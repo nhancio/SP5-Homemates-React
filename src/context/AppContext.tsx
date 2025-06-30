@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import OnboardingModal from '../components/modals/OnboardingModal';
+import PreferencesModal from '../components/modals/PreferencesModal';
 import { signInWithGoogle, logoutUser, getUserFavorites } from '../services/auth';
 
 type BaseFilters = {
@@ -51,8 +53,8 @@ interface AppContextType {
 const defaultFilters: Filters = {
   activeType: 'buy',
   rent: {
-    priceMin: '',
-    priceMax: '',
+    priceMin: 0,
+    priceMax: 0,
     location: '',
     propertyType: '',
     roomType: '',
@@ -60,11 +62,11 @@ const defaultFilters: Filters = {
     bathroomType: ''
   },
   buy: {
-    priceMin: '',
-    priceMax: '',
+    priceMin: 0,
+    priceMax: 0,
     location: '',
     propertyType: '',
-    builtUpArea: '',
+    builtUpArea: 0,
     ageOfProperty: '',
     possessionStatus: ''
   }
@@ -81,18 +83,18 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [favoriteProperties, setFavoriteProperties] = useState<string[]>([]);
   const [showPreferences, setShowPreferences] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const login = async () => {
     try {
       const result = await signInWithGoogle();
-      if (result.success && result.user) {
+      if ('user' in result && result.success && result.user) {
         setUser(result.user);
         // Save user to localStorage
         localStorage.setItem('user', JSON.stringify(result.user));
-        if (result.isNewUser) {
-          setShowPreferences(true);
+        if ('isNewUser' in result && result.isNewUser) {
+          setShowOnboarding(true);
         }
-        // Remove the redirect - it will be handled by the auth service
       } else {
         console.error('Login failed:', result);
       }
@@ -149,6 +151,14 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={value}>
       {children}
+      {showOnboarding && user && (
+        <OnboardingModal
+          userId={user.id}
+          email={user.email}
+          name={user.name}
+          onClose={() => setShowOnboarding(false)}
+        />
+      )}
       {showPreferences && user && (
         <PreferencesModal onClose={() => setShowPreferences(false)} />
       )}

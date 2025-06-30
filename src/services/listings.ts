@@ -146,26 +146,86 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
     const snapshot = await getDocs(baseQuery);
     console.log('Query returned:', snapshot.size, 'documents');
 
-    // Transform and filter results
-    const listings = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      contactNumber: doc.data().contactNumber || ''
-    }));
 
-    // Apply client-side filters that don't require indexes
+    // Transform and filter results
+    const listings = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        contactNumber: data.contactNumber || '',
+        // For type safety, ensure rentDetails and sellDetails are present if expected
+        rentDetails: data.rentDetails,
+        sellDetails: data.sellDetails,
+        address: data.address,
+        propertyType: data.propertyType
+      };
+    });
+
+
+    // Apply all client-side filters
     let filteredListings = listings;
+
     if (filters) {
+      // Price
       if (filters.priceMin || filters.priceMax) {
         filteredListings = filteredListings.filter(listing => {
           const price = type === 'rent'
             ? listing.rentDetails?.costs?.rent
             : listing.sellDetails?.price;
-
           if (filters.priceMin && price < Number(filters.priceMin)) return false;
           if (filters.priceMax && price > Number(filters.priceMax)) return false;
           return true;
         });
+      }
+
+      // Location
+      if (filters.location && filters.location.trim() !== '') {
+        filteredListings = filteredListings.filter(listing => {
+          const loc = listing.address?.locality || listing.address?.city || '';
+          return loc.toLowerCase().includes(filters.location.toLowerCase());
+        });
+      }
+
+      // Property Type
+      if (filters.propertyType && filters.propertyType !== '') {
+        filteredListings = filteredListings.filter(listing => listing.propertyType === filters.propertyType);
+      }
+
+      if (type === 'rent') {
+        // Room Type
+        if (filters.roomType && filters.roomType !== '') {
+          filteredListings = filteredListings.filter(listing => listing.rentDetails?.roomDetails?.roomType === filters.roomType);
+        }
+        // Tenant Type
+        if (filters.tenantType && filters.tenantType !== '') {
+          filteredListings = filteredListings.filter(listing => listing.rentDetails?.preferredTenant?.lookingFor === filters.tenantType);
+        }
+        // Bathroom Type
+        if (filters.bathroomType && filters.bathroomType !== '') {
+          filteredListings = filteredListings.filter(listing => listing.rentDetails?.roomDetails?.bathroomType === filters.bathroomType);
+        }
+      } else if (type === 'sell') {
+        // Built Up Area
+        if (filters.builtUpArea && Number(filters.builtUpArea) > 0) {
+          filteredListings = filteredListings.filter(listing => Number(listing.sellDetails?.sqft) >= Number(filters.builtUpArea));
+        }
+        // Age of Property
+        if (filters.ageOfProperty && filters.ageOfProperty !== '') {
+          filteredListings = filteredListings.filter(listing => {
+            const age = listing.sellDetails?.ageOfProperty;
+            if (!age) return false;
+            if (filters.ageOfProperty === '0-2') return age === '0-2';
+            if (filters.ageOfProperty === '2-5') return age === '2-5';
+            if (filters.ageOfProperty === '5-10') return age === '5-10';
+            if (filters.ageOfProperty === '10+') return age === '10+';
+            return false;
+          });
+        }
+        // Possession Status
+        if (filters.possessionStatus && filters.possessionStatus !== '') {
+          filteredListings = filteredListings.filter(listing => listing.sellDetails?.possessionStatus === filters.possessionStatus);
+        }
       }
     }
 
@@ -174,7 +234,11 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
 
   } catch (error) {
     console.error('Error in getListings:', error);
-    throw new Error(`Failed to fetch ${type} listings: ${error.message}`);
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch ${type} listings: ${error.message}`);
+    } else {
+      throw new Error(`Failed to fetch ${type} listings: Unknown error`);
+    }
   }
 }
 
