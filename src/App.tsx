@@ -10,6 +10,9 @@ import AddListingPage from './pages/AddListingPage';
 import SavedPage from './pages/SavedPage';
 import FindFriendsPage from './pages/FindFriendsPage';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import RefundPolicyPage from './pages/RefundPolicyPage';
+import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
 import { AppContextProvider } from './context/AppContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -37,7 +40,10 @@ const router = createBrowserRouter([
       { path: 'profile', element: <ProfilePage /> },
       { path: 'add-listing', element: <AddListingPage /> },
       { path: 'saved', element: <SavedPage /> },
-      { path: 'users', element: <FindFriendsPage /> }
+      { path: 'users', element: <FindFriendsPage /> },
+      { path: 'privacy_policy', element: <PrivacyPolicyPage /> },
+      { path: 'refund_policy', element: <RefundPolicyPage /> },
+      { path: 'TandC', element: <TermsAndConditionsPage /> },
     ]
   }
 ]);

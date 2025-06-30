@@ -104,6 +104,12 @@ const ProfilePage = () => {
           </div>
         </div>
         
+        {/* Policy Links */}
+        <div className="mt-8 flex flex-wrap gap-4 justify-center md:justify-start">
+          <a href="/privacy_policy" className="btn btn-secondary text-sm px-4 py-2">Privacy Policy</a>
+          <a href="/refund_policy" className="btn btn-secondary text-sm px-4 py-2">Refund Policy</a>
+          <a href="/TandC" className="btn btn-secondary text-sm px-4 py-2">T&amp;C</a>
+        </div>
         {/* Membership Status */}
         {!profileUser.isPremium && (
           <div className="mt-8 bg-gradient-to-r from-accent-500 to-amber-500 text-white rounded-lg p-6">
