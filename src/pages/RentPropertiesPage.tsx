@@ -69,9 +69,9 @@ const RentPropertiesPage = () => {
         )}
 
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Properties for Rent</h1>
+          <h1 className="text-3xl font-bold mb-2">Shared Homes</h1>
           <p className="text-gray-600">
-            Explore a wide range of rental properties to suit your needs
+            Plug and play homes which are in your comfort zone.
           </p>
         </div>
         

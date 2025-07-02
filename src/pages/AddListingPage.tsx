@@ -919,46 +919,6 @@ const AddListingPage = () => {
             renderRentFields()
           ) : (
             <>
-              {/* Address Section */}
-              <section className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">Address</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <select
-                    className="input"
-                    value={formData.address.city}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      address: { ...prev.address, city: e.target.value }
-                    }))}
-                  >
-                    <option value="">Select City</option>
-                    {CITY_OPTIONS.map(city => (
-                      <option key={city} value={city}>{city}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="text"
-                    placeholder="Locality"
-                    className="input"
-                    value={formData.address.locality}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      address: { ...prev.address, locality: e.target.value }
-                    }))}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Building Name"
-                    className="input"
-                    value={formData.address.buildingName}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      address: { ...prev.address, buildingName: e.target.value }
-                    }))}
-                  />
-                </div>
-              </section>
-
               {/* Preferred Tenant Section */}
               <section className="bg-white p-6 rounded-lg shadow-sm">
                 <h2 className="text-lg font-semibold mb-4">Preferred Tenant</h2>

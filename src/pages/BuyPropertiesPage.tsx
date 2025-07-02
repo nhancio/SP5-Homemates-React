@@ -75,9 +75,9 @@ const BuyPropertiesPage = () => {
         ) : (
           <>
             <div className="mb-6">
-              <h1 className="text-3xl font-bold mb-2">Properties for Sale</h1>
+              <h1 className="text-3xl font-bold mb-2">Full Homes for Rent</h1>
               <p className="text-gray-600">
-                Find your dream home from our curated list of properties for sale
+                Find full homes which are ready to be designed by you.
               </p>
             </div>
             
