@@ -39,7 +39,7 @@ const BuyPropertiesPage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = 'Buy Properties | Homemates';
+    document.title = 'Full Home Listings | Homemates';
   }, []);
 
   return (

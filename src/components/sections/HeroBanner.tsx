@@ -59,13 +59,13 @@ const HeroBanner = () => {
               to="/rent" 
               className="flex items-center justify-center bg-[#FF4E8E] text-white hover:bg-opacity-90 p-2 rounded-xl font-bold transition shadow hover:shadow-lg h-14 sm:h-20"
             >
-              <span className="text-base sm:text-lg">Rent</span>
+              <span className="text-base sm:text-lg">Shared Home</span>
             </Link>
             <Link 
               to="/buy"
               className="flex items-center justify-center bg-[#FFA5B8] text-white hover:bg-opacity-90 p-2 rounded-xl font-bold transition shadow hover:shadow-lg h-14 sm:h-20"
             >
-              <span className="text-base sm:text-lg">Buy</span>
+              <span className="text-base sm:text-lg">Full Home</span>
             </Link>
             <button 
               onClick={handleComingSoonClick}

@@ -45,7 +45,7 @@ const RentPropertiesPage = () => {
   
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = 'Rent Properties | Homemates';
+    document.title = 'Shared Home Listings | Homemates';
   }, []);
   
   return (
