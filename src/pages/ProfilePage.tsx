@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
@@ -131,7 +130,7 @@ const ProfilePage = () => {
                   <h1 className="text-2xl font-bold">{displayName}</h1>
                   <button 
                     onClick={logout}
-                    className="btn btn-primary mt-4 md:mt-0 px-12 text-lg font-medium"
+                    className="btn btn-primary px-12 text-lg font-medium"
                   >
                     Logout
                   </button>
