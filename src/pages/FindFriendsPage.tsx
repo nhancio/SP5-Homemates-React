@@ -1,14 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { User, Briefcase, Loader, Phone, MessageCircle } from 'lucide-react';
-import { getUsers, UserProfile } from '../services/users';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { db } from '../config/firebase';
 import { useAppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
+
+interface UserProfile {
+  id: string;
+  userEmail: string;
+  userName: string;
+  userPhoneNumber: string;
+  age: number;
+  gender: string;
+  profession: string;
+  preferences: string[];
+}
 
 const FindFriendsPage = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user: currentUser, isAuthenticated, login } = useAppContext();
+  const { user: currentUser, isAuthenticated } = useAppContext();
   const navigate = useNavigate();
 
   const handleCall = (phoneNumber: string) => {
@@ -32,18 +44,41 @@ const FindFriendsPage = () => {
 
   useEffect(() => {
     const loadUsers = async () => {
-      if (!isAuthenticated) {
+      if (!isAuthenticated || !currentUser?.id) {
         navigate('/profile');
         return;
       }
 
       try {
         setIsLoading(true);
-        const data = await getUsers();
-        console.log('Users data:', data);
-        setUsers(data.filter(u => u.id !== currentUser?.id));
+        // Get logged-in user's gender from "u" collection
+        const userDoc = await getDoc(doc(db, 'u', currentUser.id));
+        const myGender = userDoc.exists() ? (userDoc.data().gender || '') : '';
+        // Fetch all users from "u" collection
+        const querySnapshot = await getDocs(collection(db, 'u'));
+        const data: UserProfile[] = querySnapshot.docs.map(docSnap => {
+          const d = docSnap.data();
+          return {
+            id: docSnap.id,
+            userEmail: d.userEmail || d.email || '',
+            userName: d.userName || d.name || '',
+            userPhoneNumber: d.userPhoneNumber || d.mobile || d.phone || '',
+            age: Number(d.age) || 0,
+            gender: d.gender || '',
+            profession: d.profession || d.occupation || '',
+            preferences: Array.isArray(d.preferences) ? d.preferences : []
+          };
+        });
+        // Filter by gender (same as logged-in user, exclude self)
+        const filtered = data.filter(
+          u =>
+            u.id !== currentUser.id &&
+            u.gender &&
+            myGender &&
+            u.gender.toLowerCase() === myGender.toLowerCase()
+        );
+        setUsers(filtered);
       } catch (err) {
-        console.error('Error loading users:', err);
         setError(err instanceof Error ? err.message : 'Unable to load users at this time');
       } finally {
         setIsLoading(false);
@@ -138,6 +173,11 @@ const FindFriendsPage = () => {
             </div>
           </div>
         ))}
+        {users.length === 0 && (
+          <div className="col-span-full text-center text-gray-500 py-8">
+            No friends found matching your gender.
+          </div>
+        )}
       </div>
     </div>
   );

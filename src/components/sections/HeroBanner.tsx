@@ -23,6 +23,11 @@ const HeroBanner = () => {
     setShowPopup(true);
   };
 
+  const handleFindFriendsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate('/users');
+  };
+
   const handlePropertyTypeClick = (type: string, listingType: 'rent' | 'buy') => {
     setFilters(prev => ({
       ...prev,
@@ -68,7 +73,7 @@ const HeroBanner = () => {
               <span className="text-base sm:text-lg">Full Home</span>
             </Link>
             <button 
-              onClick={handleComingSoonClick}
+              onClick={handleFindFriendsClick}
               className="flex items-center justify-center bg-[#D84C89] text-white hover:bg-opacity-90 p-2 rounded-xl font-bold transition shadow hover:shadow-lg h-14 sm:h-20"
             >
               <span className="text-base sm:text-lg">Find Friends</span>
