@@ -8,5 +8,6 @@ export const USER_PREFERENCES = [
   { id: 'night-owl', label: 'Night Owl', icon: 'Moon' },
   { id: 'morning-person', label: 'Morning Person', icon: 'Sun' },
   { id: 'creative', label: 'Creative', icon: 'Palette' },
-  { id: 'coffee-to-code', label: 'CoffeeToCode', icon: 'Code' }
+  { id: 'coffee-to-code', label: 'CoffeeToCode', icon: 'Code' },
+  { id: 'couple', label: 'Couple', icon: 'Heart' }
 ];
