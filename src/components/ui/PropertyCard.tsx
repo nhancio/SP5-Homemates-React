@@ -214,7 +214,9 @@ Link: ${url}`;
           aria-label={property.contactNumber ? `Call ${property.contactNumber}` : 'No contact number available'}
         >
           <Phone className="w-4 h-4 mr-1" />
-          <span className="text-sm text-black">Call</span>
+          <span className="text-sm text-black">
+            {property.contactNumber ? property.contactNumber : 'Call'}
+          </span>
         </button>
         <button 
           onClick={handleShare}
