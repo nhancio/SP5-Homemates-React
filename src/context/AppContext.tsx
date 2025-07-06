@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from 'react';
 import OnboardingModal from '../components/modals/OnboardingModal';
 import PreferencesModal from '../components/modals/PreferencesModal';
 import { signInWithGoogle, logoutUser, getUserFavorites } from '../services/auth';
@@ -42,8 +48,8 @@ interface AppContextType {
   isAuthenticated: boolean;
   filters: Filters;
   setFilters: (filters: Filters) => void;
-  login: () => Promise<void>; // Changed to return Promise
-  logout: () => Promise<void>; // Changed to return Promise
+  login: () => Promise<void>;
+  logout: () => Promise<void>;
   favoriteProperties: string[];
   toggleFavorite: (propertyId: string) => void;
   showPreferences: boolean;
@@ -59,7 +65,7 @@ const defaultFilters: Filters = {
     propertyType: '',
     roomType: '',
     tenantType: '',
-    bathroomType: ''
+    bathroomType: '',
   },
   buy: {
     priceMin: 0,
@@ -68,18 +74,18 @@ const defaultFilters: Filters = {
     propertyType: '',
     builtUpArea: 0,
     ageOfProperty: '',
-    possessionStatus: ''
-  }
+    possessionStatus: '',
+  },
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppContextProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(() => {
-    // Try to get user from localStorage on initial load
     const storedUser = localStorage.getItem('user');
     return storedUser ? JSON.parse(storedUser) : null;
   });
+
   const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [favoriteProperties, setFavoriteProperties] = useState<string[]>([]);
   const [showPreferences, setShowPreferences] = useState(false);
@@ -88,11 +94,11 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const login = async () => {
     try {
       const result = await signInWithGoogle();
-      if ('user' in result && result.success && result.user) {
+      if (result.success && result.user) {
         setUser(result.user);
-        // Save user to localStorage
         localStorage.setItem('user', JSON.stringify(result.user));
-        if ('isNewUser' in result && result.isNewUser) {
+
+        if (result.isNewUser) {
           setShowOnboarding(true);
         }
       } else {
@@ -107,7 +113,6 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
     const result = await logoutUser();
     if (result.success) {
       setUser(null);
-      // Remove user from localStorage
       localStorage.removeItem('user');
     }
   };
@@ -115,13 +120,11 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
   const toggleFavorite = async (propertyId: string) => {
     if (!user) return;
 
-    setFavoriteProperties(prev => {
-      const newFavorites = prev.includes(propertyId)
-        ? prev.filter(id => id !== propertyId)
-        : [...prev, propertyId];
-        
-      return newFavorites;
-    });
+    setFavoriteProperties((prev) =>
+      prev.includes(propertyId)
+        ? prev.filter((id) => id !== propertyId)
+        : [...prev, propertyId]
+    );
   };
 
   useEffect(() => {
@@ -131,11 +134,11 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
         setFavoriteProperties(favorites);
       }
     };
-    
+
     loadFavorites();
   }, [user]);
 
-  const value = {
+  const value: AppContextType = {
     user,
     isAuthenticated: !!user,
     filters,
@@ -168,7 +171,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
 
 export function useAppContext() {
   const context = useContext(AppContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAppContext must be used within an AppContextProvider');
   }
   return context;

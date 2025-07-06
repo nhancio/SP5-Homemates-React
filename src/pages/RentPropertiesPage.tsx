@@ -7,8 +7,8 @@ import { getListings } from '../services/listings';
 import { useAppContext } from '../context/AppContext';
 
 const propertyTypes = [
-  '1RK',
   'Single Room',
+  '1RK',
   '2BHK',
   '3BHK',
   '4BHK'

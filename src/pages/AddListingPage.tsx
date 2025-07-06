@@ -1188,11 +1188,15 @@ const AddListingPage = () => {
           )}
 
           <button 
-            type="submit" 
-            disabled={isSubmitting}
-            className={`w-full btn btn-primary ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          type="submit"
+          className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition disabled:opacity-50"
+          disabled={isSubmitting}
           >
-            {isSubmitting ? 'Creating Listing...' : `Post ${listingType === 'rent' ? 'Rental' : 'Sale'} Listing`}
+            {isSubmitting
+              ? 'Submitting...'
+              : listingType === 'sell'
+              ? 'Submit'
+              : 'Post'}
           </button>
         </form>
       </div>
