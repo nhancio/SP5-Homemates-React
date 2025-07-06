@@ -10,7 +10,7 @@ interface PropertyFiltersProps {
 }
 
 const PRICE_MIN = 1000000;
-const PRICE_MAX = 10000000;
+const PRICE_MAX = 100000000;
 
 const defaultFilters = {
   rent: {
