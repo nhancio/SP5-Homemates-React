@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Phone, Share2, Heart, Building } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
@@ -21,6 +21,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
   const { favoriteProperties, toggleFavorite, user } = useAppContext();
   const [isLoaded, setIsLoaded] = useState(false);
   const navigate = useNavigate();
+  const prevRef = useRef<HTMLDivElement>(null);
+  const nextRef = useRef<HTMLDivElement>(null);
 
   const isFavorite = favoriteProperties.includes(property.id);
 
@@ -39,17 +41,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
     e.stopPropagation();
     const type = listingType === 'buy' ? 'sell' : 'rent';
     const url = getShareableUrl(property.id, type);
-    const price =
-      listingType === 'rent'
-        ? property.rentDetails?.costs?.rent
-        : property.sellDetails?.price;
+    const price = listingType === 'rent' ? property.rentDetails?.costs?.rent : property.sellDetails?.price;
 
-    const shareText = `Hey, check this property on Homemates!
-Name: ${property.address?.buildingName || 'Property'}
-${listingType === 'rent' ? 'Rent' : 'Price'}: ₹${formatCurrency(price || 0)}
-Type: ${property.propertyType || property.type || '-'}
-Location: ${property.address?.locality}, ${property.address?.city}
-Link: ${url}`;
+    const shareText = `Hey, check this property on Homemates!\nName: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Price'}: ₹${formatCurrency(price || 0)}\nType: ${property.propertyType || property.type || '-'}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
 
     try {
       if (navigator.share) {
@@ -72,6 +66,7 @@ Link: ${url}`;
       alert('Please login to save properties');
       return;
     }
+
     try {
       await updateUserFavorites(user.id, property.id, !isFavorite);
       toggleFavorite(property.id);
@@ -82,8 +77,7 @@ Link: ${url}`;
   };
 
   const handleCardClick = () => {
-    const path = `/${listingType}/${property.id}`;
-    navigate(path);
+    navigate(`/${listingType}/${property.id}`);
   };
 
   const formatAvailabilityDate = (date: string | undefined) => {
@@ -135,76 +129,54 @@ Link: ${url}`;
       className="bg-white rounded-lg overflow-hidden shadow-property-card hover:shadow-lg transition-shadow duration-300 cursor-pointer"
       onClick={handleCardClick}
     >
-      {/* Image Carousel */}
       <div className="relative">
         <Swiper
           modules={[Navigation, Pagination]}
-          onBeforeInit={(swiper) => {
-            // @ts-ignore
-            swiper.params.navigation.prevEl = `.swiper-button-prev-${property.id}`;
-            // @ts-ignore
-            swiper.params.navigation.nextEl = `.swiper-button-next-${property.id}`;
-          }}
-          navigation={{
-            nextEl: `.swiper-button-next-${property.id}`,
-            prevEl: `.swiper-button-prev-${property.id}`,
-          }}
           pagination={{ clickable: true }}
-          loop={property.images?.length > 1}
+          navigation={{ prevEl: prevRef.current, nextEl: nextRef.current }}
+          onInit={(swiper) => {
+            if (prevRef.current && nextRef.current) {
+              swiper.params.navigation.prevEl = prevRef.current;
+              swiper.params.navigation.nextEl = nextRef.current;
+              swiper.navigation.init();
+              swiper.navigation.update();
+            }
+          }}
+          loop={(property.images?.length || 0) > 1}
           className="h-52"
         >
-          {(property.images?.length > 0 ? property.images : ['placeholder']).map(
-            (image, index) => (
-              <SwiperSlide key={index}>
-                <div className={`h-52 bg-gray-200 ${!isLoaded ? 'animate-pulse' : ''}`}>
-                  {image === 'placeholder' ? (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <Building className="w-12 h-12" />
-                    </div>
-                  ) : (
-                    <img
-                      src={image}
-                      alt={`${property.title || 'Property'} - Image ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      onLoad={handleImageLoad}
-                      loading="lazy"
-                    />
-                  )}
-                </div>
-              </SwiperSlide>
-            )
-          )}
+          {(property.images?.length ? property.images : ['placeholder']).map((img, idx) => (
+            <SwiperSlide key={idx}>
+              <div className={`h-52 bg-gray-200 ${!isLoaded ? 'animate-pulse' : ''}`}>
+                {img === 'placeholder' ? (
+                  <div className="w-full h-full flex justify-center items-center text-gray-400">
+                    <Building className="w-12 h-12" />
+                  </div>
+                ) : (
+                  <img src={img} alt="" className="w-full h-full object-cover" onLoad={handleImageLoad} loading="lazy" />
+                )}
+              </div>
+            </SwiperSlide>
+          ))}
         </Swiper>
 
-        {/* 👇 Custom arrow buttons */}
         <div
-          className={`swiper-button-prev-${property.id} absolute top-1/2 left-2 z-20 w-6 h-6 bg-white rounded-full shadow flex items-center justify-center cursor-pointer -translate-y-1/2`}
+          ref={prevRef}
+          className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer"
         >
-          <svg
-            className="w-4 h-4 text-black"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </div>
         <div
-          className={`swiper-button-next-${property.id} absolute top-1/2 right-2 z-20 w-6 h-6 bg-white rounded-full shadow flex items-center justify-center cursor-pointer -translate-y-1/2`}
+          ref={nextRef}
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer"
         >
-          <svg
-            className="w-4 h-4 text-black"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M9 18l6-6-6-6" />
           </svg>
         </div>
 
-        {/* Property Type Badge */}
         <div className="absolute top-3 left-3 z-10">
           <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
             {property.propertyType || property.type}
@@ -212,7 +184,6 @@ Link: ${url}`;
         </div>
       </div>
 
-      {/* Property Info */}
       <div className="p-4">
         <div className="flex justify-between items-start">
           <h3 className="text-lg font-semibold line-clamp-1">
@@ -222,18 +193,18 @@ Link: ${url}`;
             ₹{formatCurrency(property.rentDetails?.costs?.rent || property.sellDetails?.price || 0)}
           </span>
         </div>
+
         <p className="text-gray-600 text-sm mt-1 line-clamp-1">
           {property.address?.locality}, {property.address?.city}
         </p>
+
         {renderPropertyFeatures()}
       </div>
 
-      {/* Action Bar */}
       <div className="flex border-t border-gray-200">
         <button
           onClick={handleFavoriteClick}
           className="flex items-center justify-center w-1/3 py-3 hover:bg-gray-50 transition"
-          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
           <Heart
             className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
