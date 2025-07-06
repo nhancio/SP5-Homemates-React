@@ -10,12 +10,12 @@ const SavedPage = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [savedProperties, setSavedProperties] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = 'Saved Properties | Homemates';
   }, []);
-  
+
   useEffect(() => {
     const fetchSavedProperties = async () => {
       if (!user || !favoriteProperties.length) {
@@ -36,63 +36,64 @@ const SavedPage = () => {
 
     fetchSavedProperties();
   }, [favoriteProperties, user]);
-  
-  const filteredProperties = activeFilter === 'all' 
-    ? savedProperties
-    : savedProperties.filter(property => {
-        const displayType = property.listingType === 'sell' ? 'buy' : property.listingType;
-        return displayType === activeFilter;
-      });
-  
+
+  const filteredProperties =
+    activeFilter === 'all'
+      ? savedProperties
+      : savedProperties.filter((property) => {
+          const displayType = property.listingType === 'sell' ? 'buy' : property.listingType;
+          return displayType === activeFilter;
+        });
+
   return (
     <div className="py-8">
       <div className="container">
         <h1 className="text-2xl font-bold mb-6">Saved Properties</h1>
-        
+
         {/* Filter Buttons */}
         <div className="flex space-x-2 mb-6">
-          <button 
+          <button
             onClick={() => setActiveFilter('all')}
             className={`px-4 py-2 rounded-full text-sm font-medium ${
-              activeFilter === 'all' 
-                ? 'bg-primary-600 text-white' 
+              activeFilter === 'all'
+                ? 'bg-primary-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             All
           </button>
-          <button 
+          <button
             onClick={() => setActiveFilter('buy')}
             className={`px-4 py-2 rounded-full text-sm font-medium ${
-              activeFilter === 'buy' 
-                ? 'bg-primary-600 text-white' 
+              activeFilter === 'buy'
+                ? 'bg-primary-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            Buy
+            Full Homes
           </button>
-          <button 
+          <button
             onClick={() => setActiveFilter('rent')}
             className={`px-4 py-2 rounded-full text-sm font-medium ${
-              activeFilter === 'rent' 
-                ? 'bg-primary-600 text-white' 
+              activeFilter === 'rent'
+                ? 'bg-primary-600 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Rent
           </button>
         </div>
-        
+
         {isLoading ? (
           <div className="text-center py-12 bg-gray-50 rounded-lg">
             <p className="text-gray-600">Loading saved properties...</p>
           </div>
         ) : filteredProperties.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProperties.map(property => (
-              <PropertyCard 
-                key={property.id} 
-                property={property} 
+            {filteredProperties.map((property) => (
+              <PropertyCard
+                key={property.id}
+                property={property}
                 listingType={property.listingType === 'sell' ? 'buy' : 'rent'}
               />
             ))}
@@ -105,8 +106,12 @@ const SavedPage = () => {
               Start exploring and save properties that catch your interest.
             </p>
             <div className="flex justify-center gap-4">
-              <Link to="/buy" className="btn btn-primary">Buy Properties</Link>
-              <Link to="/rent" className="btn btn-secondary">Rent Properties</Link>
+              <Link to="/buy" className="btn btn-primary">
+                Full Homes
+              </Link>
+              <Link to="/rent" className="btn btn-secondary">
+                Rent Properties
+              </Link>
             </div>
           </div>
         )}
