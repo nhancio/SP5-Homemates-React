@@ -24,9 +24,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
 
   const isFavorite = favoriteProperties.includes(property.id);
 
-  const handleImageLoad = () => {
-    setIsLoaded(true);
-  };
+  const handleImageLoad = () => setIsLoaded(true);
 
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -74,7 +72,6 @@ Link: ${url}`;
       alert('Please login to save properties');
       return;
     }
-
     try {
       await updateUserFavorites(user.id, property.id, !isFavorite);
       toggleFavorite(property.id);
@@ -142,6 +139,12 @@ Link: ${url}`;
       <div className="relative">
         <Swiper
           modules={[Navigation, Pagination]}
+          onBeforeInit={(swiper) => {
+            // @ts-ignore
+            swiper.params.navigation.prevEl = `.swiper-button-prev-${property.id}`;
+            // @ts-ignore
+            swiper.params.navigation.nextEl = `.swiper-button-next-${property.id}`;
+          }}
           navigation={{
             nextEl: `.swiper-button-next-${property.id}`,
             prevEl: `.swiper-button-prev-${property.id}`,
@@ -201,7 +204,7 @@ Link: ${url}`;
           </svg>
         </div>
 
-        {/* Badge */}
+        {/* Property Type Badge */}
         <div className="absolute top-3 left-3 z-10">
           <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
             {property.propertyType || property.type}
@@ -219,11 +222,9 @@ Link: ${url}`;
             ₹{formatCurrency(property.rentDetails?.costs?.rent || property.sellDetails?.price || 0)}
           </span>
         </div>
-
         <p className="text-gray-600 text-sm mt-1 line-clamp-1">
           {property.address?.locality}, {property.address?.city}
         </p>
-
         {renderPropertyFeatures()}
       </div>
 
@@ -235,20 +236,17 @@ Link: ${url}`;
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
           <Heart
-            className={`w-4 h-4 mr-1 ${
-              isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
-            }`}
+            className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
           />
           <span className="text-sm text-black">{isFavorite ? 'Saved' : 'Save'}</span>
         </button>
         <button
           onClick={handleCall}
           className="flex items-center justify-center w-1/3 py-3 text-primary-600 hover:bg-primary-50 transition border-l border-r border-gray-200"
-          aria-label={property.contactNumber ? `Call ${property.contactNumber}` : 'No contact'}
         >
           <Phone className="w-4 h-4 mr-1" />
           <span className="text-sm text-black">
-            {property.contactNumber ? property.contactNumber : 'Call'}
+            {property.contactNumber || 'Call'}
           </span>
         </button>
         <button
