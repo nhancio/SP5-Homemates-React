@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Phone, Share2, Heart, Building } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
@@ -23,7 +23,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
   const navigate = useNavigate();
   const prevRef = useRef<HTMLDivElement>(null);
   const nextRef = useRef<HTMLDivElement>(null);
-  const swiperRef = useRef<any>(null); // New: ref to hold Swiper instance
+  const swiperRef = useRef<any>(null);
 
   const isFavorite = favoriteProperties.includes(property.id);
 
@@ -125,21 +125,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
     );
   };
 
-  // 🛠️ Properly bind Swiper navigation after refs & swiper are available
-  useEffect(() => {
-    if (
-      swiperRef.current &&
-      prevRef.current &&
-      nextRef.current &&
-      swiperRef.current.params?.navigation
-    ) {
-      swiperRef.current.params.navigation.prevEl = prevRef.current;
-      swiperRef.current.params.navigation.nextEl = nextRef.current;
-      swiperRef.current.navigation.init();
-      swiperRef.current.navigation.update();
-    }
-  }, []);
-
   return (
     <div
       className="bg-white rounded-lg overflow-hidden shadow-property-card hover:shadow-lg transition-shadow duration-300 cursor-pointer"
@@ -149,8 +134,20 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
         <Swiper
           modules={[Navigation, Pagination]}
           pagination={{ clickable: true }}
+          navigation={{
+            prevEl: prevRef.current,
+            nextEl: nextRef.current,
+          }}
           onSwiper={(swiper) => {
             swiperRef.current = swiper;
+          }}
+          onInit={(swiper) => {
+            if (prevRef.current && nextRef.current) {
+              swiper.params.navigation.prevEl = prevRef.current;
+              swiper.params.navigation.nextEl = nextRef.current;
+              swiper.navigation.init();
+              swiper.navigation.update();
+            }
           }}
           loop={(property.images?.length || 0) > 1}
           className="h-52"
@@ -217,9 +214,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
           onClick={handleFavoriteClick}
           className="flex items-center justify-center w-1/3 py-3 hover:bg-gray-50 transition"
         >
-          <Heart
-            className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-          />
+          <Heart className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
           <span className="text-sm text-black">{isFavorite ? 'Saved' : 'Save'}</span>
         </button>
         <button
