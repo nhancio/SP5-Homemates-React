@@ -134,13 +134,16 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
           modules={[Navigation, Pagination]}
           pagination={{ clickable: true }}
           navigation={{ prevEl: prevRef.current, nextEl: nextRef.current }}
-          onInit={(swiper) => {
-            if (prevRef.current && nextRef.current) {
-              swiper.params.navigation.prevEl = prevRef.current;
-              swiper.params.navigation.nextEl = nextRef.current;
-              swiper.navigation.init();
-              swiper.navigation.update();
-            }
+          onSwiper={(swiper) => {
+            setTimeout(() => {
+              if (prevRef.current && nextRef.current) {
+                swiper.params.navigation.prevEl = prevRef.current;
+                swiper.params.navigation.nextEl = nextRef.current;
+                swiper.navigation.destroy();
+                swiper.navigation.init();
+                swiper.navigation.update();
+              }
+            });
           }}
           loop={(property.images?.length || 0) > 1}
           className="h-52"
