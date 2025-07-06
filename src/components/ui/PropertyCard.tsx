@@ -21,9 +21,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
   const { favoriteProperties, toggleFavorite, user } = useAppContext();
   const [isLoaded, setIsLoaded] = useState(false);
   const navigate = useNavigate();
-  const prevRef = useRef<HTMLDivElement>(null);
-  const nextRef = useRef<HTMLDivElement>(null);
-  const swiperRef = useRef<any>(null);
+  const swiperRef = useRef<any>(null); // For manual navigation
 
   const isFavorite = favoriteProperties.includes(property.id);
 
@@ -134,20 +132,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
         <Swiper
           modules={[Navigation, Pagination]}
           pagination={{ clickable: true }}
-          navigation={{
-            prevEl: prevRef.current,
-            nextEl: nextRef.current,
-          }}
           onSwiper={(swiper) => {
             swiperRef.current = swiper;
-          }}
-          onInit={(swiper) => {
-            if (prevRef.current && nextRef.current) {
-              swiper.params.navigation.prevEl = prevRef.current;
-              swiper.params.navigation.nextEl = nextRef.current;
-              swiper.navigation.init();
-              swiper.navigation.update();
-            }
           }}
           loop={(property.images?.length || 0) > 1}
           className="h-52"
@@ -167,18 +153,26 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
           ))}
         </Swiper>
 
-        {/* Custom navigation arrows */}
+        {/* ✅ Custom Prev Button */}
         <div
-          ref={prevRef}
           className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            swiperRef.current?.slidePrev();
+          }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </div>
+
+        {/* ✅ Custom Next Button */}
         <div
-          ref={nextRef}
           className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            swiperRef.current?.slideNext();
+          }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path d="M9 18l6-6-6-6" />
@@ -214,7 +208,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
           onClick={handleFavoriteClick}
           className="flex items-center justify-center w-1/3 py-3 hover:bg-gray-50 transition"
         >
-          <Heart className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+          <Heart
+            className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
+          />
           <span className="text-sm text-black">{isFavorite ? 'Saved' : 'Save'}</span>
         </button>
         <button
