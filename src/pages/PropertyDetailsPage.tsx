@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getPropertyById } from '../services/listings';
-import { Phone, Share2, Heart, Building, Loader, ArrowLeft } from 'lucide-react';
+import { Phone, Share2, Heart, Building, Loader, ArrowLeft, Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home, Check } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { formatCurrency } from '../utils/format';
 import { getShareableUrl } from '../utils/share';
@@ -91,6 +91,40 @@ Link: ${url}`;
     }
 
     toggleFavorite(property.id);
+  };
+
+  // Amenity icon mapping
+  const amenityIconMap: Record<string, React.ReactNode> = {
+    wifi: <Wifi className="w-4 h-4 mr-1 text-primary-600" />,
+    parking: <Car className="w-4 h-4 mr-1 text-primary-600" />,
+    water: <Droplet className="w-4 h-4 mr-1 text-primary-600" />,
+    kitchen: <Utensils className="w-4 h-4 mr-1 text-primary-600" />,
+    gym: <Dumbbell className="w-4 h-4 mr-1 text-primary-600" />,
+    ac: <Snowflake className="w-4 h-4 mr-1 text-primary-600" />,
+    security: <Shield className="w-4 h-4 mr-1 text-primary-600" />,
+    tv: <Tv className="w-4 h-4 mr-1 text-primary-600" />,
+    gas: <Flame className="w-4 h-4 mr-1 text-primary-600" />,
+    fan: <Fan className="w-4 h-4 mr-1 text-primary-600" />,
+    light: <Lightbulb className="w-4 h-4 mr-1 text-primary-600" />,
+    lock: <Lock className="w-4 h-4 mr-1 text-primary-600" />,
+    fridge: <Refrigerator className="w-4 h-4 mr-1 text-primary-600" />,
+    washing: <WashingMachine className="w-4 h-4 mr-1 text-primary-600" />,
+    bed: <BedDouble className="w-4 h-4 mr-1 text-primary-600" />,
+    shower: <ShowerHead className="w-4 h-4 mr-1 text-primary-600" />,
+    pet: <PawPrint className="w-4 h-4 mr-1 text-primary-600" />,
+    roommate: <Users className="w-4 h-4 mr-1 text-primary-600" />,
+    key: <KeyRound className="w-4 h-4 mr-1 text-primary-600" />,
+    power: <Plug className="w-4 h-4 mr-1 text-primary-600" />,
+    music: <Speaker className="w-4 h-4 mr-1 text-primary-600" />,
+    car: <ParkingCircle className="w-4 h-4 mr-1 text-primary-600" />,
+    bike: <Bike className="w-4 h-4 mr-1 text-primary-600" />,
+    garden: <Leaf className="w-4 h-4 mr-1 text-primary-600" />,
+    sunlight: <Sun className="w-4 h-4 mr-1 text-primary-600" />,
+    temperature: <Thermometer className="w-4 h-4 mr-1 text-primary-600" />,
+    ventilation: <AirVent className="w-4 h-4 mr-1 text-primary-600" />,
+    purifiedwater: <Droplet className="w-4 h-4 mr-1 text-primary-600" />,
+    house: <Home className="w-4 h-4 mr-1 text-primary-600" />,
+    // Add more mappings as needed
   };
 
   if (isLoading) {
@@ -339,11 +373,15 @@ Link: ${url}`;
                     <div key={category} className="mb-4 last:mb-0">
                       <h3 className="text-md font-medium mb-2 capitalize">{category}</h3>
                       <div className="flex flex-wrap gap-2">
-                        {(items as string[]).map((item: string) => (
-                          <span key={item} className="px-2 py-1 bg-gray-100 rounded-full text-sm">
-                            {item}
-                          </span>
-                        ))}
+                        {(items as string[]).map((item: string) => {
+                          // Normalize key for icon lookup
+                          const key = item.replace(/\s+/g, '').toLowerCase();
+                          return (
+                            <span key={item} className="px-2 py-1 bg-gray-100 rounded-full text-sm flex items-center">
+                              {amenityIconMap[key] || <Check className="w-4 h-4 mr-1 text-primary-600" />} {item}
+                            </span>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
