@@ -118,3 +118,24 @@ export function getMockServices(): Service[] {
 export function getServiceById(id: string): Service | undefined {
   return mockServices.find(service => service.id === id);
 }
+
+// Filters for services based on Firebase DB fields
+export type ServiceFilters = {
+  type?: string; // e.g., 'Cleaning', 'Cooking', 'Repair', 'Painting'
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  nextAvailable?: string; // e.g., 'Today', 'Tomorrow', etc.
+};
+
+// Example filter function for services
+export function filterServices(services: Service[], filters: ServiceFilters): Service[] {
+  return services.filter(service => {
+    if (filters.type && service.type !== filters.type) return false;
+    if (filters.minPrice !== undefined && service.price < filters.minPrice) return false;
+    if (filters.maxPrice !== undefined && service.price > filters.maxPrice) return false;
+    if (filters.minRating !== undefined && service.rating < filters.minRating) return false;
+    if (filters.nextAvailable && service.nextAvailable !== filters.nextAvailable) return false;
+    return true;
+  });
+}
