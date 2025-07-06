@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Phone, Share2, Heart, Building } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
@@ -21,39 +21,28 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
   const { favoriteProperties, toggleFavorite, user } = useAppContext();
   const [isLoaded, setIsLoaded] = useState(false);
   const navigate = useNavigate();
-  
+  const swiperRef = useRef<any>(null); // For manual navigation
+
   const isFavorite = favoriteProperties.includes(property.id);
-  
-  const handleImageLoad = () => {
-    setIsLoaded(true);
-  };
-  
+
+  const handleImageLoad = () => setIsLoaded(true);
+
   const handleCall = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Stop event bubbling
+    e.stopPropagation();
     if (property.contactNumber) {
-      const tel = `tel:${property.contactNumber}`;
-      window.location.href = tel;
+      window.location.href = `tel:${property.contactNumber}`;
     } else {
       alert('Contact number not available for this property');
     }
   };
-  
+
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const type = listingType === 'buy' ? 'sell' : 'rent';
     const url = getShareableUrl(property.id, type);
-    
-    const price = listingType === 'rent' 
-      ? property.rentDetails?.costs?.rent 
-      : property.sellDetails?.price;
-    
-    const shareText = 
-`Hey, check this property on Homemates!
-Name: ${property.address?.buildingName || 'Property'}
-${listingType === 'rent' ? 'Rent' : 'Price'}: ₹${formatCurrency(price || 0)}
-Type: ${property.propertyType || property.type || '-'}
-Location: ${property.address?.locality}, ${property.address?.city}
-Link: ${url}`;
+    const price = listingType === 'rent' ? property.rentDetails?.costs?.rent : property.sellDetails?.price;
+
+    const shareText = `Hey, check this property on Homemates!\nName: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Price'}: ₹${formatCurrency(price || 0)}\nType: ${property.propertyType || property.type || '-'}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
 
     try {
       if (navigator.share) {
@@ -76,7 +65,7 @@ Link: ${url}`;
       alert('Please login to save properties');
       return;
     }
-    
+
     try {
       await updateUserFavorites(user.id, property.id, !isFavorite);
       toggleFavorite(property.id);
@@ -87,16 +76,14 @@ Link: ${url}`;
   };
 
   const handleCardClick = () => {
-    // For navigation: use listingType directly (buy->buy, rent->rent)
-    const path = `/${listingType}/${property.id}`;
-    navigate(path);
+    navigate(`/${listingType}/${property.id}`);
   };
 
   const formatAvailabilityDate = (date: string | undefined) => {
     if (!date) return '-';
     return new Date(date).toLocaleDateString('en-IN', {
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
@@ -135,51 +122,70 @@ Link: ${url}`;
       </div>
     );
   };
-  
+
   return (
-    <div 
+    <div
       className="bg-white rounded-lg overflow-hidden shadow-property-card hover:shadow-lg transition-shadow duration-300 cursor-pointer"
       onClick={handleCardClick}
     >
-      {/* Image Carousel */}
       <div className="relative">
         <Swiper
           modules={[Navigation, Pagination]}
-          navigation
           pagination={{ clickable: true }}
-          loop={property.images?.length > 0}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+          }}
+          loop={(property.images?.length || 0) > 1}
           className="h-52"
         >
-          {(property.images?.length > 0 ? property.images : ['placeholder']).map((image, index) => (
-            <SwiperSlide key={index}>
+          {(property.images?.length ? property.images : ['placeholder']).map((img, idx) => (
+            <SwiperSlide key={idx}>
               <div className={`h-52 bg-gray-200 ${!isLoaded ? 'animate-pulse' : ''}`}>
-                {image === 'placeholder' ? (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                {img === 'placeholder' ? (
+                  <div className="w-full h-full flex justify-center items-center text-gray-400">
                     <Building className="w-12 h-12" />
                   </div>
                 ) : (
-                  <img
-                    src={image}
-                    alt={`${property.title || 'Property'} - Image ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onLoad={handleImageLoad}
-                    loading="lazy"
-                  />
+                  <img src={img} alt="" className="w-full h-full object-cover" onLoad={handleImageLoad} loading="lazy" />
                 )}
               </div>
             </SwiperSlide>
           ))}
         </Swiper>
-        
-        {/* Property Type Badge */}
+
+        {/* ✅ Custom Prev Button */}
+        <div
+          className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            swiperRef.current?.slidePrev();
+          }}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </div>
+
+        {/* ✅ Custom Next Button */}
+        <div
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            swiperRef.current?.slideNext();
+          }}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </div>
+
         <div className="absolute top-3 left-3 z-10">
           <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
             {property.propertyType || property.type}
           </span>
         </div>
       </div>
-      
-      {/* Property Information */}
+
       <div className="p-4">
         <div className="flex justify-between items-start">
           <h3 className="text-lg font-semibold line-clamp-1">
@@ -189,34 +195,34 @@ Link: ${url}`;
             ₹{formatCurrency(property.rentDetails?.costs?.rent || property.sellDetails?.price || 0)}
           </span>
         </div>
-        
+
         <p className="text-gray-600 text-sm mt-1 line-clamp-1">
           {property.address?.locality}, {property.address?.city}
         </p>
-        
-        {/* Property Features */}
+
         {renderPropertyFeatures()}
       </div>
-      
-      {/* Action Bar */}
+
       <div className="flex border-t border-gray-200">
-        <button 
+        <button
           onClick={handleFavoriteClick}
           className="flex items-center justify-center w-1/3 py-3 hover:bg-gray-50 transition"
-          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
-          <Heart className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+          <Heart
+            className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
+          />
           <span className="text-sm text-black">{isFavorite ? 'Saved' : 'Save'}</span>
         </button>
-        <button 
+        <button
           onClick={handleCall}
           className="flex items-center justify-center w-1/3 py-3 text-primary-600 hover:bg-primary-50 transition border-l border-r border-gray-200"
-          aria-label={property.contactNumber ? `Call ${property.contactNumber}` : 'No contact number available'}
         >
           <Phone className="w-4 h-4 mr-1" />
-          <span className="text-sm text-black">Call</span>
+          <span className="text-sm text-black">
+            {property.contactNumber || 'Call'}
+          </span>
         </button>
-        <button 
+        <button
           onClick={handleShare}
           className="flex items-center justify-center w-1/3 py-3 text-gray-600 hover:bg-gray-50 transition"
         >

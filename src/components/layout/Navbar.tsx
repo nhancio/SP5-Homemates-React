@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { PlusSquare, Heart, User, Home } from 'lucide-react';
+import { PlusSquare, Heart, User, Home, Building } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
 const Navbar = () => {
@@ -49,12 +49,19 @@ const Navbar = () => {
                 <Home className="w-5 h-5" />
                 <span>Home</span>
               </Link>
+              <Link
+                to="/rent" 
+                className={`flex items-center space-x-2 ${isActive('/rent') ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'}`}
+              >
+                <Building className="w-5 h-5" />
+                <span>Shared Homes</span>
+              </Link>
               <Link 
                 to="/add-listing" 
                 className={`flex items-center space-x-2 ${isActive('/add-listing') ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'}`}
               >
                 <PlusSquare className="w-5 h-5" />
-                <span>Add Listing</span>
+                <span>Post</span>
               </Link>
               <Link 
                 to="/saved" 
