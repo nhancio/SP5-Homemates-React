@@ -19,7 +19,7 @@ const Footer = () => {
           
           {/* Social Media Links */}
           <div className="flex items-center space-x-4">
-            <a href="https://www.instagram.com/homemates.ai/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
               <Instagram className="w-5 h-5" />
             </a>
             <a href="https://www.linkedin.com/company/homemates-ai" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
