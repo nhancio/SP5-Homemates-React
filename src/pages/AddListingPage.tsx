@@ -274,9 +274,9 @@ const AddListingPage = () => {
                 }
               }))}
             >
-              <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
+              <option value="">Select Option</option>
+              <option value="Bachelors">Bachelors</option>
+              <option value="Family">Family</option>
               <option value="Any">Any</option>
             </select>
           </div>
@@ -942,9 +942,9 @@ const AddListingPage = () => {
                         }
                       }))}
                     >
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
+                      <option value="">Select Option</option>
+                      <option value="Bachelors">Bachelors</option>
+                      <option value="Family">Family</option>
                       <option value="Any">Any</option>
                     </select>
                   </div>
