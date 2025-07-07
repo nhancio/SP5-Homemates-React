@@ -14,6 +14,7 @@ interface UserProfile {
   gender: string;
   profession: string;
   preferences: string[];
+  photoURL?: string;
 }
 
 const CATEGORY_OPTIONS = [
@@ -80,7 +81,8 @@ const FindFriendsPage = () => {
             age: Number(d.age) || 0,
             gender: d.gender || '',
             profession: d.profession || d.occupation || '',
-            preferences: Array.isArray(d.preferences) ? d.preferences : []
+            preferences: Array.isArray(d.preferences) ? d.preferences : [],
+            photoURL: d.photoURL || d.photo || d.avatar || '',
           };
         });
         // Filter by gender (same as logged-in user, exclude self)
@@ -154,7 +156,15 @@ const FindFriendsPage = () => {
             {/* User Avatar Section */}
             <div className="relative h-40 bg-primary-50">
               <div className="absolute inset-0 flex items-center justify-center">
-                <User className="w-24 h-24 text-primary-200" />
+                {user.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt={user.userName}
+                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
+                  />
+                ) : (
+                  <User className="w-24 h-24 text-primary-200" />
+                )}
               </div>
             </div>
 
