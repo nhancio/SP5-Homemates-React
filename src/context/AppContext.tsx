@@ -29,32 +29,24 @@ type BuyFilters = BaseFilters & {
 };
 
 type Filters = {
-  rent: {
+  fullHome: {
     city: string;
     locality: string;
     propertyType: string;
     furnishingType: string;
-    roomType: string;
-    bathroomType: string;
-    minRent: number;
-    maxRent: number;
-    preferredTenant: string;
-    amenities: string[];
-  };
-  buy: {
-    city: string;
-    locality: string;
-    propertyType: string;
-    furnishingType: string;
+    bhk: string;
+    bathrooms: string;
     minPrice: number;
     maxPrice: number;
     minSqft: number;
     maxSqft: number;
+    amenities: string;
+    availability: string;
+    availableFrom: string;
     ageOfProperty: string;
     possessionStatus: string;
-    amenities: string[];
   };
-  activeType: 'rent' | 'buy';
+  activeType: 'fullHome';
 };
 
 type User = {
@@ -80,31 +72,23 @@ interface AppContextType {
 }
 
 const defaultFilters: Filters = {
-  activeType: 'buy',
-  rent: {
+  activeType: 'fullHome',
+  fullHome: {
     city: '',
     locality: '',
     propertyType: '',
     furnishingType: '',
-    roomType: '',
-    bathroomType: '',
-    minRent: 0,
-    maxRent: 0,
-    preferredTenant: '',
-    amenities: [],
-  },
-  buy: {
-    city: '',
-    locality: '',
-    propertyType: '',
-    furnishingType: '',
+    bhk: '',
+    bathrooms: '',
     minPrice: 0,
     maxPrice: 0,
     minSqft: 0,
     maxSqft: 0,
+    amenities: '',
+    availability: '',
+    availableFrom: '',
     ageOfProperty: '',
     possessionStatus: '',
-    amenities: [],
   },
 };
 
