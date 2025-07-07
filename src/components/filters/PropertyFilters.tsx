@@ -12,27 +12,6 @@ interface PropertyFiltersProps {
 const PRICE_MIN = 10000000;
 const PRICE_MAX = 100000000;
 
-const defaultFilters = {
-  rent: {
-    priceMin: '',
-    priceMax: '',
-    location: '',
-    propertyType: '',
-    roomType: '',
-    tenantType: '',
-    bathroomType: ''
-  },
-  buy: {
-    priceMin: PRICE_MIN,
-    priceMax: PRICE_MAX,
-    location: '',
-    propertyType: '',
-    builtUpArea: '',
-    ageOfProperty: '',
-    possessionStatus: ''
-  }
-};
-
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listingType }) => {
   const { filters, setFilters } = useAppContext();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -47,7 +26,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        [name]: ['priceMin', 'priceMax', 'builtUpArea'].includes(name) ? Number(value) : value,
+        [name]: ['minRent', 'maxRent', 'minPrice', 'maxPrice', 'minSqft', 'maxSqft'].includes(name) ? Number(value) : value,
       },
     });
   };
@@ -55,7 +34,32 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
   const clearFilters = () => {
     setFilters({
       ...filters,
-      [listingType]: listingType === 'rent' ? defaultFilters.rent : defaultFilters.buy
+      [listingType]: listingType === 'rent'
+        ? {
+            city: '',
+            locality: '',
+            propertyType: '',
+            furnishingType: '',
+            roomType: '',
+            bathroomType: '',
+            minRent: 0,
+            maxRent: 0,
+            preferredTenant: '',
+            amenities: [],
+          }
+        : {
+            city: '',
+            locality: '',
+            propertyType: '',
+            furnishingType: '',
+            minPrice: 0,
+            maxPrice: 0,
+            minSqft: 0,
+            maxSqft: 0,
+            ageOfProperty: '',
+            possessionStatus: '',
+            amenities: [],
+          },
     });
   };
 
@@ -63,68 +67,107 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
     setIsFilterOpen(!isFilterOpen);
   };
 
-  const renderRentFilters = () => (
+  const renderFullHomeFilters = () => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
-        <select 
-          name="roomType"
-          value={filters.rent.roomType}
-          onChange={handleFilterChange}
-          className="input"
-        >
-          <option value="">All Types</option>
-          <option value="shared">Shared</option>
-          <option value="private">Private</option>
-        </select>
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Tenant Type</label>
-        <select 
-          name="tenantType"
-          value={filters.rent.tenantType}
+        <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
+        <select
+          name="bhk"
+          value={currentFilters.bhk || ''}
           onChange={handleFilterChange}
           className="input"
         >
           <option value="">Any</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
+          {[1,2,3,4,5].map((n) => (
+            <option key={n} value={n}>{n} BHK</option>
+          ))}
         </select>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Bathroom Type</label>
-        <select 
-          name="bathroomType"
-          value={filters.rent.bathroomType}
+        <label className="block text-sm font-medium text-gray-700 mb-2">Bathrooms</label>
+        <select
+          name="bathrooms"
+          value={currentFilters.bathrooms || ''}
           onChange={handleFilterChange}
           className="input"
         >
-          <option value="">All Types</option>
-          <option value="attached">Attached</option>
-          <option value="common">Common</option>
+          <option value="">Any</option>
+          {[1,2,3,4,5].map((n) => (
+            <option key={n} value={n}>{n}</option>
+          ))}
         </select>
       </div>
-    </div>
-  );
-
-  const renderBuyFilters = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Built Up Area</label>
-        <input 
-          type="number" 
-          name="builtUpArea"
-          placeholder="Min sqft" 
-          value={filters.buy.builtUpArea}
+        <label className="block text-sm font-medium text-gray-700 mb-2">Furnishing Type</label>
+        <select
+          name="furnishingType"
+          value={currentFilters.furnishingType || ''}
           onChange={handleFilterChange}
-          className="input" 
+          className="input"
+        >
+          <option value="">All</option>
+          <option value="Furnished">Furnished</option>
+          <option value="Semi-furnished">Semi-furnished</option>
+          <option value="Unfurnished">Unfurnished</option>
+        </select>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
+        <input
+          type="text"
+          name="amenities"
+          placeholder="Comma separated (e.g. wifi, parking)"
+          value={currentFilters.amenities || ''}
+          onChange={handleFilterChange}
+          className="input"
         />
       </div>
       <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Area (sqft)</label>
+        <input
+          type="number"
+          name="minSqft"
+          placeholder="Min sqft"
+          value={currentFilters.minSqft || ''}
+          onChange={handleFilterChange}
+          className="input mb-2"
+        />
+        <input
+          type="number"
+          name="maxSqft"
+          placeholder="Max sqft"
+          value={currentFilters.maxSqft || ''}
+          onChange={handleFilterChange}
+          className="input"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Availability</label>
+        <select
+          name="availability"
+          value={currentFilters.availability || ''}
+          onChange={handleFilterChange}
+          className="input"
+        >
+          <option value="">Any</option>
+          <option value="immediate">Immediate</option>
+          <option value="date">Select Date</option>
+        </select>
+        {currentFilters.availability === 'date' && (
+          <input
+            type="date"
+            name="availableFrom"
+            value={currentFilters.availableFrom || ''}
+            onChange={handleFilterChange}
+            className="input mt-2"
+          />
+        )}
+      </div>
+      <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Age of Property</label>
-        <select 
+        <select
           name="ageOfProperty"
-          value={filters.buy.ageOfProperty}
+          value={currentFilters.ageOfProperty || ''}
           onChange={handleFilterChange}
           className="input"
         >
@@ -137,9 +180,9 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Possession Status</label>
-        <select 
+        <select
           name="possessionStatus"
-          value={filters.buy.possessionStatus}
+          value={currentFilters.possessionStatus || ''}
           onChange={handleFilterChange}
           className="input"
         >
@@ -160,8 +203,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
           <Filter className="w-5 h-5 text-gray-500 mr-2" />
           <h3 className="font-medium">Filters</h3>
         </div>
-        <button 
-          onClick={toggleFilters} 
+        <button
+          onClick={toggleFilters}
           className="text-primary-600 hover:text-primary-700 text-sm font-medium md:hidden"
         >
           {isFilterOpen ? 'Hide' : 'Show'}
@@ -177,16 +220,16 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
               <label className="block text-sm font-medium text-gray-700 mb-2">Max Rent (₹)</label>
               <input
                 type="range"
-                name="priceMax"
+                name="maxRent"
                 min={1000}
                 max={100000}
                 step={500}
-                value={currentFilters.priceMax || 100000}
+                value={currentFilters.maxRent || 100000}
                 onChange={handleFilterChange}
                 className="w-full accent-primary-600"
               />
               <div className="text-sm text-gray-600 mt-1">
-                Up to ₹{Number(currentFilters.priceMax || 100000).toLocaleString()}
+                Up to ₹{Number(currentFilters.maxRent || 100000).toLocaleString()}
               </div>
             </div>
           ) : (
@@ -198,34 +241,47 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                 max={PRICE_MAX}
                 step={50000}
                 value={[
-                  currentFilters.priceMin || PRICE_MIN,
-                  currentFilters.priceMax || PRICE_MAX
+                  currentFilters.minPrice || PRICE_MIN,
+                  currentFilters.maxPrice || PRICE_MAX,
                 ]}
                 onChange={(values: number[]) => {
                   setFilters({
                     ...filters,
                     [listingType]: {
                       ...filters[listingType],
-                      priceMin: values[0],
-                      priceMax: values[1],
+                      minPrice: values[0],
+                      maxPrice: values[1],
                     },
                   });
                 }}
               />
               <div className="text-sm text-gray-600 mt-1">
-                ₹{(currentFilters.priceMin || PRICE_MIN).toLocaleString()} - ₹{(currentFilters.priceMax || PRICE_MAX).toLocaleString()}
+                ₹{(currentFilters.minPrice || PRICE_MIN).toLocaleString()} - ₹{(currentFilters.maxPrice || PRICE_MAX).toLocaleString()}
               </div>
             </div>
           )}
 
-          {/* Location */}
+          {/* City */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
-            <input 
-              type="text" 
-              name="location"
-              placeholder="Enter location"
-              value={currentFilters.location}
+            <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+            <input
+              type="text"
+              name="city"
+              placeholder="Enter city"
+              value={currentFilters.city}
+              onChange={handleFilterChange}
+              className="input"
+            />
+          </div>
+
+          {/* Locality */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
+            <input
+              type="text"
+              name="locality"
+              placeholder="Enter locality"
+              value={currentFilters.locality}
               onChange={handleFilterChange}
               className="input"
             />
@@ -234,7 +290,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
           {/* Property Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
-            <select 
+            <select
               name="propertyType"
               value={currentFilters.propertyType}
               onChange={handleFilterChange}
@@ -249,11 +305,11 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
         </div>
 
         {/* Type-specific Filters */}
-        {listingType === 'rent' ? renderRentFilters() : renderBuyFilters()}
+        {renderFullHomeFilters()}
 
         {/* Footer Buttons */}
         <div className="flex justify-end mt-4">
-          <button 
+          <button
             onClick={clearFilters}
             className="flex items-center text-gray-600 hover:text-gray-800 mr-4"
           >
