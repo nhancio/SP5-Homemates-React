@@ -1,5 +1,5 @@
-import React from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { createBrowserRouter, RouterProvider, useLocation } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import BuyPropertiesPage from './pages/BuyPropertiesPage';
@@ -15,6 +15,7 @@ import RefundPolicyPage from './pages/RefundPolicyPage';
 import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
 import { AppContextProvider } from './context/AppContext';
 import ErrorBoundary from './components/ErrorBoundary';
+import { trackPageView } from './utils/analytics';
 
 const router = createBrowserRouter([
   {
@@ -49,6 +50,12 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  // Track page views on route change
+  const location = useLocation();
+  useEffect(() => {
+    trackPageView(location.pathname + location.search);
+  }, [location]);
+
   return (
     <ErrorBoundary>
       <AppContextProvider>

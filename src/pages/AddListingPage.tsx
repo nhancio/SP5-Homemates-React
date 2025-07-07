@@ -1194,6 +1194,16 @@ const AddListingPage = () => {
           type="submit"
           className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition disabled:opacity-50"
           disabled={isSubmitting}
+          onClick={() => {
+            // Track submit/post button click
+            import('../utils/analytics').then(({ trackEvent }) => {
+              trackEvent({
+                action: 'submit_listing',
+                category: 'Button',
+                label: listingType === 'sell' ? 'Full Home Submit' : 'Shared Home Post',
+              });
+            });
+          }}
           >
             {isSubmitting
               ? 'Submitting...'
