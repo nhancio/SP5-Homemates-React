@@ -892,16 +892,19 @@ const AddListingPage = () => {
                   <option key={city} value={city}>{city}</option>
                 ))}
               </select>
-              <input
-                type="text"
-                placeholder="Locality"
+              <select
                 className="input"
                 value={formData.address.locality}
                 onChange={(e) => setFormData(prev => ({
                   ...prev,
                   address: { ...prev.address, locality: e.target.value }
                 }))}
-              />
+              >
+                <option value="">Select Locality</option>
+                {['Madhapur', 'Gachibowli', 'Kondapur', 'Hitech City', 'Jubilee Hills', 'Banjara Hills', 'Kukatpally', 'Ameerpet', 'Begumpet', 'Other'].map(locality => (
+                  <option key={locality} value={locality}>{locality}</option>
+                ))}
+              </select>
               <input
                 type="text"
                 placeholder="Building Name"
