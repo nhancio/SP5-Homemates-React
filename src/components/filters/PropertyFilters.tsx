@@ -218,15 +218,20 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
           {listingType === 'rent' ? (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Max Rent (₹)</label>
-              <input
-                type="range"
-                name="maxRent"
+              <Slider
                 min={1000}
                 max={100000}
                 step={500}
                 value={currentFilters.maxRent || 100000}
-                onChange={handleFilterChange}
-                className="w-full accent-primary-600"
+                onChange={(value: number) => {
+                  setFilters({
+                    ...filters,
+                    [listingType]: {
+                      ...filters[listingType],
+                      maxRent: value,
+                    },
+                  });
+                }}
               />
               <div className="text-sm text-gray-600 mt-1">
                 Up to ₹{Number(currentFilters.maxRent || 100000).toLocaleString()}
