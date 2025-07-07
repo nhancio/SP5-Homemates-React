@@ -41,9 +41,7 @@ export interface RentDetails {
   rent: number;
   maintenance: number;
   securityDeposit: number;
-  setupCost: number;
   brokerage: number;
   electricityBill: string;
-  setupCostRefundable: boolean;
   brokerageRefundable: boolean;
 }
