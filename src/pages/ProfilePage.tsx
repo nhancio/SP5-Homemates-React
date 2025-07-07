@@ -128,12 +128,6 @@ const ProfilePage = () => {
               <div className="md:ml-6 text-center md:text-left flex-grow">
                 <div className="flex flex-col md:flex-row items-center justify-between">
                   <h1 className="text-2xl font-bold">{displayName}</h1>
-                  <button 
-                    onClick={logout}
-                    className="btn btn-primary px-12 text-lg font-medium"
-                  >
-                    Logout
-                  </button>
                 </div>
                 <div className="mt-4 space-y-2">
                   <p className="flex items-center justify-center md:justify-start text-gray-600">
@@ -168,17 +162,18 @@ const ProfilePage = () => {
                   )}
                 </div>
                 <div className="mt-4">
-  <button
-    onClick={() => {
-      navigator.clipboard.writeText(`Hey! Here's my availability on Homemates.`);
-      alert('Availability link copied to clipboard!');
-    }}
-    className="btn btn-secondary text-sm px-4 py-2"
-  >
-    Share Availability
-  </button>
-</div>
-
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(`Hey! Here's my availability on Homemates.`);
+                      alert('Availability link copied to clipboard!');
+                    }}
+                    className="btn btn-secondary text-sm px-4 py-2"
+                  >
+                    Share Availability
+                  </button>
+                </div>
+                {/* Logout button moved further down */}
+                {/* (No logout button here, only at the bottom) */}
               </div>
             </div>
           </div>
@@ -224,6 +219,15 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
+      </div>
+      {/* Logout button at the absolute bottom of the page */}
+      <div className="flex justify-center md:justify-start mt-10 mb-8">
+        <button 
+          onClick={logout}
+          className="btn btn-primary px-12 text-lg font-medium"
+        >
+          Logout
+        </button>
       </div>
     </div>
   );
