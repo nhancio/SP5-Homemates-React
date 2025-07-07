@@ -172,8 +172,14 @@ const ProfilePage = () => {
                     Share Availability
                   </button>
                 </div>
-                {/* Logout button moved further down */}
-                {/* (No logout button here, only at the bottom) */}
+                <div className="flex justify-center md:justify-start mt-4">
+                  <button 
+                    onClick={logout}
+                    className="btn btn-primary px-12 text-lg font-medium"
+                  >
+                    Logout
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -219,15 +225,6 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
-      </div>
-      {/* Logout button at the absolute bottom of the page */}
-      <div className="flex justify-center md:justify-start mt-10 mb-8">
-        <button 
-          onClick={logout}
-          className="btn btn-primary px-12 text-lg font-medium"
-        >
-          Logout
-        </button>
       </div>
     </div>
   );
