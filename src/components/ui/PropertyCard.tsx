@@ -146,7 +146,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
                     <Building className="w-12 h-12" />
                   </div>
                 ) : (
-                  <img src={img} alt="" className="w-full h-full object-cover" onLoad={handleImageLoad} loading="lazy" />
+                  <img src={img} alt="" className="w-full h-full object-cover rounded-lg" onLoad={handleImageLoad} loading="lazy" />
                 )}
               </div>
             </SwiperSlide>

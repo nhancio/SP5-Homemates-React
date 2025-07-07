@@ -210,7 +210,7 @@ Link: ${url}`;
                   <img 
                     src={image} 
                     alt={`Property ${index + 1}`} 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-lg"
                   />
                 )}
               </SwiperSlide>
