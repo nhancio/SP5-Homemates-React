@@ -8,6 +8,9 @@ import {
 import OnboardingModal from '../components/modals/OnboardingModal';
 import PreferencesModal from '../components/modals/PreferencesModal';
 import { signInWithGoogle, logoutUser, getUserFavorites } from '../services/auth';
+import { auth, db } from '../config/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 type BaseFilters = {
   priceMin: number;
@@ -196,6 +199,44 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
         : [...prev, propertyId]
     );
   };
+
+  useEffect(() => {
+    // Listen to Firebase Auth state changes
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Fetch user info from Firestore 'u' table
+        const userRef = doc(db, 'u', firebaseUser.uid);
+        const userDoc = await getDoc(userRef);
+        let userData;
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          userData = {
+            id: firebaseUser.uid,
+            name: data.name || firebaseUser.displayName || '',
+            email: data.email || firebaseUser.email || '',
+            photoURL: data.photoURL || firebaseUser.photoURL || '',
+            isPremium: data.isPremium || false,
+            preferences: data.preferences || [],
+          };
+        } else {
+          userData = {
+            id: firebaseUser.uid,
+            name: firebaseUser.displayName || '',
+            email: firebaseUser.email || '',
+            photoURL: firebaseUser.photoURL || '',
+            isPremium: false,
+            preferences: [],
+          };
+        }
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData));
+      } else {
+        setUser(null);
+        localStorage.removeItem('user');
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const loadFavorites = async () => {
