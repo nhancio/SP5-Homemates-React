@@ -6,12 +6,14 @@ import Footer from './Footer';
 import PreferencesModal from '../modals/PreferencesModal';
 import PWAInstallPrompt from '../ui/PWAInstallPrompt';
 import { useAppContext } from '../../context/AppContext';
+import PageViewTracker from '../PageViewTracker';
 
 const Layout = () => {
   const { showPreferences } = useAppContext();
   
   return (
     <div className="flex flex-col min-h-screen">
+      <PageViewTracker />
       <Navbar />
       <main className="flex-grow">
         <Outlet />
