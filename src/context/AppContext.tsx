@@ -46,7 +46,35 @@ type Filters = {
     ageOfProperty: string;
     possessionStatus: string;
   };
-  activeType: 'fullHome';
+  rent: {
+    city: string;
+    locality: string;
+    propertyType: string;
+    furnishingType: string;
+    bhk: string;
+    bathrooms: string;
+    minRent: number;
+    maxRent: number;
+    minSqft: number;
+    maxSqft: number;
+    amenities: string;
+    availability: string;
+    availableFrom: string;
+    ageOfProperty: string;
+    possessionStatus: string;
+  };
+  buy: {
+    city: string;
+    locality: string;
+    propertyType: string;
+    minPrice: number;
+    maxPrice: number;
+    minSqft: number;
+    maxSqft: number;
+    ageOfProperty: string;
+    possessionStatus: string;
+  };
+  activeType: 'fullHome' | 'rent' | 'buy';
 };
 
 type User = {
@@ -90,6 +118,34 @@ const defaultFilters: Filters = {
     ageOfProperty: '',
     possessionStatus: '',
   },
+  rent: {
+    city: '',
+    locality: '',
+    propertyType: '',
+    furnishingType: '',
+    bhk: '',
+    bathrooms: '',
+    minRent: 0,
+    maxRent: 100000,
+    minSqft: 0,
+    maxSqft: 0,
+    amenities: '',
+    availability: '',
+    availableFrom: '',
+    ageOfProperty: '',
+    possessionStatus: '',
+  },
+  buy: {
+    city: '',
+    locality: '',
+    propertyType: '',
+    minPrice: 0,
+    maxPrice: 10000000,
+    minSqft: 0,
+    maxSqft: 0,
+    ageOfProperty: '',
+    possessionStatus: '',
+  }
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
