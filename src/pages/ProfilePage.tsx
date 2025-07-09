@@ -3,6 +3,8 @@ import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X } from 'lucide-re
 import { useAppContext } from '../context/AppContext';
 import { getDoc, doc } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import PropertyCard from '../components/ui/PropertyCard';
+import { getListingsByUser } from '../services/listings';
 
 const ProfilePage = () => {
 
@@ -10,6 +12,9 @@ const ProfilePage = () => {
   const [showUpgradePopup, setShowUpgradePopup] = useState(false);
   const [profileUser, setProfileUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [userListings, setUserListings] = useState<any[]>([]);
+  const [listingsLoading, setListingsLoading] = useState(false);
+  const [listingsError, setListingsError] = useState<string | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -39,6 +44,27 @@ const ProfilePage = () => {
       }
     };
     fetchUserProfile();
+  }, [user]);
+
+  useEffect(() => {
+    // Fetch user listings
+    const fetchUserListings = async () => {
+      if (!user) {
+        setUserListings([]);
+        return;
+      }
+      setListingsLoading(true);
+      setListingsError(null);
+      try {
+        const listings = await getListingsByUser(user.id);
+        setUserListings(listings);
+      } catch (err) {
+        setListingsError('Failed to load your listings.');
+      } finally {
+        setListingsLoading(false);
+      }
+    };
+    fetchUserListings();
   }, [user]);
 
   const handleUpgradeClick = (e: React.MouseEvent) => {
@@ -184,6 +210,31 @@ const ProfilePage = () => {
             </div>
           </div>
         </div>
+
+        {/* Manage Listings Section */}
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Manage Listings</h2>
+          {listingsLoading ? (
+            <div className="text-gray-600">Loading your listings...</div>
+          ) : listingsError ? (
+            <div className="text-red-500">{listingsError}</div>
+          ) : userListings.length === 0 ? (
+            <div className="text-gray-500">You have not posted any listings yet.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userListings.map(listing => (
+                <div key={listing.id} className="relative group">
+                  <PropertyCard property={listing} listingType={listing.listingType === 'sell' ? 'buy' : 'rent'} />
+                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="btn btn-xs btn-secondary" onClick={() => alert('Edit functionality coming soon!')}>Edit</button>
+                    <button className="btn btn-xs btn-danger" onClick={() => alert('Delete functionality coming soon!')}>Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Policy Links */}
         <div className="mt-8 flex flex-wrap gap-4 justify-center md:justify-start">
           <a href="/privacy_policy" className="btn btn-secondary text-sm px-4 py-2">Privacy Policy</a>

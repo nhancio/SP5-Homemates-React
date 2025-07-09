@@ -302,3 +302,36 @@ export async function getListingsByIds(ids: string[]) {
     throw error;
   }
 }
+
+/**
+ * Fetch all listings (rent and sell) created by a specific user.
+ * @param userId The user's UID
+ * @returns Array of listings (rent and sell)
+ */
+export async function getListingsByUser(userId: string) {
+  try {
+    // Query rent listings
+    const rentQuery = query(collection(db, 'r'), where('userId', '==', userId));
+    const rentSnapshot = await getDocs(rentQuery);
+    const rentListings = rentSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      listingType: 'rent',
+    }));
+
+    // Query sell listings
+    const sellQuery = query(collection(db, 's'), where('userId', '==', userId));
+    const sellSnapshot = await getDocs(sellQuery);
+    const sellListings = sellSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      listingType: 'sell',
+    }));
+
+    // Combine and return
+    return [...rentListings, ...sellListings];
+  } catch (error) {
+    console.error('Error fetching user listings:', error);
+    throw error;
+  }
+}
