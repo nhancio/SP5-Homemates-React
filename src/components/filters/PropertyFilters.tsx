@@ -15,10 +15,69 @@ const PRICE_MAX = 100000000;
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listingType }) => {
   const { filters, setFilters } = useAppContext();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [locationInput, setLocationInput] = useState('');
+  const [detectedCity, setDetectedCity] = useState('');
+  const [detectedState, setDetectedState] = useState('');
+  const [detecting, setDetecting] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   useEffect(() => {
     setFilters({ ...filters, activeType: listingType });
   }, [listingType]);
+
+  // Nominatim autocomplete fetch
+  const fetchSuggestions = async (input: string) => {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}&addressdetails=1&limit=5`
+    );
+    const data = await res.json();
+    return data.map((item: any) => ({
+      display_name: item.display_name,
+      city: item.address.city || item.address.town || item.address.village || '',
+      state: item.address.state || '',
+      place_id: item.place_id,
+    }));
+  };
+
+  const handleLocationChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocationInput(value);
+    setFilters({
+      ...filters,
+      [listingType]: {
+        ...filters[listingType],
+        location: value,
+        city: '', // clear old city/locality
+        locality: '',
+      },
+    });
+    if (value.length > 2) {
+      setDetecting(true);
+      const results = await fetchSuggestions(value);
+      setSuggestions(results);
+      setDetecting(false);
+    } else {
+      setDetectedCity('');
+      setDetectedState('');
+      setSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: any) => {
+    setLocationInput(suggestion.display_name);
+    setDetectedCity(suggestion.city);
+    setDetectedState(suggestion.state);
+    setSuggestions([]);
+    setFilters({
+      ...filters,
+      [listingType]: {
+        ...filters[listingType],
+        location: suggestion.display_name,
+        city: suggestion.city,
+        locality: '',
+      },
+    });
+  };
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -306,30 +365,47 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             </div>
           )}
 
-          {/* City */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+          {/* Location (combined) */}
+          <div className="col-span-1 md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Location (Locality, City or Both)</label>
             <input
               type="text"
-              name="city"
-              placeholder="Enter city"
-              value={currentFilters.city}
-              onChange={handleFilterChange}
+              name="location"
+              placeholder="Enter locality, city, or both (e.g. Whitefield, Bangalore)"
+              value={locationInput}
+              onChange={handleLocationChange}
               className="input"
+              autoComplete="off"
+              onBlur={() => setTimeout(() => setSuggestions([]), 150)}
+              onFocus={async () => {
+                if (locationInput.length > 2) {
+                  setDetecting(true);
+                  const results = await fetchSuggestions(locationInput);
+                  setSuggestions(results);
+                  setDetecting(false);
+                }
+              }}
             />
-          </div>
-
-          {/* Locality */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
-            <input
-              type="text"
-              name="locality"
-              placeholder="Enter locality"
-              value={currentFilters.locality}
-              onChange={handleFilterChange}
-              className="input"
-            />
+            {/* Suggestions dropdown */}
+            {suggestions.length > 0 && (
+              <ul className="absolute bg-white border border-gray-200 rounded shadow z-20 mt-1 w-full max-h-48 overflow-auto">
+                {suggestions.map((s, i) => (
+                  <li
+                    key={s.place_id}
+                    className="px-4 py-2 cursor-pointer hover:bg-primary-50 text-sm"
+                    onMouseDown={() => handleSuggestionClick(s)}
+                  >
+                    {s.display_name}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {detecting && (
+              <div className="text-xs text-gray-500 mt-1">Detecting city/state...</div>
+            )}
+            {!detecting && detectedCity && detectedState && (
+              <div className="text-xs text-primary-700 mt-1">Detected: {detectedCity}, {detectedState}</div>
+            )}
           </div>
 
           {/* Property Type */}
