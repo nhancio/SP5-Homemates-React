@@ -43,7 +43,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             roomType: '',
             bathroomType: '',
             minRent: 0,
-            maxRent: 0,
+            maxRent: 100000,
             preferredTenant: '',
             amenities: [],
           }
@@ -52,8 +52,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             locality: '',
             propertyType: '',
             furnishingType: '',
-            minPrice: 0,
-            maxPrice: 0,
+            minPrice: PRICE_MIN,
+            maxPrice: PRICE_MAX,
             minSqft: 0,
             maxSqft: 0,
             ageOfProperty: '',
@@ -65,6 +65,24 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
 
   const toggleFilters = () => {
     setIsFilterOpen(!isFilterOpen);
+  };
+
+  const formatPrice = (price: number) => {
+    if (price >= 10000000) {
+      return `₹${(price / 10000000).toFixed(1)}Cr`;
+    } else if (price >= 100000) {
+      return `₹${(price / 100000).toFixed(1)}L`;
+    } else {
+      return `₹${price.toLocaleString()}`;
+    }
+  };
+
+  const formatRent = (rent: number) => {
+    if (rent >= 100000) {
+      return `₹${(rent / 100000).toFixed(1)}L`;
+    } else {
+      return `₹${rent.toLocaleString()}`;
+    }
   };
 
   const renderFullHomeFilters = () => (
@@ -217,51 +235,73 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
           {/* Price Filter */}
           {listingType === 'rent' ? (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Max Rent (₹)</label>
-              <Slider
-                min={1000}
-                max={100000}
-                step={500}
-                value={currentFilters.maxRent || 100000}
-                onChange={(value: number) => {
-                  setFilters({
-                    ...filters,
-                    [listingType]: {
-                      ...filters[listingType],
-                      maxRent: value,
-                    },
-                  });
-                }}
-              />
-              <div className="text-sm text-gray-600 mt-1">
-                Up to ₹{Number(currentFilters.maxRent || 100000).toLocaleString()}
+              <label className="block text-sm font-medium text-gray-700 mb-2">Max Rent</label>
+              <div className="px-2">
+                <Slider
+                  min={1000}
+                  max={100000}
+                  step={1000}
+                  value={currentFilters.maxRent || 100000}
+                  onChange={(value: number) => {
+                    setFilters({
+                      ...filters,
+                      [listingType]: {
+                        ...filters[listingType],
+                        maxRent: value,
+                      },
+                    });
+                  }}
+                  trackStyle={{ backgroundColor: '#2563eb', height: 6 }}
+                  handleStyle={{
+                    borderColor: '#2563eb',
+                    height: 20,
+                    width: 20,
+                    marginTop: -7,
+                    backgroundColor: '#2563eb',
+                  }}
+                  railStyle={{ backgroundColor: '#e5e7eb', height: 6 }}
+                />
+              </div>
+              <div className="text-sm text-gray-600 mt-2 text-center font-medium">
+                Up to {formatRent(currentFilters.maxRent || 100000)}
               </div>
             </div>
           ) : (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Price Range (₹)</label>
-              <Slider
-                range
-                min={PRICE_MIN}
-                max={PRICE_MAX}
-                step={50000}
-                value={[
-                  currentFilters.minPrice || PRICE_MIN,
-                  currentFilters.maxPrice || PRICE_MAX,
-                ]}
-                onChange={(values: number[]) => {
-                  setFilters({
-                    ...filters,
-                    [listingType]: {
-                      ...filters[listingType],
-                      minPrice: values[0],
-                      maxPrice: values[1],
-                    },
-                  });
-                }}
-              />
-              <div className="text-sm text-gray-600 mt-1">
-                ₹{(currentFilters.minPrice || PRICE_MIN).toLocaleString()} - ₹{(currentFilters.maxPrice || PRICE_MAX).toLocaleString()}
+              <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+              <div className="px-2">
+                <Slider
+                  range
+                  min={PRICE_MIN}
+                  max={PRICE_MAX}
+                  step={500000}
+                  value={[
+                    currentFilters.minPrice || PRICE_MIN,
+                    currentFilters.maxPrice || PRICE_MAX,
+                  ]}
+                  onChange={(values: number[]) => {
+                    setFilters({
+                      ...filters,
+                      [listingType]: {
+                        ...filters[listingType],
+                        minPrice: values[0],
+                        maxPrice: values[1],
+                      },
+                    });
+                  }}
+                  trackStyle={{ backgroundColor: '#2563eb', height: 6 }}
+                  handleStyle={{
+                    borderColor: '#2563eb',
+                    height: 20,
+                    width: 20,
+                    marginTop: -7,
+                    backgroundColor: '#2563eb',
+                  }}
+                  railStyle={{ backgroundColor: '#e5e7eb', height: 6 }}
+                />
+              </div>
+              <div className="text-sm text-gray-600 mt-2 text-center font-medium">
+                {formatPrice(currentFilters.minPrice || PRICE_MIN)} - {formatPrice(currentFilters.maxPrice || PRICE_MAX)}
               </div>
             </div>
           )}
