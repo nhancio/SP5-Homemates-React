@@ -453,3 +453,17 @@ export async function getListingsByUser(userId: string) {
     throw error;
   }
 }
+
+export const initiatePhonePePayment = async (amount: number, userPhone: string) => {
+  const res = await fetch('https://us-central1-homemates-app.cloudfunctions.net/phonepePay', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount, merchantTransactionId: 'txn_' + Date.now(), userPhone }),
+  });
+  const data = await res.json();
+  if (data.success && data.data && data.data.instrumentResponse.redirectInfo.url) {
+    window.location.href = data.data.instrumentResponse.redirectInfo.url;
+  } else {
+    alert('Payment initiation failed');
+  }
+};
