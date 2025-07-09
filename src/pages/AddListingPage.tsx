@@ -84,7 +84,6 @@ const initialFormData = {
       rent: '',
       maintenance: '',
       securityDeposit: '',
-      setupCost: '',
       brokerage: '',
     },
     additionalBills: {
@@ -452,7 +451,7 @@ const AddListingPage = () => {
       <section className="bg-white p-6 rounded-lg shadow-sm">
         <h2 className="text-lg font-semibold mb-4">Rent Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {['rent', 'maintenance', 'securityDeposit', 'setupCost', 'brokerage'].map(field => (
+          {['rent', 'maintenance', 'securityDeposit', 'brokerage'].map(field => (
             <div key={field}>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {field.split(/(?=[A-Z])/).join(' ').replace(/^\w/, c => c.toUpperCase())}
@@ -1096,7 +1095,7 @@ const AddListingPage = () => {
               <section className="bg-white p-6 rounded-lg shadow-sm">
                 <h2 className="text-lg font-semibold mb-4">Rent Details</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {['rent', 'maintenance', 'securityDeposit', 'setupCost', 'brokerage'].map(field => (
+                  {['rent', 'maintenance', 'securityDeposit', 'brokerage'].map(field => (
                     <div key={field}>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         {field.split(/(?=[A-Z])/).join(' ').replace(/^ /, c => c.toUpperCase())}
