@@ -288,3 +288,9 @@ export function useAppContext() {
   }
   return context;
 }
+
+const CATEGORY_OPTIONS = [
+  { label: 'IT', value: 'IT' },
+  { label: 'Travel', value: 'Travel' },
+  { label: 'Finance', value: 'Finance' }, // Add more as needed
+];
