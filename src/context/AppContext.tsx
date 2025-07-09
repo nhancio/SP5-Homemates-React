@@ -1,3 +1,4 @@
+import * as React from 'react';
 import {
   createContext,
   useContext,
@@ -151,18 +152,18 @@ const defaultFilters: Filters = {
   }
 };
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = React.createContext<AppContextType | undefined>(undefined);
 
-export function AppContextProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
+export function AppContextProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = React.useState<User | null>(() => {
     const storedUser = localStorage.getItem('user');
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
-  const [filters, setFilters] = useState<Filters>(defaultFilters);
-  const [favoriteProperties, setFavoriteProperties] = useState<string[]>([]);
-  const [showPreferences, setShowPreferences] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [filters, setFilters] = React.useState<Filters>(defaultFilters);
+  const [favoriteProperties, setFavoriteProperties] = React.useState<string[]>([]);
+  const [showPreferences, setShowPreferences] = React.useState(false);
+  const [showOnboarding, setShowOnboarding] = React.useState(false);
 
   const login = async () => {
     try {
@@ -281,7 +282,7 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAppContext() {
-  const context = useContext(AppContext);
+  const context = React.useContext(AppContext);
   if (!context) {
     throw new Error('useAppContext must be used within an AppContextProvider');
   }
