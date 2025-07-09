@@ -123,6 +123,7 @@ export async function createListing(type: 'rent' | 'sell', data: RentListing | S
 
 export async function getListings(type: 'rent' | 'sell', filters?: any) {
   try {
+    console.log('Fetching listings...');
     console.log('Getting listings for type:', type, 'with filters:', filters);
     // Use r for rent and s for sell collections
     const collectionRef = collection(db, type === 'rent' ? 'r' : 's');
@@ -167,7 +168,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
     let filteredListings = listings;
 
     if (filters) {
-      // Price
+      // Price (for buy)
       if (filters.priceMin || filters.priceMax) {
         filteredListings = filteredListings.filter(listing => {
           const price = type === 'rent'
@@ -179,20 +180,141 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
         });
       }
 
-      // Location
-      if (filters.location && filters.location.trim() !== '') {
+      // City filter
+      if (filters.city && filters.city.trim() !== '') {
+        filteredListings = filteredListings.filter(listing =>
+          listing.address?.city?.toLowerCase().includes(filters.city.toLowerCase())
+        );
+      }
+
+      // Locality filter
+      if (filters.locality && filters.locality.trim() !== '') {
+        filteredListings = filteredListings.filter(listing =>
+          listing.address?.locality?.toLowerCase().includes(filters.locality.toLowerCase())
+        );
+      }
+
+      // BHK filter
+      if (filters.bhk && filters.bhk !== '') {
+        filteredListings = filteredListings.filter(listing =>
+          String(listing.propertyType).toLowerCase().includes(String(filters.bhk).toLowerCase())
+        );
+      }
+
+      // Bathrooms filter
+      if (filters.bathrooms && filters.bathrooms !== '') {
         filteredListings = filteredListings.filter(listing => {
-          const loc = listing.address?.locality || listing.address?.city || '';
-          return loc.toLowerCase().includes(filters.location.toLowerCase());
+          const bathrooms =
+            listing.rentDetails?.roomDetails?.bathrooms ??
+            listing.sellDetails?.bathrooms ??
+            '';
+          if (!bathrooms && (filters.bathrooms === 'Any' || filters.bathrooms === '')) return true;
+          // Allow partial and case-insensitive match
+          return String(bathrooms).toLowerCase().includes(String(filters.bathrooms).toLowerCase());
         });
       }
 
-      // Property Type
+      // Furnishing Type filter
+      if (filters.furnishingType && filters.furnishingType !== '') {
+        filteredListings = filteredListings.filter(listing => {
+          const furnishingType =
+            listing.rentDetails?.furnishingType ??
+            listing.sellDetails?.furnishingType ??
+            '';
+          if (!furnishingType && (filters.furnishingType === 'All' || filters.furnishingType === '')) return true;
+          // Allow partial and case-insensitive match
+          return (furnishingType || '').toLowerCase().includes(filters.furnishingType.toLowerCase());
+        });
+      }
+
+      // Area (sqft) filter
+      if (filters.minSqft) {
+        filteredListings = filteredListings.filter(listing => {
+          const area = listing.sellDetails?.sqft
+            || listing.rentDetails?.roomDetails?.area
+            || 0;
+          // If area is missing, treat as match
+          if (!area) return true;
+          return area >= Number(filters.minSqft);
+        });
+      }
+      if (filters.maxSqft) {
+        filteredListings = filteredListings.filter(listing => {
+          const area = listing.sellDetails?.sqft
+            || listing.rentDetails?.roomDetails?.area
+            || 0;
+          // If area is missing, treat as match
+          if (!area) return true;
+          return area <= Number(filters.maxSqft);
+        });
+      }
+
+      // Availability filter
+      if (filters.availability && filters.availability !== '') {
+        filteredListings = filteredListings.filter(listing => {
+          const avail = (listing.rentDetails?.roomDetails?.availability || '').toLowerCase();
+          if (!avail && (filters.availability === 'Any' || filters.availability === '')) return true;
+          return avail.includes(filters.availability.toLowerCase());
+        });
+      }
+
+      // Age of Property filter
+      if (filters.ageOfProperty && filters.ageOfProperty !== '') {
+        filteredListings = filteredListings.filter(listing => {
+          const age = listing.sellDetails?.ageOfProperty
+            || listing.rentDetails?.ageOfProperty;
+          if (!age && (filters.ageOfProperty === 'All' || filters.ageOfProperty === '')) return true;
+          return (age || '').toLowerCase().includes(filters.ageOfProperty.toLowerCase());
+        });
+      }
+
+      // Possession Status filter
+      if (filters.possessionStatus && filters.possessionStatus !== '') {
+        filteredListings = filteredListings.filter(listing => {
+          const status = listing.sellDetails?.possessionStatus
+            || listing.rentDetails?.possessionStatus;
+          if (!status && (filters.possessionStatus === 'All' || filters.possessionStatus === '')) return true;
+          return (status || '').toLowerCase().includes(filters.possessionStatus.toLowerCase());
+        });
+      }
+
+      // Property Type filter
       if (filters.propertyType && filters.propertyType !== '') {
-        filteredListings = filteredListings.filter(listing => listing.propertyType === filters.propertyType);
+        filteredListings = filteredListings.filter(listing =>
+          (listing.propertyType || '').toLowerCase().includes(filters.propertyType.toLowerCase())
+        );
+      }
+
+      // Amenities filter (comma separated string or array, match if at least one selected is present)
+      if (filters.amenities && filters.amenities.length > 0) {
+        const selectedAmenities = Array.isArray(filters.amenities)
+          ? filters.amenities.map((a: string) => a.toLowerCase())
+          : String(filters.amenities).split(',').map((a: string) => a.trim().toLowerCase());
+        filteredListings = filteredListings.filter(listing => {
+          const listingAmenities = [
+            ...(listing.rentDetails?.amenities?.appliances || []),
+            ...(listing.rentDetails?.amenities?.furniture || []),
+            ...(listing.rentDetails?.amenities?.building || []),
+            ...(listing.sellDetails?.amenities || []),
+          ].map((a: string) => a.toLowerCase());
+          // Match if at least one selected amenity is present
+          return selectedAmenities.some((a: string) => listingAmenities.includes(a));
+        });
       }
 
       if (type === 'rent') {
+        // Max Rent
+        if (filters.maxRent) {
+          filteredListings = filteredListings.filter(
+            listing => listing.rentDetails?.costs?.rent <= Number(filters.maxRent)
+          );
+        }
+        // Min Rent
+        if (filters.minRent) {
+          filteredListings = filteredListings.filter(
+            listing => listing.rentDetails?.costs?.rent >= Number(filters.minRent)
+          );
+        }
         // Room Type
         if (filters.roomType && filters.roomType !== '') {
           filteredListings = filteredListings.filter(listing => listing.rentDetails?.roomDetails?.roomType === filters.roomType);
@@ -229,16 +351,12 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
       }
     }
 
-    console.log('Returning filtered listings:', filteredListings.length);
+    console.log('Returning listings:', filteredListings.length);
     return filteredListings;
 
   } catch (error) {
-    console.error('Error in getListings:', error);
-    if (error instanceof Error) {
-      throw new Error(`Failed to fetch ${type} listings: ${error.message}`);
-    } else {
-      throw new Error(`Failed to fetch ${type} listings: Unknown error`);
-    }
+    console.error('Error fetching listings:', error);
+    throw error;
   }
 }
 
