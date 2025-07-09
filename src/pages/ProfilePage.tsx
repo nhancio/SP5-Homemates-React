@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X } from 'lucide-react';
+import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import { getDoc, doc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { getDoc, doc, updateDoc } from 'firebase/firestore';
+import { db, storage } from '../config/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import PropertyCard from '../components/ui/PropertyCard';
-import { getListingsByUser } from '../services/listings';
+import { getListingsByUser, initiatePhonePePayment } from '../services/listings';
 
 const ProfilePage = () => {
 
@@ -15,6 +16,8 @@ const ProfilePage = () => {
   const [userListings, setUserListings] = useState<any[]>([]);
   const [listingsLoading, setListingsLoading] = useState(false);
   const [listingsError, setListingsError] = useState<string | null>(null);
+  const [showFileInput, setShowFileInput] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -70,7 +73,25 @@ const ProfilePage = () => {
   const handleUpgradeClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setShowUpgradePopup(true);
-    setTimeout(() => setShowUpgradePopup(false), 2000);
+  };
+
+  const handlePhonePePayment = async () => {
+    const upgradeAmount = 999; // Premium upgrade amount
+    const userPhone = profileUser?.userPhoneNumber || profileUser?.phoneNumber || '';
+    
+    if (!userPhone) {
+      alert('Please add your phone number to your profile to proceed with payment.');
+      return;
+    }
+
+    try {
+      const res = await initiatePhonePePayment(upgradeAmount, userPhone);
+      console.log('PhonePe payment response:', res);
+      setShowUpgradePopup(false);
+    } catch (err) {
+      alert('Payment initiation failed');
+      console.error(err);
+    }
   };
 
   if (!isAuthenticated) {
@@ -129,22 +150,67 @@ const ProfilePage = () => {
             <div className="flex flex-col md:flex-row">
               {/* Avatar */}
               <div className="flex justify-center md:justify-start -mt-16 mb-4 md:mb-0">
-                <div className="relative">
-                  <div className="w-32 h-32 rounded-full bg-white p-2">
-                    {photoURL ? (
-                      <img 
-                        src={photoURL} 
-                        alt={displayName} 
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full rounded-full bg-primary-100 flex items-center justify-center">
-                        <User className="w-16 h-16 text-primary-600" />
-                      </div>
-                    )}
-                  </div>
+                <div className="relative group w-32 h-32">
+                  <img
+                    src={photoURL || '/images/default-avatar.png'}
+                    alt={displayName}
+                    className="w-32 h-32 rounded-full object-cover border-4 border-white shadow"
+                  />
+                  {/* Pencil icon overlay */}
+                  <button
+                    type="button"
+                    className="absolute bottom-2 right-2 bg-primary-600 text-white rounded-full p-2 shadow hover:bg-primary-700 transition-opacity opacity-90 group-hover:opacity-100 focus:outline-none"
+                    style={{ fontSize: 16, zIndex: 20 }}
+                    onClick={() => setShowFileInput(true)}
+                    title="Change profile picture"
+                    aria-label="Edit profile photo"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  {/* File input (hidden) */}
+                  {showFileInput && (
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="absolute bottom-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                      style={{ zIndex: 30 }}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (!user || !user.id) {
+                          alert('You must be logged in to upload a profile photo.');
+                          return;
+                        }
+                        setUploading(true);
+                        try {
+                          // Upload to Firebase Storage
+                          const storageRef = ref(storage, `profile_photos/${user.id}.jpg`);
+                          await uploadBytes(storageRef, file);
+                          const downloadURL = await getDownloadURL(storageRef);
+                          // Update Firestore user profile
+                          const userDocRef = doc(db, 'u', user.id);
+                          await updateDoc(userDocRef, { photoURL: downloadURL });
+                          // Update local state
+                          setProfileUser((prev: any) => ({ ...prev, photoURL: downloadURL }));
+                          setShowFileInput(false);
+                        } catch (err) {
+                          alert('Failed to upload profile photo.');
+                          console.error(err);
+                        } finally {
+                          setUploading(false);
+                        }
+                      }}
+                      onBlur={() => setShowFileInput(false)}
+                      autoFocus
+                    />
+                  )}
+                  {uploading && (
+                    <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center rounded-full z-40">
+                      <span className="text-primary-600 font-semibold">Uploading...</span>
+                    </div>
+                  )}
                   {isPremium && (
-                    <div className="absolute -right-2 -bottom-2 bg-accent-500 text-white p-1 rounded-full">
+                    <div className="absolute -right-2 -bottom-2 bg-accent-500 text-white p-1 rounded-full z-10">
                       <Award className="w-5 h-5" />
                     </div>
                   )}
@@ -262,17 +328,40 @@ const ProfilePage = () => {
         )}
         {showUpgradePopup && (
           <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl p-8 max-w-sm mx-4 relative">
+            <div className="bg-white rounded-lg shadow-xl p-8 max-w-md mx-4 relative">
               <button
                 onClick={() => setShowUpgradePopup(false)}
                 className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
               >
                 <X className="w-5 h-5" />
               </button>
-              <h3 className="text-xl font-semibold mb-2">Coming Soon!</h3>
-              <p className="text-gray-600">
-                We are curating amazing experiences for you, please stay tuned!
+              <h3 className="text-xl font-semibold mb-4">Upgrade to Premium</h3>
+              <p className="text-gray-600 mb-6">
+                Get exclusive access to premium listings, priority support, and more features!
               </p>
+              <div className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2">Premium Benefits:</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li>• Priority listing visibility</li>
+                    <li>• Advanced search filters</li>
+                    <li>• Direct contact with owners</li>
+                    <li>• Premium support</li>
+                  </ul>
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-primary-600 mb-4">
+                    ₹999 / month
+                  </p>
+                  <button
+                    onClick={handlePhonePePayment}
+                    className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 text-lg hover:scale-105 transition-transform border-2 border-yellow-500 focus:outline-none focus:ring-4 focus:ring-yellow-300 w-full justify-center"
+                  >
+                    <CreditCard className="w-6 h-6" />
+                    Pay with PhonePe
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

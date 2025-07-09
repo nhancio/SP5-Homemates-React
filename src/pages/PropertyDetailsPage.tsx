@@ -15,7 +15,7 @@ const PropertyDetailsPage = () => {
   const [property, setProperty] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { favoriteProperties, toggleFavorite, isAuthenticated, login } = useAppContext();
+  const { favoriteProperties, toggleFavorite, isAuthenticated, login, user } = useAppContext();
 
   // Determine listing type from URL
   const listingType = location.pathname.startsWith('/rent') ? 'rent' : 'sell';
@@ -225,16 +225,16 @@ Link: ${url}`;
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
               {/* Basic Info */}
               <div className="p-6 border-b">
+                <div className="flex items-center text-2xl font-bold text-primary-600 mb-2">
+                  ₹{formatCurrency(listingType === 'rent' ? property.rentDetails?.costs?.rent : property.sellDetails?.price)}
+                  {listingType === 'rent' && <span className="text-sm text-gray-500 ml-1">/month</span>}
+                </div>
                 <h1 className="text-2xl font-bold mb-2">
                   {property.address?.buildingName}
                 </h1>
                 <p className="text-gray-600 mb-4">
                   {property.address?.locality}, {property.address?.city}
                 </p>
-                <div className="flex items-center text-2xl font-bold text-primary-600">
-                  ₹{formatCurrency(listingType === 'rent' ? property.rentDetails?.costs?.rent : property.sellDetails?.price)}
-                  {listingType === 'rent' && <span className="text-sm text-gray-500 ml-1">/month</span>}
-                </div>
               </div>
 
               {/* Property Details */}
