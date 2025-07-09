@@ -22,11 +22,34 @@ const CATEGORY_OPTIONS = [
   { label: 'Travel', value: 'Travel' },
 ];
 
+const LOOKING_FOR_OPTIONS = [
+  { label: 'Any', value: '' },
+  { label: 'Student', value: 'Student' },
+  { label: 'Working Professional', value: 'Working Professional' },
+  { label: 'Walking', value: 'Walking' },
+  { label: 'Badminton', value: 'Badminton' },
+  { label: 'Cricket', value: 'Cricket' },
+  { label: 'Football', value: 'Football' },
+  { label: 'Running', value: 'Running' },
+  { label: 'Cycling', value: 'Cycling' },
+  { label: 'Gym', value: 'Gym' },
+  { label: 'Yoga', value: 'Yoga' },
+  { label: 'Music', value: 'Music' },
+  { label: 'Movies', value: 'Movies' },
+  { label: 'Reading', value: 'Reading' },
+  { label: 'Cooking', value: 'Cooking' },
+  { label: 'Gaming', value: 'Gaming' },
+  { label: 'Pet Friendly', value: 'Pet Friendly' },
+];
+
 const FindFriendsPage = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedLookingFor, setSelectedLookingFor] = useState<string[]>([]);
+  const [customFilter, setCustomFilter] = useState('');
+  const [customFilters, setCustomFilters] = useState<string[]>([]);
   const { user: currentUser, isAuthenticated } = useAppContext();
   const navigate = useNavigate();
 
@@ -104,10 +127,16 @@ const FindFriendsPage = () => {
     loadUsers();
   }, [currentUser?.id, isAuthenticated, navigate]);
 
-  // Filter users by selected categories (profession)
-  const filteredUsers = selectedCategories.length === 0
-    ? users
-    : users.filter(user => selectedCategories.includes(user.profession));
+  // Filter users by selected categories (profession), selectedLookingFor, and customFilters
+  const allLookingFor = [...selectedLookingFor, ...customFilters];
+  const filteredUsers = users.filter(user => {
+    const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(user.profession);
+    if (allLookingFor.length === 0) return categoryMatch;
+    // Match if any filter matches profession or preferences
+    const professionMatch = allLookingFor.some(opt => user.profession && user.profession.toLowerCase().includes(opt.toLowerCase()));
+    const preferenceMatch = allLookingFor.some(opt => user.preferences && user.preferences.some(p => p.toLowerCase() === opt.toLowerCase()));
+    return categoryMatch && (professionMatch || preferenceMatch);
+  });
 
   if (isLoading) {
     return (
@@ -130,24 +159,80 @@ const FindFriendsPage = () => {
 
   return (
     <div className="container py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Find Friends</h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold mb-2">Find Friends</h1>
         <span className="text-gray-600">{filteredUsers.length} users found</span>
       </div>
-
-      {/* Category Filter Cards */}
-      <div className="flex gap-4 mb-8">
+      {/* Unified Filter Bar */}
+      <div className="flex flex-wrap gap-3 mb-8 items-center">
+        {/* Category Filter Buttons */}
         {CATEGORY_OPTIONS.map(option => (
           <button
             key={option.value}
             onClick={() => toggleCategory(option.value)}
-            className={`px-6 py-3 rounded-lg border transition font-medium text-base ${selectedCategories.includes(option.value)
+            className={`px-6 py-2 rounded-full border transition font-medium text-base ${selectedCategories.includes(option.value)
               ? 'bg-primary-600 text-white border-primary-600'
               : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
           >
             {option.label}
           </button>
         ))}
+        {/* Looking For Filter Buttons */}
+        {LOOKING_FOR_OPTIONS.filter(opt => opt.value).map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => setSelectedLookingFor(prev => prev.includes(opt.value)
+              ? prev.filter(v => v !== opt.value)
+              : [...prev, opt.value])}
+            className={`px-6 py-2 rounded-full border transition font-medium text-base ${selectedLookingFor.includes(opt.value)
+              ? 'bg-primary-600 text-white border-primary-600'
+              : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+          >
+            {opt.label}
+          </button>
+        ))}
+        {/* Custom Filter Pills */}
+        {customFilters.map(opt => (
+          <button
+            key={opt}
+            onClick={() => setCustomFilters(prev => prev.includes(opt)
+              ? prev.filter(v => v !== opt)
+              : [...prev, opt])}
+            className={`px-6 py-2 rounded-full border transition font-medium text-base ${customFilters.includes(opt)
+              ? 'bg-primary-600 text-white border-primary-600'
+              : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+          >
+            {opt}
+          </button>
+        ))}
+        {/* Custom Filter Input */}
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            const val = customFilter.trim();
+            if (!val || customFilters.includes(val) || selectedLookingFor.includes(val) || LOOKING_FOR_OPTIONS.some(o => o.value.toLowerCase() === val.toLowerCase())) return;
+            setCustomFilters(prev => [...prev, val]);
+            setCustomFilter('');
+          }}
+          className="flex items-center gap-2"
+          style={{ minWidth: 180 }}
+        >
+          <input
+            type="text"
+            className="input px-3 py-2 rounded-full border border-gray-300"
+            placeholder="Add custom..."
+            value={customFilter}
+            onChange={e => setCustomFilter(e.target.value)}
+            maxLength={32}
+          />
+          <button
+            type="submit"
+            className="btn btn-primary px-4 py-2 rounded-full"
+            disabled={!customFilter.trim() || customFilters.includes(customFilter.trim())}
+          >
+            Add
+          </button>
+        </form>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
