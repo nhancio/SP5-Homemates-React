@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Camera, X } from 'lucide-react';
 
 interface AddListingFormsProps {
@@ -10,44 +10,106 @@ interface AddListingFormsProps {
   removeImage: (index: number) => void;
 }
 
-// Create a shared address fields component
-const AddressFields = ({ formData, setFormData }: AddListingFormsProps) => (
-  <section className="bg-white p-6 rounded-lg shadow-sm">
-    <h2 className="text-lg font-semibold mb-4">Address</h2>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <input
-        type="text"
-        placeholder="City"
-        className="input"
-        value={formData.address.city}
-        onChange={(e) => setFormData({
-          ...formData,
-          address: { ...formData.address, city: e.target.value }
-        })}
-      />
-      <input
-        type="text"
-        placeholder="Locality"
-        className="input"
-        value={formData.address.locality}
-        onChange={(e) => setFormData({
-          ...formData,
-          address: { ...formData.address, locality: e.target.value }
-        })}
-      />
-      <input
-        type="text"
-        placeholder="Building Name"
-        className="input"
-        value={formData.address.buildingName}
-        onChange={(e) => setFormData({
-          ...formData,
-          address: { ...formData.address, buildingName: e.target.value }
-        })}
-      />
-    </div>
-  </section>
-);
+export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) => {
+  const [locationInput, setLocationInput] = useState(formData.address.locality ? `${formData.address.locality}${formData.address.city ? ', ' + formData.address.city : ''}` : '');
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [detecting, setDetecting] = useState(false);
+
+  // Nominatim autocomplete fetch
+  const fetchSuggestions = async (input: string) => {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}&addressdetails=1&limit=5`
+    );
+    const data = await res.json();
+    return data.map((item: any) => ({
+      display_name: item.display_name,
+      city: item.address.city || item.address.town || item.address.village || '',
+      locality: item.address.suburb || item.address.neighbourhood || item.address.village || item.address.town || '',
+      place_id: item.place_id,
+    }));
+  };
+
+  const handleLocationChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocationInput(value);
+    setFormData({
+      ...formData,
+      address: { ...formData.address, city: '', locality: '' }
+    });
+    if (value.length > 2) {
+      setDetecting(true);
+      const results = await fetchSuggestions(value);
+      setSuggestions(results);
+      setDetecting(false);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (suggestion: any) => {
+    setLocationInput(suggestion.display_name);
+    setSuggestions([]);
+    setFormData({
+      ...formData,
+      address: {
+        ...formData.address,
+        city: suggestion.city,
+        locality: suggestion.locality || suggestion.city || '',
+      },
+    });
+  };
+
+  return (
+    <section className="bg-white p-6 rounded-lg shadow-sm">
+      <h2 className="text-lg font-semibold mb-4">Address</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="relative col-span-2">
+          <input
+            type="text"
+            placeholder="Location (Locality, City or Both)"
+            className="input"
+            value={locationInput}
+            onChange={handleLocationChange}
+            autoComplete="off"
+            onBlur={() => setTimeout(() => setSuggestions([]), 150)}
+            onFocus={async () => {
+              if (locationInput.length > 2) {
+                setDetecting(true);
+                const results = await fetchSuggestions(locationInput);
+                setSuggestions(results);
+                setDetecting(false);
+              }
+            }}
+          />
+          {/* Suggestions dropdown */}
+          {suggestions.length > 0 && (
+            <ul className="absolute bg-white border border-gray-200 rounded shadow z-20 mt-1 w-full max-h-48 overflow-auto">
+              {suggestions.map((s, i) => (
+                <li
+                  key={s.place_id}
+                  className="px-4 py-2 cursor-pointer hover:bg-primary-50 text-sm"
+                  onMouseDown={() => handleSuggestionClick(s)}
+                >
+                  {s.display_name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <input
+          type="text"
+          placeholder="Building Name"
+          className="input"
+          value={formData.address.buildingName}
+          onChange={(e) => setFormData({
+            ...formData,
+            address: { ...formData.address, buildingName: e.target.value }
+          })}
+        />
+      </div>
+    </section>
+  );
+};
 
 const ContactNumberField = ({ formData, setFormData }: AddListingFormsProps) => (
   <section className="bg-white p-6 rounded-lg shadow-sm">

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Camera, MapPin, Calendar, X, Check } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { createListing } from '../services/listings';
+import { AddressFields } from '../components/sections/AddListingForms';
 
 const PROPERTY_TYPES = ['Apartment', 'Villa', 'Independent House', 'Gated Community'];
 const CITY_OPTIONS = ['Hyderabad', 'Bangalore', 'Mumbai', 'Ahmedabad', 'Gandhinagar', 'Rajkot', 'Others'];
@@ -84,6 +85,7 @@ const initialFormData = {
       rent: '',
       maintenance: '',
       securityDeposit: '',
+      setupCost: '',
       brokerage: '',
     },
     additionalBills: {
@@ -156,16 +158,6 @@ const AddListingPage = () => {
     setIsSubmitting(true);
     try {
       console.log('Creating listing type:', listingType);
-      
-      const listingData = {
-        ...formData,
-        userId: user.id,
-        images,
-        createdAt: Date.now(),
-        status: 'active' as const,
-      };
-
-      console.log('Submitting data:', listingData);
 
       if (listingType === 'rent') {
         // Validate rent-specific fields
@@ -173,20 +165,127 @@ const AddListingPage = () => {
           throw new Error('Please enter rental cost');
         }
         
-        const result = await createListing('rent', {
-          ...listingData,
-          rentDetails: formData.rentDetails,
-          amenities: formData.amenities,
-        });
+        // Explicitly construct rent listing data with only intended fields
+        const rentListingData = {
+          // Common fields
+          address: {
+            city: formData.address.city,
+            locality: formData.address.locality,
+            buildingName: formData.address.buildingName,
+          },
+          propertyType: formData.propertyType,
+          furnishingType: formData.furnishingType,
+          parking: formData.parking,
+          buildingType: formData.buildingType,
+          handoverDate: formData.handoverDate,
+          isImmediate: formData.isImmediate,
+          description: formData.description,
+          contactNumber: formData.contactNumber,
+          images,
+          createdAt: Date.now(),
+          status: 'active' as const,
+          userId: user.id,
+          createdByUser: user.id,
+          listingType: 'rent',
+          
+          // Rent-specific fields
+          rentDetails: {
+            preferredTenant: {
+              lookingFor: formData.rentDetails.preferredTenant.lookingFor,
+              preferences: formData.rentDetails.preferredTenant.preferences,
+            },
+            roomDetails: {
+              availableRooms: formData.rentDetails.roomDetails.availableRooms,
+              availability: formData.rentDetails.roomDetails.availability,
+              bathroomType: formData.rentDetails.roomDetails.bathroomType,
+            },
+            costs: {
+              rent: Number(formData.rentDetails.costs.rent) || 0,
+              maintenance: Number(formData.rentDetails.costs.maintenance) || 0,
+              securityDeposit: Number(formData.rentDetails.costs.securityDeposit) || 0,
+              setupCost: Number(formData.rentDetails.costs.setupCost) || 0,
+              brokerage: Number(formData.rentDetails.costs.brokerage) || 0,
+            },
+            additionalBills: {
+              wifi: Number(formData.rentDetails.additionalBills.wifi) || 0,
+              water: Number(formData.rentDetails.additionalBills.water) || 0,
+              gas: Number(formData.rentDetails.additionalBills.gas) || 0,
+              cook: Number(formData.rentDetails.additionalBills.cook) || 0,
+              maid: Number(formData.rentDetails.additionalBills.maid) || 0,
+              others: Number(formData.rentDetails.additionalBills.others) || 0,
+            },
+          },
+          
+          // Amenities
+          amenities: {
+            appliances: formData.amenities.appliances,
+            furniture: formData.amenities.furniture,
+            building: formData.amenities.building,
+          },
+        };
+
+        console.log('Submitting rent data:', rentListingData);
+        const result = await createListing('rent', rentListingData);
         console.log('Rent listing created:', result);
       } else {
-        // For sell listings - no validation required, everything optional
-        const result = await createListing('sell', {
-          ...listingData,
-          sellDetails: formData.sellDetails,
+        // Explicitly construct sell listing data with only intended fields
+        const sellListingData = {
+          // Common fields
+          address: {
+            city: formData.address.city,
+            locality: formData.address.locality,
+            buildingName: formData.address.buildingName,
+          },
+          propertyType: formData.propertyType,
+          furnishingType: formData.furnishingType,
+          parking: formData.parking,
+          buildingType: formData.buildingType,
+          handoverDate: formData.handoverDate,
+          isImmediate: formData.isImmediate,
+          description: formData.description,
+          contactNumber: formData.contactNumber,
+          images,
+          createdAt: Date.now(),
+          status: 'active' as const,
+          userId: user.id,
+          createdByUser: user.id,
+          listingType: 'sell',
+          
+          // Sell-specific fields
+          sellDetails: {
+            price: Number(formData.sellDetails.price) || 0,
+            gst: Number(formData.sellDetails.gst) || 0,
+            isNegotiable: formData.sellDetails.isNegotiable,
+            propertyType: formData.sellDetails.propertyType,
+            sqft: Number(formData.sellDetails.sqft) || 0,
+            direction: formData.sellDetails.direction,
+            ownership: formData.sellDetails.ownership,
+            ageOfProperty: formData.sellDetails.ageOfProperty,
+            totalFloors: formData.sellDetails.totalFloors,
+            floorNumber: formData.sellDetails.floorNumber,
+            waterSupply: formData.sellDetails.waterSupply,
+            approvals: formData.sellDetails.approvals,
+            amenities: formData.sellDetails.amenities,
+            highlights: formData.sellDetails.highlights,
+            description: formData.sellDetails.description,
+            propertyId: formData.sellDetails.propertyId,
+            loanOnProperty: formData.sellDetails.loanOnProperty,
+          },
+          
+          // Amenities (required by ListingData interface)
+          amenities: {
+            appliances: formData.amenities.appliances,
+            furniture: formData.amenities.furniture,
+            building: formData.amenities.building,
+          },
+          
+          // Additional sell fields
           builtUpArea: formData.builtUpArea,
           ageOfProperty: formData.ageOfProperty,
-        });
+        };
+
+        console.log('Submitting sell data:', sellListingData);
+        const result = await createListing('sell', sellListingData);
         console.log('Sale listing created:', result);
       }
 
@@ -226,7 +325,7 @@ const AddListingPage = () => {
             
             ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
             const compressedImage = canvas.toDataURL('image/jpeg', 0.8);
-            setImages(prev => [...prev, compressedImage]);
+            setImages((prev: string[]) => [...prev, compressedImage]);
           };
         };
         reader.readAsDataURL(file);
@@ -235,12 +334,12 @@ const AddListingPage = () => {
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+    setImages((prev: string[]) => prev.filter((_: string, i: number) => i !== index));
   };
 
   // Toggle functions and handlers
   const handleAmenityToggle = (category: 'appliances' | 'furniture' | 'building', item: string) => {
-    setFormData(prev => {
+    setFormData((prev: typeof initialFormData) => {
       const amenities = { ...prev.amenities };
       if (amenities[category].includes(item)) {
         amenities[category] = amenities[category].filter(i => i !== item);
@@ -253,6 +352,7 @@ const AddListingPage = () => {
 
   const renderRentFields = () => (
     <>
+      <AddressFields formData={formData} setFormData={setFormData} />
       {/* Preferred Tenant Section */}
       <section className="bg-white p-6 rounded-lg shadow-sm">
         <h2 className="text-lg font-semibold mb-4">Preferred Tenant</h2>
@@ -274,9 +374,9 @@ const AddListingPage = () => {
               }))}
             >
               <option value="">Select Option</option>
-              <option value="Bachelors">Bachelors</option>
-              <option value="Family">Family</option>
-              <option value="Any">Any</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Couple">Couple</option>
             </select>
           </div>
 
@@ -586,6 +686,7 @@ const AddListingPage = () => {
 
   const renderSellFields = () => (
     <>
+      <AddressFields formData={formData} setFormData={setFormData} />
       {/* Property Details Section */}
       <section className="bg-white p-6 rounded-lg shadow-sm">
         <h2 className="text-lg font-semibold mb-4">Property Details</h2>
@@ -874,319 +975,10 @@ const AddListingPage = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Address Section */}
-          <section className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Address</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <select
-                className="input"
-                value={formData.address.city}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  address: { ...prev.address, city: e.target.value }
-                }))}
-              >
-                <option value="">Select City</option>
-                {CITY_OPTIONS.map(city => (
-                  <option key={city} value={city}>{city}</option>
-                ))}
-              </select>
-              <select
-                className="input"
-                value={formData.address.locality}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  address: { ...prev.address, locality: e.target.value }
-                }))}
-              >
-                <option value="">Select Locality</option>
-                {['Madhapur', 'Gachibowli', 'Kondapur', 'Hitech City', 'Jubilee Hills', 'Banjara Hills', 'Kukatpally', 'Ameerpet', 'Begumpet', 'Other'].map(locality => (
-                  <option key={locality} value={locality}>{locality}</option>
-                ))}
-              </select>
-              <input
-                type="text"
-                placeholder="Building Name"
-                className="input"
-                value={formData.address.buildingName}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  address: { ...prev.address, buildingName: e.target.value }
-                }))}
-              />
-            </div>
-          </section>
-
           {listingType === 'rent' ? (
             renderRentFields()
           ) : (
-            <>
-              {/* Preferred Tenant Section */}
-              <section className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">Preferred Tenant</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
-                    <select 
-                      className="input"
-                      value={formData.rentDetails.preferredTenant.lookingFor}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        rentDetails: {
-                          ...prev.rentDetails,
-                          preferredTenant: {
-                            ...prev.rentDetails.preferredTenant,
-                            lookingFor: e.target.value
-                          }
-                        }
-                      }))}
-                    >
-                      <option value="">Select Option</option>
-                      <option value="Bachelors">Bachelors</option>
-                      <option value="Family">Family</option>
-                      <option value="Any">Any</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Preferences</label>
-                    <div className="flex flex-wrap gap-3">
-                      {PREFERRED_TENANT_OPTIONS.preferences.map(pref => (
-                        <label 
-                          key={pref}
-                          className={`flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-gray-50 ${
-                            formData.rentDetails.preferredTenant.preferences.includes(pref) 
-                              ? 'border-primary-500 bg-primary-50' 
-                              : ''
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={formData.rentDetails.preferredTenant.preferences.includes(pref)}
-                            onChange={() => {
-                              const preferences = formData.rentDetails.preferredTenant.preferences;
-                              setFormData(prev => ({
-                                ...prev,
-                                rentDetails: {
-                                  ...prev.rentDetails,
-                                  preferredTenant: {
-                                    ...prev.rentDetails.preferredTenant,
-                                    preferences: preferences.includes(pref)
-                                      ? preferences.filter(p => p !== pref)
-                                      : [...preferences, pref]
-                                  }
-                                }
-                              }));
-                            }}
-                            className="form-checkbox h-4 w-4 text-primary-600"
-                          />
-                          <span>{pref}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              {/* Property Details Section */}
-              <section className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">Property Details</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
-                  {['1RK', '1 BHK', '2 BHK', '3 BHK', '4 BHK', '4+ BHK'].map(type => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, propertyType: type }))}
-                      className={`p-3 rounded-full border-2 ${
-                        formData.propertyType === type 
-                          ? 'border-primary-500 bg-primary-50' 
-                          : 'border-gray-200 hover:border-primary-500'
-                      }`}
-                    >
-                      {type}
-                    </button>
-                  ))}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Furnishing Type</label>
-                    <select 
-                      className="input"
-                      value={formData.furnishingType}
-                      onChange={(e) => setFormData(prev => ({ ...prev, furnishingType: e.target.value }))}
-                    >
-                      <option value="">Select Furnishing Type</option>
-                      <option value="fully">Fully Furnished</option>
-                      <option value="semi">Semi Furnished</option>
-                      <option value="unfurnished">Unfurnished</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Parking</label>
-                    <select 
-                      className="input"
-                      value={formData.parking}
-                      onChange={(e) => setFormData(prev => ({ ...prev, parking: e.target.value }))}
-                    >
-                      <option value="">Select Parking Type</option>
-                      <option value="car">Car Parking</option>
-                      <option value="bike">Bike Parking</option>
-                      <option value="both">Both</option>
-                    </select>
-                  </div>
-                </div>
-              </section>
-
-              {/* Move In Section */}
-              <section className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">Move In</h2>
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={formData.isImmediate}
-                      onChange={(e) => setFormData(prev => ({ ...prev, isImmediate: e.target.checked }))}
-                      className="form-checkbox h-4 w-4 text-primary-600"
-                    />
-                    <span>Immediate</span>
-                  </label>
-                  {!formData.isImmediate && (
-                    <input
-                      type="date"
-                      className="input"
-                      value={formData.handoverDate}
-                      onChange={(e) => setFormData(prev => ({ ...prev, handoverDate: e.target.value }))}
-                      min={new Date().toISOString().split('T')[0]}
-                    />
-                  )}
-                </div>
-              </section>
-
-              {/* Amenities Section */}
-              <section className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">Amenities</h2>
-                {Object.entries(amenityOptions).map(([category, items]) => (
-                  <div key={category} className="mb-6 last:mb-0">
-                    <h3 className="text-md font-medium mb-3 capitalize">{category}</h3>
-                    <div className="flex flex-wrap gap-3">
-                      {items.map(item => (
-                        <label 
-                          key={item}
-                          className={`flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-gray-50 ${
-                            formData.amenities[category as keyof typeof formData.amenities].includes(item)
-                              ? 'border-primary-500 bg-primary-50'
-                              : ''
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={formData.amenities[category as keyof typeof formData.amenities].includes(item)}
-                            onChange={() => handleAmenityToggle(category as 'appliances' | 'furniture' | 'building', item)}
-                            className="form-checkbox h-4 w-4 text-primary-600"
-                          />
-                          <span>{item}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </section>
-
-              {/* Rent Details Section */}
-              <section className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">Rent Details</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {['rent', 'maintenance', 'securityDeposit', 'brokerage'].map(field => (
-                    <div key={field}>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {field.split(/(?=[A-Z])/).join(' ').replace(/^ /, c => c.toUpperCase())}
-                      </label>
-                      <input
-                        type="number"
-                        className="input"
-                        value={formData.rentDetails.costs[field as keyof typeof formData.rentDetails.costs]}
-                        onChange={(e) => setFormData(prev => ({
-                          ...prev,
-                          rentDetails: {
-                            ...prev.rentDetails,
-                            costs: {
-                              ...prev.rentDetails.costs,
-                              [field]: e.target.value
-                            }
-                          }
-                        }))}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* Description Section */}
-              <section className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">Description</h2>
-                <textarea
-                  className="input min-h-[100px]"
-                  placeholder="Add property description..."
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    description: e.target.value
-                  }))}
-                />
-              </section>
-
-              {/* Images Section */}
-              <section className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">Photos</h2>
-                <div className="flex flex-wrap gap-4">
-                  {images.map((img, index) => (
-                    <div key={index} className="relative aspect-square">
-                      <img 
-                        src={img} 
-                        alt={`Upload ${index + 1}`} 
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                      <button
-                        onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Upload Photos (max 5)</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageUpload}
-                    className="input"
-                  />
-                </div>
-              </section>
-
-              {/* Contact Details Section */}
-              <section className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-lg font-semibold mb-4">Contact Details</h2>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
-                  <input
-                    type="tel"
-                    className="input"
-                    placeholder="Enter your 10-digit mobile number"
-                    value={formData.contactNumber}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      contactNumber: e.target.value
-                    }))}
-                    pattern="[0-9]{10}"
-                    maxLength={10}
-                    required
-                  />
-                </div>
-              </section>
-            </>
+            renderSellFields()
           )}
 
           <button 

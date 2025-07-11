@@ -15,7 +15,7 @@ const PropertyDetailsPage = () => {
   const [property, setProperty] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { favoriteProperties, toggleFavorite, isAuthenticated, login } = useAppContext();
+  const { favoriteProperties, toggleFavorite, isAuthenticated, login, user } = useAppContext();
 
   // Determine listing type from URL
   const listingType = location.pathname.startsWith('/rent') ? 'rent' : 'sell';
@@ -194,28 +194,30 @@ Link: ${url}`;
 
         {/* Image Gallery */}
         <div className="mb-8">
-          <Swiper
-            modules={[Navigation, Pagination]}
-            navigation
-            pagination={{ clickable: true }}
-            className="h-[400px] rounded-lg overflow-hidden"
-          >
-            {(property.images?.length ? property.images : ['placeholder']).map((image: string, index: number) => (
-              <SwiperSlide key={index}>
-                {image === 'placeholder' ? (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                    <Building className="w-16 h-16 text-gray-400" />
-                  </div>
-                ) : (
-                  <img 
-                    src={image} 
-                    alt={`Property ${index + 1}`} 
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                )}
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          <div className="aspect-[16/9] w-full rounded-lg overflow-hidden bg-gray-100">
+            <Swiper
+              modules={[Navigation, Pagination]}
+              navigation
+              pagination={{ clickable: true }}
+              className="w-full h-full"
+            >
+              {(property.images?.length ? property.images : ['placeholder']).map((image: string, index: number) => (
+                <SwiperSlide key={index}>
+                  {image === 'placeholder' ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                      <Building className="w-16 h-16 text-gray-400" />
+                    </div>
+                  ) : (
+                    <img 
+                      src={image} 
+                      alt={`Property ${index + 1}`} 
+                      className="w-full h-full object-contain rounded-lg bg-white"
+                    />
+                  )}
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
         </div>
 
         {/* Property Details Grid */}
@@ -225,16 +227,16 @@ Link: ${url}`;
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
               {/* Basic Info */}
               <div className="p-6 border-b">
+                <div className="flex items-center text-2xl font-bold text-primary-600 mb-2">
+                  ₹{formatCurrency(listingType === 'rent' ? property.rentDetails?.costs?.rent : property.sellDetails?.price)}
+                  {listingType === 'rent' && <span className="text-sm text-gray-500 ml-1">/month</span>}
+                </div>
                 <h1 className="text-2xl font-bold mb-2">
                   {property.address?.buildingName}
                 </h1>
                 <p className="text-gray-600 mb-4">
                   {property.address?.locality}, {property.address?.city}
                 </p>
-                <div className="flex items-center text-2xl font-bold text-primary-600">
-                  ₹{formatCurrency(listingType === 'rent' ? property.rentDetails?.costs?.rent : property.sellDetails?.price)}
-                  {listingType === 'rent' && <span className="text-sm text-gray-500 ml-1">/month</span>}
-                </div>
               </div>
 
               {/* Property Details */}

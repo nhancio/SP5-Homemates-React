@@ -218,9 +218,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
           className="flex items-center justify-center w-1/3 py-3 text-primary-600 hover:bg-primary-50 transition border-l border-r border-gray-200"
         >
           <Phone className="w-4 h-4 mr-1" />
-          <span className="text-sm text-black">
-            {property.contactNumber || 'Call'}
-          </span>
+          <span className="text-sm text-black">Call</span>
         </button>
         <button
           onClick={handleShare}

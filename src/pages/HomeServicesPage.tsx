@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import ServiceCard from '../components/ui/ServiceCard';
-import { Wrench, Search } from 'lucide-react';
+import ServiceBookingModal from '../components/modals/ServiceBookingModal';
+import { Wrench, Search, CheckCircle } from 'lucide-react';
 import { getMockServices } from '../data/services';
+import { Service } from '../types/service';
 
 const HomeServicesPage = () => {
   const allServices = getMockServices();
   const [services, setServices] = useState(allServices);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   
   useEffect(() => {
     // Scroll to top when component mounts
@@ -46,8 +51,24 @@ const HomeServicesPage = () => {
   };
   
   const handleBookService = (serviceId: string) => {
-    console.log(`Booking service with ID: ${serviceId}`);
-    // Here we would navigate to a booking page or open a modal
+    const service = allServices.find(s => s.id === serviceId);
+    if (service) {
+      setSelectedService(service);
+      setIsBookingModalOpen(true);
+    }
+  };
+
+  const handleBookingSubmit = (bookingData: any) => {
+    console.log('Booking submitted:', bookingData);
+    // Here you would typically send the booking data to your backend
+    // For now, we'll just show a success message
+    setShowSuccessMessage(true);
+    setTimeout(() => setShowSuccessMessage(false), 3000);
+  };
+
+  const closeBookingModal = () => {
+    setIsBookingModalOpen(false);
+    setSelectedService(null);
   };
   
   return (
@@ -159,6 +180,22 @@ const HomeServicesPage = () => {
           </div>
         )}
       </div>
+
+      {/* Booking Modal */}
+      <ServiceBookingModal
+        service={selectedService}
+        isOpen={isBookingModalOpen}
+        onClose={closeBookingModal}
+        onBook={handleBookingSubmit}
+      />
+
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center">
+          <CheckCircle className="w-5 h-5 mr-2" />
+          <span>Service booked successfully! We'll contact you soon.</span>
+        </div>
+      )}
     </div>
   );
 };
