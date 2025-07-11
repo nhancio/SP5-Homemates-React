@@ -152,7 +152,10 @@ const ProfilePage = () => {
               <div className="flex justify-center md:justify-start -mt-16 mb-4 md:mb-0">
                 <div className="relative group w-32 h-32">
                   <img
-                    src={photoURL || '/images/default-avatar.png'}
+                    src={photoURL ? photoURL : '/images/default-avatar.png'}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=E0E0E0&color=7c2d6e&size=128`;
+                    }}
                     alt={displayName}
                     className="w-32 h-32 rounded-full object-cover border-4 border-white shadow"
                   />
