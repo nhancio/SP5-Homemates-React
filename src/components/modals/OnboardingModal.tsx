@@ -31,6 +31,10 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (mobile.replace(/\D/g, '').length !==10) {
+      alert('Mobile number');
+      return;
+    }
     setLoading(true);
     try {
       await setDoc(doc(db, 'u', userId), {

@@ -437,6 +437,67 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
           </>
         )}
       </section>
+
+      {/* Amenities Section for RentForm (Shared Homes) */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Amenities</h2>
+        <div className="flex flex-wrap gap-3">
+          {['Lift', 'Car Parking', 'Power Backup', 'Gym', 'Swimming Pool', 'Security', 'Garden'].map(amenity => (
+            <label key={amenity} className="inline-flex items-center">
+              <input
+                type="checkbox"
+                className="form-checkbox h-5 w-5 text-primary-600"
+                checked={Array.isArray(formData.rentDetails.amenities) && formData.rentDetails.amenities.includes(amenity)}
+                onChange={() => {
+                  const amenities = formData.rentDetails.amenities;
+                  setFormData({
+                    ...formData,
+                    rentDetails: {
+                      ...formData.rentDetails,
+                      amenities: amenities.includes(amenity)
+                        ? amenities.filter((a: string) => a !== amenity)
+                        : [...amenities, amenity]
+                    }
+                  });
+                }}
+              />
+              <span className="ml-2">{amenity}</span>
+            </label>
+          ))}
+        </div>
+      </section>
+
+      {/* Upload Images Section (modern, user-friendly) */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Upload Images</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-2">
+          {images.map((image, index) => (
+            <div key={index} className="relative rounded-lg shadow hover:shadow-lg transition overflow-hidden group bg-gray-50">
+              <img src={image} alt={`Property ${index + 1}`} className="w-full h-24 sm:h-28 object-cover" />
+              <button
+                type="button"
+                onClick={() => removeImage(index)}
+                className="absolute top-1 right-1 bg-white bg-opacity-80 text-red-600 rounded-full p-1 hover:bg-red-500 hover:text-white transition"
+                title="Remove Image"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+          {images.length < 5 && (
+            <label htmlFor="image-upload" className="flex flex-col items-center justify-center h-24 sm:h-28 rounded-lg border-2 border-dashed border-primary-300 cursor-pointer hover:border-primary-500 bg-primary-50 text-primary-600 font-medium shadow group transition">
+              <Camera className="h-7 w-7 mb-1 group-hover:text-primary-700" />
+              <span className="text-xs">Add Photo</span>
+              <input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+            </label>
+          )}
+        </div>
+        <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+          {images.length}/5 images uploaded
+          {images.length >= 5 && <span className="text-red-500">(Maximum reached)</span>}
+        </div>
+        <div className="text-xs text-gray-400 mt-1">Tip: Add clear, well-lit photos for better responses.</div>
+      </section>
     </>
   );
 };
@@ -651,6 +712,67 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
             description: e.target.value
           })}
         />
+      </section>
+
+      {/* Upload Images Section (modern, user-friendly) */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Upload Images</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-2">
+          {images.map((image, index) => (
+            <div key={index} className="relative rounded-lg shadow hover:shadow-lg transition overflow-hidden group bg-gray-50">
+              <img src={image} alt={`Property ${index + 1}`} className="w-full h-24 sm:h-28 object-cover" />
+              <button
+                type="button"
+                onClick={() => removeImage(index)}
+                className="absolute top-1 right-1 bg-white bg-opacity-80 text-red-600 rounded-full p-1 hover:bg-red-500 hover:text-white transition"
+                title="Remove Image"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+          {images.length < 5 && (
+            <label htmlFor="image-upload" className="flex flex-col items-center justify-center h-24 sm:h-28 rounded-lg border-2 border-dashed border-primary-300 cursor-pointer hover:border-primary-500 bg-primary-50 text-primary-600 font-medium shadow group transition">
+              <Camera className="h-7 w-7 mb-1 group-hover:text-primary-700" />
+              <span className="text-xs">Add Photo</span>
+              <input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+            </label>
+          )}
+        </div>
+        <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+          {images.length}/5 images uploaded
+          {images.length >= 5 && <span className="text-red-500">(Maximum reached)</span>}
+        </div>
+        <div className="text-xs text-gray-400 mt-1">Tip: Add clear, well-lit photos for better responses.</div>
+      </section>
+
+      {/* Amenities Section for SellForm (Full Homes) */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Amenities</h2>
+        <div className="flex flex-wrap gap-3">
+          {['Lift', 'Car Parking', 'Power Backup', 'Gym', 'Swimming Pool', 'Security', 'Garden'].map(amenity => (
+            <label key={amenity} className="inline-flex items-center">
+              <input
+                type="checkbox"
+                className="form-checkbox h-5 w-5 text-primary-600"
+                checked={formData.sellDetails?.amenities.includes(amenity)}
+                onChange={() => {
+                  const amenities = formData.sellDetails?.amenities || [];
+                  setFormData({
+                    ...formData,
+                    sellDetails: {
+                      ...formData.sellDetails,
+                      amenities: amenities.includes(amenity)
+                        ? amenities.filter((a: string) => a !== amenity)
+                        : [...amenities, amenity]
+                    }
+                  });
+                }}
+              />
+              <span className="ml-2">{amenity}</span>
+            </label>
+          ))}
+        </div>
       </section>
     </>
   );

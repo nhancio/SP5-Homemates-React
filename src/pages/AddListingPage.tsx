@@ -81,6 +81,7 @@ const initialFormData = {
       availability: '',
       bathroomType: '',
     },
+    amenities: [], // <-- Add this line!
     costs: {
       rent: '',
       maintenance: '',
@@ -702,7 +703,13 @@ const AddListingPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {listingType === 'rent' ? (
-            renderRentFields()
+            <RentForm
+              formData={formData}
+              setFormData={setFormData}
+              images={images}
+              handleImageUpload={handleImageUpload}
+              removeImage={removeImage}
+            />
           ) : (
             renderSellFields()
           )}
