@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Filter, X } from 'lucide-react';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { useAppContext } from '../../context/AppContext';
 
 interface PropertyFiltersProps {
@@ -361,7 +363,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
         <div className="border-t border-gray-100 my-6" />
 
         {/* Row 3: Availability */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Availability</label>
             <select
@@ -375,12 +377,20 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
               <option value="date">Select Date</option>
             </select>
             {currentFilters.availability === 'date' && (
-              <input
-                type="date"
-                name="availableFrom"
-                value={currentFilters.availableFrom || ''}
-                onChange={handleFilterChange}
-                className="input mt-2"
+              <DatePicker
+                selected={currentFilters.availableFrom ? new Date(currentFilters.availableFrom) : null}
+                onChange={date => handleFilterChange({
+                  target: {
+                    name: 'availableFrom',
+                    value: date ? date.toISOString().split('T')[0] : ''
+                  }
+                })}
+                minDate={new Date()}
+                className="input mt-2 w-full"
+                placeholderText="Select date"
+                dateFormat="yyyy-MM-dd"
+                isClearable
+                showPopperArrow={false}
               />
             )}
           </div>
