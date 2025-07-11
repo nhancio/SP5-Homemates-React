@@ -168,11 +168,13 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   const login = async () => {
     try {
       const result = await signInWithGoogle();
+      console.log('Login result:', result); // DEBUG LOG
       if (result.success && result.user) {
         setUser(result.user);
         localStorage.setItem('user', JSON.stringify(result.user));
 
         if (result.isNewUser) {
+          console.log('New user detected, showing onboarding modal'); // DEBUG LOG
           setShowOnboarding(true);
         }
       } else {
@@ -209,6 +211,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
         const userRef = doc(db, 'u', firebaseUser.uid);
         const userDoc = await getDoc(userRef);
         let userData;
+        let needsOnboarding = false;
         if (userDoc.exists()) {
           const data = userDoc.data();
           userData = {
@@ -219,6 +222,10 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
             isPremium: data.isPremium || false,
             preferences: data.preferences || [],
           };
+          // Check for required onboarding fields
+          if (!data.userPhoneNumber || !data.preferences || data.preferences.length === 0) {
+            needsOnboarding = true;
+          }
         } else {
           userData = {
             id: firebaseUser.uid,
@@ -228,9 +235,11 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
             isPremium: false,
             preferences: [],
           };
+          needsOnboarding = true;
         }
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
+        setShowOnboarding(needsOnboarding);
       } else {
         setUser(null);
         localStorage.removeItem('user');
@@ -263,6 +272,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
     setShowPreferences,
   };
 
+  // Block app features if onboarding is required
   return (
     <AppContext.Provider value={value}>
       {children}
@@ -277,6 +287,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
       {showPreferences && user && (
         <PreferencesModal onClose={() => setShowPreferences(false)} />
       )}
+      {showOnboarding && <div className="fixed inset-0 bg-white bg-opacity-80 z-40" />} {/* Overlay to block features */}
     </AppContext.Provider>
   );
 }
