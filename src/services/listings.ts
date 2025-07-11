@@ -285,23 +285,6 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
         );
       }
 
-      // Amenities filter (comma separated string or array, match if at least one selected is present)
-      if (filters.amenities && filters.amenities.length > 0) {
-        const selectedAmenities = Array.isArray(filters.amenities)
-          ? filters.amenities.map((a: string) => a.toLowerCase())
-          : String(filters.amenities).split(',').map((a: string) => a.trim().toLowerCase());
-        filteredListings = filteredListings.filter(listing => {
-          const listingAmenities = [
-            ...(listing.rentDetails?.amenities?.appliances || []),
-            ...(listing.rentDetails?.amenities?.furniture || []),
-            ...(listing.rentDetails?.amenities?.building || []),
-            ...(listing.sellDetails?.amenities || []),
-          ].map((a: string) => a.toLowerCase());
-          // Match if at least one selected amenity is present
-          return selectedAmenities.some((a: string) => listingAmenities.includes(a));
-        });
-      }
-
       if (type === 'rent') {
         // Max Rent
         if (filters.maxRent) {

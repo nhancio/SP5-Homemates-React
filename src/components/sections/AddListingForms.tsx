@@ -345,7 +345,98 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
         </div>
       </section>
 
-      {/* ...rest of the rent form sections... */}
+      {/* Availability Section */}
+      <section className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-lg font-semibold mb-4">Availability</h2>
+        <div className="flex items-center gap-2">
+          <input
+            type="radio"
+            id="immediate"
+            name="availability"
+            value="immediate"
+            checked={formData.rentDetails.availability === 'immediate'}
+            onChange={() => setFormData({
+              ...formData,
+              rentDetails: {
+                ...formData.rentDetails,
+                availability: 'immediate'
+              }
+            })}
+            className="form-radio h-5 w-5 text-primary-600"
+          />
+          <label htmlFor="immediate" className="text-sm">Immediate</label>
+          <input
+            type="radio"
+            id="handover"
+            name="availability"
+            value="handover"
+            checked={formData.rentDetails.availability === 'handover'}
+            onChange={() => setFormData({
+              ...formData,
+              rentDetails: {
+                ...formData.rentDetails,
+                availability: 'handover'
+              }
+            })}
+            className="form-radio h-5 w-5 text-primary-600"
+          />
+          <label htmlFor="handover" className="text-sm">Handover Date</label>
+        </div>
+        {formData.rentDetails.availability === 'handover' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Handover Date</label>
+            <input
+              type="date"
+              className="input"
+              value={formData.rentDetails.handoverDate}
+              onChange={(e) => setFormData({
+                ...formData,
+                rentDetails: {
+                  ...formData.rentDetails,
+                  handoverDate: e.target.value
+                }
+              })}
+            />
+          </div>
+        )}
+      </section>
+
+      {/* Move In Section for RentForm (Shared Homes) */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Move In</h2>
+        <div className="flex items-center gap-8 mb-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="moveInOption"
+              checked={formData.isImmediate === true}
+              onChange={() => setFormData({ ...formData, isImmediate: true, handoverDate: '' })}
+            />
+            Immediate
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="moveInOption"
+              checked={formData.isImmediate === false}
+              onChange={() => setFormData({ ...formData, isImmediate: false })}
+            />
+            Specific Date
+          </label>
+        </div>
+        {formData.isImmediate === false && (
+          <>
+            <input
+              type="date"
+              className="input w-full mb-1"
+              placeholder="dd-mm-yyyy"
+              value={formData.handoverDate}
+              onChange={e => setFormData({ ...formData, handoverDate: e.target.value })}
+            />
+            <span className="text-xs text-gray-500">Select your move-in date.</span>
+          </>
+        )}
+      </section>
     </>
   );
 };
@@ -357,58 +448,76 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
   handleImageUpload,
   removeImage
 }) => {
-  const DIRECTIONS = ['East', 'West', 'North', 'South', 'North-East', 'North-West'];
-  
   return (
     <>
       <AddressFields formData={formData} setFormData={setFormData} />
       <ContactNumberField formData={formData} setFormData={setFormData} />
 
-      {/* Property Details */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Property Details</h2>
-        {/* BHK Selection */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
+      {/* Property Type (BHK Selection) */}
+      <section className="bg-white p-6 rounded-2xl shadow mb-8">
+        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Property Type</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-2">
           {['1RK', '1 BHK', '2 BHK', '3 BHK', '4 BHK', '4+ BHK'].map(type => (
             <button
               key={type}
               type="button"
               onClick={() => setFormData({ ...formData, propertyType: type })}
-              className={`p-3 rounded-full border-2 ${
+              className={`p-3 rounded-full border-2 transition font-semibold text-base focus:outline-none focus:ring-2 focus:ring-primary-300 shadow-sm ${
                 formData.propertyType === type 
-                  ? 'border-primary-500 bg-primary-50' 
-                  : 'border-gray-200 hover:border-primary-500'
+                  ? 'border-primary-600 bg-primary-50 text-primary-700' 
+                  : 'border-gray-200 bg-white text-gray-700 hover:border-primary-400'
               }`}
             >
               {type}
             </button>
           ))}
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Availability, Furnishing, Parking */}
+      <section className="bg-white p-6 rounded-2xl shadow mb-8">
+        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
-            <select 
-              className="input"
-              value={formData.furnishingType}
-              onChange={(e) => setFormData({
+            <label className="block text-sm font-medium text-gray-700 mb-2">Availability</label>
+            <select
+              className="input w-full focus:ring-2 focus:ring-primary-300"
+              value={formData.sellDetails?.availability || ''}
+              onChange={e => setFormData({
+                ...formData,
+                sellDetails: {
+                  ...formData.sellDetails,
+                  availability: e.target.value
+                }
+              })}
+            >
+              <option value="">Select Availability</option>
+              <option value="immediate">Immediate</option>
+              <option value="handover">Handover Date</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Furnishing Type</label>
+            <select
+              className="input w-full focus:ring-2 focus:ring-primary-300"
+              value={formData.furnishingType || ''}
+              onChange={e => setFormData({
                 ...formData,
                 furnishingType: e.target.value
               })}
             >
-              <option value="">Select Furnishing</option>
+              <option value="">Select Furnishing Type</option>
               <option value="fully">Fully Furnished</option>
               <option value="semi">Semi Furnished</option>
               <option value="unfurnished">Unfurnished</option>
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
-            <select 
-              className="input"
-              value={formData.parking}
-              onChange={(e) => setFormData({
+            <select
+              className="input w-full focus:ring-2 focus:ring-primary-300"
+              value={formData.parking || ''}
+              onChange={e => setFormData({
                 ...formData,
                 parking: e.target.value
               })}
@@ -419,41 +528,130 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
               <option value="both">Both</option>
             </select>
           </div>
+        </div>
+      </section>
 
+      {/* Move In Section (for both RentForm and SellForm) */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Move In</h2>
+        <div className="flex items-center gap-8 mb-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="moveInOption"
+              checked={formData.isImmediate === true}
+              onChange={() => setFormData({ ...formData, isImmediate: true, handoverDate: '' })}
+            />
+            Immediate
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="moveInOption"
+              checked={formData.isImmediate === false}
+              onChange={() => setFormData({ ...formData, isImmediate: false })}
+            />
+            Specific Date
+          </label>
+        </div>
+        {formData.isImmediate === false && (
+          <div className="flex flex-col gap-2 mt-2">
+            <input
+              type="date"
+              className="input w-full"
+              placeholder="dd-mm-yyyy"
+              value={formData.handoverDate}
+              onChange={e => setFormData({ ...formData, handoverDate: e.target.value })}
+            />
+            <span className="text-xs text-gray-500">Select your move-in date.</span>
+          </div>
+        )}
+      </section>
+
+      {/* Price Details Section */}
+      <section className="bg-white p-6 rounded-2xl shadow mb-8">
+        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Price Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Built Up Area (Sq.ft)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rent</label>
             <input
               type="number"
-              className="input"
-              value={formData.sellDetails.sqft}
-              onChange={(e) => setFormData(prev => ({
-                ...prev,
-                sellDetails: { ...prev.sellDetails, sqft: Number(e.target.value) }
-              }))}
-              placeholder="Enter area in square feet"
+              className="input w-full focus:ring-2 focus:ring-primary-300"
+              placeholder="Enter rent"
+              value={formData.sellDetails?.rent || ''}
+              onChange={e => setFormData({
+                ...formData,
+                sellDetails: {
+                  ...formData.sellDetails,
+                  rent: e.target.value
+                }
+              })}
             />
           </div>
-
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Direction</label>
-            <select 
-              className="input"
-              value={formData.sellDetails.direction}
-              onChange={(e) => setFormData(prev => ({
-                ...prev,
-                sellDetails: { ...prev.sellDetails, direction: e.target.value }
-              }))}
-            >
-              <option value="">Select Direction</option>
-              {DIRECTIONS.map(dir => (
-                <option key={dir} value={dir}>{dir}</option>
-              ))}
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance</label>
+            <input
+              type="number"
+              className="input w-full focus:ring-2 focus:ring-primary-300"
+              placeholder="Enter maintenance"
+              value={formData.sellDetails?.maintenance || ''}
+              onChange={e => setFormData({
+                ...formData,
+                sellDetails: {
+                  ...formData.sellDetails,
+                  maintenance: e.target.value
+                }
+              })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit</label>
+            <input
+              type="number"
+              className="input w-full focus:ring-2 focus:ring-primary-300"
+              placeholder="Enter security deposit"
+              value={formData.sellDetails?.securityDeposit || ''}
+              onChange={e => setFormData({
+                ...formData,
+                sellDetails: {
+                  ...formData.sellDetails,
+                  securityDeposit: e.target.value
+                }
+              })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage</label>
+            <input
+              type="number"
+              className="input w-full focus:ring-2 focus:ring-primary-300"
+              placeholder="Enter brokerage"
+              value={formData.sellDetails?.brokerage || ''}
+              onChange={e => setFormData({
+                ...formData,
+                sellDetails: {
+                  ...formData.sellDetails,
+                  brokerage: e.target.value
+                }
+              })}
+            />
           </div>
         </div>
       </section>
 
-      {/* ...rest of the sell form sections... */}
+      {/* Description Section */}
+      <section className="bg-white p-6 rounded-2xl shadow mb-8">
+        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Description</h2>
+        <textarea
+          className="input min-h-[100px] focus:ring-2 focus:ring-primary-300"
+          placeholder="Add property description..."
+          value={formData.description}
+          onChange={e => setFormData({
+            ...formData,
+            description: e.target.value
+          })}
+        />
+      </section>
     </>
   );
 };
