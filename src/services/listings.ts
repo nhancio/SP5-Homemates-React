@@ -453,3 +453,21 @@ export async function getListingsByUser(userId: string) {
     throw error;
   }
 }
+
+/**
+ * Update a listing by ID and type (rent/sell)
+ * @param type 'rent' | 'sell'
+ * @param id Listing document ID
+ * @param data Partial update data
+ */
+export async function updateListing(type: 'rent' | 'sell', id: string, data: Partial<RentListing | SellListing>) {
+  try {
+    const collectionName = type === 'rent' ? 'r' : 's';
+    const docRef = doc(db, collectionName, id);
+    await import('firebase/firestore').then(({ updateDoc }) => updateDoc(docRef, data));
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating listing:', error);
+    throw error;
+  }
+}
