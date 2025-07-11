@@ -222,10 +222,8 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
             isPremium: data.isPremium || false,
             preferences: data.preferences || [],
           };
-          // Check for required onboarding fields
-          if (!data.userPhoneNumber || !data.preferences || data.preferences.length === 0) {
-            needsOnboarding = true;
-          }
+          // Only show onboarding if the record does NOT exist
+          needsOnboarding = false;
         } else {
           userData = {
             id: firebaseUser.uid,
