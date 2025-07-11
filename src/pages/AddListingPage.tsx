@@ -85,6 +85,7 @@ const initialFormData = {
       rent: '',
       maintenance: '',
       securityDeposit: '',
+      setupCost: '',
       brokerage: '',
     },
     additionalBills: {
@@ -157,16 +158,6 @@ const AddListingPage = () => {
     setIsSubmitting(true);
     try {
       console.log('Creating listing type:', listingType);
-      
-      const listingData = {
-        ...formData,
-        userId: user.id,
-        images,
-        createdAt: Date.now(),
-        status: 'active' as const,
-      };
-
-      console.log('Submitting data:', listingData);
 
       if (listingType === 'rent') {
         // Validate rent-specific fields
@@ -174,20 +165,127 @@ const AddListingPage = () => {
           throw new Error('Please enter rental cost');
         }
         
-        const result = await createListing('rent', {
-          ...listingData,
-          rentDetails: formData.rentDetails,
-          amenities: formData.amenities,
-        });
+        // Explicitly construct rent listing data with only intended fields
+        const rentListingData = {
+          // Common fields
+          address: {
+            city: formData.address.city,
+            locality: formData.address.locality,
+            buildingName: formData.address.buildingName,
+          },
+          propertyType: formData.propertyType,
+          furnishingType: formData.furnishingType,
+          parking: formData.parking,
+          buildingType: formData.buildingType,
+          handoverDate: formData.handoverDate,
+          isImmediate: formData.isImmediate,
+          description: formData.description,
+          contactNumber: formData.contactNumber,
+          images,
+          createdAt: Date.now(),
+          status: 'active' as const,
+          userId: user.id,
+          createdByUser: user.id,
+          listingType: 'rent',
+          
+          // Rent-specific fields
+          rentDetails: {
+            preferredTenant: {
+              lookingFor: formData.rentDetails.preferredTenant.lookingFor,
+              preferences: formData.rentDetails.preferredTenant.preferences,
+            },
+            roomDetails: {
+              availableRooms: formData.rentDetails.roomDetails.availableRooms,
+              availability: formData.rentDetails.roomDetails.availability,
+              bathroomType: formData.rentDetails.roomDetails.bathroomType,
+            },
+            costs: {
+              rent: Number(formData.rentDetails.costs.rent) || 0,
+              maintenance: Number(formData.rentDetails.costs.maintenance) || 0,
+              securityDeposit: Number(formData.rentDetails.costs.securityDeposit) || 0,
+              setupCost: Number(formData.rentDetails.costs.setupCost) || 0,
+              brokerage: Number(formData.rentDetails.costs.brokerage) || 0,
+            },
+            additionalBills: {
+              wifi: Number(formData.rentDetails.additionalBills.wifi) || 0,
+              water: Number(formData.rentDetails.additionalBills.water) || 0,
+              gas: Number(formData.rentDetails.additionalBills.gas) || 0,
+              cook: Number(formData.rentDetails.additionalBills.cook) || 0,
+              maid: Number(formData.rentDetails.additionalBills.maid) || 0,
+              others: Number(formData.rentDetails.additionalBills.others) || 0,
+            },
+          },
+          
+          // Amenities
+          amenities: {
+            appliances: formData.amenities.appliances,
+            furniture: formData.amenities.furniture,
+            building: formData.amenities.building,
+          },
+        };
+
+        console.log('Submitting rent data:', rentListingData);
+        const result = await createListing('rent', rentListingData);
         console.log('Rent listing created:', result);
       } else {
-        // For sell listings - no validation required, everything optional
-        const result = await createListing('sell', {
-          ...listingData,
-          sellDetails: formData.sellDetails,
+        // Explicitly construct sell listing data with only intended fields
+        const sellListingData = {
+          // Common fields
+          address: {
+            city: formData.address.city,
+            locality: formData.address.locality,
+            buildingName: formData.address.buildingName,
+          },
+          propertyType: formData.propertyType,
+          furnishingType: formData.furnishingType,
+          parking: formData.parking,
+          buildingType: formData.buildingType,
+          handoverDate: formData.handoverDate,
+          isImmediate: formData.isImmediate,
+          description: formData.description,
+          contactNumber: formData.contactNumber,
+          images,
+          createdAt: Date.now(),
+          status: 'active' as const,
+          userId: user.id,
+          createdByUser: user.id,
+          listingType: 'sell',
+          
+          // Sell-specific fields
+          sellDetails: {
+            price: Number(formData.sellDetails.price) || 0,
+            gst: Number(formData.sellDetails.gst) || 0,
+            isNegotiable: formData.sellDetails.isNegotiable,
+            propertyType: formData.sellDetails.propertyType,
+            sqft: Number(formData.sellDetails.sqft) || 0,
+            direction: formData.sellDetails.direction,
+            ownership: formData.sellDetails.ownership,
+            ageOfProperty: formData.sellDetails.ageOfProperty,
+            totalFloors: formData.sellDetails.totalFloors,
+            floorNumber: formData.sellDetails.floorNumber,
+            waterSupply: formData.sellDetails.waterSupply,
+            approvals: formData.sellDetails.approvals,
+            amenities: formData.sellDetails.amenities,
+            highlights: formData.sellDetails.highlights,
+            description: formData.sellDetails.description,
+            propertyId: formData.sellDetails.propertyId,
+            loanOnProperty: formData.sellDetails.loanOnProperty,
+          },
+          
+          // Amenities (required by ListingData interface)
+          amenities: {
+            appliances: formData.amenities.appliances,
+            furniture: formData.amenities.furniture,
+            building: formData.amenities.building,
+          },
+          
+          // Additional sell fields
           builtUpArea: formData.builtUpArea,
           ageOfProperty: formData.ageOfProperty,
-        });
+        };
+
+        console.log('Submitting sell data:', sellListingData);
+        const result = await createListing('sell', sellListingData);
         console.log('Sale listing created:', result);
       }
 
@@ -227,7 +325,7 @@ const AddListingPage = () => {
             
             ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
             const compressedImage = canvas.toDataURL('image/jpeg', 0.8);
-            setImages(prev => [...prev, compressedImage]);
+            setImages((prev: string[]) => [...prev, compressedImage]);
           };
         };
         reader.readAsDataURL(file);
@@ -236,12 +334,12 @@ const AddListingPage = () => {
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+    setImages((prev: string[]) => prev.filter((_: string, i: number) => i !== index));
   };
 
   // Toggle functions and handlers
   const handleAmenityToggle = (category: 'appliances' | 'furniture' | 'building', item: string) => {
-    setFormData(prev => {
+    setFormData((prev: typeof initialFormData) => {
       const amenities = { ...prev.amenities };
       if (amenities[category].includes(item)) {
         amenities[category] = amenities[category].filter(i => i !== item);
