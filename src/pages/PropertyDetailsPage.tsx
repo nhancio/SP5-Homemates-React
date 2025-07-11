@@ -194,28 +194,30 @@ Link: ${url}`;
 
         {/* Image Gallery */}
         <div className="mb-8">
-          <Swiper
-            modules={[Navigation, Pagination]}
-            navigation
-            pagination={{ clickable: true }}
-            className="h-[400px] rounded-lg overflow-hidden"
-          >
-            {(property.images?.length ? property.images : ['placeholder']).map((image: string, index: number) => (
-              <SwiperSlide key={index}>
-                {image === 'placeholder' ? (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                    <Building className="w-16 h-16 text-gray-400" />
-                  </div>
-                ) : (
-                  <img 
-                    src={image} 
-                    alt={`Property ${index + 1}`} 
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                )}
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          <div className="aspect-[16/9] w-full rounded-lg overflow-hidden bg-gray-100">
+            <Swiper
+              modules={[Navigation, Pagination]}
+              navigation
+              pagination={{ clickable: true }}
+              className="w-full h-full"
+            >
+              {(property.images?.length ? property.images : ['placeholder']).map((image: string, index: number) => (
+                <SwiperSlide key={index}>
+                  {image === 'placeholder' ? (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                      <Building className="w-16 h-16 text-gray-400" />
+                    </div>
+                  ) : (
+                    <img 
+                      src={image} 
+                      alt={`Property ${index + 1}`} 
+                      className="w-full h-full object-contain rounded-lg bg-white"
+                    />
+                  )}
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
         </div>
 
         {/* Property Details Grid */}
