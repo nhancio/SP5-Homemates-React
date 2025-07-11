@@ -367,26 +367,16 @@ Link: ${url}`;
                 </div>
               )}
 
-              {/* Amenities - Only for Rent */}
-              {listingType === 'rent' && property.amenities && (
+              {/* Availability */}
+              {listingType === 'rent' && (
                 <div className="p-6 border-b">
-                  <h2 className="text-lg font-semibold mb-4">Amenities</h2>
-                  {Object.entries(property.amenities).map(([category, items]) => items.length > 0 && (
-                    <div key={category} className="mb-4 last:mb-0">
-                      <h3 className="text-md font-medium mb-2 capitalize">{category}</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {(items as string[]).map((item: string) => {
-                          // Normalize key for icon lookup
-                          const key = item.replace(/\s+/g, '').toLowerCase();
-                          return (
-                            <span key={item} className="px-2 py-1 bg-gray-100 rounded-full text-sm flex items-center">
-                              {amenityIconMap[key] || <Check className="w-4 h-4 mr-1 text-primary-600" />} {item}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
+                  <h2 className="text-lg font-semibold mb-4">Availability</h2>
+                  <div className="flex items-center gap-4">
+                    <span className="text-gray-600">Available From:</span>
+                    <span className="font-semibold text-primary-700">
+                      {property.isImmediate ? 'Immediate' : property.handoverDate || 'N/A'}
+                    </span>
+                  </div>
                 </div>
               )}
 

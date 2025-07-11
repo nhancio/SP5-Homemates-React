@@ -106,7 +106,6 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             minRent: 0,
             maxRent: 100000,
             preferredTenant: '',
-            amenities: [],
           }
         : {
             city: '',
@@ -119,7 +118,6 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             maxSqft: 0,
             ageOfProperty: '',
             possessionStatus: '',
-            amenities: [],
           },
     });
   };
@@ -303,7 +301,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
         {/* Divider */}
         <div className="border-t border-gray-100 my-6" />
 
-        {/* Row 2: BHK, Bathrooms, Furnishing, Amenities */}
+        {/* Row 2: BHK, Bathrooms, Furnishing, Availability */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
@@ -311,7 +309,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
               name="bhk"
               value={currentFilters.bhk || ''}
               onChange={handleFilterChange}
-              className="input"
+              className="input w-full"
             >
               <option value="">Any</option>
               {[1,2,3,4,5].map((n) => (
@@ -325,7 +323,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
               name="bathrooms"
               value={currentFilters.bathrooms || ''}
               onChange={handleFilterChange}
-              className="input"
+              className="input w-full"
             >
               <option value="">Any</option>
               <option value="dedicated">Dedicated</option>
@@ -338,7 +336,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
               name="furnishingType"
               value={currentFilters.furnishingType || ''}
               onChange={handleFilterChange}
-              className="input"
+              className="input w-full"
             >
               <option value="">All</option>
               <option value="Furnished">Furnished</option>
@@ -347,30 +345,12 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Amenities <span className='text-gray-400'>(Optional)</span></label>
-            <input
-              type="text"
-              name="amenities"
-              placeholder="Comma separated (e.g. wifi, parking)"
-              value={currentFilters.amenities || ''}
-              onChange={handleFilterChange}
-              className="input"
-            />
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-gray-100 my-6" />
-
-        {/* Row 3: Availability */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Availability</label>
             <select
               name="availability"
               value={currentFilters.availability || ''}
               onChange={handleFilterChange}
-              className="input"
+              className="input w-full"
             >
               <option value="">Any</option>
               <option value="immediate">Immediate</option>

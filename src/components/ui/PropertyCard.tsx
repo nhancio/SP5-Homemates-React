@@ -200,7 +200,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, listingType = 're
           {property.address?.locality}, {property.address?.city}
         </p>
 
-        {renderPropertyFeatures()}
+        {listingType === 'rent' && renderPropertyFeatures()}
       </div>
 
       <div className="flex border-t border-gray-200">
