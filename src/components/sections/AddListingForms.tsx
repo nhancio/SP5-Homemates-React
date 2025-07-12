@@ -1,5 +1,43 @@
 import React, { useState } from 'react';
 import { Camera, X } from 'lucide-react';
+import {
+  Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home
+} from 'lucide-react';
+import { USER_PREFERENCES } from '../../constants/theme';
+import * as LucideIcons from 'lucide-react';
+
+// Amenity/feature options with icon and label (same as PropertyFilters)
+const AMENITY_OPTIONS = [
+  { key: 'wifi', label: 'Wi-Fi', icon: Wifi },
+  { key: 'parking', label: 'Car Parking', icon: Car },
+  { key: 'water', label: 'Water', icon: Droplet },
+  { key: 'kitchen', label: 'Cook', icon: Utensils },
+  { key: 'gym', label: 'Gym', icon: Dumbbell },
+  { key: 'ac', label: 'AC', icon: Snowflake },
+  { key: 'security', label: 'Security', icon: Shield },
+  { key: 'tv', label: 'TV', icon: Tv },
+  { key: 'gas', label: 'Gas', icon: Flame },
+  { key: 'fan', label: 'Fan', icon: Fan },
+  { key: 'light', label: 'Light', icon: Lightbulb },
+  { key: 'lock', label: 'Lock', icon: Lock },
+  { key: 'fridge', label: 'Fridge', icon: Refrigerator },
+  { key: 'washing', label: 'Washing', icon: WashingMachine },
+  { key: 'bed', label: 'Bed', icon: BedDouble },
+  { key: 'shower', label: 'Shower', icon: ShowerHead },
+  { key: 'pet', label: 'Pet Friendly', icon: PawPrint },
+  { key: 'roommate', label: 'Shared Room', icon: Users },
+  { key: 'key', label: 'Private Room', icon: KeyRound },
+  { key: 'power', label: 'Power Backup', icon: Plug },
+  { key: 'music', label: 'Music', icon: Speaker },
+  { key: 'car', label: 'Parking', icon: ParkingCircle },
+  { key: 'bike', label: 'Bike Parking', icon: Bike },
+  { key: 'garden', label: 'Garden', icon: Leaf },
+  { key: 'sunlight', label: 'Sunlight', icon: Sun },
+  { key: 'temperature', label: 'Temperature', icon: Thermometer },
+  { key: 'ventilation', label: 'Ventilation', icon: AirVent },
+  { key: 'purifiedwater', label: 'Purified Water', icon: Droplet },
+  { key: 'house', label: 'Gated Society', icon: Home },
+];
 
 interface AddListingFormsProps {
   listingType: 'rent' | 'sell';
@@ -60,14 +98,14 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
   };
 
   return (
-    <section className="bg-white p-6 rounded-lg shadow-sm">
-      <h2 className="text-lg font-semibold mb-4">Address</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <section className="bg-white p-6 rounded-lg shadow-sm">
+    <h2 className="text-lg font-semibold mb-4">Address</h2>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="relative col-span-2">
-          <input
-            type="text"
+      <input
+        type="text"
             placeholder="Location (Locality, City or Both)"
-            className="input"
+        className="input"
             value={locationInput}
             onChange={handleLocationChange}
             autoComplete="off"
@@ -96,19 +134,19 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
             </ul>
           )}
         </div>
-        <input
-          type="text"
-          placeholder="Building Name"
-          className="input"
-          value={formData.address.buildingName}
-          onChange={(e) => setFormData({
-            ...formData,
-            address: { ...formData.address, buildingName: e.target.value }
-          })}
-        />
-      </div>
-    </section>
-  );
+      <input
+        type="text"
+        placeholder="Building Name"
+        className="input"
+        value={formData.address.buildingName}
+        onChange={(e) => setFormData({
+          ...formData,
+          address: { ...formData.address, buildingName: e.target.value }
+        })}
+      />
+    </div>
+  </section>
+);
 };
 
 const ContactNumberField = ({ formData, setFormData }: AddListingFormsProps) => (
@@ -143,22 +181,8 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
 }) => {
   return (
     <>
-      <AddressFields 
-        formData={formData} 
-        setFormData={setFormData}
-        listingType="rent"
-        images={images}
-        handleImageUpload={handleImageUpload}
-        removeImage={removeImage}
-      />
-      <ContactNumberField 
-        formData={formData} 
-        setFormData={setFormData}
-        listingType="rent"
-        images={images}
-        handleImageUpload={handleImageUpload}
-        removeImage={removeImage}
-      />
+      <AddressFields formData={formData} setFormData={setFormData} />
+      <ContactNumberField formData={formData} setFormData={setFormData} />
 
       {/* Property Details */}
       <section className="bg-white p-6 rounded-lg shadow-sm">
@@ -319,10 +343,9 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
                 }
               })}
             >
-              <option value="">Select Option</option>
+              <option value="">Select Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
-              <option value="Couple">Couple</option>
               <option value="Any">Any</option>
             </select>
           </div>
@@ -330,13 +353,14 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Preferences</label>
             <div className="flex flex-wrap gap-3">
-              {['Vegetarian', 'Non-smoker', 'Non-alcoholic', 'Pet friendly', 'Party Friendly', 'Night owl'].map(pref => (
-                <label key={pref} className="inline-flex items-center">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-5 w-5 text-primary-600"
-                    checked={formData.rentDetails.preferredTenant.preferences.includes(pref)}
-                    onChange={() => {
+              {USER_PREFERENCES.map(pref => {
+                const Icon = LucideIcons[pref.icon] || LucideIcons.User;
+                const selected = formData.rentDetails.preferredTenant.preferences.includes(pref.label);
+                return (
+                  <button
+                    key={pref.id}
+                    type="button"
+                    onClick={() => {
                       const preferences = formData.rentDetails.preferredTenant.preferences;
                       setFormData({
                         ...formData,
@@ -344,20 +368,82 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
                           ...formData.rentDetails,
                           preferredTenant: {
                             ...formData.rentDetails.preferredTenant,
-                            preferences: preferences.includes(pref)
-                              ? preferences.filter((p: string) => p !== pref)
-                              : [...preferences, pref]
+                            preferences: preferences.includes(pref.label)
+                              ? preferences.filter((p: string) => p !== pref.label)
+                              : [...preferences, pref.label]
                           }
                         }
                       });
                     }}
-                  />
-                  <span className="ml-2">{pref}</span>
-                </label>
-              ))}
+                    className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
+                      ? 'bg-primary-600 text-white border-primary-600 shadow'
+                      : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+                    tabIndex={0}
+                  >
+                    <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
+                    <span className="whitespace-nowrap">{pref.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Availability Section */}
+      <section className="bg-white p-6 rounded-lg shadow-sm">
+        <h2 className="text-lg font-semibold mb-4">Availability</h2>
+        <div className="flex items-center gap-2">
+          <input
+            type="radio"
+            id="immediate"
+            name="availability"
+            value="immediate"
+            checked={formData.rentDetails.availability === 'immediate'}
+            onChange={() => setFormData({
+              ...formData,
+              rentDetails: {
+                ...formData.rentDetails,
+                availability: 'immediate'
+              }
+            })}
+            className="form-radio h-5 w-5 text-primary-600"
+          />
+          <label htmlFor="immediate" className="text-sm">Immediate</label>
+          <input
+            type="radio"
+            id="handover"
+            name="availability"
+            value="handover"
+            checked={formData.rentDetails.availability === 'handover'}
+            onChange={() => setFormData({
+              ...formData,
+              rentDetails: {
+                ...formData.rentDetails,
+                availability: 'handover'
+              }
+            })}
+            className="form-radio h-5 w-5 text-primary-600"
+          />
+          <label htmlFor="handover" className="text-sm">Handover Date</label>
+        </div>
+        {formData.rentDetails.availability === 'handover' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Handover Date</label>
+            <input
+              type="date"
+              className="input"
+              value={formData.rentDetails.handoverDate}
+              onChange={(e) => setFormData({
+                ...formData,
+                rentDetails: {
+                  ...formData.rentDetails,
+                  handoverDate: e.target.value
+                }
+              })}
+            />
+          </div>
+        )}
       </section>
 
       {/* Move In Section for RentForm (Shared Homes) */}
@@ -400,101 +486,36 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
       {/* Amenities Section for RentForm (Shared Homes) */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Amenities</h2>
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2">Appliances</h3>
-          <div className="flex flex-wrap gap-3">
-            {['TV', 'Fridge', 'AC', 'Washing Machine', 'Water Purifier', 'Geyser'].map(appliance => (
-              <label key={appliance} className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-5 w-5 text-primary-600"
-                  checked={Array.isArray(formData.rentDetails.amenities?.appliances) && formData.rentDetails.amenities.appliances.includes(appliance)}
-                  onChange={() => {
-                    const appliances = formData.rentDetails.amenities?.appliances || [];
-                    setFormData({
-                      ...formData,
-                      rentDetails: {
-                        ...formData.rentDetails,
-                        amenities: {
-                          ...formData.rentDetails.amenities,
-                          appliances: appliances.includes(appliance)
-                            ? appliances.filter((a: string) => a !== appliance)
-                            : [...appliances, appliance],
-                          furniture: formData.rentDetails.amenities?.furniture || [],
-                          building: formData.rentDetails.amenities?.building || [],
-                        }
-                      }
-                    });
-                  }}
-                />
-                <span className="ml-2">{appliance}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2">Furniture</h3>
-          <div className="flex flex-wrap gap-3">
-            {['Bed', 'Wardrobe', 'Study Table', 'Dining Table', 'Sofa', 'Mattress'].map(furniture => (
-              <label key={furniture} className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-5 w-5 text-primary-600"
-                  checked={Array.isArray(formData.rentDetails.amenities?.furniture) && formData.rentDetails.amenities.furniture.includes(furniture)}
-                  onChange={() => {
-                    const furnitureArr = formData.rentDetails.amenities?.furniture || [];
-                    setFormData({
-                      ...formData,
-                      rentDetails: {
-                        ...formData.rentDetails,
-                        amenities: {
-                          ...formData.rentDetails.amenities,
-                          furniture: furnitureArr.includes(furniture)
-                            ? furnitureArr.filter((a: string) => a !== furniture)
-                            : [...furnitureArr, furniture],
-                          appliances: formData.rentDetails.amenities?.appliances || [],
-                          building: formData.rentDetails.amenities?.building || [],
-                        }
-                      }
-                    });
-                  }}
-                />
-                <span className="ml-2">{furniture}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2">Building</h3>
-          <div className="flex flex-wrap gap-3">
-            {['Lift', 'Power Backup', 'Security', 'Parking', 'Gym', 'Swimming Pool', 'Garden', 'CCTV'].map(building => (
-              <label key={building} className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-5 w-5 text-primary-600"
-                  checked={Array.isArray(formData.rentDetails.amenities?.building) && formData.rentDetails.amenities.building.includes(building)}
-                  onChange={() => {
-                    const buildingArr = formData.rentDetails.amenities?.building || [];
-                    setFormData({
-                      ...formData,
-                      rentDetails: {
-                        ...formData.rentDetails,
-                        amenities: {
-                          ...formData.rentDetails.amenities,
-                          building: buildingArr.includes(building)
-                            ? buildingArr.filter((a: string) => a !== building)
-                            : [...buildingArr, building],
-                          appliances: formData.rentDetails.amenities?.appliances || [],
-                          furniture: formData.rentDetails.amenities?.furniture || [],
-                        }
-                      }
-                    });
-                  }}
-                />
-                <span className="ml-2">{building}</span>
-              </label>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-3">
+          {AMENITY_OPTIONS.map(opt => {
+            const Icon = opt.icon;
+            const selected = Array.isArray(formData.rentDetails.amenities) && formData.rentDetails.amenities.includes(opt.key);
+            return (
+              <button
+                key={opt.key}
+                type="button"
+                onClick={() => {
+                  const amenities = formData.rentDetails.amenities || [];
+                  setFormData({
+                    ...formData,
+                    rentDetails: {
+                      ...formData.rentDetails,
+                      amenities: amenities.includes(opt.key)
+                        ? amenities.filter((a: string) => a !== opt.key)
+                        : [...amenities, opt.key]
+                    }
+                  });
+                }}
+                className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
+                  ? 'bg-primary-600 text-white border-primary-600 shadow'
+                  : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+                tabIndex={0}
+              >
+                <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
+                <span className="whitespace-nowrap">{opt.label}</span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -503,32 +524,66 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
         <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Rental Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Rent (₹/month)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Rent (₹/month)</label>
             <input
               type="number"
               className="input w-full"
-              placeholder="Enter rent"
+              placeholder="Enter minimum rent"
               min={0}
-              value={formData.rentDetails.costs.rent || ''}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  costs: {
-                    ...formData.rentDetails.costs,
-                    rent: e.target.value
+              value={formData.rentDetails.costs.minRent || ''}
+              onChange={e => {
+                const minRent = Number(e.target.value);
+                setFormData({
+                  ...formData,
+                  rentDetails: {
+                    ...formData.rentDetails,
+                    costs: {
+                      ...formData.rentDetails.costs,
+                      minRent,
+                      // If maxRent is less than new minRent, update maxRent as well
+                      maxRent: formData.rentDetails.costs.maxRent < minRent ? minRent : formData.rentDetails.costs.maxRent
+                    }
                   }
-                }
-              })}
+                });
+              }}
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Rent (₹/month)</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter maximum rent"
+              min={formData.rentDetails.costs.minRent || 0}
+              value={formData.rentDetails.costs.maxRent || ''}
+              onChange={e => {
+                const maxRent = Number(e.target.value);
+                setFormData({
+                  ...formData,
+                  rentDetails: {
+                    ...formData.rentDetails,
+                    costs: {
+                      ...formData.rentDetails.costs,
+                      maxRent,
+                      // If minRent is more than new maxRent, update minRent as well
+                      minRent: formData.rentDetails.costs.minRent > maxRent ? maxRent : formData.rentDetails.costs.minRent
+                    }
+                  }
+                });
+              }}
+            />
+          </div>
+          {/* Optionally, show a validation message if min > max */}
+          {formData.rentDetails.costs.minRent > formData.rentDetails.costs.maxRent && (
+            <div className="col-span-full text-red-500 text-sm">Minimum rent cannot exceed maximum rent.</div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance (₹/month)</label>
             <input
               type="number"
               className="input w-full"
               placeholder="Enter maintenance amount"
-              value={formData.rentDetails.costs.maintenance || ''}
+              value={formData.rentDetails.costs.maintenance}
               onChange={e => setFormData({
                 ...formData,
                 rentDetails: {
@@ -547,7 +602,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
               type="number"
               className="input w-full"
               placeholder="Enter security deposit"
-              value={formData.rentDetails.costs.securityDeposit || ''}
+              value={formData.rentDetails.costs.securityDeposit}
               onChange={e => setFormData({
                 ...formData,
                 rentDetails: {
@@ -566,7 +621,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
               type="number"
               className="input w-full"
               placeholder="Enter setup cost"
-              value={formData.rentDetails.costs.setupCost || ''}
+              value={formData.rentDetails.costs.setupCost}
               onChange={e => setFormData({
                 ...formData,
                 rentDetails: {
@@ -585,7 +640,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
               type="number"
               className="input w-full"
               placeholder="Enter brokerage amount"
-              value={formData.rentDetails.costs.brokerage || ''}
+              value={formData.rentDetails.costs.brokerage}
               onChange={e => setFormData({
                 ...formData,
                 rentDetails: {
@@ -593,127 +648,6 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
                   costs: {
                     ...formData.rentDetails.costs,
                     brokerage: e.target.value
-                  }
-                }
-              })}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Additional Bills Section for RentForm (Shared Homes) */}
-      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Additional Bills</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Wifi (₹/month)</label>
-            <input
-              type="number"
-              className="input w-full"
-              placeholder="Enter wifi bill"
-              value={formData.rentDetails.additionalBills.wifi || ''}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  additionalBills: {
-                    ...formData.rentDetails.additionalBills,
-                    wifi: e.target.value
-                  }
-                }
-              })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Water (₹/month)</label>
-            <input
-              type="number"
-              className="input w-full"
-              placeholder="Enter water bill"
-              value={formData.rentDetails.additionalBills.water || ''}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  additionalBills: {
-                    ...formData.rentDetails.additionalBills,
-                    water: e.target.value
-                  }
-                }
-              })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Gas (₹/month)</label>
-            <input
-              type="number"
-              className="input w-full"
-              placeholder="Enter gas bill"
-              value={formData.rentDetails.additionalBills.gas || ''}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  additionalBills: {
-                    ...formData.rentDetails.additionalBills,
-                    gas: e.target.value
-                  }
-                }
-              })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cook (₹/month)</label>
-            <input
-              type="number"
-              className="input w-full"
-              placeholder="Enter cook bill"
-              value={formData.rentDetails.additionalBills.cook || ''}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  additionalBills: {
-                    ...formData.rentDetails.additionalBills,
-                    cook: e.target.value
-                  }
-                }
-              })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Maid (₹/month)</label>
-            <input
-              type="number"
-              className="input w-full"
-              placeholder="Enter maid bill"
-              value={formData.rentDetails.additionalBills.maid || ''}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  additionalBills: {
-                    ...formData.rentDetails.additionalBills,
-                    maid: e.target.value
-                  }
-                }
-              })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Other bills (₹/month)</label>
-            <input
-              type="number"
-              className="input w-full"
-              placeholder="Enter other bills"
-              value={formData.rentDetails.additionalBills.others || ''}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  additionalBills: {
-                    ...formData.rentDetails.additionalBills,
-                    others: e.target.value
                   }
                 }
               })}
@@ -766,22 +700,8 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
 }) => {
   return (
     <>
-      <AddressFields 
-        formData={formData} 
-        setFormData={setFormData}
-        listingType="sell"
-        images={images}
-        handleImageUpload={handleImageUpload}
-        removeImage={removeImage}
-      />
-      <ContactNumberField 
-        formData={formData} 
-        setFormData={setFormData}
-        listingType="sell"
-        images={images}
-        handleImageUpload={handleImageUpload}
-        removeImage={removeImage}
-      />
+      <AddressFields formData={formData} setFormData={setFormData} />
+      <ContactNumberField formData={formData} setFormData={setFormData} />
 
       {/* Property Type (BHK Selection) */}
       <section className="bg-white p-6 rounded-2xl shadow mb-8">
@@ -804,13 +724,31 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
         </div>
       </section>
 
-      {/* Details (remove Availability) */}
+      {/* Availability, Furnishing, Parking */}
       <section className="bg-white p-6 rounded-2xl shadow mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Furnishing Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Availability</label>
             <select
+              className="input w-full focus:ring-2 focus:ring-primary-300"
+              value={formData.sellDetails?.availability || ''}
+              onChange={e => setFormData({
+                ...formData,
+                sellDetails: {
+                  ...formData.sellDetails,
+                  availability: e.target.value
+                }
+              })}
+            >
+              <option value="">Select Availability</option>
+              <option value="immediate">Immediate</option>
+              <option value="handover">Handover Date</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Furnishing Type</label>
+            <select 
               className="input w-full focus:ring-2 focus:ring-primary-300"
               value={formData.furnishingType || ''}
               onChange={e => setFormData({
@@ -826,7 +764,7 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
-            <select
+            <select 
               className="input w-full focus:ring-2 focus:ring-primary-300"
               value={formData.parking || ''}
               onChange={e => setFormData({
@@ -843,95 +781,39 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
         </div>
       </section>
 
-      {/* Amenities Section (moved above Move In) */}
+      {/* Preferences Section for SellForm (Full Homes) */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Amenities</h2>
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2">Appliances</h3>
-          <div className="flex flex-wrap gap-3">
-            {['TV', 'Fridge', 'AC', 'Washing Machine', 'Water Purifier', 'Geyser'].map(appliance => (
-              <label key={appliance} className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-5 w-5 text-primary-600"
-                  checked={Array.isArray(formData.amenities?.appliances) && formData.amenities.appliances.includes(appliance)}
-                  onChange={() => {
-                    const appliances = formData.amenities?.appliances || [];
-                    setFormData({
-                      ...formData,
-                      amenities: {
-                        ...formData.amenities,
-                        appliances: appliances.includes(appliance)
-                          ? appliances.filter((a: string) => a !== appliance)
-                          : [...appliances, appliance],
-                        furniture: formData.amenities?.furniture || [],
-                        building: formData.amenities?.building || [],
-                      }
-                    });
-                  }}
-                />
-                <span className="ml-2">{appliance}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2">Furniture</h3>
-          <div className="flex flex-wrap gap-3">
-            {['Bed', 'Wardrobe', 'Study Table', 'Dining Table', 'Sofa', 'Mattress'].map(furniture => (
-              <label key={furniture} className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-5 w-5 text-primary-600"
-                  checked={Array.isArray(formData.amenities?.furniture) && formData.amenities.furniture.includes(furniture)}
-                  onChange={() => {
-                    const furnitureArr = formData.amenities?.furniture || [];
-                    setFormData({
-                      ...formData,
-                      amenities: {
-                        ...formData.amenities,
-                        furniture: furnitureArr.includes(furniture)
-                          ? furnitureArr.filter((a: string) => a !== furniture)
-                          : [...furnitureArr, furniture],
-                        appliances: formData.amenities?.appliances || [],
-                        building: formData.amenities?.building || [],
-                      }
-                    });
-                  }}
-                />
-                <span className="ml-2">{furniture}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2">Building</h3>
-          <div className="flex flex-wrap gap-3">
-            {['Lift', 'Power Backup', 'Security', 'Parking', 'Gym', 'Swimming Pool', 'Garden', 'CCTV'].map(building => (
-              <label key={building} className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  className="form-checkbox h-5 w-5 text-primary-600"
-                  checked={Array.isArray(formData.amenities?.building) && formData.amenities.building.includes(building)}
-                  onChange={() => {
-                    const buildingArr = formData.amenities?.building || [];
-                    setFormData({
-                      ...formData,
-                      amenities: {
-                        ...formData.amenities,
-                        building: buildingArr.includes(building)
-                          ? buildingArr.filter((a: string) => a !== building)
-                          : [...buildingArr, building],
-                        appliances: formData.amenities?.appliances || [],
-                        furniture: formData.amenities?.furniture || [],
-                      }
-                    });
-                  }}
-                />
-                <span className="ml-2">{building}</span>
-              </label>
-            ))}
-          </div>
+        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Preferences</h2>
+        <div className="flex flex-wrap gap-3">
+          {USER_PREFERENCES.map(pref => {
+            const Icon = LucideIcons[pref.icon] || LucideIcons.User;
+            const selected = Array.isArray(formData.sellDetails.preferences) && formData.sellDetails.preferences.includes(pref.label);
+            return (
+              <button
+                key={pref.id}
+                type="button"
+                onClick={() => {
+                  const preferences = formData.sellDetails.preferences || [];
+                  setFormData({
+                    ...formData,
+                    sellDetails: {
+                      ...formData.sellDetails,
+                      preferences: preferences.includes(pref.label)
+                        ? preferences.filter((p: string) => p !== pref.label)
+                        : [...preferences, pref.label]
+                    }
+                  });
+                }}
+                className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
+                  ? 'bg-primary-600 text-white border-primary-600 shadow'
+                  : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+                tabIndex={0}
+              >
+                <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
+                <span className="whitespace-nowrap">{pref.label}</span>
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -1087,6 +969,42 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
           {images.length >= 5 && <span className="text-red-500">(Maximum reached)</span>}
         </div>
         <div className="text-xs text-gray-400 mt-1">Tip: Add clear, well-lit photos for better responses.</div>
+      </section>
+
+      {/* Amenities Section for SellForm (Full Homes) */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Amenities</h2>
+        <div className="flex flex-wrap gap-3">
+          {AMENITY_OPTIONS.map(opt => {
+            const Icon = opt.icon;
+            const selected = Array.isArray(formData.sellDetails.amenities) && formData.sellDetails.amenities.includes(opt.key);
+            return (
+              <button
+                key={opt.key}
+                type="button"
+                onClick={() => {
+                  const amenities = formData.sellDetails.amenities || [];
+                  setFormData({
+                    ...formData,
+                    sellDetails: {
+                      ...formData.sellDetails,
+                      amenities: amenities.includes(opt.key)
+                        ? amenities.filter((a: string) => a !== opt.key)
+                        : [...amenities, opt.key]
+                    }
+                  });
+                }}
+                className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
+                  ? 'bg-primary-600 text-white border-primary-600 shadow'
+                  : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+                tabIndex={0}
+              >
+                <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
+                <span className="whitespace-nowrap">{opt.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </section>
     </>
   );
