@@ -11,6 +11,13 @@ import 'swiper/css/pagination';
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('Failed to find the root element');
 
+window.addEventListener('error', function (e) {
+  console.error('Global error:', e.error || e.message);
+});
+window.addEventListener('unhandledrejection', function (e) {
+  console.error('Unhandled promise rejection:', e.reason);
+});
+
 createRoot(rootElement).render(
   <StrictMode>
     <App />

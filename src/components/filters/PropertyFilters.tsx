@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Filter, X } from 'lucide-react';
-// Removed: import Slider from 'rc-slider';
-// Removed: import 'rc-slider/assets/index.css';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useAppContext } from '../../context/AppContext';
+import {
+  Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home
+} from 'lucide-react';
 
 interface PropertyFiltersProps {
   propertyTypes: string[];
   listingType: 'buy' | 'rent';
 }
 
-const PRICE_MIN = 10000000;
-const PRICE_MAX = 100000000;
+const PRICE_MIN = 1000; // Allow min price from 1,000
+const PRICE_MAX = 100000000; // Allow max price up to 10,00,00,000 (1 Cr)
 
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listingType }) => {
   const { filters, setFilters } = useAppContext();
@@ -22,20 +25,40 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
   const [detectedState, setDetectedState] = useState('');
   const [detecting, setDetecting] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerRef = React.useRef<HTMLDivElement>(null);
+
+  // Focus trap for accessibility
+  useEffect(() => {
+    if (drawerOpen && drawerRef.current) {
+      drawerRef.current.focus();
+    }
+  }, [drawerOpen]);
 
   // Add local state for price/rent inputs
-  const [localMinPrice, setLocalMinPrice] = useState(filters[listingType]?.minPrice === '' ? '' : filters[listingType]?.minPrice);
-  const [localMaxPrice, setLocalMaxPrice] = useState(filters[listingType]?.maxPrice === '' ? '' : filters[listingType]?.maxPrice);
+  // Change local state for price inputs to use priceMin and priceMax
+  const [localPriceMin, setLocalPriceMin] = useState<number | undefined>(filters[listingType]?.priceMin);
+  const [localPriceMax, setLocalPriceMax] = useState<number | undefined>(filters[listingType]?.priceMax);
   const [localMinRent, setLocalMinRent] = useState(filters[listingType]?.minRent === '' ? '' : filters[listingType]?.minRent);
   const [localMaxRent, setLocalMaxRent] = useState(filters[listingType]?.maxRent === '' ? '' : filters[listingType]?.maxRent);
 
+  // Local state for min/max fields, keyed by listingType
+  const [localMin, setLocalMin] = useState<number | undefined>(
+    listingType === 'rent' ? filters[listingType]?.minRent : filters[listingType]?.priceMin
+  );
+  const [localMax, setLocalMax] = useState<number | undefined>(
+    listingType === 'rent' ? filters[listingType]?.maxRent : filters[listingType]?.priceMax
+  );
+
   // Sync local state with context filters when filters change externally
   useEffect(() => {
-    setLocalMinPrice(filters[listingType]?.minPrice === '' ? '' : filters[listingType]?.minPrice);
-    setLocalMaxPrice(filters[listingType]?.maxPrice === '' ? '' : filters[listingType]?.maxPrice);
+    setLocalPriceMin(filters[listingType]?.priceMin);
+    setLocalPriceMax(filters[listingType]?.priceMax);
     setLocalMinRent(filters[listingType]?.minRent === '' ? '' : filters[listingType]?.minRent);
     setLocalMaxRent(filters[listingType]?.maxRent === '' ? '' : filters[listingType]?.maxRent);
-  }, [filters[listingType]?.minPrice, filters[listingType]?.maxPrice, filters[listingType]?.minRent, filters[listingType]?.maxRent]);
+    setLocalMin(listingType === 'rent' ? filters[listingType]?.minRent : filters[listingType]?.priceMin);
+    setLocalMax(listingType === 'rent' ? filters[listingType]?.maxRent : filters[listingType]?.priceMax);
+  }, [filters[listingType]?.priceMin, filters[listingType]?.priceMax, filters[listingType]?.minRent, filters[listingType]?.maxRent, listingType]);
 
   useEffect(() => {
     setFilters({ ...filters, activeType: listingType });
@@ -113,14 +136,44 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
     });
   };
 
-  // Handler to update filters only on Enter or blur
-  const handlePriceInput = (name: string, value: string | number) => {
-    let newValue: any = value === '' ? '' : Number(value);
+  // Handler for input changes
+  const handleMinInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '') {
+      setLocalMin(undefined);
+    } else {
+      const num = Number(value);
+      if (!isNaN(num)) setLocalMin(num);
+    }
+  };
+  const handleMaxInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '') {
+      setLocalMax(undefined);
+    } else {
+      const num = Number(value);
+      if (!isNaN(num)) setLocalMax(num);
+    }
+  };
+
+  // Commit filter on blur/enter
+  const commitMin = () => {
+    console.log('Committing min filter:', listingType === 'rent' ? 'minRent' : 'priceMin', localMin);
     setFilters({
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        [name]: newValue,
+        ...(listingType === 'rent' ? { minRent: localMin } : { priceMin: localMin }),
+      },
+    });
+  };
+  const commitMax = () => {
+    console.log('Committing max filter:', listingType === 'rent' ? 'maxRent' : 'priceMax', localMax);
+    setFilters({
+      ...filters,
+      [listingType]: {
+        ...filters[listingType],
+        ...(listingType === 'rent' ? { maxRent: localMax } : { priceMax: localMax }),
       },
     });
   };
@@ -145,8 +198,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             locality: '',
             propertyType: '',
             furnishingType: '',
-            minPrice: PRICE_MIN,
-            maxPrice: PRICE_MAX,
+            priceMin: PRICE_MIN,
+            priceMax: PRICE_MAX,
             minSqft: 0,
             maxSqft: 0,
             ageOfProperty: '',
@@ -177,245 +230,360 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
     }
   };
 
+  // Amenity/feature options with icon and label
+  const AMENITY_OPTIONS = [
+    { key: 'wifi', label: 'Wi-Fi', icon: Wifi },
+    { key: 'parking', label: 'Car Parking', icon: Car },
+    { key: 'water', label: 'Water', icon: Droplet },
+    { key: 'kitchen', label: 'Cook', icon: Utensils },
+    { key: 'gym', label: 'Gym', icon: Dumbbell },
+    { key: 'ac', label: 'AC', icon: Snowflake },
+    { key: 'security', label: 'Security', icon: Shield },
+    { key: 'tv', label: 'TV', icon: Tv },
+    { key: 'gas', label: 'Gas', icon: Flame },
+    { key: 'fan', label: 'Fan', icon: Fan },
+    { key: 'light', label: 'Light', icon: Lightbulb },
+    { key: 'lock', label: 'Lock', icon: Lock },
+    { key: 'fridge', label: 'Fridge', icon: Refrigerator },
+    { key: 'washing', label: 'Washing', icon: WashingMachine },
+    { key: 'bed', label: 'Bed', icon: BedDouble },
+    { key: 'shower', label: 'Shower', icon: ShowerHead },
+    { key: 'pet', label: 'Pet Friendly', icon: PawPrint },
+    { key: 'roommate', label: 'Shared Room', icon: Users },
+    { key: 'key', label: 'Private Room', icon: KeyRound },
+    { key: 'power', label: 'Power Backup', icon: Plug },
+    { key: 'music', label: 'Music', icon: Speaker },
+    { key: 'car', label: 'Parking', icon: ParkingCircle },
+    { key: 'bike', label: 'Bike Parking', icon: Bike },
+    { key: 'garden', label: 'Garden', icon: Leaf },
+    { key: 'sunlight', label: 'Sunlight', icon: Sun },
+    { key: 'temperature', label: 'Temperature', icon: Thermometer },
+    { key: 'ventilation', label: 'Ventilation', icon: AirVent },
+    { key: 'purifiedwater', label: 'Purified Water', icon: Droplet },
+    { key: 'house', label: 'Gated Society', icon: Home },
+  ];
+
   const currentFilters = filters[listingType];
+  const selectedAmenities = Array.isArray(currentFilters.amenities)
+    ? currentFilters.amenities
+    : typeof currentFilters.amenities === 'string' && currentFilters.amenities
+      ? currentFilters.amenities.split(',').map((a: string) => a.trim()).filter(Boolean)
+      : [];
+  const handleAmenityToggle = (key: string) => {
+    let newAmenities: string[];
+    if (selectedAmenities.includes(key)) {
+      newAmenities = selectedAmenities.filter((a: string) => a !== key);
+    } else {
+      newAmenities = [...selectedAmenities, key];
+    }
+    setFilters({
+      ...filters,
+      [listingType]: {
+        ...filters[listingType],
+        amenities: newAmenities,
+      },
+    });
+  };
 
   return (
-    <div className="bg-white shadow-sm rounded-lg mb-6">
-      <div className="flex items-center justify-between p-4 border-b border-gray-100">
-        <div className="flex items-center">
-          <Filter className="w-5 h-5 text-gray-500 mr-2" />
-          <h3 className="font-medium text-lg">Filters</h3>
-        </div>
+    <div className="bg-white shadow-sm rounded-lg mb-6 relative">
+      {/* Filters Button above amenity chips */}
+      <div className="w-full flex justify-center md:justify-start p-4 border-b border-gray-100 bg-white">
         <button
-          onClick={toggleFilters}
-          className="text-primary-600 hover:text-primary-700 text-sm font-medium md:hidden"
+          onClick={() => setDrawerOpen(true)}
+          className="flex items-center gap-2 px-5 py-3 rounded-full border border-primary-200 text-primary-600 font-semibold bg-white shadow hover:bg-primary-50 transition"
+          aria-label="Open Filters"
         >
-          {isFilterOpen ? 'Hide' : 'Show'}
+          <Filter className="w-6 h-6" />
+          Filters
         </button>
       </div>
-
-      <div className={`border-t-0 p-6 ${isFilterOpen ? 'block' : 'hidden md:block'}`}> 
-        {/* Row 1: Price, Location, Property Type */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {/* Price Filter */}
-          {listingType === 'rent' ? (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Min Rent (₹/month)</label>
-              <input
-                type="number"
-                name="minRent"
-                className="input w-full mb-2"
-                placeholder="Enter minimum rent"
-                min={0}
-                value={localMinRent}
-                onChange={e => setLocalMinRent(e.target.value)}
-                onBlur={() => handlePriceInput('minRent', localMinRent)}
-                onKeyDown={e => { if (e.key === 'Enter') handlePriceInput('minRent', localMinRent); }}
-              />
-              <label className="block text-sm font-medium text-gray-700 mb-2 mt-2">Max Rent (₹/month)</label>
-              <input
-                type="number"
-                name="maxRent"
-                className="input w-full"
-                placeholder="Enter maximum rent"
-                min={currentFilters.minRent === '' ? 0 : currentFilters.minRent}
-                value={localMaxRent}
-                onChange={e => setLocalMaxRent(e.target.value)}
-                onBlur={() => handlePriceInput('maxRent', localMaxRent)}
-                onKeyDown={e => { if (e.key === 'Enter') handlePriceInput('maxRent', localMaxRent); }}
-              />
-              {currentFilters.minRent > currentFilters.maxRent && (
-                <div className="text-red-500 text-xs mt-1">Minimum rent cannot exceed maximum rent.</div>
-              )}
-            </div>
-          ) : (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Min Price (₹)</label>
-              <input
-                type="number"
-                name="minPrice"
-                className="input w-full mb-2"
-                placeholder="Enter minimum price"
-                min={PRICE_MIN}
-                value={localMinPrice}
-                onChange={e => setLocalMinPrice(e.target.value)}
-                onBlur={() => handlePriceInput('minPrice', localMinPrice)}
-                onKeyDown={e => { if (e.key === 'Enter') handlePriceInput('minPrice', localMinPrice); }}
-              />
-              <label className="block text-sm font-medium text-gray-700 mb-2 mt-2">Max Price (₹)</label>
-              <input
-                type="number"
-                name="maxPrice"
-                className="input w-full"
-                placeholder="Enter maximum price"
-                min={currentFilters.minPrice === '' ? PRICE_MIN : currentFilters.minPrice}
-                value={localMaxPrice}
-                onChange={e => setLocalMaxPrice(e.target.value)}
-                onBlur={() => handlePriceInput('maxPrice', localMaxPrice)}
-                onKeyDown={e => { if (e.key === 'Enter') handlePriceInput('maxPrice', localMaxPrice); }}
-              />
-              {currentFilters.minPrice > currentFilters.maxPrice && (
-                <div className="text-red-500 text-xs mt-1">Minimum price cannot exceed maximum price.</div>
-              )}
-            </div>
-          )}
-
-          {/* Location */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Location (Locality, City or Both)</label>
-            <input
-              type="text"
-              name="location"
-              placeholder="Enter locality, city, or both (e.g. Whitefield, Bangalore)"
-              value={locationInput}
-              onChange={handleLocationChange}
-              className="input"
-              autoComplete="off"
-              onBlur={() => setTimeout(() => setSuggestions([]), 150)}
-              onFocus={async () => {
-                if (locationInput.length > 2) {
-                  setDetecting(true);
-                  const results = await fetchSuggestions(locationInput);
-                  setSuggestions(results);
-                  setDetecting(false);
-                }
-              }}
-              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-            />
-            {/* Suggestions dropdown */}
-            {suggestions.length > 0 && (
-              <ul className="absolute bg-white border border-gray-200 rounded shadow z-20 mt-1 w-full max-h-48 overflow-auto">
-                {suggestions.map((s, i) => (
-                  <li
-                    key={s.place_id}
-                    className="px-4 py-2 cursor-pointer hover:bg-primary-50 text-sm"
-                    onMouseDown={() => handleSuggestionClick(s)}
-                  >
-                    {s.display_name}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {detecting && (
-              <div className="text-xs text-gray-500 mt-1">Detecting city/state...</div>
-            )}
-            {!detecting && detectedCity && detectedState && (
-              <div className="text-xs text-primary-700 mt-1">Detected: {detectedCity}, {detectedState}</div>
-            )}
-          </div>
-
-          {/* Property Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
-            <select
-              name="propertyType"
-              value={currentFilters.propertyType}
-              onChange={handleFilterChange}
-              className="input"
-              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-            >
-              <option value="">All Types</option>
-              {propertyTypes.map((type) => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-gray-100 my-6" />
-
-        {/* Row 2: BHK, Bathrooms, Furnishing, Availability */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
-            <select
-              name="bhk"
-              value={currentFilters.bhk || ''}
-              onChange={handleFilterChange}
-              className="input w-full"
-              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-            >
-              <option value="">Any</option>
-              {[1,2,3,4,5].map((n) => (
-                <option key={n} value={n}>{n} BHK</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Bathrooms</label>
-            <select
-              name="bathrooms"
-              value={currentFilters.bathrooms || ''}
-              onChange={handleFilterChange}
-              className="input w-full"
-              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-            >
-              <option value="">Any</option>
-              <option value="dedicated">Dedicated</option>
-              <option value="shared">Shared</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Furnishing Type</label>
-            <select
-              name="furnishingType"
-              value={currentFilters.furnishingType || ''}
-              onChange={handleFilterChange}
-              className="input w-full"
-              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-            >
-              <option value="">All</option>
-              <option value="Furnished">Furnished</option>
-              <option value="Semi-furnished">Semi-furnished</option>
-              <option value="Unfurnished">Unfurnished</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Availability</label>
-            <select
-              name="availability"
-              value={currentFilters.availability || ''}
-              onChange={handleFilterChange}
-              className="input w-full"
-              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-            >
-              <option value="">Any</option>
-              <option value="immediate">Immediate</option>
-              <option value="date">Select Date</option>
-            </select>
-            {currentFilters.availability === 'date' && (
-              <DatePicker
-                selected={currentFilters.availableFrom ? new Date(currentFilters.availableFrom) : null}
-                onChange={date => handleFilterChange({
-                  target: {
-                    name: 'availableFrom',
-                    value: date ? date.toISOString().split('T')[0] : ''
-                  }
-                })}
-                minDate={new Date()}
-                className="input mt-2 w-full"
-                placeholderText="Select date"
-                dateFormat="yyyy-MM-dd"
-                isClearable
-                showPopperArrow={false}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* Footer Buttons */}
-        <div className="flex justify-end mt-4">
-          <button
-            onClick={clearFilters}
-            className="flex items-center text-gray-600 hover:text-gray-800 mr-4"
-          >
-            <X className="w-4 h-4 mr-1" />
-            Clear All
-          </button>
-          {/* Removed Apply Filters button to prevent accidental page reloads */}
+      {/* Amenity/Feature Select Buttons Row (always visible) */}
+      <div className="overflow-x-auto py-3 px-4 border-b border-gray-100 bg-white sticky top-0 z-30">
+        <div className="flex gap-3 min-w-max">
+          {AMENITY_OPTIONS.map(opt => {
+            const Icon = opt.icon;
+            const selected = selectedAmenities.includes(opt.key);
+            return (
+              <button
+                key={opt.key}
+                type="button"
+                onClick={() => handleAmenityToggle(opt.key)}
+                className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
+                  ? 'bg-primary-600 text-white border-primary-600 shadow'
+                  : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+                tabIndex={0}
+              >
+                <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
+                <span className="whitespace-nowrap">{opt.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
+      {/* Drawer/Modal for Detailed Filters */}
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-40 transition-opacity"
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Close Filters Overlay"
+          />
+          {/* Drawer Panel */}
+          <div
+            ref={drawerRef}
+            tabIndex={-1}
+            className="relative h-full bg-white shadow-2xl rounded-r-2xl w-full max-w-md md:max-w-lg lg:max-w-xl flex flex-col animate-slide-in-left focus:outline-none"
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.16)' }}
+            role="dialog"
+            aria-modal="true"
+          >
+            {/* Sticky Header */}
+            <div className="sticky top-0 z-10 bg-white pt-6 pb-3 px-6 border-b flex items-center justify-between rounded-tr-2xl">
+              <h3 className="font-bold text-xl flex items-center gap-2"><Filter className="w-6 h-6" /> Filters</h3>
+              <div className="flex gap-2">
+                <button onClick={clearFilters} className="text-gray-500 hover:text-primary-600 text-sm font-medium px-3 py-1 rounded transition">Clear All</button>
+                <button onClick={() => setDrawerOpen(false)} className="text-gray-500 hover:text-primary-600 p-2 rounded-full transition" aria-label="Close Filters"><X className="w-6 h-6" /></button>
+              </div>
+            </div>
+            {/* Amenity Chips Sticky in Drawer */}
+            <div className="overflow-x-auto py-3 px-2 border-b border-gray-100 bg-white sticky top-[60px] z-10">
+              <div className="flex gap-3 min-w-max">
+                {AMENITY_OPTIONS.map(opt => {
+                  const Icon = opt.icon;
+                  const selected = selectedAmenities.includes(opt.key);
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => handleAmenityToggle(opt.key)}
+                      className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
+                        ? 'bg-primary-600 text-white border-primary-600 shadow'
+                        : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+                      tabIndex={0}
+                    >
+                      <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
+                      <span className="whitespace-nowrap">{opt.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {/* Filter Content */}
+            <div className="flex-1 overflow-y-auto px-6 pb-32 pt-4">
+              {/* Row 1: Price, Location, Property Type */}
+              <div className="mb-6">
+                {listingType === 'rent' ? (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Max Rent</label>
+                    <Slider
+                      min={1000}
+                      max={100000}
+                      step={1000}
+                      value={currentFilters.maxRent || 100000}
+                      onChange={(value: number) => {
+                        setFilters({
+                          ...filters,
+                          [listingType]: {
+                            ...filters[listingType],
+                            maxRent: value,
+                          },
+                        });
+                      }}
+                      trackStyle={{ backgroundColor: '#2563eb', height: 6 }}
+                      handleStyle={{
+                        borderColor: '#2563eb',
+                        height: 20,
+                        width: 20,
+                        marginTop: -7,
+                        backgroundColor: '#2563eb',
+                      }}
+                      railStyle={{ backgroundColor: '#e5e7eb', height: 6 }}
+                    />
+                    <div className="text-sm text-gray-600 mt-2 text-center font-medium">
+                      Up to {formatRent(currentFilters.maxRent || 100000)}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Min Price (₹)</label>
+                    <input
+                      type="number"
+                      name="priceMin"
+                      className="input w-full mb-2"
+                      min={PRICE_MIN}
+                      value={localMin === undefined ? '' : localMin}
+                      onChange={handleMinInput}
+                      onBlur={commitMin}
+                      onKeyDown={e => { if (e.key === 'Enter') commitMin(); }}
+                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2 mt-2">Max Price (₹)</label>
+                    <input
+                      type="number"
+                      name="priceMax"
+                      className="input w-full mb-2"
+                      placeholder="Max Price"
+                      min={PRICE_MIN}
+                      value={localMax === undefined ? '' : localMax}
+                      onChange={handleMaxInput}
+                      onBlur={commitMax}
+                      onKeyDown={e => { if (e.key === 'Enter') commitMax(); }}
+                    />
+                    {localMin !== undefined && localMax !== undefined && Number(localMin) > Number(localMax) && (
+                      <div className="text-red-500 text-xs mt-1">Minimum price cannot exceed maximum price.</div>
+                    )}
+                  </div>
+                )}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Location (Locality, City or Both)</label>
+                  <input
+                    type="text"
+                    name="location"
+                    placeholder="Enter locality, city, or both (e.g. Whitefield, Bangalore)"
+                    value={locationInput}
+                    onChange={handleLocationChange}
+                    className="input w-full"
+                    autoComplete="off"
+                    onBlur={() => setTimeout(() => setSuggestions([]), 150)}
+                    onFocus={async () => {
+                      if (locationInput.length > 2) {
+                        setDetecting(true);
+                        const results = await fetchSuggestions(locationInput);
+                        setSuggestions(results);
+                        setDetecting(false);
+                      }
+                    }}
+                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                  />
+                  {suggestions.length > 0 && (
+                    <ul className="absolute bg-white border border-gray-200 rounded shadow z-20 mt-1 w-full max-h-48 overflow-auto">
+                      {suggestions.map((s, i) => (
+                        <li
+                          key={s.place_id}
+                          className="px-4 py-2 cursor-pointer hover:bg-primary-50 text-sm"
+                          onMouseDown={() => handleSuggestionClick(s)}
+                        >
+                          {s.display_name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {detecting && (
+                    <div className="text-xs text-gray-500 mt-1">Detecting city/state...</div>
+                  )}
+                  {!detecting && detectedCity && detectedState && (
+                    <div className="text-xs text-primary-700 mt-1">Detected: {detectedCity}, {detectedState}</div>
+                  )}
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+                  <select
+                    name="propertyType"
+                    value={currentFilters.propertyType}
+                    onChange={handleFilterChange}
+                    className="input w-full"
+                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                  >
+                    <option value="">All Types</option>
+                    {propertyTypes.map((type) => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {/* Row 2: BHK, Bathrooms, Furnishing, Availability */}
+              <div className="mb-6">
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
+                  <select
+                    name="bhk"
+                    value={currentFilters.bhk || ''}
+                    onChange={handleFilterChange}
+                    className="input w-full"
+                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                  >
+                    <option value="">Any</option>
+                    {[1,2,3,4,5].map((n) => (
+                      <option key={n} value={n}>{n} BHK</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Bathrooms</label>
+                  <select
+                    name="bathrooms"
+                    value={currentFilters.bathrooms || ''}
+                    onChange={handleFilterChange}
+                    className="input w-full"
+                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                  >
+                    <option value="">Any</option>
+                    <option value="dedicated">Dedicated</option>
+                    <option value="shared">Shared</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Furnishing Type</label>
+                  <select
+                    name="furnishingType"
+                    value={currentFilters.furnishingType || ''}
+                    onChange={handleFilterChange}
+                    className="input w-full"
+                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                  >
+                    <option value="">All</option>
+                    <option value="Furnished">Furnished</option>
+                    <option value="Semi-furnished">Semi-furnished</option>
+                    <option value="Unfurnished">Unfurnished</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Availability</label>
+                  <select
+                    name="availability"
+                    value={currentFilters.availability || ''}
+                    onChange={handleFilterChange}
+                    className="input w-full"
+                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                  >
+                    <option value="">Any</option>
+                    <option value="immediate">Immediate</option>
+                    <option value="date">Select Date</option>
+                  </select>
+                  {currentFilters.availability === 'date' && (
+                    <DatePicker
+                      selected={currentFilters.availableFrom ? new Date(currentFilters.availableFrom) : null}
+                      onChange={date => handleFilterChange({
+                        target: {
+                          name: 'availableFrom',
+                          value: date ? date.toISOString().split('T')[0] : ''
+                        }
+                      })}
+                      minDate={new Date()}
+                      className="input mt-2 w-full"
+                      placeholderText="Select date"
+                      dateFormat="yyyy-MM-dd"
+                      isClearable
+                      showPopperArrow={false}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+            {/* Sticky Footer with Apply Button */}
+            <div className="sticky bottom-0 z-20 bg-white border-t pt-3 pb-5 px-6 flex justify-end rounded-br-2xl shadow-lg">
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="btn btn-primary px-8 py-3 rounded-full text-lg font-semibold shadow hover:scale-105 transition"
+                aria-label="Apply Filters"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
