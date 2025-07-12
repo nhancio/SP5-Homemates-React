@@ -222,8 +222,18 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
             isPremium: data.isPremium || false,
             preferences: data.preferences || [],
           };
-          // Only show onboarding if onboardingComplete is not true
-          needsOnboarding = !data.onboardingComplete;
+          // Check for required fields
+          const hasRequiredFields = !!(data.userPhoneNumber && data.gender && data.lookingFor);
+          if (typeof data.onboardingComplete === 'undefined') {
+            if (hasRequiredFields) {
+              await userRef.set({ onboardingComplete: true }, { merge: true });
+              needsOnboarding = false;
+            } else {
+              needsOnboarding = true;
+            }
+          } else {
+            needsOnboarding = !data.onboardingComplete;
+          }
         } else {
           userData = {
             id: firebaseUser.uid,
