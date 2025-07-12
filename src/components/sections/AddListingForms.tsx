@@ -179,6 +179,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
   handleImageUpload,
   removeImage
 }) => {
+  const [isDragActive, setIsDragActive] = useState(false);
   return (
     <>
       <AddressFields formData={formData} setFormData={setFormData} />
@@ -659,7 +660,28 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
       {/* Upload Images Section (modern, user-friendly) */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Upload Images</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-2">
+        <div
+          className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-2 border-2 border-dashed rounded-lg p-2 transition ${isDragActive ? 'border-primary-500 bg-primary-50' : 'border-primary-300 bg-white'}`}
+          onDragOver={e => { e.preventDefault(); setIsDragActive(true); }}
+          onDragLeave={e => { e.preventDefault(); setIsDragActive(false); }}
+          onDrop={e => {
+            e.preventDefault();
+            setIsDragActive(false);
+            const files = Array.from(e.dataTransfer.files || []);
+            if (files.length + images.length > 5) {
+              alert('Maximum 5 images allowed');
+              return;
+            }
+            files.forEach(file => {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const result = e.target?.result as string;
+                setImages(prev => [...prev, result]);
+              };
+              reader.readAsDataURL(file);
+            });
+          }}
+        >
           {images.map((image, index) => (
             <div key={index} className="relative rounded-lg shadow hover:shadow-lg transition overflow-hidden group bg-gray-50">
               <img src={image} alt={`Property ${index + 1}`} className="w-full h-24 sm:h-28 object-cover" />
@@ -677,7 +699,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
             <label htmlFor="image-upload" className="flex flex-col items-center justify-center h-24 sm:h-28 rounded-lg border-2 border-dashed border-primary-300 cursor-pointer hover:border-primary-500 bg-primary-50 text-primary-600 font-medium shadow group transition">
               <Camera className="h-7 w-7 mb-1 group-hover:text-primary-700" />
               <span className="text-xs">Add Photo</span>
-              <input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              <input id="image-upload" type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
             </label>
           )}
         </div>
@@ -960,7 +982,7 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
             <label htmlFor="image-upload" className="flex flex-col items-center justify-center h-24 sm:h-28 rounded-lg border-2 border-dashed border-primary-300 cursor-pointer hover:border-primary-500 bg-primary-50 text-primary-600 font-medium shadow group transition">
               <Camera className="h-7 w-7 mb-1 group-hover:text-primary-700" />
               <span className="text-xs">Add Photo</span>
-              <input id="image-upload" type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+              <input id="image-upload" type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
             </label>
           )}
         </div>
