@@ -467,6 +467,108 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
         </div>
       </section>
 
+      {/* Rental Details Section for RentForm (Shared Homes) */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Rental Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rent (₹/month)</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter rent amount"
+              value={formData.rentDetails.costs.rent}
+              onChange={e => setFormData({
+                ...formData,
+                rentDetails: {
+                  ...formData.rentDetails,
+                  costs: {
+                    ...formData.rentDetails.costs,
+                    rent: e.target.value
+                  }
+                }
+              })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance (₹/month)</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter maintenance amount"
+              value={formData.rentDetails.costs.maintenance}
+              onChange={e => setFormData({
+                ...formData,
+                rentDetails: {
+                  ...formData.rentDetails,
+                  costs: {
+                    ...formData.rentDetails.costs,
+                    maintenance: e.target.value
+                  }
+                }
+              })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (₹)</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter security deposit"
+              value={formData.rentDetails.costs.securityDeposit}
+              onChange={e => setFormData({
+                ...formData,
+                rentDetails: {
+                  ...formData.rentDetails,
+                  costs: {
+                    ...formData.rentDetails.costs,
+                    securityDeposit: e.target.value
+                  }
+                }
+              })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Setup Cost (₹)</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter setup cost"
+              value={formData.rentDetails.costs.setupCost}
+              onChange={e => setFormData({
+                ...formData,
+                rentDetails: {
+                  ...formData.rentDetails,
+                  costs: {
+                    ...formData.rentDetails.costs,
+                    setupCost: e.target.value
+                  }
+                }
+              })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage (₹)</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter brokerage amount"
+              value={formData.rentDetails.costs.brokerage}
+              onChange={e => setFormData({
+                ...formData,
+                rentDetails: {
+                  ...formData.rentDetails,
+                  costs: {
+                    ...formData.rentDetails.costs,
+                    brokerage: e.target.value
+                  }
+                }
+              })}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Upload Images Section (modern, user-friendly) */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Upload Images</h2>
