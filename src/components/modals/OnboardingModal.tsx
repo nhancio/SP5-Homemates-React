@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { db, auth } from '../../config/firebase';
 
 interface OnboardingModalProps {
   userId: string;
@@ -37,10 +37,12 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
     }
     setLoading(true);
     try {
+      const photoURL = auth.currentUser?.photoURL || '';
       await setDoc(doc(db, 'u', userId), {
         userId,
         email,
         name,
+        photoURL, // Save Google photoURL
         userPhoneNumber: mobile,
         gender,
         lookingFor,
