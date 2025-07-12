@@ -222,8 +222,8 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
             isPremium: data.isPremium || false,
             preferences: data.preferences || [],
           };
-          // Only show onboarding if the record does NOT exist
-          needsOnboarding = false;
+          // Only show onboarding if onboardingComplete is not true
+          needsOnboarding = !data.onboardingComplete;
         } else {
           userData = {
             id: firebaseUser.uid,

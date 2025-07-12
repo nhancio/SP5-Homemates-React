@@ -48,6 +48,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
         lookingFor,
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
+        onboardingComplete: true, // Mark onboarding as complete
       }, { merge: true });
       onClose();
     } catch (err) {
