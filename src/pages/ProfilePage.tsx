@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil } from 'lucide-react';
+import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil, Trash } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { getDoc, doc, updateDoc } from 'firebase/firestore';
 import { db, storage } from '../config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import PropertyCard from '../components/ui/PropertyCard';
-import { getListingsByUser, initiatePhonePePayment } from '../services/listings';
+import { getListingsByUser, initiatePhonePePayment, updateListing, deleteListing } from '../services/listings';
+import { useNavigate } from 'react-router-dom';
 
 const ProfilePage = () => {
 
   const { user, isAuthenticated, login, logout } = useAppContext();
+  const navigate = useNavigate();
   const [showUpgradePopup, setShowUpgradePopup] = useState(false);
   const [profileUser, setProfileUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -18,6 +20,8 @@ const ProfilePage = () => {
   const [listingsError, setListingsError] = useState<string | null>(null);
   const [showFileInput, setShowFileInput] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editingListing, setEditingListing] = useState<any>(null);
+  const [deletingListing, setDeletingListing] = useState<string | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -91,6 +95,32 @@ const ProfilePage = () => {
     } catch (err) {
       alert('Payment initiation failed');
       console.error(err);
+    }
+  };
+
+  const handleEditListing = (listing: any) => {
+    // Navigate to edit page with listing data
+    navigate(`/edit-listing/${listing.listingType}/${listing.id}`, {
+      state: { listing }
+    });
+  };
+
+  const handleDeleteListing = async (listing: any) => {
+    if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeletingListing(listing.id);
+    try {
+      await deleteListing(listing.listingType, listing.id);
+      // Remove from local state
+      setUserListings(prev => prev.filter(l => l.id !== listing.id));
+      alert('Listing deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+      alert('Failed to delete listing. Please try again.');
+    } finally {
+      setDeletingListing(null);
     }
   };
 
@@ -292,12 +322,29 @@ const ProfilePage = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {userListings.map(listing => (
-                <div key={listing.id} className="relative group">
-                  <PropertyCard property={listing} listingType={listing.listingType === 'sell' ? 'buy' : 'rent'} />
-                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="btn btn-xs btn-secondary" onClick={() => alert('Edit functionality coming soon!')}>Edit</button>
-                    <button className="btn btn-xs btn-danger" onClick={() => alert('Delete functionality coming soon!')}>Delete</button>
+                <div key={listing.id} className="relative">
+                  {/* Formal Edit/Delete icon buttons always visible, overlay top-right */}
+                  <div className="absolute top-2 right-2 flex gap-2 z-10">
+                    <button 
+                      className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow hover:bg-primary-50 hover:border-primary-400 transition focus:outline-none"
+                      onClick={() => handleEditListing(listing)}
+                      disabled={deletingListing === listing.id}
+                      title="Edit Listing"
+                      aria-label="Edit Listing"
+                    >
+                      <Pencil className="w-5 h-5 text-primary-600" />
+                    </button>
+                    <button 
+                      className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow hover:bg-red-50 hover:border-red-400 transition focus:outline-none"
+                      onClick={() => handleDeleteListing(listing)}
+                      disabled={deletingListing === listing.id}
+                      title="Delete Listing"
+                      aria-label="Delete Listing"
+                    >
+                      {deletingListing === listing.id ? <span className="text-lg">⏳</span> : <Trash className="w-5 h-5 text-red-500" />}
+                    </button>
                   </div>
+                  <PropertyCard property={listing} listingType={listing.listingType === 'sell' ? 'buy' : 'rent'} />
                 </div>
               ))}
             </div>

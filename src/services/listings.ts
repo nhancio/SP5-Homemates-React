@@ -482,3 +482,20 @@ export async function updateListing(type: 'rent' | 'sell', id: string, data: Par
     throw error;
   }
 }
+
+/**
+ * Delete a listing by ID and type (rent/sell)
+ * @param type 'rent' | 'sell'
+ * @param id Listing document ID
+ */
+export async function deleteListing(type: 'rent' | 'sell', id: string) {
+  try {
+    const collectionName = type === 'rent' ? 'r' : 's';
+    const docRef = doc(db, collectionName, id);
+    await import('firebase/firestore').then(({ deleteDoc }) => deleteDoc(docRef));
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting listing:', error);
+    throw error;
+  }
+}
