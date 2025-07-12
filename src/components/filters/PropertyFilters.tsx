@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Filter, X } from 'lucide-react';
-import Slider from 'rc-slider';
-import 'rc-slider/assets/index.css';
+// Removed: import Slider from 'rc-slider';
+// Removed: import 'rc-slider/assets/index.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useAppContext } from '../../context/AppContext';
@@ -22,6 +22,20 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
   const [detectedState, setDetectedState] = useState('');
   const [detecting, setDetecting] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
+
+  // Add local state for price/rent inputs
+  const [localMinPrice, setLocalMinPrice] = useState(filters[listingType]?.minPrice === '' ? '' : filters[listingType]?.minPrice);
+  const [localMaxPrice, setLocalMaxPrice] = useState(filters[listingType]?.maxPrice === '' ? '' : filters[listingType]?.maxPrice);
+  const [localMinRent, setLocalMinRent] = useState(filters[listingType]?.minRent === '' ? '' : filters[listingType]?.minRent);
+  const [localMaxRent, setLocalMaxRent] = useState(filters[listingType]?.maxRent === '' ? '' : filters[listingType]?.maxRent);
+
+  // Sync local state with context filters when filters change externally
+  useEffect(() => {
+    setLocalMinPrice(filters[listingType]?.minPrice === '' ? '' : filters[listingType]?.minPrice);
+    setLocalMaxPrice(filters[listingType]?.maxPrice === '' ? '' : filters[listingType]?.maxPrice);
+    setLocalMinRent(filters[listingType]?.minRent === '' ? '' : filters[listingType]?.minRent);
+    setLocalMaxRent(filters[listingType]?.maxRent === '' ? '' : filters[listingType]?.maxRent);
+  }, [filters[listingType]?.minPrice, filters[listingType]?.maxPrice, filters[listingType]?.minRent, filters[listingType]?.maxRent]);
 
   useEffect(() => {
     setFilters({ ...filters, activeType: listingType });
@@ -83,11 +97,30 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    let newValue: any = value;
+    if ([
+      'minRent', 'maxRent', 'minPrice', 'maxPrice', 'minSqft', 'maxSqft'
+    ].includes(name)) {
+      newValue = value === '' ? '' : Number(value);
+    }
+    console.log('Filter change', name, value, newValue);
     setFilters({
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        [name]: ['minRent', 'maxRent', 'minPrice', 'maxPrice', 'minSqft', 'maxSqft'].includes(name) ? Number(value) : value,
+        [name]: newValue,
+      },
+    });
+  };
+
+  // Handler to update filters only on Enter or blur
+  const handlePriceInput = (name: string, value: string | number) => {
+    let newValue: any = value === '' ? '' : Number(value);
+    setFilters({
+      ...filters,
+      [listingType]: {
+        ...filters[listingType],
+        [name]: newValue,
       },
     });
   };
@@ -167,74 +200,63 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
           {/* Price Filter */}
           {listingType === 'rent' ? (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Max Rent</label>
-              <div className="px-2">
-                <Slider
-                  min={1000}
-                  max={100000}
-                  step={1000}
-                  value={currentFilters.maxRent || 100000}
-                  onChange={(value: number) => {
-                    setFilters({
-                      ...filters,
-                      [listingType]: {
-                        ...filters[listingType],
-                        maxRent: value,
-                      },
-                    });
-                  }}
-                  trackStyle={{ backgroundColor: '#2563eb', height: 6 }}
-                  handleStyle={{
-                    borderColor: '#2563eb',
-                    height: 20,
-                    width: 20,
-                    marginTop: -7,
-                    backgroundColor: '#2563eb',
-                  }}
-                  railStyle={{ backgroundColor: '#e5e7eb', height: 6 }}
-                />
-              </div>
-              <div className="text-sm text-gray-600 mt-2 text-center font-medium">
-                Up to {formatRent(currentFilters.maxRent || 100000)}
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Min Rent (₹/month)</label>
+              <input
+                type="number"
+                name="minRent"
+                className="input w-full mb-2"
+                placeholder="Enter minimum rent"
+                min={0}
+                value={localMinRent}
+                onChange={e => setLocalMinRent(e.target.value)}
+                onBlur={() => handlePriceInput('minRent', localMinRent)}
+                onKeyDown={e => { if (e.key === 'Enter') handlePriceInput('minRent', localMinRent); }}
+              />
+              <label className="block text-sm font-medium text-gray-700 mb-2 mt-2">Max Rent (₹/month)</label>
+              <input
+                type="number"
+                name="maxRent"
+                className="input w-full"
+                placeholder="Enter maximum rent"
+                min={currentFilters.minRent === '' ? 0 : currentFilters.minRent}
+                value={localMaxRent}
+                onChange={e => setLocalMaxRent(e.target.value)}
+                onBlur={() => handlePriceInput('maxRent', localMaxRent)}
+                onKeyDown={e => { if (e.key === 'Enter') handlePriceInput('maxRent', localMaxRent); }}
+              />
+              {currentFilters.minRent > currentFilters.maxRent && (
+                <div className="text-red-500 text-xs mt-1">Minimum rent cannot exceed maximum rent.</div>
+              )}
             </div>
           ) : (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
-              <div className="px-2">
-                <Slider
-                  range
-                  min={PRICE_MIN}
-                  max={PRICE_MAX}
-                  step={500000}
-                  value={[
-                    currentFilters.minPrice || PRICE_MIN,
-                    currentFilters.maxPrice || PRICE_MAX,
-                  ]}
-                  onChange={(values: number[]) => {
-                    setFilters({
-                      ...filters,
-                      [listingType]: {
-                        ...filters[listingType],
-                        minPrice: values[0],
-                        maxPrice: values[1],
-                      },
-                    });
-                  }}
-                  trackStyle={{ backgroundColor: '#2563eb', height: 6 }}
-                  handleStyle={{
-                    borderColor: '#2563eb',
-                    height: 20,
-                    width: 20,
-                    marginTop: -7,
-                    backgroundColor: '#2563eb',
-                  }}
-                  railStyle={{ backgroundColor: '#e5e7eb', height: 6 }}
-                />
-              </div>
-              <div className="text-sm text-gray-600 mt-2 text-center font-medium">
-                {formatPrice(currentFilters.minPrice || PRICE_MIN)} - {formatPrice(currentFilters.maxPrice || PRICE_MAX)}
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Min Price (₹)</label>
+              <input
+                type="number"
+                name="minPrice"
+                className="input w-full mb-2"
+                placeholder="Enter minimum price"
+                min={PRICE_MIN}
+                value={localMinPrice}
+                onChange={e => setLocalMinPrice(e.target.value)}
+                onBlur={() => handlePriceInput('minPrice', localMinPrice)}
+                onKeyDown={e => { if (e.key === 'Enter') handlePriceInput('minPrice', localMinPrice); }}
+              />
+              <label className="block text-sm font-medium text-gray-700 mb-2 mt-2">Max Price (₹)</label>
+              <input
+                type="number"
+                name="maxPrice"
+                className="input w-full"
+                placeholder="Enter maximum price"
+                min={currentFilters.minPrice === '' ? PRICE_MIN : currentFilters.minPrice}
+                value={localMaxPrice}
+                onChange={e => setLocalMaxPrice(e.target.value)}
+                onBlur={() => handlePriceInput('maxPrice', localMaxPrice)}
+                onKeyDown={e => { if (e.key === 'Enter') handlePriceInput('maxPrice', localMaxPrice); }}
+              />
+              {currentFilters.minPrice > currentFilters.maxPrice && (
+                <div className="text-red-500 text-xs mt-1">Minimum price cannot exceed maximum price.</div>
+              )}
             </div>
           )}
 
@@ -258,6 +280,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                   setDetecting(false);
                 }
               }}
+              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
             />
             {/* Suggestions dropdown */}
             {suggestions.length > 0 && (
@@ -289,6 +312,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
               value={currentFilters.propertyType}
               onChange={handleFilterChange}
               className="input"
+              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
             >
               <option value="">All Types</option>
               {propertyTypes.map((type) => (
@@ -310,6 +334,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
               value={currentFilters.bhk || ''}
               onChange={handleFilterChange}
               className="input w-full"
+              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
             >
               <option value="">Any</option>
               {[1,2,3,4,5].map((n) => (
@@ -324,6 +349,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
               value={currentFilters.bathrooms || ''}
               onChange={handleFilterChange}
               className="input w-full"
+              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
             >
               <option value="">Any</option>
               <option value="dedicated">Dedicated</option>
@@ -337,6 +363,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
               value={currentFilters.furnishingType || ''}
               onChange={handleFilterChange}
               className="input w-full"
+              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
             >
               <option value="">All</option>
               <option value="Furnished">Furnished</option>
@@ -351,6 +378,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
               value={currentFilters.availability || ''}
               onChange={handleFilterChange}
               className="input w-full"
+              onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
             >
               <option value="">Any</option>
               <option value="immediate">Immediate</option>
@@ -385,9 +413,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             <X className="w-4 h-4 mr-1" />
             Clear All
           </button>
-          <button className="btn btn-primary">
-            Apply Filters
-          </button>
+          {/* Removed Apply Filters button to prevent accidental page reloads */}
         </div>
       </div>
     </div>

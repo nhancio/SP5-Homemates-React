@@ -472,24 +472,59 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
         <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Rental Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Rent (₹/month)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Rent (₹/month)</label>
             <input
               type="number"
               className="input w-full"
-              placeholder="Enter rent amount"
-              value={formData.rentDetails.costs.rent}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  costs: {
-                    ...formData.rentDetails.costs,
-                    rent: e.target.value
+              placeholder="Enter minimum rent"
+              min={0}
+              value={formData.rentDetails.costs.minRent || ''}
+              onChange={e => {
+                const minRent = Number(e.target.value);
+                setFormData({
+                  ...formData,
+                  rentDetails: {
+                    ...formData.rentDetails,
+                    costs: {
+                      ...formData.rentDetails.costs,
+                      minRent,
+                      // If maxRent is less than new minRent, update maxRent as well
+                      maxRent: formData.rentDetails.costs.maxRent < minRent ? minRent : formData.rentDetails.costs.maxRent
+                    }
                   }
-                }
-              })}
+                });
+              }}
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Rent (₹/month)</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter maximum rent"
+              min={formData.rentDetails.costs.minRent || 0}
+              value={formData.rentDetails.costs.maxRent || ''}
+              onChange={e => {
+                const maxRent = Number(e.target.value);
+                setFormData({
+                  ...formData,
+                  rentDetails: {
+                    ...formData.rentDetails,
+                    costs: {
+                      ...formData.rentDetails.costs,
+                      maxRent,
+                      // If minRent is more than new maxRent, update minRent as well
+                      minRent: formData.rentDetails.costs.minRent > maxRent ? maxRent : formData.rentDetails.costs.minRent
+                    }
+                  }
+                });
+              }}
+            />
+          </div>
+          {/* Optionally, show a validation message if min > max */}
+          {formData.rentDetails.costs.minRent > formData.rentDetails.costs.maxRent && (
+            <div className="col-span-full text-red-500 text-sm">Minimum rent cannot exceed maximum rent.</div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance (₹/month)</label>
             <input
