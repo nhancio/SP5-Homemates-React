@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropertyFilters from '../components/filters/PropertyFilters';
 import PropertyCard from '../components/ui/PropertyCard';
@@ -14,6 +14,7 @@ const BuyPropertiesPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { filters, isAuthenticated, login } = useAppContext();
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const fetchProperties = async () => {
     try {
@@ -34,7 +35,13 @@ const BuyPropertiesPage = () => {
   };
 
   useEffect(() => {
-    fetchProperties();
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(() => {
+      fetchProperties();
+    }, 400);
+    return () => {
+      if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    };
   }, [filters.buy]);
 
   useEffect(() => {
