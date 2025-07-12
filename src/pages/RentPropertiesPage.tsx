@@ -5,6 +5,8 @@ import PropertyCard from '../components/ui/PropertyCard';
 import { Building, Loader, User } from 'lucide-react';
 import { getListings } from '../services/listings';
 import { useAppContext } from '../context/AppContext';
+import { getDoc, doc } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
 const propertyTypes = [
   'Single Room',
@@ -19,18 +21,49 @@ const RentPropertiesPage = () => {
   const [properties, setProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { filters, isAuthenticated, login } = useAppContext();
+  const { filters, isAuthenticated, login, user } = useAppContext();
+  const [userGender, setUserGender] = useState<string | null>(null);
   
   useEffect(() => {
     fetchProperties();
   }, [filters.rent]); // Re-fetch when filters change
+
+  useEffect(() => {
+    if (user && user.id) {
+      // Fetch logged-in user's gender
+      getDoc(doc(db, 'u', user.id)).then(userDoc => {
+        setUserGender(userDoc.exists() ? (userDoc.data().gender || '').toLowerCase() : null);
+      });
+    } else {
+      setUserGender(null);
+    }
+  }, [user]);
 
   const fetchProperties = async () => {
     try {
       setIsLoading(true);
       setError(null);
       const listings = await getListings('rent', filters.rent);
-      setProperties(listings);
+      // For each listing, fetch poster's gender
+      const listingsWithGender = await Promise.all(listings.map(async (listing) => {
+        let posterGender = null;
+        if (listing.userId) {
+          const posterDoc = await getDoc(doc(db, 'u', listing.userId));
+          posterGender = posterDoc.exists() ? (posterDoc.data().gender || '').toLowerCase() : null;
+        }
+        return { ...listing, posterGender };
+      }));
+      // Filter: if poster is female, only show to female users; if male, only to male users
+      const filtered = listingsWithGender.filter(listing => {
+        if (listing.posterGender === 'female') {
+          return userGender === 'female';
+        }
+        if (listing.posterGender === 'male') {
+          return userGender === 'male';
+        }
+        return true;
+      });
+      setProperties(filtered);
     } catch (err) {
       console.error('Error fetching properties:', err);
       setError('Failed to load properties. Please try again later.');
@@ -108,7 +141,7 @@ const RentPropertiesPage = () => {
             <Building className="w-12 h-12 mx-auto text-gray-400 mb-4" />
             <h3 className="text-xl font-semibold mb-2">No properties found</h3>
             <p className="text-gray-600">
-              Try adjusting your filters or check back later for new listings
+              No properties available for your profile at this time due to privacy settings.
             </p>
           </div>
         )}
