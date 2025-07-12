@@ -237,12 +237,17 @@ const FindFriendsPage = () => {
               <div className="absolute inset-0 flex items-center justify-center">
                 {user.photoURL ? (
                   <img
-                    src={user.photoURL}
+                    src={user.photoURL || '/images/default-avatar.png'}
+                    alt={user.userName}
+                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
+                    onError={e => { e.currentTarget.src = '/images/default-avatar.png'; }}
+                  />
+                ) : (
+                  <img
+                    src={'/images/default-avatar.png'}
                     alt={user.userName}
                     className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
                   />
-                ) : (
-                  <User className="w-24 h-24 text-primary-200" />
                 )}
               </div>
             </div>

@@ -287,15 +287,7 @@ const ProfilePage = () => {
                   )}
                 </div>
                 <div className="mt-4">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`Hey! Here's my availability on Homemates.`);
-                      alert('Availability link copied to clipboard!');
-                    }}
-                    className="btn btn-secondary text-sm px-4 py-2"
-                  >
-                    Share Availability
-                  </button>
+                  
                 </div>
                 <div className="flex justify-center md:justify-start mt-4">
                   <button 
@@ -393,10 +385,10 @@ const ProfilePage = () => {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-semibold mb-2">Premium Benefits:</h4>
                   <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• Priority listing visibility</li>
-                    <li>• Advanced search filters</li>
-                    <li>• Direct contact with owners</li>
-                    <li>• Premium support</li>
+                    <li>• Unlimited contacts</li>
+                    <li>• Priority support</li>
+                    <li>• Exclusive features</li>
+                    <li>• And much more...</li>
                   </ul>
                 </div>
                 <div className="text-center">
