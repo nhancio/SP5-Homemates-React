@@ -401,7 +401,9 @@ const ProfilePage = () => {
                 </div>
                 <div className="text-center">
                   <p className="text-lg font-bold text-primary-600 mb-4">
-                    ₹999 / month
+                    <span className="line-through text-gray-400 mr-2">₹499</span>
+                    <span className="text-primary-600 font-bold text-2xl">₹99</span>
+                    <span className="text-base text-gray-500 ml-1">/ month</span>
                   </p>
                   <button
                     onClick={handlePhonePePayment}
