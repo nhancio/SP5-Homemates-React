@@ -169,13 +169,26 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
 
     if (filters) {
       // Price (for buy)
-      if (filters.priceMin || filters.priceMax) {
+      if (type === 'sell' && (filters.priceMin || filters.priceMax)) {
+        console.log('Filtering by priceMin:', filters.priceMin, 'priceMax:', filters.priceMax);
         filteredListings = filteredListings.filter(listing => {
-          const price = type === 'rent'
-            ? listing.rentDetails?.costs?.rent
-            : listing.sellDetails?.price;
+          const price = listing.sellDetails?.price;
+          if (price === undefined) return false;
+          console.log('Listing price:', price, 'Filter min:', filters.priceMin, 'Filter max:', filters.priceMax);
           if (filters.priceMin && price < Number(filters.priceMin)) return false;
           if (filters.priceMax && price > Number(filters.priceMax)) return false;
+          return true;
+        });
+      }
+      // Rent (for rent)
+      if (type === 'rent' && (filters.minRent || filters.maxRent)) {
+        console.log('Filtering by minRent:', filters.minRent, 'maxRent:', filters.maxRent);
+        filteredListings = filteredListings.filter(listing => {
+          const rent = listing.rentDetails?.costs?.rent;
+          if (rent === undefined) return false;
+          console.log('Listing rent:', rent, 'Filter min:', filters.minRent, 'Filter max:', filters.maxRent);
+          if (filters.minRent && rent < Number(filters.minRent)) return false;
+          if (filters.maxRent && rent > Number(filters.maxRent)) return false;
           return true;
         });
       }
@@ -335,6 +348,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
     }
 
     console.log('Returning listings:', filteredListings.length);
+    console.log('Final filtered listings:', filteredListings.map(l => ({ id: l.id, rent: l.rentDetails?.costs?.rent, price: l.sellDetails?.price })));
     return filteredListings;
 
   } catch (error) {
@@ -465,6 +479,23 @@ export async function updateListing(type: 'rent' | 'sell', id: string, data: Par
     return { success: true };
   } catch (error) {
     console.error('Error updating listing:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a listing by ID and type (rent/sell)
+ * @param type 'rent' | 'sell'
+ * @param id Listing document ID
+ */
+export async function deleteListing(type: 'rent' | 'sell', id: string) {
+  try {
+    const collectionName = type === 'rent' ? 'r' : 's';
+    const docRef = doc(db, collectionName, id);
+    await import('firebase/firestore').then(({ deleteDoc }) => deleteDoc(docRef));
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting listing:', error);
     throw error;
   }
 }
