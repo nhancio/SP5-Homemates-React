@@ -130,7 +130,7 @@ const defaultFilters: Filters = {
     bhk: '',
     bathrooms: '',
     minRent: 0,
-    maxRent: 100000,
+    maxRent: 10000000, // set to a very high value
     minSqft: 0,
     maxSqft: 0,
     amenities: '',
