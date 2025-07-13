@@ -232,34 +232,16 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
 
   // Amenity/feature options with icon and label
   const AMENITY_OPTIONS = [
-    { key: 'wifi', label: 'Wi-Fi', icon: Wifi },
     { key: 'parking', label: 'Car Parking', icon: Car },
-    { key: 'water', label: 'Water', icon: Droplet },
-    { key: 'kitchen', label: 'Cook', icon: Utensils },
-    { key: 'gym', label: 'Gym', icon: Dumbbell },
-    { key: 'ac', label: 'AC', icon: Snowflake },
     { key: 'security', label: 'Security', icon: Shield },
-    { key: 'tv', label: 'TV', icon: Tv },
-    { key: 'gas', label: 'Gas', icon: Flame },
-    { key: 'fan', label: 'Fan', icon: Fan },
-    { key: 'light', label: 'Light', icon: Lightbulb },
-    { key: 'lock', label: 'Lock', icon: Lock },
     { key: 'fridge', label: 'Fridge', icon: Refrigerator },
     { key: 'washing', label: 'Washing', icon: WashingMachine },
     { key: 'bed', label: 'Bed', icon: BedDouble },
-    { key: 'shower', label: 'Shower', icon: ShowerHead },
-    { key: 'pet', label: 'Pet Friendly', icon: PawPrint },
     { key: 'roommate', label: 'Shared Room', icon: Users },
     { key: 'key', label: 'Private Room', icon: KeyRound },
     { key: 'power', label: 'Power Backup', icon: Plug },
-    { key: 'music', label: 'Music', icon: Speaker },
     { key: 'car', label: 'Parking', icon: ParkingCircle },
     { key: 'bike', label: 'Bike Parking', icon: Bike },
-    { key: 'garden', label: 'Garden', icon: Leaf },
-    { key: 'sunlight', label: 'Sunlight', icon: Sun },
-    { key: 'temperature', label: 'Temperature', icon: Thermometer },
-    { key: 'ventilation', label: 'Ventilation', icon: AirVent },
-    { key: 'purifiedwater', label: 'Purified Water', icon: Droplet },
     { key: 'house', label: 'Gated Society', icon: Home },
   ];
 
@@ -417,6 +399,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                       onChange={handleMinInput}
                       onBlur={commitMin}
                       onKeyDown={e => { if (e.key === 'Enter') commitMin(); }}
+                      title="Min Price"
                     />
                     <label className="block text-sm font-medium text-gray-700 mb-2 mt-2">Max Price (₹)</label>
                     <input
@@ -429,6 +412,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                       onChange={handleMaxInput}
                       onBlur={commitMax}
                       onKeyDown={e => { if (e.key === 'Enter') commitMax(); }}
+                      title="Max Price"
                     />
                     {localMin !== undefined && localMax !== undefined && Number(localMin) > Number(localMax) && (
                       <div className="text-red-500 text-xs mt-1">Minimum price cannot exceed maximum price.</div>
@@ -455,6 +439,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                       }
                     }}
                     onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                    title="Location Search"
                   />
                   {suggestions.length > 0 && (
                     <ul className="absolute bg-white border border-gray-200 rounded shadow z-20 mt-1 w-full max-h-48 overflow-auto">
@@ -484,6 +469,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                     onChange={handleFilterChange}
                     className="input w-full"
                     onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                    title="Property Type"
                   >
                     <option value="">All Types</option>
                     {propertyTypes.map((type) => (
@@ -502,6 +488,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                     onChange={handleFilterChange}
                     className="input w-full"
                     onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                    title="BHK"
                   >
                     <option value="">Any</option>
                     {[1,2,3,4,5].map((n) => (
@@ -517,6 +504,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                     onChange={handleFilterChange}
                     className="input w-full"
                     onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                    title="Bathrooms"
                   >
                     <option value="">Any</option>
                     <option value="dedicated">Dedicated</option>
@@ -531,6 +519,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                     onChange={handleFilterChange}
                     className="input w-full"
                     onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                    title="Furnishing Type"
                   >
                     <option value="">All</option>
                     <option value="Furnished">Furnished</option>
