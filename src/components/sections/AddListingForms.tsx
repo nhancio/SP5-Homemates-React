@@ -10,14 +10,8 @@ import { db } from '../../config/firebase';
 
 // Amenity/feature options with icon and label (same as PropertyFilters)
 const AMENITY_OPTIONS = [
-  { key: 'wifi', label: 'Wi-Fi', icon: Wifi },
-  { key: 'water', label: 'Water', icon: Droplet },
-  { key: 'kitchen', label: 'Cook', icon: Utensils },
-  { key: 'gym', label: 'Gym', icon: Dumbbell },
   { key: 'ac', label: 'AC', icon: Snowflake },
   { key: 'security', label: 'Security', icon: Shield },
-  { key: 'tv', label: 'TV', icon: Tv },
-  { key: 'gas', label: 'Gas', icon: Flame },
   { key: 'fridge', label: 'Fridge', icon: Refrigerator },
   { key: 'washing', label: 'Washing', icon: WashingMachine },
   { key: 'bed', label: 'Bed', icon: BedDouble },
@@ -962,4 +956,4 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
       </section>
     </>
   );
-};
+};                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
