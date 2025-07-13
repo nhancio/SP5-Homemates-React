@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Camera, X } from 'lucide-react';
 import {
   Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home
 } from 'lucide-react';
 import { USER_PREFERENCES } from '../../constants/theme';
 import * as LucideIcons from 'lucide-react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 // Amenity/feature options with icon and label (same as PropertyFilters)
 const AMENITY_OPTIONS = [
   { key: 'wifi', label: 'Wi-Fi', icon: Wifi },
-  { key: 'parking', label: 'Car Parking', icon: Car },
   { key: 'water', label: 'Water', icon: Droplet },
   { key: 'kitchen', label: 'Cook', icon: Utensils },
   { key: 'gym', label: 'Gym', icon: Dumbbell },
@@ -17,27 +18,17 @@ const AMENITY_OPTIONS = [
   { key: 'security', label: 'Security', icon: Shield },
   { key: 'tv', label: 'TV', icon: Tv },
   { key: 'gas', label: 'Gas', icon: Flame },
-  { key: 'fan', label: 'Fan', icon: Fan },
-  { key: 'light', label: 'Light', icon: Lightbulb },
-  { key: 'lock', label: 'Lock', icon: Lock },
   { key: 'fridge', label: 'Fridge', icon: Refrigerator },
   { key: 'washing', label: 'Washing', icon: WashingMachine },
   { key: 'bed', label: 'Bed', icon: BedDouble },
-  { key: 'shower', label: 'Shower', icon: ShowerHead },
   { key: 'pet', label: 'Pet Friendly', icon: PawPrint },
-  { key: 'roommate', label: 'Shared Room', icon: Users },
-  { key: 'key', label: 'Private Room', icon: KeyRound },
   { key: 'power', label: 'Power Backup', icon: Plug },
-  { key: 'music', label: 'Music', icon: Speaker },
-  { key: 'car', label: 'Parking', icon: ParkingCircle },
-  { key: 'bike', label: 'Bike Parking', icon: Bike },
-  { key: 'garden', label: 'Garden', icon: Leaf },
-  { key: 'sunlight', label: 'Sunlight', icon: Sun },
-  { key: 'temperature', label: 'Temperature', icon: Thermometer },
-  { key: 'ventilation', label: 'Ventilation', icon: AirVent },
-  { key: 'purifiedwater', label: 'Purified Water', icon: Droplet },
-  { key: 'house', label: 'Gated Society', icon: Home },
 ];
+
+interface Market {
+  id: string;
+  name: string;
+}
 
 interface AddListingFormsProps {
   listingType: 'rent' | 'sell';
@@ -49,104 +40,81 @@ interface AddListingFormsProps {
 }
 
 export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) => {
-  const [locationInput, setLocationInput] = useState(formData.address.locality ? `${formData.address.locality}${formData.address.city ? ', ' + formData.address.city : ''}` : '');
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [detecting, setDetecting] = useState(false);
+  const [markets, setMarkets] = useState<Market[]>([]);
+  const [loadingMarkets, setLoadingMarkets] = useState(true);
 
-  // Nominatim autocomplete fetch
-  const fetchSuggestions = async (input: string) => {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}&addressdetails=1&limit=5`
-    );
-    const data = await res.json();
-    return data.map((item: any) => ({
-      display_name: item.display_name,
-      city: item.address.city || item.address.town || item.address.village || '',
-      locality: item.address.suburb || item.address.neighbourhood || item.address.village || item.address.town || '',
-      place_id: item.place_id,
-    }));
-  };
+  useEffect(() => {
+    const fetchMarkets = async () => {
+      try {
+        console.log('Fetching markets from Firebase...');
+        const marketsCollection = collection(db, 'markets');
+        const marketsSnapshot = await getDocs(marketsCollection);
+        const marketsData = marketsSnapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name || doc.id
+        }));
+        console.log('Markets data:', marketsData);
+        setMarkets(marketsData);
+      } catch (error) {
+        console.error('Error fetching markets:', error);
+      } finally {
+        setLoadingMarkets(false);
+      }
+    };
 
-  const handleLocationChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocationInput(value);
-    setFormData({
-      ...formData,
-      address: { ...formData.address, city: '', locality: '' }
-    });
-    if (value.length > 2) {
-      setDetecting(true);
-      const results = await fetchSuggestions(value);
-      setSuggestions(results);
-      setDetecting(false);
-    } else {
-      setSuggestions([]);
-    }
-  };
+    fetchMarkets();
+  }, []);
 
-  const handleSuggestionClick = (suggestion: any) => {
-    setLocationInput(suggestion.display_name);
-    setSuggestions([]);
+  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedMarket = markets.find(market => market.name === e.target.value);
     setFormData({
       ...formData,
       address: {
         ...formData.address,
-        city: suggestion.city,
-        locality: suggestion.locality || suggestion.city || '',
-      },
+        locality: e.target.value,
+        city: selectedMarket?.name || ''
+      }
     });
   };
 
   return (
-  <section className="bg-white p-6 rounded-lg shadow-sm">
-    <h2 className="text-lg font-semibold mb-4">Address</h2>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="relative col-span-2">
-      <input
-        type="text"
-            placeholder="Location (Locality, City or Both)"
-        className="input"
-            value={locationInput}
+    <section className="bg-white p-6 rounded-lg shadow-sm">
+      <h2 className="text-lg font-semibold mb-4">Address</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+          <select
+            className="input w-full"
+            value={formData.address.locality}
             onChange={handleLocationChange}
-            autoComplete="off"
-            onBlur={() => setTimeout(() => setSuggestions([]), 150)}
-            onFocus={async () => {
-              if (locationInput.length > 2) {
-                setDetecting(true);
-                const results = await fetchSuggestions(locationInput);
-                setSuggestions(results);
-                setDetecting(false);
-              }
-            }}
-          />
-          {/* Suggestions dropdown */}
-          {suggestions.length > 0 && (
-            <ul className="absolute bg-white border border-gray-200 rounded shadow z-20 mt-1 w-full max-h-48 overflow-auto">
-              {suggestions.map((s, i) => (
-                <li
-                  key={s.place_id}
-                  className="px-4 py-2 cursor-pointer hover:bg-primary-50 text-sm"
-                  onMouseDown={() => handleSuggestionClick(s)}
-                >
-                  {s.display_name}
-                </li>
-              ))}
-            </ul>
-          )}
+            disabled={loadingMarkets}
+            title="Select location"
+          >
+            <option value="">{loadingMarkets ? 'Loading locations...' : 'Select location'}</option>
+            {markets.map(market => (
+              <option key={market.id} value={market.name}>
+                {market.name}
+              </option>
+            ))}
+          </select>
         </div>
-      <input
-        type="text"
-        placeholder="Building Name"
-        className="input"
-        value={formData.address.buildingName}
-        onChange={(e) => setFormData({
-          ...formData,
-          address: { ...formData.address, buildingName: e.target.value }
-        })}
-      />
-    </div>
-  </section>
-);
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Building Name</label>
+          <input
+            type="text"
+            placeholder="Building Name"
+            className="input w-full"
+            value={formData.address.buildingName}
+            onChange={(e) => setFormData({
+              ...formData,
+              address: { ...formData.address, buildingName: e.target.value }
+            })}
+            title="Building name"
+          />
+        </div>
+      </div>
+    </section>
+  );
 };
 
 const ContactNumberField = ({ formData, setFormData }: AddListingFormsProps) => (
@@ -260,8 +228,9 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
               })}
             >
               <option value="">Select Room Type</option>
-              <option value="shared">Shared</option>
               <option value="private">Private</option>
+              <option value="shared">Shared</option>
+              
             </select>
           </div>
 
@@ -298,9 +267,10 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
               })}
             >
               <option value="">Select Parking Type</option>
+              <option value="both">Both</option>
               <option value="car">Car Parking</option>
               <option value="bike">Bike Parking</option>
-              <option value="both">Both</option>
+              
             </select>
           </div>
 
@@ -315,8 +285,8 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
               })}
             >
               <option value="">Select Property Type</option>
+              <option value="standalone">Standalone Apartment</option>
               <option value="gated">Gated Community</option>
-              <option value="standalone">Standalone</option>
               <option value="individual">Individual House</option>
               <option value="villa">Villa</option>
             </select>
@@ -391,61 +361,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
         </div>
       </section>
 
-      {/* Availability Section */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Availability</h2>
-        <div className="flex items-center gap-2">
-          <input
-            type="radio"
-            id="immediate"
-            name="availability"
-            value="immediate"
-            checked={formData.rentDetails.availability === 'immediate'}
-            onChange={() => setFormData({
-              ...formData,
-              rentDetails: {
-                ...formData.rentDetails,
-                availability: 'immediate'
-              }
-            })}
-            className="form-radio h-5 w-5 text-primary-600"
-          />
-          <label htmlFor="immediate" className="text-sm">Immediate</label>
-          <input
-            type="radio"
-            id="handover"
-            name="availability"
-            value="handover"
-            checked={formData.rentDetails.availability === 'handover'}
-            onChange={() => setFormData({
-              ...formData,
-              rentDetails: {
-                ...formData.rentDetails,
-                availability: 'handover'
-              }
-            })}
-            className="form-radio h-5 w-5 text-primary-600"
-          />
-          <label htmlFor="handover" className="text-sm">Handover Date</label>
-        </div>
-        {formData.rentDetails.availability === 'handover' && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Handover Date</label>
-            <input
-              type="date"
-              className="input"
-              value={formData.rentDetails.handoverDate}
-              onChange={(e) => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  handoverDate: e.target.value
-                }
-              })}
-            />
-          </div>
-        )}
-      </section>
+
 
       {/* Move In Section for RentForm (Shared Homes) */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
@@ -525,59 +441,28 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
         <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Rental Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Minimum Rent (₹/month)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rent (₹/month)</label>
             <input
               type="number"
               className="input w-full"
-              placeholder="Enter minimum rent"
+              placeholder="Enter rent amount"
               min={0}
-              value={formData.rentDetails.costs.minRent || ''}
+              value={formData.rentDetails.costs.rent || ''}
               onChange={e => {
-                const minRent = Number(e.target.value);
+                const rent = Number(e.target.value);
                 setFormData({
                   ...formData,
                   rentDetails: {
                     ...formData.rentDetails,
                     costs: {
                       ...formData.rentDetails.costs,
-                      minRent,
-                      // If maxRent is less than new minRent, update maxRent as well
-                      maxRent: formData.rentDetails.costs.maxRent < minRent ? minRent : formData.rentDetails.costs.maxRent
+                      rent
                     }
                   }
                 });
               }}
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Maximum Rent (₹/month)</label>
-            <input
-              type="number"
-              className="input w-full"
-              placeholder="Enter maximum rent"
-              min={formData.rentDetails.costs.minRent || 0}
-              value={formData.rentDetails.costs.maxRent || ''}
-              onChange={e => {
-                const maxRent = Number(e.target.value);
-                setFormData({
-                  ...formData,
-                  rentDetails: {
-                    ...formData.rentDetails,
-                    costs: {
-                      ...formData.rentDetails.costs,
-                      maxRent,
-                      // If minRent is more than new maxRent, update minRent as well
-                      minRent: formData.rentDetails.costs.minRent > maxRent ? maxRent : formData.rentDetails.costs.minRent
-                    }
-                  }
-                });
-              }}
-            />
-          </div>
-          {/* Optionally, show a validation message if min > max */}
-          {formData.rentDetails.costs.minRent > formData.rentDetails.costs.maxRent && (
-            <div className="col-span-full text-red-500 text-sm">Minimum rent cannot exceed maximum rent.</div>
-          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance (₹/month)</label>
             <input
@@ -747,36 +632,39 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
       </section>
 
       {/* Availability, Furnishing, Parking */}
-      <section className="bg-white p-6 rounded-2xl shadow mb-8">
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Availability</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
             <select
-              className="input w-full focus:ring-2 focus:ring-primary-300"
-              value={formData.sellDetails?.availability || ''}
+              className="input w-full"
+              value={formData.sellDetails.lookingFor || ''}
               onChange={e => setFormData({
                 ...formData,
                 sellDetails: {
                   ...formData.sellDetails,
-                  availability: e.target.value
+                  lookingFor: e.target.value
                 }
               })}
+              title="Looking for"
             >
-              <option value="">Select Availability</option>
-              <option value="immediate">Immediate</option>
-              <option value="handover">Handover Date</option>
+              <option value="">Select</option>
+              <option value="Bachelors">Bachelors</option>
+              <option value="Family">Family</option>
+              <option value="Any">Any</option>
             </select>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnishing Type</label>
             <select 
-              className="input w-full focus:ring-2 focus:ring-primary-300"
+              className="input w-full"
               value={formData.furnishingType || ''}
               onChange={e => setFormData({
                 ...formData,
                 furnishingType: e.target.value
               })}
+              title="Furnishing Type"
             >
               <option value="">Select Furnishing Type</option>
               <option value="fully">Fully Furnished</option>
@@ -787,12 +675,13 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
             <select 
-              className="input w-full focus:ring-2 focus:ring-primary-300"
+              className="input w-full"
               value={formData.parking || ''}
               onChange={e => setFormData({
                 ...formData,
                 parking: e.target.value
               })}
+              title="Parking"
             >
               <option value="">Select Parking Type</option>
               <option value="car">Car Parking</option>
@@ -803,26 +692,26 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
         </div>
       </section>
 
-      {/* Preferences Section for SellForm (Full Homes) */}
+      {/* Amenities Section for SellForm (Full Homes) */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Preferences</h2>
+        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Amenities</h2>
         <div className="flex flex-wrap gap-3">
-          {USER_PREFERENCES.map(pref => {
-            const Icon = LucideIcons[pref.icon] || LucideIcons.User;
-            const selected = Array.isArray(formData.sellDetails.preferences) && formData.sellDetails.preferences.includes(pref.label);
+          {AMENITY_OPTIONS.map(opt => {
+            const Icon = opt.icon;
+            const selected = Array.isArray(formData.sellDetails.amenities) && formData.sellDetails.amenities.includes(opt.key);
             return (
               <button
-                key={pref.id}
+                key={opt.key}
                 type="button"
                 onClick={() => {
-                  const preferences = formData.sellDetails.preferences || [];
+                  const amenities = formData.sellDetails.amenities || [];
                   setFormData({
                     ...formData,
                     sellDetails: {
                       ...formData.sellDetails,
-                      preferences: preferences.includes(pref.label)
-                        ? preferences.filter((p: string) => p !== pref.label)
-                        : [...preferences, pref.label]
+                      amenities: amenities.includes(opt.key)
+                        ? amenities.filter((a: string) => a !== opt.key)
+                        : [...amenities, opt.key]
                     }
                   });
                 }}
@@ -832,7 +721,7 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
                 tabIndex={0}
               >
                 <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
-                <span className="whitespace-nowrap">{pref.label}</span>
+                <span className="whitespace-nowrap">{opt.label}</span>
               </button>
             );
           })}
@@ -877,7 +766,7 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
       </section>
 
       {/* Price Details Section */}
-      <section className="bg-white p-6 rounded-2xl shadow mb-8">
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Price Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
@@ -991,42 +880,6 @@ export const SellForm: React.FC<AddListingFormsProps> = ({
           {images.length >= 5 && <span className="text-red-500">(Maximum reached)</span>}
         </div>
         <div className="text-xs text-gray-400 mt-1">Tip: Add clear, well-lit photos for better responses.</div>
-      </section>
-
-      {/* Amenities Section for SellForm (Full Homes) */}
-      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Amenities</h2>
-        <div className="flex flex-wrap gap-3">
-          {AMENITY_OPTIONS.map(opt => {
-            const Icon = opt.icon;
-            const selected = Array.isArray(formData.sellDetails.amenities) && formData.sellDetails.amenities.includes(opt.key);
-            return (
-              <button
-                key={opt.key}
-                type="button"
-                onClick={() => {
-                  const amenities = formData.sellDetails.amenities || [];
-                  setFormData({
-                    ...formData,
-                    sellDetails: {
-                      ...formData.sellDetails,
-                      amenities: amenities.includes(opt.key)
-                        ? amenities.filter((a: string) => a !== opt.key)
-                        : [...amenities, opt.key]
-                    }
-                  });
-                }}
-                className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
-                  ? 'bg-primary-600 text-white border-primary-600 shadow'
-                  : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
-                tabIndex={0}
-              >
-                <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
-                <span className="whitespace-nowrap">{opt.label}</span>
-              </button>
-            );
-          })}
-        </div>
       </section>
     </>
   );

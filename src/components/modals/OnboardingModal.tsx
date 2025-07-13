@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
+import React, { useState } from 'react';
+import { doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '../../config/firebase';
 
 interface OnboardingModalProps {
@@ -7,11 +7,6 @@ interface OnboardingModalProps {
   email: string;
   name: string;
   onClose: () => void;
-}
-
-interface Market {
-  id: string;
-  name: string;
 }
 
 const PREFERENCES = [
@@ -32,47 +27,9 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
   const [mobile, setMobile] = useState('');
   const [gender, setGender] = useState('');
   const [lookingFor, setLookingFor] = useState('');
-  const [location, setLocation] = useState('');
-  const [markets, setMarkets] = useState<Market[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loadingMarkets, setLoadingMarkets] = useState(true);
 
-  useEffect(() => {
-    const fetchMarkets = async () => {
-      try {
-        console.log('Fetching markets from Firebase...');
-        const marketsCollection = collection(db, 'markets');
-        console.log('Markets collection reference:', marketsCollection);
-        
-        const marketsSnapshot = await getDocs(marketsCollection);
-        console.log('Markets snapshot:', marketsSnapshot);
-        console.log('Number of markets found:', marketsSnapshot.docs.length);
-        
-        const marketsData = marketsSnapshot.docs.map(doc => {
-          const data = doc.data();
-          console.log('Market document data:', doc.id, data);
-          return {
-            id: doc.id,
-            name: data.name || doc.id
-          };
-        });
-        
-        console.log('Processed markets data:', marketsData);
-        setMarkets(marketsData);
-      } catch (error) {
-        console.error('Error fetching markets:', error);
-        // Add more detailed error information
-        if (error instanceof Error) {
-          console.error('Error message:', error.message);
-          console.error('Error stack:', error.stack);
-        }
-      } finally {
-        setLoadingMarkets(false);
-      }
-    };
 
-    fetchMarkets();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +48,6 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
         userPhoneNumber: mobile,
         gender,
         lookingFor,
-        location,
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
         onboardingComplete: true, // Mark onboarding as complete
@@ -147,21 +103,6 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
           >
             <option value="">Select</option>
             {LOOKING_FOR.map(l => <option key={l} value={l}>{l}</option>)}
-          </select>
-        </div>
-        <div className="mb-3">
-          <label className="block text-sm font-medium mb-1" htmlFor="onboard-location">Location</label>
-          <select
-            id="onboard-location"
-            required
-            value={location}
-            onChange={e => setLocation(e.target.value)}
-            className="input input-bordered w-full"
-            title="Location"
-            disabled={loadingMarkets}
-          >
-            <option value="">{loadingMarkets ? 'Loading locations...' : 'Select location'}</option>
-            {markets.map(market => <option key={market.id} value={market.name}>{market.name}</option>)}
           </select>
         </div>
         <div className="flex justify-end space-x-4">

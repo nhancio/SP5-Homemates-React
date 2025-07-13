@@ -367,19 +367,6 @@ Link: ${url}`;
                 </div>
               )}
 
-              {/* Availability */}
-              {listingType === 'rent' && (
-                <div className="p-6 border-b">
-                  <h2 className="text-lg font-semibold mb-4">Availability</h2>
-                  <div className="flex items-center gap-4">
-                    <span className="text-gray-600">Available From:</span>
-                    <span className="font-semibold text-primary-700">
-                      {property.isImmediate ? 'Immediate' : property.handoverDate || 'N/A'}
-                    </span>
-                  </div>
-                </div>
-              )}
-
               {/* Description */}
               <div className="p-6">
                 <h2 className="text-lg font-semibold mb-4">Description</h2>
