@@ -117,7 +117,8 @@ const initialFormData = {
     highlights: [] as string[],
     description: '',
     propertyId: '',
-    loanOnProperty: false
+    loanOnProperty: false,
+    lookingFor: '',
   },
   builtUpArea: '',
   ageOfProperty: '',
@@ -158,8 +159,7 @@ const AddListingPage = () => {
         if (!formData.rentDetails.costs.rent) {
           throw new Error('Please enter rental cost');
         }
-        
-        // Explicitly construct rent listing data with only intended fields
+        // Construct rent listing data for shared listing
         const rentListingData = {
           // Common fields
           address: {
@@ -181,7 +181,6 @@ const AddListingPage = () => {
           userId: user.id,
           createdByUser: user.id,
           listingType: 'rent',
-          
           // Rent-specific fields
           rentDetails: {
             preferredTenant: {
@@ -190,7 +189,6 @@ const AddListingPage = () => {
             },
             roomDetails: {
               availableRooms: formData.rentDetails.roomDetails.availableRooms,
-              availability: formData.rentDetails.roomDetails.availability,
               bathroomType: formData.rentDetails.roomDetails.bathroomType,
             },
             costs: {
@@ -208,18 +206,11 @@ const AddListingPage = () => {
               maid: Number(formData.rentDetails.additionalBills.maid) || 0,
               others: Number(formData.rentDetails.additionalBills.others) || 0,
             },
-          },
-          
-          // Amenities
-          amenities: {
-            appliances: formData.amenities.appliances,
-            furniture: formData.amenities.furniture,
-            building: formData.amenities.building,
+            amenities: formData.rentDetails.amenities || [],
           },
         };
-
         console.log('Submitting rent data:', rentListingData);
-        const result = await createListing('rent', rentListingData);
+        const result = await createListing('r', rentListingData);
         console.log('Rent listing created:', result);
       } else {
         // Explicitly construct sell listing data with only intended fields
@@ -244,7 +235,6 @@ const AddListingPage = () => {
           userId: user.id,
           createdByUser: user.id,
           listingType: 'sell',
-          
           // Sell-specific fields
           sellDetails: {
             price: Number(formData.sellDetails.price) || 0,
@@ -264,20 +254,12 @@ const AddListingPage = () => {
             description: formData.sellDetails.description,
             propertyId: formData.sellDetails.propertyId,
             loanOnProperty: formData.sellDetails.loanOnProperty,
+            lookingFor: formData.sellDetails.lookingFor,
           },
-          
-          // Amenities (required by ListingData interface)
-          amenities: {
-            appliances: formData.amenities.appliances,
-            furniture: formData.amenities.furniture,
-            building: formData.amenities.building,
-          },
-          
           // Additional sell fields
           builtUpArea: formData.builtUpArea,
           ageOfProperty: formData.ageOfProperty,
         };
-
         console.log('Submitting sell data:', sellListingData);
         const result = await createListing('sell', sellListingData);
         console.log('Sale listing created:', result);
