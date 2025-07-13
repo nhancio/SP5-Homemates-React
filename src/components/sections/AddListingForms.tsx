@@ -27,7 +27,8 @@ const AMENITY_OPTIONS = [
 
 interface Market {
   id: string;
-  name: string;
+  city: string;
+  market: string;
 }
 
 interface AddListingFormsProps {
@@ -35,12 +36,15 @@ interface AddListingFormsProps {
   formData: any;
   setFormData: (data: any) => void;
   images: string[];
+  setImages: (images: string[] | ((prev: string[]) => string[])) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   removeImage: (index: number) => void;
 }
 
-export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) => {
+export const AddressFields = ({ formData, setFormData }: { formData: any; setFormData: (data: any) => void }) => {
   const [markets, setMarkets] = useState<Market[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [localities, setLocalities] = useState<string[]>([]);
   const [loadingMarkets, setLoadingMarkets] = useState(true);
 
   useEffect(() => {
@@ -51,10 +55,15 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
         const marketsSnapshot = await getDocs(marketsCollection);
         const marketsData = marketsSnapshot.docs.map(doc => ({
           id: doc.id,
-          name: doc.data().name || doc.id
+          city: doc.data().city || '',
+          market: doc.data().market || doc.data().name || doc.id
         }));
         console.log('Markets data:', marketsData);
         setMarkets(marketsData);
+        
+        // Extract unique cities
+        const uniqueCities = [...new Set(marketsData.map(market => market.city).filter(Boolean))];
+        setCities(uniqueCities);
       } catch (error) {
         console.error('Error fetching markets:', error);
       } finally {
@@ -65,14 +74,46 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
     fetchMarkets();
   }, []);
 
-  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedMarket = markets.find(market => market.name === e.target.value);
+  // Update localities when city changes
+  useEffect(() => {
+    if (formData.address.city) {
+      const cityLocalities = markets
+        .filter(market => market.city === formData.address.city)
+        .map(market => market.market);
+      setLocalities([...new Set(cityLocalities)]);
+      
+      // Clear locality if it's not valid for the selected city
+      if (!cityLocalities.includes(formData.address.locality)) {
+        setFormData({
+          ...formData,
+          address: {
+            ...formData.address,
+            locality: ''
+          }
+        });
+      }
+    } else {
+      setLocalities([]);
+    }
+  }, [formData.address.city, markets]);
+
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFormData({
       ...formData,
       address: {
         ...formData.address,
-        locality: e.target.value,
-        city: selectedMarket?.name || ''
+        city: e.target.value,
+        locality: '' // Clear locality when city changes
+      }
+    });
+  };
+
+  const handleLocalityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      address: {
+        ...formData.address,
+        locality: e.target.value
       }
     });
   };
@@ -81,19 +122,36 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
     <section className="bg-white p-6 rounded-lg shadow-sm">
       <h2 className="text-lg font-semibold mb-4">Address</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+          <select
+            className="input w-full"
+            value={formData.address.city}
+            onChange={handleCityChange}
+            disabled={loadingMarkets}
+            title="Select city"
+          >
+            <option value="">{loadingMarkets ? 'Loading cities...' : 'Select city'}</option>
+            {cities.map(city => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
           <select
             className="input w-full"
             value={formData.address.locality}
-            onChange={handleLocationChange}
-            disabled={loadingMarkets}
-            title="Select location"
+            onChange={handleLocalityChange}
+            disabled={!formData.address.city || loadingMarkets}
+            title="Select locality"
           >
-            <option value="">{loadingMarkets ? 'Loading locations...' : 'Select location'}</option>
-            {markets.map(market => (
-              <option key={market.id} value={market.name}>
-                {market.name}
+            <option value="">{!formData.address.city ? 'Select city first' : loadingMarkets ? 'Loading localities...' : 'Select locality'}</option>
+            {localities.map(locality => (
+              <option key={locality} value={locality}>
+                {locality}
               </option>
             ))}
           </select>
@@ -117,7 +175,7 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
   );
 };
 
-const ContactNumberField = ({ formData, setFormData }: AddListingFormsProps) => (
+const ContactNumberField = ({ formData, setFormData }: { formData: any; setFormData: (data: any) => void }) => (
   <section className="bg-white p-6 rounded-lg shadow-sm">
     <h2 className="text-lg font-semibold mb-4">Contact Details</h2>
     <div>
@@ -144,6 +202,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
   formData,
   setFormData,
   images,
+  setImages,
   handleImageUpload,
   removeImage
 }) => {
@@ -184,6 +243,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
                 ...formData,
                 furnishingType: e.target.value
               })}
+              title="Furnishing Type"
             >
               <option value="">Select Furnishing</option>
               <option value="fully">Fully Furnished</option>
@@ -197,6 +257,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
             <input
               type="number"
               className="input"
+              placeholder="Number of available rooms"
               value={formData.rentDetails.roomDetails.availableRooms}
               onChange={(e) => setFormData({
                 ...formData,
@@ -208,6 +269,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
                   }
                 }
               })}
+              title="Available Rooms"
             />
           </div>
 
@@ -226,6 +288,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
                   }
                 }
               })}
+              title="Room Type"
             >
               <option value="">Select Room Type</option>
               <option value="private">Private</option>
@@ -249,6 +312,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
                   }
                 }
               })}
+              title="Bathroom Type"
             >
               <option value="">Select Bathroom Type</option>
               <option value="attached">Attached</option>
@@ -265,6 +329,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
                 ...formData,
                 parking: e.target.value
               })}
+              title="Parking Type"
             >
               <option value="">Select Parking Type</option>
               <option value="both">Both</option>
@@ -283,6 +348,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
                 ...formData,
                 buildingType: e.target.value
               })}
+              title="Property Type"
             >
               <option value="">Select Property Type</option>
               <option value="standalone">Standalone Apartment</option>
@@ -313,6 +379,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
                   }
                 }
               })}
+              title="Looking for"
             >
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
@@ -325,7 +392,7 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-2">Preferences</label>
             <div className="flex flex-wrap gap-3">
               {USER_PREFERENCES.map(pref => {
-                const Icon = LucideIcons[pref.icon] || LucideIcons.User;
+                const Icon = (LucideIcons as any)[pref.icon] || LucideIcons.User;
                 const selected = formData.rentDetails.preferredTenant.preferences.includes(pref.label);
                 return (
                   <button
@@ -360,8 +427,6 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
           </div>
         </div>
       </section>
-
-
 
       {/* Move In Section for RentForm (Shared Homes) */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
@@ -540,6 +605,20 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
             />
           </div>
         </div>
+      </section>
+
+      {/* Description Section for RentForm (Shared Homes) */}
+      <section className="bg-white p-6 rounded-2xl shadow mb-8">
+        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Description</h2>
+        <textarea
+          className="input min-h-[100px] focus:ring-2 focus:ring-primary-300"
+          placeholder="Add property description..."
+          value={formData.description}
+          onChange={e => setFormData({
+            ...formData,
+            description: e.target.value
+          })}
+        />
       </section>
 
       {/* Upload Images Section (modern, user-friendly) */}
