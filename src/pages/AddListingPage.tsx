@@ -124,6 +124,33 @@ const initialFormData = {
   ageOfProperty: '',
 };
 
+// Utility function to clean form data and only include fields with actual values
+const cleanFormData = (obj: any): any => {
+  if (obj === null || obj === undefined) return undefined;
+  if (typeof obj !== 'object') return obj;
+
+  if (Array.isArray(obj)) {
+    const cleanedArray = obj
+      .map(item => cleanFormData(item))
+      .filter(item => item !== undefined && item !== null && item !== '');
+    return cleanedArray.length > 0 ? cleanedArray : undefined;
+  }
+
+  const cleaned: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === '' || value === null || value === undefined) continue;
+    if (typeof value === 'object') {
+      const cleanedValue = cleanFormData(value);
+      if (cleanedValue !== undefined) {
+        cleaned[key] = cleanedValue;
+      }
+    } else {
+      cleaned[key] = value;
+    }
+  }
+  return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+};
+
 const AddListingPage = () => {
   const { isAuthenticated, user } = useAppContext();
   const navigate = useNavigate();
@@ -152,21 +179,15 @@ const AddListingPage = () => {
 
     setIsSubmitting(true);
     try {
-      console.log('Creating listing type:', listingType);
-
+      // No validation checks, allow any data
       if (listingType === 'rent') {
-        // Validate rent-specific fields
-        if (!formData.rentDetails.costs.rent) {
-          throw new Error('Please enter rental cost');
-        }
-        // Construct rent listing data for shared listing
+        // Prepare rent listing data with only filled fields
         const rentListingData = {
-          // Common fields
-          address: {
+          address: cleanFormData({
             city: formData.address.city,
             locality: formData.address.locality,
             buildingName: formData.address.buildingName,
-          },
+          }),
           propertyType: formData.propertyType,
           furnishingType: formData.furnishingType,
           parking: formData.parking,
@@ -181,8 +202,7 @@ const AddListingPage = () => {
           userId: user.id,
           createdByUser: user.id,
           listingType: 'rent',
-          // Rent-specific fields
-          rentDetails: {
+          rentDetails: cleanFormData({
             preferredTenant: {
               lookingFor: formData.rentDetails.preferredTenant.lookingFor,
               preferences: formData.rentDetails.preferredTenant.preferences,
@@ -192,35 +212,34 @@ const AddListingPage = () => {
               bathroomType: formData.rentDetails.roomDetails.bathroomType,
             },
             costs: {
-              rent: Number(formData.rentDetails.costs.rent) || 0,
-              maintenance: Number(formData.rentDetails.costs.maintenance) || 0,
-              securityDeposit: Number(formData.rentDetails.costs.securityDeposit) || 0,
-              setupCost: Number(formData.rentDetails.costs.setupCost) || 0,
-              brokerage: Number(formData.rentDetails.costs.brokerage) || 0,
+              rent: formData.rentDetails.costs.rent,
+              maintenance: formData.rentDetails.costs.maintenance,
+              securityDeposit: formData.rentDetails.costs.securityDeposit,
+              setupCost: formData.rentDetails.costs.setupCost,
+              brokerage: formData.rentDetails.costs.brokerage,
             },
             additionalBills: {
-              wifi: Number(formData.rentDetails.additionalBills.wifi) || 0,
-              water: Number(formData.rentDetails.additionalBills.water) || 0,
-              gas: Number(formData.rentDetails.additionalBills.gas) || 0,
-              cook: Number(formData.rentDetails.additionalBills.cook) || 0,
-              maid: Number(formData.rentDetails.additionalBills.maid) || 0,
-              others: Number(formData.rentDetails.additionalBills.others) || 0,
+              wifi: formData.rentDetails.additionalBills.wifi,
+              water: formData.rentDetails.additionalBills.water,
+              gas: formData.rentDetails.additionalBills.gas,
+              cook: formData.rentDetails.additionalBills.cook,
+              maid: formData.rentDetails.additionalBills.maid,
+              others: formData.rentDetails.additionalBills.others,
             },
-            amenities: formData.rentDetails.amenities || [],
-          },
+            amenities: formData.rentDetails.amenities,
+          }),
         };
-        console.log('Submitting rent data:', rentListingData);
-        const result = await createListing('r', rentListingData);
+        const cleanedRentListingData = cleanFormData(rentListingData);
+        const result = await createListing('rent', cleanedRentListingData);
         console.log('Rent listing created:', result);
       } else {
-        // Explicitly construct sell listing data with only intended fields
+        // Prepare sell listing data with only filled fields
         const sellListingData = {
-          // Common fields
-          address: {
+          address: cleanFormData({
             city: formData.address.city,
             locality: formData.address.locality,
             buildingName: formData.address.buildingName,
-          },
+          }),
           propertyType: formData.propertyType,
           furnishingType: formData.furnishingType,
           parking: formData.parking,
@@ -235,13 +254,12 @@ const AddListingPage = () => {
           userId: user.id,
           createdByUser: user.id,
           listingType: 'sell',
-          // Sell-specific fields
-          sellDetails: {
-            price: Number(formData.sellDetails.price) || 0,
-            gst: Number(formData.sellDetails.gst) || 0,
+          sellDetails: cleanFormData({
+            price: formData.sellDetails.price,
+            gst: formData.sellDetails.gst,
             isNegotiable: formData.sellDetails.isNegotiable,
             propertyType: formData.sellDetails.propertyType,
-            sqft: Number(formData.sellDetails.sqft) || 0,
+            sqft: formData.sellDetails.sqft,
             direction: formData.sellDetails.direction,
             ownership: formData.sellDetails.ownership,
             ageOfProperty: formData.sellDetails.ageOfProperty,
@@ -255,13 +273,12 @@ const AddListingPage = () => {
             propertyId: formData.sellDetails.propertyId,
             loanOnProperty: formData.sellDetails.loanOnProperty,
             lookingFor: formData.sellDetails.lookingFor,
-          },
-          // Additional sell fields
+          }),
           builtUpArea: formData.builtUpArea,
           ageOfProperty: formData.ageOfProperty,
         };
-        console.log('Submitting sell data:', sellListingData);
-        const result = await createListing('sell', sellListingData);
+        const cleanedSellListingData = cleanFormData(sellListingData);
+        const result = await createListing('sell', cleanedSellListingData);
         console.log('Sale listing created:', result);
       }
 
