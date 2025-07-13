@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil } from 'lucide-react';
+import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil, Trash } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { getDoc, doc, updateDoc } from 'firebase/firestore';
 import { db, storage } from '../config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import PropertyCard from '../components/ui/PropertyCard';
-import { getListingsByUser, initiatePhonePePayment } from '../services/listings';
+import { getListingsByUser, initiatePhonePePayment, updateListing, deleteListing } from '../services/listings';
+import { useNavigate } from 'react-router-dom';
 
 const ProfilePage = () => {
 
   const { user, isAuthenticated, login, logout } = useAppContext();
+  const navigate = useNavigate();
   const [showUpgradePopup, setShowUpgradePopup] = useState(false);
   const [profileUser, setProfileUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -18,6 +20,8 @@ const ProfilePage = () => {
   const [listingsError, setListingsError] = useState<string | null>(null);
   const [showFileInput, setShowFileInput] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editingListing, setEditingListing] = useState<any>(null);
+  const [deletingListing, setDeletingListing] = useState<string | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -94,6 +98,32 @@ const ProfilePage = () => {
     }
   };
 
+  const handleEditListing = (listing: any) => {
+    // Navigate to edit page with listing data
+    navigate(`/edit-listing/${listing.listingType}/${listing.id}`, {
+      state: { listing }
+    });
+  };
+
+  const handleDeleteListing = async (listing: any) => {
+    if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeletingListing(listing.id);
+    try {
+      await deleteListing(listing.listingType, listing.id);
+      // Remove from local state
+      setUserListings(prev => prev.filter(l => l.id !== listing.id));
+      alert('Listing deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+      alert('Failed to delete listing. Please try again.');
+    } finally {
+      setDeletingListing(null);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="py-20">
@@ -151,12 +181,12 @@ const ProfilePage = () => {
               {/* Avatar */}
               <div className="flex justify-center md:justify-start -mt-16 mb-4 md:mb-0">
                 <div className="relative group w-32 h-32">
-                  <img
+                      <img 
                     src={photoURL ? photoURL : '/images/default-avatar.png'}
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=E0E0E0&color=7c2d6e&size=128`;
                     }}
-                    alt={displayName}
+                        alt={displayName} 
                     className="w-32 h-32 rounded-full object-cover border-4 border-white shadow"
                   />
                   {/* Pencil icon overlay */}
@@ -210,8 +240,8 @@ const ProfilePage = () => {
                   {uploading && (
                     <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center rounded-full z-40">
                       <span className="text-primary-600 font-semibold">Uploading...</span>
-                    </div>
-                  )}
+                      </div>
+                    )}
                   {isPremium && (
                     <div className="absolute -right-2 -bottom-2 bg-accent-500 text-white p-1 rounded-full z-10">
                       <Award className="w-5 h-5" />
@@ -257,15 +287,7 @@ const ProfilePage = () => {
                   )}
                 </div>
                 <div className="mt-4">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(`Hey! Here's my availability on Homemates.`);
-                      alert('Availability link copied to clipboard!');
-                    }}
-                    className="btn btn-secondary text-sm px-4 py-2"
-                  >
-                    Share Availability
-                  </button>
+                  
                 </div>
                 <div className="flex justify-center md:justify-start mt-4">
                   <button 
@@ -292,12 +314,29 @@ const ProfilePage = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {userListings.map(listing => (
-                <div key={listing.id} className="relative group">
-                  <PropertyCard property={listing} listingType={listing.listingType === 'sell' ? 'buy' : 'rent'} />
-                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="btn btn-xs btn-secondary" onClick={() => alert('Edit functionality coming soon!')}>Edit</button>
-                    <button className="btn btn-xs btn-danger" onClick={() => alert('Delete functionality coming soon!')}>Delete</button>
+                <div key={listing.id} className="relative">
+                  {/* Formal Edit/Delete icon buttons always visible, overlay top-right */}
+                  <div className="absolute top-2 right-2 flex gap-2 z-10">
+                    <button 
+                      className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow hover:bg-primary-50 hover:border-primary-400 transition focus:outline-none"
+                      onClick={() => handleEditListing(listing)}
+                      disabled={deletingListing === listing.id}
+                      title="Edit Listing"
+                      aria-label="Edit Listing"
+                    >
+                      <Pencil className="w-5 h-5 text-primary-600" />
+                    </button>
+                    <button 
+                      className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow hover:bg-red-50 hover:border-red-400 transition focus:outline-none"
+                      onClick={() => handleDeleteListing(listing)}
+                      disabled={deletingListing === listing.id}
+                      title="Delete Listing"
+                      aria-label="Delete Listing"
+                    >
+                      {deletingListing === listing.id ? <span className="text-lg">⏳</span> : <Trash className="w-5 h-5 text-red-500" />}
+                    </button>
                   </div>
+                  <PropertyCard property={listing} listingType={listing.listingType === 'sell' ? 'buy' : 'rent'} />
                 </div>
               ))}
             </div>
@@ -346,15 +385,17 @@ const ProfilePage = () => {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-semibold mb-2">Premium Benefits:</h4>
                   <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• Priority listing visibility</li>
-                    <li>• Advanced search filters</li>
-                    <li>• Direct contact with owners</li>
-                    <li>• Premium support</li>
+                    <li>• Unlimited contacts</li>
+                    <li>• Priority support</li>
+                    <li>• Exclusive features</li>
+                    <li>• And much more...</li>
                   </ul>
                 </div>
                 <div className="text-center">
                   <p className="text-lg font-bold text-primary-600 mb-4">
-                    ₹999 / month
+                    <span className="line-through text-gray-400 mr-2">₹499</span>
+                    <span className="text-primary-600 font-bold text-2xl">₹99</span>
+                    <span className="text-base text-gray-500 ml-1">/ month</span>
                   </p>
                   <button
                     onClick={handlePhonePePayment}

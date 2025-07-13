@@ -20,12 +20,18 @@ interface UserProfile {
 const CATEGORY_OPTIONS = [
   { label: 'IT', value: 'IT' },
   { label: 'Travel', value: 'Travel' },
-];
-
-const LOOKING_FOR_OPTIONS = [
-  { label: 'Any', value: '' },
   { label: 'Student', value: 'Student' },
   { label: 'Working Professional', value: 'Working Professional' },
+  { label: 'Doctor', value: 'Doctor' },
+  { label: 'Engineer', value: 'Engineer' },
+  { label: 'Teacher', value: 'Teacher' },
+  { label: 'Artist', value: 'Artist' },
+  { label: 'Business', value: 'Business' },
+  { label: 'Researcher', value: 'Researcher' },
+  { label: 'Others', value: 'Others' },
+];
+
+const INTEREST_OPTIONS = [
   { label: 'Walking', value: 'Walking' },
   { label: 'Badminton', value: 'Badminton' },
   { label: 'Cricket', value: 'Cricket' },
@@ -46,7 +52,7 @@ const FindFriendsPage = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLookingFor, setSelectedLookingFor] = useState<string[]>([]);
   const [customFilter, setCustomFilter] = useState('');
   const [customFilters, setCustomFilters] = useState<string[]>([]);
@@ -70,14 +76,6 @@ const FindFriendsPage = () => {
     const message = 'Hey, are you looking for a flat or flatmate?';
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
-  };
-
-  const toggleCategory = (category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
   };
 
   useEffect(() => {
@@ -130,7 +128,7 @@ const FindFriendsPage = () => {
   // Filter users by selected categories (profession), selectedLookingFor, and customFilters
   const allLookingFor = [...selectedLookingFor, ...customFilters];
   const filteredUsers = users.filter(user => {
-    const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(user.profession);
+    const categoryMatch = !selectedCategory || user.profession === selectedCategory;
     if (allLookingFor.length === 0) return categoryMatch;
     // Match if any filter matches profession or preferences
     const professionMatch = allLookingFor.some(opt => user.profession && user.profession.toLowerCase().includes(opt.toLowerCase()));
@@ -163,76 +161,72 @@ const FindFriendsPage = () => {
         <h1 className="text-2xl font-bold mb-2">Find Friends</h1>
         <span className="text-gray-600">{filteredUsers.length} users found</span>
       </div>
-      {/* Unified Filter Bar */}
-      <div className="flex flex-wrap gap-3 mb-8 items-center">
-        {/* Category Filter Buttons */}
-        {CATEGORY_OPTIONS.map(option => (
-          <button
-            key={option.value}
-            onClick={() => toggleCategory(option.value)}
-            className={`px-6 py-2 rounded-full border transition font-medium text-base ${selectedCategories.includes(option.value)
-              ? 'bg-primary-600 text-white border-primary-600'
-              : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
-          >
-            {option.label}
-          </button>
-        ))}
-        {/* Looking For Filter Buttons */}
-        {LOOKING_FOR_OPTIONS.filter(opt => opt.value).map(opt => (
-          <button
-            key={opt.value}
-            onClick={() => setSelectedLookingFor(prev => prev.includes(opt.value)
-              ? prev.filter(v => v !== opt.value)
-              : [...prev, opt.value])}
-            className={`px-6 py-2 rounded-full border transition font-medium text-base ${selectedLookingFor.includes(opt.value)
-              ? 'bg-primary-600 text-white border-primary-600'
-              : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
-          >
-            {opt.label}
-          </button>
-        ))}
-        {/* Custom Filter Pills */}
-        {customFilters.map(opt => (
-          <button
-            key={opt}
-            onClick={() => setCustomFilters(prev => prev.includes(opt)
-              ? prev.filter(v => v !== opt)
-              : [...prev, opt])}
-            className={`px-6 py-2 rounded-full border transition font-medium text-base ${customFilters.includes(opt)
-              ? 'bg-primary-600 text-white border-primary-600'
-              : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
-          >
-            {opt}
-          </button>
-        ))}
-        {/* Custom Filter Input */}
-        <form
-          onSubmit={e => {
-            e.preventDefault();
-            const val = customFilter.trim();
-            if (!val || customFilters.includes(val) || selectedLookingFor.includes(val) || LOOKING_FOR_OPTIONS.some(o => o.value.toLowerCase() === val.toLowerCase())) return;
-            setCustomFilters(prev => [...prev, val]);
-            setCustomFilter('');
-          }}
-          className="flex items-center gap-2"
-          style={{ minWidth: 180 }}
-        >
+      <div className="mb-8">
+        {/* Profession Filter (Single-select) */}
+        <div className="flex flex-wrap gap-3 mb-4 items-center">
+          <span className="font-semibold text-gray-700 mr-2">Profession:</span>
+          {CATEGORY_OPTIONS.map(option => (
+            <button
+              key={option.value}
+              onClick={() => setSelectedCategory(selectedCategory === option.value ? null : option.value)}
+              className={`px-6 py-2 rounded-full border transition font-medium text-base ${selectedCategory === option.value
+                ? 'bg-primary-600 text-white border-primary-600'
+                : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        {/* Interests Filter (Multi-select) */}
+        <div className="flex flex-wrap gap-3 items-center">
+          <span className="font-semibold text-gray-700 mr-2">Interests:</span>
+          {INTEREST_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setSelectedLookingFor(prev => prev.includes(opt.value)
+                ? prev.filter(v => v !== opt.value)
+                : [...prev, opt.value])}
+              className={`px-6 py-2 rounded-full border transition font-medium text-base ${selectedLookingFor.includes(opt.value)
+                ? 'bg-primary-600 text-white border-primary-600'
+                : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+            >
+              {opt.label}
+            </button>
+          ))}
+          {/* Custom Interest Pills */}
+          {customFilters.map(opt => (
+            <button
+              key={opt}
+              onClick={() => setCustomFilters(prev => prev.includes(opt)
+                ? prev.filter(v => v !== opt)
+                : [...prev, opt])}
+              className={`px-6 py-2 rounded-full border transition font-medium text-base ${customFilters.includes(opt)
+                ? 'bg-primary-600 text-white border-primary-600'
+                : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+            >
+              {opt}
+            </button>
+          ))}
           <input
             type="text"
-            className="input px-3 py-2 rounded-full border border-gray-300"
-            placeholder="Add custom..."
             value={customFilter}
             onChange={e => setCustomFilter(e.target.value)}
-            maxLength={32}
+            placeholder="Add custom..."
+            className="input w-40 text-sm px-3 py-2 border rounded mr-2"
           />
           <button
-            type="submit"
-            className="btn btn-primary px-4 py-2 rounded-full"
-            disabled={!customFilter.trim() || customFilters.includes(customFilter.trim())}
+            type="button"
+            onClick={() => {
+              if (customFilter.trim() && !customFilters.includes(customFilter.trim())) {
+                setCustomFilters([...customFilters, customFilter.trim()]);
+                setCustomFilter('');
+              }
+            }}
+            className="btn btn-primary px-4 py-2 text-sm"
           >
             Add
           </button>
-        </form>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -243,12 +237,17 @@ const FindFriendsPage = () => {
               <div className="absolute inset-0 flex items-center justify-center">
                 {user.photoURL ? (
                   <img
-                    src={user.photoURL}
+                    src={user.photoURL || '/images/default-avatar.png'}
+                    alt={user.userName}
+                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
+                    onError={e => { e.currentTarget.src = '/images/default-avatar.png'; }}
+                  />
+                ) : (
+                  <img
+                    src={'/images/default-avatar.png'}
                     alt={user.userName}
                     className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
                   />
-                ) : (
-                  <User className="w-24 h-24 text-primary-200" />
                 )}
               </div>
             </div>
@@ -268,7 +267,7 @@ const FindFriendsPage = () => {
               {/* Preferences with increased spacing */}
               {user.preferences?.length > 0 && (
                 <div className="space-y-3 mb-6">
-                  <p className="text-sm font-medium text-gray-700">Preferences</p>
+                  <p className="text-sm font-medium text-gray-700">Interests</p>
                   <div className="flex flex-wrap gap-2">
                     {user.preferences.map((pref, idx) => (
                       <span 

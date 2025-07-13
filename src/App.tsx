@@ -7,6 +7,7 @@ import RentPropertiesPage from './pages/RentPropertiesPage';
 import HomeServicesPage from './pages/HomeServicesPage';
 import ProfilePage from './pages/ProfilePage';
 import AddListingPage from './pages/AddListingPage';
+import EditListingPage from './pages/EditListingPage';
 import SavedPage from './pages/SavedPage';
 import FindFriendsPage from './pages/FindFriendsPage';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
@@ -39,6 +40,7 @@ const router = createBrowserRouter([
       { path: 'services', element: <HomeServicesPage /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'add-listing', element: <AddListingPage /> },
+      { path: 'edit-listing/:listingType/:listingId', element: <EditListingPage /> },
       { path: 'saved', element: <SavedPage /> },
       { path: 'users', element: <FindFriendsPage /> },
       { path: 'privacy_policy', element: <PrivacyPolicyPage /> },

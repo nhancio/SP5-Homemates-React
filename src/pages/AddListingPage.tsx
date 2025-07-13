@@ -70,13 +70,6 @@ const initialFormData = {
   description: '',
   contactNumber: '',
 
-  // Top-level amenities object for rent
-  amenities: {
-    appliances: [],
-    furniture: [],
-    building: [],
-  },
-
   // Rent specific fields
   rentDetails: {
     preferredTenant: {
@@ -88,6 +81,7 @@ const initialFormData = {
       availability: '',
       bathroomType: '',
     },
+    amenities: [], // <-- Add this line!
     costs: {
       rent: '',
       maintenance: '',
@@ -102,8 +96,7 @@ const initialFormData = {
       cook: '',
       maid: '',
       others: '',
-    },
-    // Remove amenities from here
+    }
   },
 
   // Sell specific fields
@@ -178,7 +171,7 @@ const AddListingPage = () => {
           furnishingType: formData.furnishingType,
           parking: formData.parking,
           buildingType: formData.buildingType,
-          handoverDate: formData.handoverDate, // Ensure move-in date is included
+          handoverDate: formData.handoverDate,
           isImmediate: formData.isImmediate,
           description: formData.description,
           contactNumber: formData.contactNumber,
@@ -217,11 +210,11 @@ const AddListingPage = () => {
             },
           },
           
-          // Amenities: always use top-level formData.amenities, fallback to empty arrays
+          // Amenities
           amenities: {
-            appliances: (formData.amenities && formData.amenities.appliances) || [],
-            furniture: (formData.amenities && formData.amenities.furniture) || [],
-            building: (formData.amenities && formData.amenities.building) || [],
+            appliances: formData.amenities.appliances,
+            furniture: formData.amenities.furniture,
+            building: formData.amenities.building,
           },
         };
 
@@ -241,7 +234,7 @@ const AddListingPage = () => {
           furnishingType: formData.furnishingType,
           parking: formData.parking,
           buildingType: formData.buildingType,
-          handoverDate: formData.handoverDate, // Ensure move-in date is included
+          handoverDate: formData.handoverDate,
           isImmediate: formData.isImmediate,
           description: formData.description,
           contactNumber: formData.contactNumber,
@@ -251,6 +244,7 @@ const AddListingPage = () => {
           userId: user.id,
           createdByUser: user.id,
           listingType: 'sell',
+          
           // Sell-specific fields
           sellDetails: {
             price: Number(formData.sellDetails.price) || 0,
@@ -265,21 +259,25 @@ const AddListingPage = () => {
             floorNumber: formData.sellDetails.floorNumber,
             waterSupply: formData.sellDetails.waterSupply,
             approvals: formData.sellDetails.approvals,
+            amenities: formData.sellDetails.amenities,
             highlights: formData.sellDetails.highlights,
             description: formData.sellDetails.description,
             propertyId: formData.sellDetails.propertyId,
             loanOnProperty: formData.sellDetails.loanOnProperty,
           },
-          // Amenities: always use top-level formData.amenities, fallback to empty arrays
+          
+          // Amenities (required by ListingData interface)
           amenities: {
-            appliances: (formData.amenities && formData.amenities.appliances) || [],
-            furniture: (formData.amenities && formData.amenities.furniture) || [],
-            building: (formData.amenities && formData.amenities.building) || [],
+            appliances: formData.amenities.appliances,
+            furniture: formData.amenities.furniture,
+            building: formData.amenities.building,
           },
+          
           // Additional sell fields
           builtUpArea: formData.builtUpArea,
           ageOfProperty: formData.ageOfProperty,
         };
+
         console.log('Submitting sell data:', sellListingData);
         const result = await createListing('sell', sellListingData);
         console.log('Sale listing created:', result);

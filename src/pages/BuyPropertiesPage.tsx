@@ -37,7 +37,7 @@ const BuyPropertiesPage = () => {
   useEffect(() => {
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
     debounceTimeout.current = setTimeout(() => {
-      fetchProperties();
+    fetchProperties();
     }, 400);
     return () => {
       if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
