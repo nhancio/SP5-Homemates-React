@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home } from 'lucide-react';
+import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
@@ -17,6 +17,17 @@ interface PropertyCardProps {
   listingType?: 'rent' | 'buy';
   variant?: 'small' | 'large';
 }
+
+// Key amenities to show as icons
+const AMENITY_ICONS: Record<string, React.ReactNode> = {
+  parking: <Car className="w-4 h-4" />,
+  ac: <Snowflake className="w-4 h-4" />,
+  security: <Shield className="w-4 h-4" />,
+  fridge: <Refrigerator className="w-4 h-4" />,
+  washing: <WashingMachine className="w-4 h-4" />,
+  bed: <BedDouble className="w-4 h-4" />,
+  power: <Plug className="w-4 h-4" />,
+};
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ 
   property, 
@@ -70,7 +81,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       alert('Please login to save properties');
       return;
     }
-
     try {
       await updateUserFavorites(user.id, property.id, !isFavorite);
       toggleFavorite(property.id);
@@ -92,27 +102,27 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     });
   };
 
+  // --- Small Card Variant ---
   const renderSmallCard = () => (
     <div
-      className="bg-white rounded-lg overflow-hidden shadow-property-card hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+      className="bg-white rounded-lg overflow-hidden shadow-property-card hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100 flex flex-col"
       onClick={handleCardClick}
     >
+      {/* Image & Property Type Badge */}
       <div className="relative">
         <Swiper
           modules={[Navigation, Pagination]}
           pagination={{ clickable: true }}
-          onSwiper={(swiper) => {
-            swiperRef.current = swiper;
-          }}
+          onSwiper={(swiper) => { swiperRef.current = swiper; }}
           loop={(property.images?.length || 0) > 1}
-          className="h-52"
+          className="h-48"
         >
           {(property.images?.length ? property.images : ['placeholder']).map((img, idx) => (
             <SwiperSlide key={idx}>
-              <div className={`h-52 bg-gray-200 ${!isLoaded ? 'animate-pulse' : ''}`}>
+              <div className={`h-48 bg-gray-200 ${!isLoaded ? 'animate-pulse' : ''}`}>
                 {img === 'placeholder' ? (
                   <div className="w-full h-full flex justify-center items-center text-gray-400">
-                    <Building className="w-12 h-12" />
+                    <Building className="w-10 h-10" />
                   </div>
                 ) : (
                   <img src={img} alt="" className="w-full h-full object-cover rounded-lg" onLoad={handleImageLoad} loading="lazy" />
@@ -121,10 +131,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </SwiperSlide>
           ))}
         </Swiper>
-
+        {/* Left Arrow */}
         <div
-          className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer"
-          onClick={(e) => {
+          className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
+          onClick={e => {
             e.stopPropagation();
             swiperRef.current?.slidePrev();
           }}
@@ -133,10 +143,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </div>
-
+        {/* Right Arrow */}
         <div
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer"
-          onClick={(e) => {
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
+          onClick={e => {
             e.stopPropagation();
             swiperRef.current?.slideNext();
           }}
@@ -145,101 +155,81 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             <path d="M9 18l6-6-6-6" />
           </svg>
         </div>
-
+        {/* Property Type Badge */}
         <div className="absolute top-3 left-3 z-10">
           <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
             {property.propertyType || property.type}
           </span>
         </div>
       </div>
-
-      <div className="p-4">
-        <div className="flex justify-between items-start">
-          <h3 className="text-lg font-semibold line-clamp-1">
-            {property.address?.buildingName || 'Property'}
-          </h3>
-          <span className="text-lg font-bold text-primary-600">
-            ₹{formatCurrency(property.rentDetails?.costs?.rent || property.sellDetails?.price || 0)}
-          </span>
+      {/* Main Info */}
+      <div className="p-4 flex-1 flex flex-col justify-between">
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="text-base font-bold line-clamp-1 text-gray-900">
+              {property.address?.buildingName || 'Property'}
+            </h3>
+            <span className="text-lg font-extrabold text-primary-600">
+              ₹{formatCurrency(property.rentDetails?.costs?.rent || property.sellDetails?.price || 0)}
+            </span>
+          </div>
+          <div className="flex items-center text-xs text-gray-500 mb-2">
+            <BedDouble className="w-4 h-4 mr-1" />
+            <span className="mr-2">{property.bedrooms || '-'} BHK</span>
+            <KeyRound className="w-4 h-4 mr-1" />
+            <span>{property.sellDetails?.sqft || property.rentDetails?.sqft || '-'} sqft</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600 mb-2">
+            <MapPin className="w-4 h-4 mr-1" />
+            <span className="line-clamp-1">{property.address?.locality}, {property.address?.city}</span>
+          </div>
+          {/* Amenity Icons Row */}
+          <div className="flex gap-2 mt-2 mb-2">
+            {Object.entries(AMENITY_ICONS).map(([key, icon]) => (
+              <span key={key} className={`rounded-full p-1 bg-gray-100 ${property.rentDetails?.amenities?.includes(key) || property.sellDetails?.amenities?.includes(key) ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
+            ))}
+          </div>
         </div>
-
-        <p className="text-gray-600 text-sm mt-1 line-clamp-1">
-          {property.address?.locality}, {property.address?.city}
-        </p>
-
-        {listingType === 'rent' && (
-          <div className="flex gap-4 mt-3 text-sm text-gray-700">
-            <div className="flex flex-col items-center">
-              <span className="font-semibold">
-                {property.isImmediate ? 'Immediate' : formatAvailabilityDate(property.handoverDate)}
-              </span>
-              <span className="text-xs text-gray-500">Available</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="font-semibold">{property.furnishingType || '-'}</span>
-              <span className="text-xs text-gray-500">Furnishing</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="font-semibold">{property.parking || '-'}</span>
-              <span className="text-xs text-gray-500">Parking</span>
-            </div>
-          </div>
-        )}
-
-        {listingType === 'buy' && (
-          <div className="flex gap-4 mt-3 text-sm text-gray-700">
-            <div className="flex flex-col items-center">
-              <span className="font-semibold">{property.sellDetails?.sqft || '-'}</span>
-              <span className="text-xs text-gray-500">Sq.ft</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="font-semibold">{property.sellDetails?.direction || '-'}</span>
-              <span className="text-xs text-gray-500">Direction</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="flex border-t border-gray-200">
-        <button
-          onClick={handleFavoriteClick}
-          className="flex items-center justify-center w-1/3 py-3 hover:bg-gray-50 transition"
-        >
-          <Heart
-            className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-          />
-          <span className="text-sm text-black">{isFavorite ? 'Saved' : 'Save'}</span>
-        </button>
-        <button
-          onClick={handleCall}
-          className="flex items-center justify-center w-1/3 py-3 text-primary-600 hover:bg-primary-50 transition border-l border-r border-gray-200"
-        >
-          <Phone className="w-4 h-4 mr-1" />
-          <span className="text-sm text-black">Call</span>
-        </button>
-        <button
-          onClick={handleShare}
-          className="flex items-center justify-center w-1/3 py-3 text-gray-600 hover:bg-gray-50 transition"
-        >
-          <Share2 className="w-4 h-4 mr-1" />
-          <span className="text-sm text-black">Share</span>
-        </button>
+        {/* Action Buttons */}
+        <div className="flex border-t border-gray-200 pt-2 mt-2">
+          <button
+            onClick={handleFavoriteClick}
+            className="flex-1 flex items-center justify-center py-2 hover:bg-gray-50 transition rounded-l-lg"
+          >
+            <Heart className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+            <span className="text-xs text-black">{isFavorite ? 'Saved' : 'Save'}</span>
+          </button>
+          <button
+            onClick={handleCall}
+            className="flex-1 flex items-center justify-center py-2 text-primary-600 hover:bg-primary-50 transition border-l border-r border-gray-200"
+          >
+            <Phone className="w-4 h-4 mr-1" />
+            <span className="text-xs text-black">Call</span>
+          </button>
+          <button
+            onClick={handleShare}
+            className="flex-1 flex items-center justify-center py-2 text-gray-600 hover:bg-gray-50 transition rounded-r-lg"
+          >
+            <Share2 className="w-4 h-4 mr-1" />
+            <span className="text-xs text-black">Share</span>
+          </button>
+        </div>
       </div>
     </div>
   );
 
+  // --- Large Card Variant ---
   const renderLargeCard = () => (
     <div
-      className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer border border-gray-100"
+      className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer border border-gray-100 flex flex-col"
       onClick={handleCardClick}
     >
+      {/* Image & Property Type Badge */}
       <div className="relative">
         <Swiper
           modules={[Navigation, Pagination]}
           pagination={{ clickable: true }}
-          onSwiper={(swiper) => {
-            swiperRef.current = swiper;
-          }}
+          onSwiper={(swiper) => { swiperRef.current = swiper; }}
           loop={(property.images?.length || 0) > 1}
           className="h-80"
         >
@@ -257,105 +247,73 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </SwiperSlide>
           ))}
         </Swiper>
-
-        <div
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg z-10 cursor-pointer hover:bg-gray-50"
-          onClick={(e) => {
-            e.stopPropagation();
-            swiperRef.current?.slidePrev();
-          }}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </div>
-
-        <div
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg z-10 cursor-pointer hover:bg-gray-50"
-          onClick={(e) => {
-            e.stopPropagation();
-            swiperRef.current?.slideNext();
-          }}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </div>
-
+        {/* Property Type Badge */}
         <div className="absolute top-4 left-4 z-10">
           <span className="bg-primary-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
             {property.propertyType || property.type}
           </span>
         </div>
-
+        {/* Favorite Button */}
         <button
           onClick={handleFavoriteClick}
           className="absolute top-4 right-4 z-10 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-50 transition"
         >
-          <Heart
-            className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-          />
+          <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
         </button>
       </div>
-
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-900 mb-1">
-              {property.address?.buildingName || 'Property'}
-            </h3>
-            <div className="flex items-center text-gray-600 mb-2">
-              <MapPin className="w-4 h-4 mr-1" />
-              <span className="text-sm">{property.address?.locality}, {property.address?.city}</span>
+      {/* Main Info */}
+      <div className="p-6 flex-1 flex flex-col justify-between">
+        <div>
+          <div className="flex justify-between items-start mb-3">
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-gray-900 mb-1">
+                {property.address?.buildingName || 'Property'}
+              </h3>
+              <div className="flex items-center text-gray-600 mb-2">
+                <MapPin className="w-4 h-4 mr-1" />
+                <span className="text-sm">{property.address?.locality}, {property.address?.city}</span>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-extrabold text-primary-600">
+                ₹{formatCurrency(property.rentDetails?.costs?.rent || property.sellDetails?.price || 0)}
+              </div>
+              <div className="text-sm text-gray-500">
+                {listingType === 'rent' ? 'per month' : 'total price'}
+              </div>
             </div>
           </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-primary-600">
-              ₹{formatCurrency(property.rentDetails?.costs?.rent || property.sellDetails?.price || 0)}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="flex items-center text-sm text-gray-700">
+              <BedDouble className="w-4 h-4 mr-2 text-gray-500" />
+              <span>{property.bedrooms || '-'} BHK</span>
             </div>
-            <div className="text-sm text-gray-500">
-              {listingType === 'rent' ? 'per month' : 'total price'}
+            <div className="flex items-center text-sm text-gray-700">
+              <KeyRound className="w-4 h-4 mr-2 text-gray-500" />
+              <span>{property.sellDetails?.sqft || property.rentDetails?.sqft || '-'} sqft</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-700">
+              <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+              <span>{property.isImmediate ? 'Immediate' : formatAvailabilityDate(property.handoverDate)}</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-700">
+              <Home className="w-4 h-4 mr-2 text-gray-500" />
+              <span>{property.furnishingType || 'Not specified'}</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-700">
+              <Car className="w-4 h-4 mr-2 text-gray-500" />
+              <span>{property.parking || 'Not specified'}</span>
             </div>
           </div>
+          {/* Amenity Icons Row */}
+          <div className="flex gap-3 mb-4">
+            {Object.entries(AMENITY_ICONS).map(([key, icon]) => (
+              <span key={key} className={`rounded-full p-2 bg-gray-100 ${property.rentDetails?.amenities?.includes(key) || property.sellDetails?.amenities?.includes(key) ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
+            ))}
+          </div>
         </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          {listingType === 'rent' ? (
-            <>
-              <div className="flex items-center text-sm text-gray-700">
-                <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                <span>
-                  {property.isImmediate ? 'Immediate' : formatAvailabilityDate(property.handoverDate)}
-                </span>
-              </div>
-              <div className="flex items-center text-sm text-gray-700">
-                <Home className="w-4 h-4 mr-2 text-gray-500" />
-                <span>{property.furnishingType || 'Not specified'}</span>
-              </div>
-              <div className="flex items-center text-sm text-gray-700">
-                <Car className="w-4 h-4 mr-2 text-gray-500" />
-                <span>{property.parking || 'Not specified'}</span>
-              </div>
-              <div className="flex items-center text-sm text-gray-700">
-                <Building className="w-4 h-4 mr-2 text-gray-500" />
-                <span>{property.bedrooms || '-'} BHK</span>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center text-sm text-gray-700">
-                <Building className="w-4 h-4 mr-2 text-gray-500" />
-                <span>{property.sellDetails?.sqft || '-'} sq.ft</span>
-              </div>
-              <div className="flex items-center text-sm text-gray-700">
-                <MapPin className="w-4 h-4 mr-2 text-gray-500" />
-                <span>{property.sellDetails?.direction || '-'}</span>
-              </div>
-            </>
-          )}
-        </div>
-
-        <div className="flex gap-3">
+        {/* Action Buttons */}
+        <div className="flex gap-3 mt-auto">
           <button
             onClick={handleCall}
             className="flex-1 bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-700 transition flex items-center justify-center"
@@ -374,6 +332,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     </div>
   );
 
+  // --- Render Variant ---
   return variant === 'large' ? renderLargeCard() : renderSmallCard();
 };
 
