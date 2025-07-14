@@ -287,9 +287,7 @@ const FindFriendsPage = () => {
                   onClick={() => handleWhatsApp(user.userPhoneNumber)}
                   className="flex-1 py-2.5 flex items-center justify-center bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition"
                 >
-                  <svg className="w-5 h-5 mr-2" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M16 3C9.373 3 4 8.373 4 15c0 2.385.832 4.584 2.236 6.393L4 29l7.828-2.205C13.416 27.168 14.684 27.5 16 27.5c6.627 0 12-5.373 12-12S22.627 3 16 3zm0 22c-1.168 0-2.312-.205-3.393-.607l-.242-.086-4.65 1.308 1.242-4.393-.158-.23C7.205 19.312 7 18.168 7 17c0-5.514 4.486-10 10-10s10 4.486 10 10-4.486 10-10 10zm5.293-7.293c-.293-.293-.707-.293-1 0l-1.293 1.293c-.293.293-.293.707 0 1l2 2c.293.293.707.293 1 0l1.293-1.293c.293-.293.293-.707 0-1l-2-2z" />
-                  </svg>
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5 mr-2" />
                   <span>WhatsApp</span>
                 </button>
                 <button 
