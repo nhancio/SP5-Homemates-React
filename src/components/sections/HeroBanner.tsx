@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Home, Users, Key, Wrench } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
+import type { Filters } from '../../context/AppContext';
 
 const HeroBanner = () => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const HeroBanner = () => {
   };
 
   const handlePropertyTypeClick = (type: string, listingType: 'rent' | 'buy') => {
-    setFilters(prev => ({
+    setFilters((prev: Filters) => ({
       ...prev,
       [listingType]: {
         ...prev[listingType],
@@ -29,7 +30,7 @@ const HeroBanner = () => {
   };
 
   return (
-    <section className="h-full relative flex items-center justify-center overflow-hidden"> {/* Removed min-height and padding */}
+    <section className="relative flex flex-col justify-center items-center overflow-hidden h-screen -mt-16"> {/* Full viewport height, offset for header */}
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat before:absolute before:inset-0 before:bg-black before:opacity-40"
