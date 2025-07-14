@@ -1,5 +1,10 @@
 import React, { useEffect } from 'react';
 import HeroBanner from '../components/sections/HeroBanner';
+import Footer from '../components/layout/Footer';
+import FeaturedProperties from '../components/sections/FeaturedProperties';
+import HomeCategories from '../components/sections/HomeCategories';
+import HomeServices from '../components/sections/HomeServices';
+import Testimonials from '../components/sections/Testimonials';
 
 const HomePage = () => {
   useEffect(() => {
@@ -8,8 +13,9 @@ const HomePage = () => {
   }, []);
   
   return (
-    <div className="h-[calc(97.1vh-112px)] flex flex-col"> {/* home image banner height */}
+    <div className="flex flex-col h-screen overflow-hidden">
       <HeroBanner />
+      <Footer />
     </div>
   );
 };

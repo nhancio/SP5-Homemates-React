@@ -16,6 +16,7 @@ interface PropertyCardProps {
   property: Property;
   listingType?: 'rent' | 'buy';
   variant?: 'small' | 'large';
+  onClick?: () => void;
 }
 
 // Key amenities to show as icons
@@ -32,7 +33,8 @@ const AMENITY_ICONS: Record<string, React.ReactNode> = {
 const PropertyCard: React.FC<PropertyCardProps> = ({ 
   property, 
   listingType = 'rent',
-  variant = 'small'
+  variant = 'small',
+  onClick
 }) => {
   const { favoriteProperties, toggleFavorite, user } = useAppContext();
   const [isLoaded, setIsLoaded] = useState(false);
@@ -108,7 +110,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const renderSmallCard = () => (
     <div
       className="bg-white rounded-lg overflow-hidden shadow-property-card hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100 flex flex-col"
-      onClick={handleCardClick}
+      onClick={onClick || handleCardClick}
     >
       {/* Image & Property Type Badge */}
       <div className="relative">
@@ -133,6 +135,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </SwiperSlide>
           ))}
         </Swiper>
+        {/* Property Type Badge */}
+        <div className="absolute top-3 left-3 z-10">
+          <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
+            {property.propertyType || property.type}
+          </span>
+        </div>
         {/* Left Arrow */}
         <div
           className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
@@ -157,12 +165,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             <path d="M9 18l6-6-6-6" />
           </svg>
         </div>
-        {/* Property Type Badge */}
-        <div className="absolute top-3 left-3 z-10">
-          <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
-            {property.propertyType || property.type}
-          </span>
-        </div>
       </div>
       {/* Main Info */}
       <div className="p-4 flex-1 flex flex-col justify-between">
@@ -174,12 +176,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             <span className="text-lg font-extrabold text-primary-600">
               ₹{formatCurrency(property.rentDetails?.costs?.rent || property.sellDetails?.price || 0)}
             </span>
-          </div>
-          <div className="flex items-center text-xs text-gray-500 mb-2">
-            <BedDouble className="w-4 h-4 mr-1" />
-            <span className="mr-2">{property.bedrooms || '-'} BHK</span>
-            <KeyRound className="w-4 h-4 mr-1" />
-            <span>{property.sellDetails?.sqft || property.rentDetails?.sqft || '-'} sqft</span>
           </div>
           <div className="flex items-center text-sm text-gray-600 mb-2">
             <MapPin className="w-4 h-4 mr-1" />
@@ -294,28 +290,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               <div className="text-sm text-gray-500">
                 {listingType === 'rent' ? 'per month' : 'total price'}
               </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="flex items-center text-sm text-gray-700">
-              <BedDouble className="w-4 h-4 mr-2 text-gray-500" />
-              <span>{property.bedrooms || '-'} BHK</span>
-            </div>
-            <div className="flex items-center text-sm text-gray-700">
-              <KeyRound className="w-4 h-4 mr-2 text-gray-500" />
-              <span>{property.sellDetails?.sqft || property.rentDetails?.sqft || '-'} sqft</span>
-            </div>
-            <div className="flex items-center text-sm text-gray-700">
-              <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-              <span>{property.isImmediate ? 'Immediate' : formatAvailabilityDate(property.handoverDate)}</span>
-            </div>
-            <div className="flex items-center text-sm text-gray-700">
-              <Home className="w-4 h-4 mr-2 text-gray-500" />
-              <span>{property.furnishingType || 'Not specified'}</span>
-            </div>
-            <div className="flex items-center text-sm text-gray-700">
-              <Car className="w-4 h-4 mr-2 text-gray-500" />
-              <span>{property.parking || 'Not specified'}</span>
             </div>
           </div>
           {/* Amenity Icons Row */}
