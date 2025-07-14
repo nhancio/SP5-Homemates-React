@@ -331,21 +331,18 @@ const AddListingPage = () => {
   };
 
   // Toggle functions and handlers
-  const handleAmenityToggle = (category: 'appliances' | 'furniture' | 'building', item: string) => {
-    setFormData((prev: typeof initialFormData) => {
-      const amenities = { ...prev.amenities };
-      if (amenities[category].includes(item)) {
-        amenities[category] = amenities[category].filter(i => i !== item);
-      } else {
-        amenities[category] = [...amenities[category], item];
-      }
-      return { ...prev, amenities };
-    });
-  };
 
   const renderRentFields = () => (
     <>
-      <AddressFields formData={formData} setFormData={setFormData} />
+      <AddressFields 
+        listingType={listingType}
+        formData={formData}
+        setFormData={setFormData}
+        images={images}
+        setImages={setImages}
+        handleImageUpload={handleImageUpload}
+        removeImage={removeImage}
+      />
       {/* Preferred Tenant Section */}
       <section className="bg-white p-6 rounded-lg shadow-sm">
         <h2 className="text-lg font-semibold mb-4">Preferred Tenant</h2>
@@ -661,16 +658,18 @@ const AddListingPage = () => {
 
   const renderSellFields = () => (
     <SellForm
+      listingType={listingType}
       formData={formData}
       setFormData={setFormData}
       images={images}
+      setImages={setImages}
       handleImageUpload={handleImageUpload}
       removeImage={removeImage}
     />
   );
 
   return (
-    <div className="py-8">
+    <div className="py-8 bg-white">
       <div className="container">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-4">Add New Listing</h1>
@@ -703,14 +702,24 @@ const AddListingPage = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {listingType === 'rent' ? (
             <RentForm
+              listingType={listingType}
               formData={formData}
               setFormData={setFormData}
               images={images}
+              setImages={setImages}
               handleImageUpload={handleImageUpload}
               removeImage={removeImage}
             />
           ) : (
-            renderSellFields()
+            <SellForm
+              listingType={listingType}
+              formData={formData}
+              setFormData={setFormData}
+              images={images}
+              setImages={setImages}
+              handleImageUpload={handleImageUpload}
+              removeImage={removeImage}
+            />
           )}
 
           <button 

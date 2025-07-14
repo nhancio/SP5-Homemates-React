@@ -8,7 +8,7 @@ import { getListingsByIds } from '../services/listings';
 const SavedPage = () => {
   const { favoriteProperties, user } = useAppContext();
   const [activeFilter, setActiveFilter] = useState('all');
-  const [savedProperties, setSavedProperties] = useState([]);
+  const [savedProperties, setSavedProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -95,6 +95,7 @@ const SavedPage = () => {
                 key={property.id}
                 property={property}
                 listingType={property.listingType === 'sell' ? 'buy' : 'rent'}
+                variant="large"
               />
             ))}
           </div>

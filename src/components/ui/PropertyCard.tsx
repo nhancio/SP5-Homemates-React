@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug } from 'lucide-react';
+import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug, X } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
@@ -38,6 +38,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const navigate = useNavigate();
   const swiperRef = useRef<any>(null);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [modalImage, setModalImage] = useState<string | null>(null);
 
   const isFavorite = favoriteProperties.includes(property.id);
 
@@ -241,7 +243,18 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                     <Building className="w-16 h-16" />
                   </div>
                 ) : (
-                  <img src={img} alt="" className="w-full h-full object-cover" onLoad={handleImageLoad} loading="lazy" />
+                  <img
+                    src={img}
+                    alt=""
+                    className="w-full h-full object-cover cursor-zoom-in"
+                    onClick={e => {
+                      e.stopPropagation();
+                      setModalImage(img);
+                      setShowImageModal(true);
+                    }}
+                    onLoad={handleImageLoad}
+                    loading="lazy"
+                  />
                 )}
               </div>
             </SwiperSlide>
@@ -329,6 +342,27 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           </button>
         </div>
       </div>
+      {/* Full-page image modal */}
+      {showImageModal && modalImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
+          onClick={() => setShowImageModal(false)}
+        >
+          <img
+            src={modalImage}
+            alt="Property"
+            className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg"
+            onClick={e => e.stopPropagation()}
+          />
+          <button
+            className="absolute top-6 right-6 text-white text-3xl font-bold"
+            onClick={() => setShowImageModal(false)}
+            aria-label="Close"
+          >
+            <X className="w-8 h-8" />
+          </button>
+        </div>
+      )}
     </div>
   );
 
