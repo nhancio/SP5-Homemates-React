@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import MobileNav from './MobileNav';
 import Footer from './Footer';
@@ -10,6 +10,7 @@ import PageViewTracker from '../PageViewTracker';
 
 const Layout = () => {
   const { showPreferences } = useAppContext();
+  const location = useLocation();
   
   return (
     <div className="flex flex-col min-h-screen">
@@ -18,7 +19,7 @@ const Layout = () => {
       <main className="flex-grow">
         <Outlet />
       </main>
-      <Footer />
+      {location.pathname !== '/' && <Footer />}
       <MobileNav />
       <PWAInstallPrompt />
       {showPreferences && <PreferencesModal />}

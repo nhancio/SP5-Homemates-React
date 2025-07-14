@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Instagram, Linkedin, MessageCircle, Home } from 'lucide-react';
+import { Mail, Instagram, Linkedin, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -29,9 +29,10 @@ const Footer = () => {
               href="https://chat.whatsapp.com/Iu4iWfmQEVZB6UHRqHKRYt" 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="hover:text-white transition"
+              className="hover:text-green-500 transition"
+              title="WhatsApp Group"
             >
-              <MessageCircle className="w-5 h-5" />
+              <img src="/images/whatsapp-logo.png" alt="WhatsApp" className="w-5 h-5 rounded-full" />
             </a>
           </div>
           

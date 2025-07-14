@@ -130,7 +130,8 @@ const RentPropertiesPage = () => {
                 key={property.id} 
                 property={property}
                 listingType="rent"
-                variant="large"
+                variant="small"
+                onClick={() => handlePropertyClick(property.id)}
               />
             ))}
           </div>
