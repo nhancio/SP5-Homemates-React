@@ -32,7 +32,7 @@ type BuyFilters = BaseFilters & {
   possessionStatus: string;
 };
 
-type Filters = {
+export type Filters = {
   fullHome: {
     city: string;
     locality: string;

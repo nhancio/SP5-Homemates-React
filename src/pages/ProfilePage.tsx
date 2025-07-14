@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil, Trash } from 'lucide-react';
+import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil, Trash, MoreVertical, Eye, Edit } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { getDoc, doc, updateDoc } from 'firebase/firestore';
 import { db, storage } from '../config/firebase';
@@ -22,6 +22,16 @@ const ProfilePage = () => {
   const [uploading, setUploading] = useState(false);
   const [editingListing, setEditingListing] = useState<any>(null);
   const [deletingListing, setDeletingListing] = useState<string | null>(null);
+  const [showOptionsFor, setShowOptionsFor] = useState<string | null>(null);
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [editProfileData, setEditProfileData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    gender: '',
+    age: '',
+    profession: '',
+  });
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -74,6 +84,19 @@ const ProfilePage = () => {
     fetchUserListings();
   }, [user]);
 
+  useEffect(() => {
+    if (profileUser) {
+      setEditProfileData({
+        name: profileUser.userName || profileUser.name || '',
+        email: profileUser.userEmail || profileUser.email || '',
+        phone: profileUser.userPhoneNumber || '',
+        gender: profileUser.gender || '',
+        age: profileUser.age || '',
+        profession: profileUser.profession || '',
+      });
+    }
+  }, [profileUser]);
+
   const handleUpgradeClick = (e: React.MouseEvent) => {
     e.preventDefault();
     setShowUpgradePopup(true);
@@ -123,6 +146,22 @@ const ProfilePage = () => {
       setDeletingListing(null);
     }
   };
+
+  // Add click-away listener for dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const dropdowns = document.querySelectorAll('.z-20.animate-fade-in');
+      let clickedInside = false;
+      dropdowns.forEach(dropdown => {
+        if (dropdown.contains(event.target as Node)) clickedInside = true;
+      });
+      if (!clickedInside) setShowOptionsFor(null);
+    }
+    if (showOptionsFor) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showOptionsFor]);
 
   if (!isAuthenticated) {
     return (
@@ -252,7 +291,17 @@ const ProfilePage = () => {
               {/* User Info */}
               <div className="md:ml-6 text-center md:text-left flex-grow">
                 <div className="flex flex-col md:flex-row items-center justify-between">
-                  <h1 className="text-2xl font-bold">{displayName}</h1>
+                  <h1 className="text-2xl font-bold flex items-center gap-2">
+                    {displayName}
+                    <button
+                      className="ml-2 p-1 rounded-full bg-gray-100 hover:bg-primary-50 text-primary-600"
+                      onClick={() => setEditProfileOpen(true)}
+                      title="Edit Profile"
+                      aria-label="Edit Profile"
+                    >
+                      <Edit className="w-5 h-5" />
+                    </button>
+                  </h1>
                 </div>
                 <div className="mt-4 space-y-2">
                   <p className="flex items-center justify-center md:justify-start text-gray-600">
@@ -315,26 +364,31 @@ const ProfilePage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {userListings.map(listing => (
                 <div key={listing.id} className="relative">
-                  {/* Formal Edit/Delete icon buttons always visible, overlay top-right */}
-                  <div className="absolute top-2 right-2 flex gap-2 z-10">
-                    <button 
-                      className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow hover:bg-primary-50 hover:border-primary-400 transition focus:outline-none"
-                      onClick={() => handleEditListing(listing)}
-                      disabled={deletingListing === listing.id}
-                      title="Edit Listing"
-                      aria-label="Edit Listing"
-                    >
-                      <Pencil className="w-5 h-5 text-primary-600" />
-                    </button>
-                    <button 
-                      className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow hover:bg-red-50 hover:border-red-400 transition focus:outline-none"
-                      onClick={() => handleDeleteListing(listing)}
-                      disabled={deletingListing === listing.id}
-                      title="Delete Listing"
-                      aria-label="Delete Listing"
-                    >
-                      {deletingListing === listing.id ? <span className="text-lg">⏳</span> : <Trash className="w-5 h-5 text-red-500" />}
-                    </button>
+                  {/* More options dropdown */}
+                  <div className="absolute top-2 right-2 z-10">
+                    <div className="relative">
+                      <button
+                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition"
+                        onClick={() => setShowOptionsFor(showOptionsFor === listing.id ? null : listing.id)}
+                        title="More Options"
+                        aria-label="More Options"
+                      >
+                        <MoreVertical className="w-5 h-5 text-gray-600" />
+                      </button>
+                      {showOptionsFor === listing.id && (
+                        <div className="absolute right-0 mt-2 w-44 bg-white border rounded shadow z-20 animate-fade-in">
+                          <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-sm gap-2" onClick={() => { setShowOptionsFor(null); handleEditListing(listing); }}>
+                            <Pencil className="w-4 h-4 text-primary-600" /> Edit
+                          </button>
+                          <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-sm gap-2" onClick={() => { setShowOptionsFor(null); handleDeleteListing(listing); }} disabled={deletingListing === listing.id}>
+                            <Trash className="w-4 h-4 text-red-500" /> Delete
+                          </button>
+                          <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-sm gap-2" onClick={() => { setShowOptionsFor(null); navigate(`/listing/${listing.listingType}/${listing.id}`); }}>
+                            <Eye className="w-4 h-4 text-gray-600" /> View
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <PropertyCard property={listing} listingType={listing.listingType === 'sell' ? 'buy' : 'rent'} />
                 </div>
@@ -406,6 +460,124 @@ const ProfilePage = () => {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+        {editProfileOpen && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
+            <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4 relative">
+              <button
+                onClick={() => setEditProfileOpen(false)}
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <h3 className="text-xl font-semibold mb-4">Edit Profile</h3>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!user) return;
+                  try {
+                    const userDocRef = doc(db, 'u', user.id);
+                    await updateDoc(userDocRef, {
+                      userName: editProfileData.name,
+                      userEmail: editProfileData.email,
+                      userPhoneNumber: editProfileData.phone,
+                      gender: editProfileData.gender,
+                      age: editProfileData.age,
+                      profession: editProfileData.profession,
+                    });
+                    setProfileUser((prev: any) => ({
+                      ...prev,
+                      userName: editProfileData.name,
+                      userEmail: editProfileData.email,
+                      userPhoneNumber: editProfileData.phone,
+                      gender: editProfileData.gender,
+                      age: editProfileData.age,
+                      profession: editProfileData.profession,
+                    }));
+                    setEditProfileOpen(false);
+                    alert('Profile updated successfully!');
+                  } catch (err) {
+                    alert('Failed to update profile.');
+                    console.error(err);
+                  }
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium mb-1">Name</label>
+                  <input
+                    type="text"
+                    className="input w-full"
+                    value={editProfileData.name}
+                    onChange={e => setEditProfileData(d => ({ ...d, name: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Email</label>
+                  <input
+                    type="email"
+                    className="input w-full"
+                    value={editProfileData.email}
+                    onChange={e => setEditProfileData(d => ({ ...d, email: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    className="input w-full"
+                    value={editProfileData.phone}
+                    onChange={e => setEditProfileData(d => ({ ...d, phone: e.target.value }))}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Gender</label>
+                  <input
+                    type="text"
+                    className="input w-full"
+                    value={editProfileData.gender}
+                    onChange={e => setEditProfileData(d => ({ ...d, gender: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Age</label>
+                  <input
+                    type="number"
+                    className="input w-full"
+                    value={editProfileData.age}
+                    onChange={e => setEditProfileData(d => ({ ...d, age: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Profession</label>
+                  <input
+                    type="text"
+                    className="input w-full"
+                    value={editProfileData.profession}
+                    onChange={e => setEditProfileData(d => ({ ...d, profession: e.target.value }))}
+                  />
+                </div>
+                <div className="flex justify-end gap-2 mt-4">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setEditProfileOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
