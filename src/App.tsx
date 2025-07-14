@@ -14,6 +14,7 @@ import PropertyDetailsPage from './pages/PropertyDetailsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
 import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
+import CardDemoPage from './pages/CardDemoPage';
 import { AppContextProvider } from './context/AppContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -43,6 +44,7 @@ const router = createBrowserRouter([
       { path: 'edit-listing/:listingType/:listingId', element: <EditListingPage /> },
       { path: 'saved', element: <SavedPage /> },
       { path: 'users', element: <FindFriendsPage /> },
+      { path: 'card-demo', element: <CardDemoPage /> },
       { path: 'privacy_policy', element: <PrivacyPolicyPage /> },
       { path: 'refund_policy', element: <RefundPolicyPage /> },
       { path: 'TandC', element: <TermsAndConditionsPage /> },
