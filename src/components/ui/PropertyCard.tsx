@@ -96,6 +96,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       alert('Please login to save properties');
       return;
     }
+    // If already saved, confirm before un-saving
+    if (isFavorite) {
+      const confirmed = window.confirm('Are you sure you want to remove this property from your saved list?');
+      if (!confirmed) return;
+    }
     try {
       await updateUserFavorites(user.id, property.id, !isFavorite);
       toggleFavorite(property.id);
