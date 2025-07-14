@@ -106,6 +106,7 @@ const RentPropertiesPage = () => {
           <p className="text-gray-600">
             Plug and play homes which are in your comfort zone.
           </p>
+          <p className="text-primary-600 font-semibold mt-1">Showing {properties.length} rooms</p>
         </div>
         
         <PropertyFilters 
