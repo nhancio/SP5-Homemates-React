@@ -1,3 +1,44 @@
+export interface PropertyAddress {
+  buildingName: string;
+  locality: string;
+  city: string;
+}
+
+export interface RoomDetails {
+  availableRooms: number;
+  availability: string;
+  bathroomType: string;
+}
+
+export interface RentCosts {
+  rent: number;
+  maintenance: number;
+  securityDeposit: number;
+  setupCost: number;
+  brokerage: number;
+}
+
+export interface AdditionalBills {
+  wifi: number;
+  water: number;
+  gas: number;
+  cook: number;
+  maid: number;
+  others: number;
+}
+
+export interface PreferredTenant {
+  lookingFor: string;
+  preferences: string[];
+}
+
+export interface RentDetailsFull {
+  roomDetails: RoomDetails;
+  costs: RentCosts;
+  additionalBills: AdditionalBills;
+  preferredTenant: PreferredTenant;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -17,6 +58,8 @@ export interface Property {
     phone: string;
     email: string;
   };
+  address?: PropertyAddress;
+  rentDetails?: RentDetailsFull;
 }
 
 export interface PropertyAmenities {
