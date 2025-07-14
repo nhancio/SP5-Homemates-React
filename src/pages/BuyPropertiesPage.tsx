@@ -99,7 +99,8 @@ const BuyPropertiesPage = () => {
                   key={property.id} 
                   property={property}
                   listingType="buy"
-                  variant="large"
+                  variant="small"
+                  onClick={() => handlePropertyClick(property.id)}
                 />
               ))}
             </div>

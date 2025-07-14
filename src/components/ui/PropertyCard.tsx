@@ -197,6 +197,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               ₹{formatCurrency(property.rentDetails?.costs?.rent || property.sellDetails?.price || 0)}
             </span>
           </div>
+          {typeof property.rentDetails?.roomDetails?.availableRooms === 'number' && (
+            <div className="text-xs text-primary-600 font-semibold mb-1">
+              {property.rentDetails.roomDetails.availableRooms} room(s) available in {property.address?.buildingName}, {property.address?.locality}, {property.address?.city}
+            </div>
+          )}
           <div className="flex items-center text-sm text-gray-600 mb-2">
             <MapPin className="w-4 h-4 mr-1" />
             <span className="line-clamp-1">{property.address?.locality}, {property.address?.city}</span>
@@ -324,6 +329,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               </div>
             </div>
           </div>
+          {typeof property.rentDetails?.roomDetails?.availableRooms === 'number' && (
+            <div className="text-sm text-primary-600 font-semibold mb-2">
+              {property.rentDetails.roomDetails.availableRooms} room(s) available in {property.address?.buildingName}, {property.address?.locality}, {property.address?.city}
+            </div>
+          )}
           {/* Amenity Icons Row */}
           <div className="flex gap-3 mb-4">
             {Object.entries(AMENITY_ICONS).map(([key, icon]) => (

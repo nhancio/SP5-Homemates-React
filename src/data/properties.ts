@@ -23,6 +23,37 @@ const mockProperties: Property[] = [
       name: 'Rahul Sharma',
       phone: '+91 98765 43210',
       email: 'rahul.sharma@example.com'
+    },
+    address: {
+      buildingName: 'Prestige Acropolis',
+      locality: 'Koramangala',
+      city: 'Bangalore'
+    },
+    rentDetails: {
+      roomDetails: {
+        availableRooms: 2,
+        availability: 'Immediate',
+        bathroomType: 'Attached'
+      },
+      costs: {
+        rent: 35000,
+        maintenance: 3000,
+        securityDeposit: 70000,
+        setupCost: 5000,
+        brokerage: 0
+      },
+      additionalBills: {
+        wifi: 1000,
+        water: 500,
+        gas: 600,
+        cook: 2000,
+        maid: 1500,
+        others: 0
+      },
+      preferredTenant: {
+        lookingFor: 'Any',
+        preferences: []
+      }
     }
   },
   {
@@ -47,6 +78,37 @@ const mockProperties: Property[] = [
       name: 'Priya Patel',
       phone: '+91 87654 32109',
       email: 'priya.patel@example.com'
+    },
+    address: {
+      buildingName: 'Brigade Lakefront',
+      locality: 'Whitefield',
+      city: 'Bangalore'
+    },
+    rentDetails: {
+      roomDetails: {
+        availableRooms: 4,
+        availability: 'Immediate',
+        bathroomType: 'Attached'
+      },
+      costs: {
+        rent: 90000,
+        maintenance: 8000,
+        securityDeposit: 180000,
+        setupCost: 10000,
+        brokerage: 0
+      },
+      additionalBills: {
+        wifi: 2000,
+        water: 1000,
+        gas: 1200,
+        cook: 4000,
+        maid: 3000,
+        others: 0
+      },
+      preferredTenant: {
+        lookingFor: 'Family',
+        preferences: []
+      }
     }
   },
   {
@@ -59,14 +121,45 @@ const mockProperties: Property[] = [
     bedrooms: 3,
     bathrooms: 3,
     area: 1800,
-    images: [/* Add image URLs */],
-    features: ['Modular Kitchen', 'Power Backup', 'Club House', 'Children\'s Play Area'],
+    images: [],
+    features: ['Modular Kitchen', 'Power Backup', 'Club House', "Children's Play Area"],
     listingType: 'buy',
     listedAt: '2024-03-10',
     contactInfo: {
       name: 'Amit Kumar',
       phone: '+91 98765 43211',
       email: 'amit.kumar@example.com'
+    },
+    address: {
+      buildingName: 'Salarpuria Greenage',
+      locality: 'HSR Layout',
+      city: 'Bangalore'
+    },
+    rentDetails: {
+      roomDetails: {
+        availableRooms: 3,
+        availability: 'Immediate',
+        bathroomType: 'Common'
+      },
+      costs: {
+        rent: 45000,
+        maintenance: 4000,
+        securityDeposit: 90000,
+        setupCost: 6000,
+        brokerage: 0
+      },
+      additionalBills: {
+        wifi: 1200,
+        water: 700,
+        gas: 800,
+        cook: 2500,
+        maid: 1800,
+        others: 0
+      },
+      preferredTenant: {
+        lookingFor: 'Any',
+        preferences: []
+      }
     }
   },
   // Add more properties with Indian locations and contact details...
