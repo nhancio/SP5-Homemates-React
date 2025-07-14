@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug, X } from 'lucide-react';
+import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug, X, Check } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
@@ -42,6 +42,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const swiperRef = useRef<any>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImage, setModalImage] = useState<string | null>(null);
+  const [showSavedAnimation, setShowSavedAnimation] = useState(false);
 
   const isFavorite = favoriteProperties.includes(property.id);
 
@@ -98,6 +99,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     try {
       await updateUserFavorites(user.id, property.id, !isFavorite);
       toggleFavorite(property.id);
+      if (!isFavorite) {
+        setShowSavedAnimation(true);
+        setTimeout(() => setShowSavedAnimation(false), 1200);
+      }
     } catch (error) {
       console.error('Error updating favorites:', error);
       alert('Failed to update favorites. Please try again.');
@@ -206,6 +211,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           >
             <Heart className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
             <span className="text-xs text-black">{isFavorite ? 'Saved' : 'Save'}</span>
+            {showSavedAnimation && (
+              <span className="ml-2 animate-fade-in-out text-green-600">
+                <Check className="w-4 h-4" />
+              </span>
+            )}
           </button>
           <button
             onClick={handleCall}
