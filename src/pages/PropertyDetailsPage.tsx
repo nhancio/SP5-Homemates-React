@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getPropertyById } from '../services/listings';
-import { Phone, Share2, Heart, Building, Loader, ArrowLeft, Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home, Check } from 'lucide-react';
+import { Phone, Share2, Heart, Building, Loader, ArrowLeft, Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { formatCurrency } from '../utils/format';
 import { getShareableUrl } from '../utils/share';
@@ -16,6 +16,9 @@ const PropertyDetailsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { favoriteProperties, toggleFavorite, isAuthenticated, login, user } = useAppContext();
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [modalImage, setModalImage] = useState<string | null>(null);
+  const [modalImageIndex, setModalImageIndex] = useState<number>(0);
 
   // Determine listing type from URL
   const listingType = location.pathname.startsWith('/rent') ? 'rent' : 'sell';
@@ -208,11 +211,33 @@ Link: ${url}`;
                       <Building className="w-16 h-16 text-gray-400" />
                     </div>
                   ) : (
-                    <img 
-                      src={image} 
-                      alt={`Property ${index + 1}`} 
-                      className="w-full h-full object-contain rounded-lg bg-white"
-                    />
+                    <div className="relative w-full h-full">
+                      <img 
+                        src={image} 
+                        alt={`Property ${index + 1}`} 
+                        className="w-full h-full object-contain rounded-lg bg-white cursor-zoom-in"
+                        onClick={() => {
+                          setModalImage(image);
+                          setModalImageIndex(index);
+                          setShowImageModal(true);
+                        }}
+                      />
+                      {/* Zoom/Expand Button */}
+                      <button
+                        className="absolute bottom-3 right-3 bg-black bg-opacity-60 text-white rounded-full p-2 hover:bg-opacity-80 focus:outline-none"
+                        onClick={e => {
+                          e.stopPropagation();
+                          setModalImage(image);
+                          setModalImageIndex(index);
+                          setShowImageModal(true);
+                        }}
+                        aria-label="Expand image"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h6m0 0v6m0-6L10 14m-1 7H3m0 0v-6m0 6l11-11" />
+                        </svg>
+                      </button>
+                    </div>
                   )}
                 </SwiperSlide>
               ))}
@@ -334,7 +359,7 @@ Link: ${url}`;
                       <p className="font-semibold text-lg text-primary-600">
                         ₹{formatCurrency(
                           Object.values(property.rentDetails.additionalBills)
-                            .reduce((sum, value) => sum + (Number(value) || 0), 0)
+                            .reduce((sum: number, value) => sum + (Number(value) || 0), 0)
                         )}
                       </p>
                     </div>
@@ -405,6 +430,67 @@ Link: ${url}`;
           </div>
         </div>
       </div>
+      {showImageModal && modalImage && (
+        // Defensive: fallback to [] if property.images is undefined
+        (() => { const images = property.images?.length ? property.images : []; return (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
+          onClick={() => setShowImageModal(false)}
+        >
+          {/* Left Clickable Area */}
+          <div
+            className="absolute left-0 top-0 bottom-0 w-1/2 cursor-pointer z-40"
+            onClick={e => {
+              e.stopPropagation();
+              if (!images.length) return;
+              const prevIndex = (modalImageIndex - 1 + images.length) % images.length;
+              setModalImage(images[prevIndex]);
+              setModalImageIndex(prevIndex);
+            }}
+            aria-label="Previous image"
+          >
+            <span className="absolute left-8 top-1/2 -translate-y-1/2">
+              <span className="flex items-center justify-center w-12 h-12 bg-black bg-opacity-60 rounded-full text-white hover:bg-opacity-80 pointer-events-none select-none">
+                <ChevronLeft className="w-8 h-8" />
+              </span>
+            </span>
+          </div>
+          {/* Right Clickable Area */}
+          <div
+            className="absolute right-0 top-0 bottom-0 w-1/2 cursor-pointer z-40"
+            onClick={e => {
+              e.stopPropagation();
+              if (!images.length) return;
+              const nextIndex = (modalImageIndex + 1) % images.length;
+              setModalImage(images[nextIndex]);
+              setModalImageIndex(nextIndex);
+            }}
+            aria-label="Next image"
+          >
+            <span className="absolute right-8 top-1/2 -translate-y-1/2">
+              <span className="flex items-center justify-center w-12 h-12 bg-black bg-opacity-60 rounded-full text-white hover:bg-opacity-80 pointer-events-none select-none">
+                <ChevronRight className="w-8 h-8" />
+              </span>
+            </span>
+          </div>
+          {/* Image (centered, above click areas) */}
+          <img
+            src={modalImage}
+            alt="Property Full"
+            className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg z-50"
+            onClick={e => e.stopPropagation()}
+          />
+          {/* Close Button */}
+          <button
+            className="absolute top-6 right-6 text-white text-3xl font-bold z-50"
+            onClick={() => setShowImageModal(false)}
+            aria-label="Close"
+          >
+            ×
+          </button>
+        </div>
+        )})()
+      )}
     </div>
   );
 };

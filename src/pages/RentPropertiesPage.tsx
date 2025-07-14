@@ -102,7 +102,7 @@ const RentPropertiesPage = () => {
         )}
 
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Shared Homes</h1>
+          <h1 className="text-3xl font-bold mb-2 text-gray-900">Shared Homes</h1>
           <p className="text-gray-600">
             Plug and play homes which are in your comfort zone.
           </p>
@@ -130,7 +130,7 @@ const RentPropertiesPage = () => {
                 key={property.id} 
                 property={property}
                 listingType="rent"
-                onClick={() => handlePropertyClick(property.id)}
+                variant="large"
               />
             ))}
           </div>
