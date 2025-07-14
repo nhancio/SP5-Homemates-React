@@ -32,7 +32,7 @@ const Footer = () => {
               className="hover:text-green-500 transition"
               title="WhatsApp Group"
             >
-              <img src="/images/whatsapp-logo.png" alt="WhatsApp" className="w-5 h-5 rounded-full" />
+              <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5 rounded-full" />
             </a>
           </div>
           

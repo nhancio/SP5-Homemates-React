@@ -56,6 +56,16 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     }
   };
 
+  const handleWhatsApp = () => {
+    e.stopPropagation();
+    if (property.contactNumber) {
+      const url = `https://wa.me/${property.contactNumber.replace(/\D/g, '')}`;
+      window.open(url, '_blank');
+    } else {
+      alert('Contact number not available for this property');
+    }
+  };
+
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const type = listingType === 'buy' ? 'sell' : 'rent';
@@ -205,6 +215,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             <span className="text-xs text-black">Call</span>
           </button>
           <button
+            onClick={handleWhatsApp}
+            className="flex-1 flex items-center justify-center py-2 text-green-600 hover:bg-green-50 transition border-l border-r border-gray-200"
+          >
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5 mr-1" />
+            <span className="text-xs text-black">WhatsApp</span>
+          </button>
+          <button
             onClick={handleShare}
             className="flex-1 flex items-center justify-center py-2 text-gray-600 hover:bg-gray-50 transition rounded-r-lg"
           >
@@ -307,6 +324,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           >
             <Phone className="w-4 h-4 mr-2" />
             Contact Owner
+          </button>
+          <button
+            onClick={handleWhatsApp}
+            className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center"
+          >
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-4 h-4 mr-2" />
+            WhatsApp
           </button>
           <button
             onClick={handleShare}
