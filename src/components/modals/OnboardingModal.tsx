@@ -28,7 +28,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
   const [gender, setGender] = useState('');
   const [lookingFor, setLookingFor] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [preferences, setPreferences] = useState<string[]>([]);
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,6 +48,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
         userPhoneNumber: mobile,
         gender,
         lookingFor,
+        preferences,
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
         onboardingComplete: true, // Mark onboarding as complete
@@ -104,6 +105,26 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             <option value="">Select</option>
             {LOOKING_FOR.map(l => <option key={l} value={l}>{l}</option>)}
           </select>
+        </div>
+        <div className="mb-3">
+          <label className="block text-sm font-medium mb-1">Preferences</label>
+          <div className="flex flex-wrap gap-3">
+            {PREFERENCES.map(pref => (
+              <label key={pref.id} className={`flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-gray-50 ${preferences.includes(pref.id) ? 'border-primary-500 bg-primary-50' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={preferences.includes(pref.id)}
+                  onChange={() => {
+                    setPreferences(prev => prev.includes(pref.id)
+                      ? prev.filter(p => p !== pref.id)
+                      : [...prev, pref.id]);
+                  }}
+                  className="form-checkbox h-4 w-4 text-primary-600"
+                />
+                <span>{pref.label}</span>
+              </label>
+            ))}
+          </div>
         </div>
         <div className="flex justify-end space-x-4">
           {/* Remove Skip button, only show Submit */}
