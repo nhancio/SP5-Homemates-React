@@ -205,7 +205,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           <div className="text-xs text-primary-600 font-semibold mb-1 flex items-center">
             <MapPin className="w-4 h-4 mr-1 text-primary-600" />
             <span className="line-clamp-1">
-              {(property.rentDetails?.roomDetails?.availableRooms ?? '-')} room(s) available in {property.address?.locality}, {property.address?.city}
+              {listingType === 'rent'
+                ? `${property.rentDetails?.roomDetails?.availableRooms ?? '-'} room(s) available in ${property.address?.locality}, ${property.address?.city}`
+                : `${property.address?.locality}, ${property.address?.city}`}
             </span>
           </div>
           {/* Amenity Icons Row */}
@@ -320,7 +322,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               <div className="flex items-center text-primary-600 mb-2 text-sm font-semibold">
                 <MapPin className="w-4 h-4 mr-1 text-primary-600" />
                 <span>
-                  {(property.rentDetails?.roomDetails?.availableRooms ?? '-')} room(s) available in {property.address?.locality}, {property.address?.city}
+                  {listingType === 'rent'
+                    ? `${property.rentDetails?.roomDetails?.availableRooms ?? '-'} room(s) available in ${property.address?.locality}, ${property.address?.city}`
+                    : `${property.address?.locality}, ${property.address?.city}`}
                 </span>
               </div>
             </div>
