@@ -11,14 +11,17 @@
   },
   "dependencies": {
     "@firebase/auth": "^1.10.1",
+    "@headlessui/react": "^2.2.4",
     "@types/react-datepicker": "^6.2.0",
     "clsx": "^2.1.0",
     "firebase": "^11.6.1",
     "lucide-react": "^0.344.0",
+    "qrcode.react": "^4.2.0",
     "rc-slider": "^11.1.8",
     "react": "^18.3.1",
     "react-datepicker": "^8.4.0",
     "react-dom": "^18.3.1",
+    "react-qr-code": "^2.0.18",
     "react-router-dom": "^6.22.1",
     "swiper": "^11.0.5"
   },
