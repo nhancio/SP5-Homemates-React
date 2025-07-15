@@ -50,17 +50,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (property.contactNumber) {
-      window.location.href = `tel:${property.contactNumber}`;
+    if (property.contactInfo?.phone) {
+      window.location.href = `tel:${property.contactInfo.phone}`;
     } else {
       alert('Contact number not available for this property');
     }
   };
 
-  const handleWhatsApp = () => {
+  const handleWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (property.contactNumber) {
-      const url = `https://wa.me/${property.contactNumber.replace(/\D/g, '')}`;
+    if (property.contactInfo?.phone) {
+      const url = `https://wa.me/${property.contactInfo.phone.replace(/\D/g, '')}`;
       window.open(url, '_blank');
     } else {
       alert('Contact number not available for this property');
@@ -71,9 +71,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     e.stopPropagation();
     const type = listingType === 'buy' ? 'sell' : 'rent';
     const url = getShareableUrl(property.id, type);
-    const price = listingType === 'rent' ? property.rentDetails?.costs?.rent : property.sellDetails?.price;
+    const price = listingType === 'rent' ? property.rentDetails?.costs?.rent : property.price;
 
-    const shareText = `Hey, check this property on Homemates!\nName: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Price'}: ₹${formatCurrency(price || 0)}\nType: ${property.propertyType || property.type || '-'}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
+    const shareText = `Hey, check this property on Homemates!\nName: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Price'}: ₹${formatCurrency(price || 0)}\nType: ${property.type || '-'}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
 
     try {
       if (navigator.share) {
@@ -158,7 +158,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         {/* Property Type Badge */}
         <div className="absolute top-3 left-3 z-10">
           <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
-            {property.propertyType || property.type}
+            {property.type}
           </span>
         </div>
         {/* Left Arrow */}
@@ -191,17 +191,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         <div>
           <div className="flex items-center justify-between mb-1">
             <h3 className="text-base font-bold line-clamp-1 text-gray-900">
-              {property.address?.buildingName || 'Property'}
+              {listingType === 'buy'
+                ? (property.address?.buildingName || 'No Building Name')
+                : (property.address?.buildingName || 'Property')}
             </h3>
             <span className="text-lg font-extrabold text-primary-600">
-              ₹{formatCurrency(property.rentDetails?.costs?.rent || property.sellDetails?.price || 0)}
+              ₹{formatCurrency(property.rentDetails?.costs?.rent || property.price || 0)}
             </span>
           </div>
-          {typeof property.rentDetails?.roomDetails?.availableRooms === 'number' && (
-            <div className="text-xs text-primary-600 font-semibold mb-1">
-              {property.rentDetails.roomDetails.availableRooms} room(s) available in {property.address?.buildingName}, {property.address?.locality}, {property.address?.city}
-            </div>
-          )}
+          <div className="text-xs text-primary-600 font-semibold mb-1">
+            {(property.rentDetails?.roomDetails?.availableRooms ?? '-')} room(s) available in {property.address?.buildingName ?? '-'}, {property.address?.locality ?? '-'}, {property.address?.city ?? '-'}
+          </div>
           <div className="flex items-center text-sm text-gray-600 mb-2">
             <MapPin className="w-4 h-4 mr-1" />
             <span className="line-clamp-1">{property.address?.locality}, {property.address?.city}</span>
@@ -209,7 +209,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           {/* Amenity Icons Row */}
           <div className="flex gap-2 mt-2 mb-2">
             {Object.entries(AMENITY_ICONS).map(([key, icon]) => (
-              <span key={key} className={`rounded-full p-1 bg-gray-100 ${property.rentDetails?.amenities?.includes(key) || property.sellDetails?.amenities?.includes(key) ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
+              <span key={key} className={`rounded-full p-1 bg-gray-100 ${property.features?.includes(key) ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
             ))}
           </div>
         </div>
@@ -296,7 +296,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         {/* Property Type Badge */}
         <div className="absolute top-4 left-4 z-10">
           <span className="bg-primary-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
-            {property.propertyType || property.type}
+            {property.type}
           </span>
         </div>
         {/* Favorite Button */}
@@ -322,22 +322,20 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </div>
             <div className="text-right">
               <div className="text-2xl font-extrabold text-primary-600">
-                ₹{formatCurrency(property.rentDetails?.costs?.rent || property.sellDetails?.price || 0)}
+                ₹{formatCurrency(property.rentDetails?.costs?.rent || property.price || 0)}
               </div>
               <div className="text-sm text-gray-500">
                 {listingType === 'rent' ? 'per month' : 'total price'}
               </div>
             </div>
           </div>
-          {typeof property.rentDetails?.roomDetails?.availableRooms === 'number' && (
-            <div className="text-sm text-primary-600 font-semibold mb-2">
-              {property.rentDetails.roomDetails.availableRooms} room(s) available in {property.address?.buildingName}, {property.address?.locality}, {property.address?.city}
-            </div>
-          )}
+          <div className="text-sm text-primary-600 font-semibold mb-2">
+            {(property.rentDetails?.roomDetails?.availableRooms ?? '-')} room(s) available in {property.address?.buildingName ?? '-'}, {property.address?.locality ?? '-'}, {property.address?.city ?? '-'}
+          </div>
           {/* Amenity Icons Row */}
           <div className="flex gap-3 mb-4">
             {Object.entries(AMENITY_ICONS).map(([key, icon]) => (
-              <span key={key} className={`rounded-full p-2 bg-gray-100 ${property.rentDetails?.amenities?.includes(key) || property.sellDetails?.amenities?.includes(key) ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
+              <span key={key} className={`rounded-full p-2 bg-gray-100 ${property.features?.includes(key) ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
             ))}
           </div>
         </div>
