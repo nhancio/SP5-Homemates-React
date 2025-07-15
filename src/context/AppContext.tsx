@@ -11,7 +11,7 @@ import PreferencesModal from '../components/modals/PreferencesModal';
 import { signInWithGoogle, logoutUser, getUserFavorites } from '../services/auth';
 import { auth, db } from '../config/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 type BaseFilters = {
   priceMin: number;
@@ -154,6 +154,24 @@ const defaultFilters: Filters = {
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
 
+// Add setUserOnline and setUserOffline
+async function setUserOnline(userId: string) {
+  try {
+    await updateDoc(doc(db, 'u', userId), {
+      online: true,
+      lastActive: Date.now(),
+    });
+  } catch (e) { /* ignore */ }
+}
+async function setUserOffline(userId: string) {
+  try {
+    await updateDoc(doc(db, 'u', userId), {
+      online: false,
+      lastActive: Date.now(),
+    });
+  } catch (e) { /* ignore */ }
+}
+
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(() => {
     const storedUser = localStorage.getItem('user');
@@ -169,11 +187,11 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
     try {
       const result = await signInWithGoogle();
       console.log('Login result:', result); // DEBUG LOG
-      if (result.success && result.user) {
+      if (result.success && 'user' in result && result.user) {
         setUser(result.user);
         localStorage.setItem('user', JSON.stringify(result.user));
-
-        if (result.isNewUser) {
+        await setUserOnline(result.user.id);
+        if ('isNewUser' in result && result.isNewUser) {
           console.log('New user detected, showing onboarding modal'); // DEBUG LOG
           setShowOnboarding(true);
         }
@@ -186,6 +204,9 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   };
 
   const logout = async () => {
+    if (user) {
+      await setUserOffline(user.id);
+    }
     const result = await logoutUser();
     if (result.success) {
       setUser(null);
@@ -226,7 +247,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
           const hasRequiredFields = !!(data.userPhoneNumber && data.gender && data.lookingFor);
           if (typeof data.onboardingComplete === 'undefined') {
             if (hasRequiredFields) {
-              await userRef.set({ onboardingComplete: true }, { merge: true });
+              await updateDoc(userRef, { onboardingComplete: true });
               needsOnboarding = false;
             } else {
               needsOnboarding = true;
@@ -248,6 +269,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         setShowOnboarding(needsOnboarding);
+        await setUserOnline(firebaseUser.uid);
       } else {
         setUser(null);
         localStorage.removeItem('user');
@@ -255,6 +277,23 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
     });
     return () => unsubscribe();
   }, []);
+
+  // Set user offline on tab close
+  useEffect(() => {
+    if (!user) return;
+    const handleUnload = () => setUserOffline(user.id);
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [user]);
+
+  // Update lastActive every 60 seconds while logged in
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => {
+      setUserOnline(user.id);
+    }, 60000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   useEffect(() => {
     const loadFavorites = async () => {

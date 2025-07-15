@@ -15,6 +15,8 @@ interface UserProfile {
   profession: string;
   preferences: string[];
   photoURL?: string;
+  online?: boolean;
+  lastActive?: number;
 }
 
 const CATEGORY_OPTIONS = [
@@ -64,20 +66,6 @@ const ICEBREAKERS = [
 
 function getRandomIcebreaker() {
   return ICEBREAKERS[Math.floor(Math.random() * ICEBREAKERS.length)];
-}
-
-// Helper: Randomly assign online status and badges for demo
-function getRandomOnlineStatus(id: string) {
-  // 70% chance online
-  return (parseInt(id.replace(/\D/g, ''), 10) % 10) < 7;
-}
-const BADGES = ['New', 'Verified', 'Super Friendly'];
-function getRandomBadge(id: string) {
-  const n = parseInt(id.replace(/\D/g, ''), 10);
-  if (n % 7 === 0) return BADGES[0];
-  if (n % 5 === 0) return BADGES[1];
-  if (n % 3 === 0) return BADGES[2];
-  return null;
 }
 
 // Helper: Get initials from name
@@ -184,7 +172,6 @@ const FindFriendsPage = () => {
   const [icebreaker, setIcebreaker] = useState('');
   const [modalUser, setModalUser] = useState<UserProfile | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [burstUserId, setBurstUserId] = useState<string | null>(null);
   useEffect(() => {
     setIcebreaker(getRandomIcebreaker());
   }, []);
@@ -242,6 +229,8 @@ const FindFriendsPage = () => {
             profession: d.profession || d.occupation || '',
             preferences: Array.isArray(d.preferences) ? d.preferences : [],
             photoURL: d.photoURL || d.photo || d.avatar || '',
+            online: d.online,
+            lastActive: d.lastActive,
           };
         });
         // Filter by gender (same as logged-in user, exclude self)
@@ -425,13 +414,8 @@ const FindFriendsPage = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredUsers.map((user, idx) => {
-          const isOnline = getRandomOnlineStatus(user.id);
-          const badge = getRandomBadge(user.id);
-          const handleWave = (userId: string) => {
-            setBurstUserId(userId);
-            setTimeout(() => setBurstUserId(null), 1200);
-            alert('👋 You waved!');
-          };
+          // User is online if online === true and lastActive within 2 minutes
+          const isOnline = user.online && user.lastActive && (Date.now() - user.lastActive < 2 * 60 * 1000);
           return (
             <div
               key={user.id}
@@ -439,7 +423,6 @@ const FindFriendsPage = () => {
               style={{ animationDelay: `${idx * 80}ms`, animationFillMode: 'both' }}
               onClick={() => openProfileModal(user)}
             >
-              <EmojiBurst show={burstUserId === user.id} />
               {/* User Avatar Section */}
               <div className="relative h-40 bg-primary-50 flex items-center justify-center">
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -462,12 +445,12 @@ const FindFriendsPage = () => {
                     />
                   )}
                   {/* Online status dot */}
-                  <span className={`absolute bottom-4 right-8 w-4 h-4 rounded-full border-2 border-white ${isOnline ? 'bg-green-500' : 'bg-gray-300'}`}
-                    title={isOnline ? 'Online' : 'Offline'} />
-                  {/* Fun badge */}
-                  {badge && (
-                    <span className="absolute top-4 left-8 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full font-bold shadow">{badge}</span>
-                  )}
+                  <span
+                    className={`absolute bottom-4 right-8 w-4 h-4 rounded-full border-2 border-white ${
+                      isOnline ? 'bg-green-500' : 'bg-gray-400'
+                    }`}
+                    title={isOnline ? 'Online' : 'Offline'}
+                  />
                 </div>
               </div>
               <div className="p-4">
@@ -489,10 +472,9 @@ const FindFriendsPage = () => {
                   <button className="btn btn-sm btn-primary flex-1 flex items-center justify-center gap-1" onClick={e => { e.stopPropagation(); handleCall(user.userPhoneNumber); }}>
                     <Phone className="w-5 h-5 mr-1" /> Call
                   </button>
-                  <button className="btn btn-sm btn-success flex-1 flex items-center justify-center gap-1" onClick={e => { e.stopPropagation(); handleWhatsApp(user.userPhoneNumber); }}>
+                  <button className="btn btn-sm flex-1 flex items-center justify-center gap-1 border border-green-600 text-green-600 bg-white hover:bg-green-50 hover:border-green-700 hover:text-green-700 transition" onClick={e => { e.stopPropagation(); handleWhatsApp(user.userPhoneNumber); }}>
                     <WhatsAppIcon /> WhatsApp
                   </button>
-                  <button className="btn btn-sm btn-outline flex-1" onClick={e => { e.stopPropagation(); handleWave(user.id); }}>Wave 👋</button>
                 </div>
               </div>
             </div>
