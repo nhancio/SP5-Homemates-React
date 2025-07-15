@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
@@ -53,6 +53,19 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  useEffect(() => {
+    fetch('/version.json')
+      .then(res => res.json())
+      .then(data => {
+        const currentVersion = localStorage.getItem('appVersion');
+        if (currentVersion && currentVersion !== data.version) {
+          localStorage.setItem('appVersion', data.version);
+          window.location.reload(true);
+        } else {
+          localStorage.setItem('appVersion', data.version);
+        }
+      });
+  }, []);
   return (
     <ErrorBoundary>
       <AppContextProvider>
