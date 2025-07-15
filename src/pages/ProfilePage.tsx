@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil, Trash, MoreVertical, Eye, Edit } from 'lucide-react';
+import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil, Trash, MoreVertical, Eye, Edit, Star, Info, UserCheck, Users, MessageCircle, Briefcase } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { getDoc, doc, updateDoc } from 'firebase/firestore';
 import { db, storage } from '../config/firebase';
@@ -32,6 +32,17 @@ const ProfilePage = () => {
     age: '',
     profession: '',
   });
+
+  // Inline editing state (must be at the top, unconditional)
+  const [editingBio, setEditingBio] = useState(false);
+  const [bioInput, setBioInput] = useState('');
+  const [editingLookingFor, setEditingLookingFor] = useState(false);
+  const [lookingForInput, setLookingForInput] = useState('');
+  const [editingFunFact, setEditingFunFact] = useState(false);
+  const [funFactInput, setFunFactInput] = useState('');
+  const [editingPreferences, setEditingPreferences] = useState(false);
+  const [preferencesInput, setPreferencesInput] = useState<string[]>([]);
+  const [savingField, setSavingField] = useState<string | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -86,14 +97,10 @@ const ProfilePage = () => {
 
   useEffect(() => {
     if (profileUser) {
-      setEditProfileData({
-        name: profileUser.userName || profileUser.name || '',
-        email: profileUser.userEmail || profileUser.email || '',
-        phone: profileUser.userPhoneNumber || '',
-        gender: profileUser.gender || '',
-        age: profileUser.age || '',
-        profession: profileUser.profession || '',
-      });
+      setBioInput(profileUser.bio || profileUser.about || '');
+      setLookingForInput(profileUser.lookingFor || profileUser.openTo || '');
+      setFunFactInput(profileUser.funFact || '');
+      setPreferencesInput(profileUser.preferences || []);
     }
   }, [profileUser]);
 
@@ -207,6 +214,64 @@ const ProfilePage = () => {
   const displayPreferences = profileUser.preferences;
   const isPremium = profileUser.isPremium;
   const photoURL = profileUser.photoURL;
+  const displayCity = profileUser.address?.city || profileUser.city || '';
+  const displayBio = profileUser.bio || profileUser.about || '';
+  const displayLookingFor = profileUser.lookingFor || profileUser.openTo || '';
+  const funFacts = [
+    "I love midnight snacks!",
+    "I can cook 5 types of pasta.",
+    "I play the ukulele.",
+    "I have a pet turtle.",
+    "I run marathons.",
+    "I speak 3 languages.",
+    "I love board games.",
+    "I’m a movie buff.",
+    "I’m a morning person.",
+    "I’m a night owl."
+  ];
+  const randomFunFact = funFacts[Math.floor(Math.random() * funFacts.length)];
+
+  // Save handlers
+  const saveBio = async () => {
+    setSavingField('bio');
+    try {
+      await updateDoc(doc(db, 'u', profileUser.id), { bio: bioInput });
+      setProfileUser((prev: any) => ({ ...prev, bio: bioInput }));
+      setEditingBio(false);
+    } finally {
+      setSavingField(null);
+    }
+  };
+  const saveLookingFor = async () => {
+    setSavingField('lookingFor');
+    try {
+      await updateDoc(doc(db, 'u', profileUser.id), { lookingFor: lookingForInput });
+      setProfileUser((prev: any) => ({ ...prev, lookingFor: lookingForInput }));
+      setEditingLookingFor(false);
+    } finally {
+      setSavingField(null);
+    }
+  };
+  const saveFunFact = async () => {
+    setSavingField('funFact');
+    try {
+      await updateDoc(doc(db, 'u', profileUser.id), { funFact: funFactInput });
+      setProfileUser((prev: any) => ({ ...prev, funFact: funFactInput }));
+      setEditingFunFact(false);
+    } finally {
+      setSavingField(null);
+    }
+  };
+  const savePreferences = async () => {
+    setSavingField('preferences');
+    try {
+      await updateDoc(doc(db, 'u', profileUser.id), { preferences: preferencesInput });
+      setProfileUser((prev: any) => ({ ...prev, preferences: preferencesInput }));
+      setEditingPreferences(false);
+    } finally {
+      setSavingField(null);
+    }
+  };
 
   return (
     <div className="py-8">
@@ -314,29 +379,153 @@ const ProfilePage = () => {
                       {displayPhone}
                     </p>
                   )}
+                  {displayCity && (
+                    <p className="flex items-center justify-center md:justify-start text-gray-600">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      {displayCity}
+                    </p>
+                  )}
                   {displayAge && (
                     <p className="flex items-center justify-center md:justify-start text-gray-600">
+                      <User className="w-4 h-4 mr-2" />
                       Age: {displayAge}
                     </p>
                   )}
                   {displayGender && (
                     <p className="flex items-center justify-center md:justify-start text-gray-600">
+                      <UserCheck className="w-4 h-4 mr-2" />
                       Gender: {displayGender}
                     </p>
                   )}
                   {displayProfession && (
                     <p className="flex items-center justify-center md:justify-start text-gray-600">
+                      <Briefcase className="w-4 h-4 mr-2" />
                       Profession: {displayProfession}
                     </p>
                   )}
-                  {displayPreferences && displayPreferences.length > 0 && (
-                    <p className="flex items-center justify-center md:justify-start text-gray-600">
-                      Preferences: {displayPreferences.join(', ')}
+                  {/* Premium/Verified badge */}
+                  {isPremium && (
+                    <p className="flex items-center justify-center md:justify-start text-primary-600 font-semibold">
+                      <Star className="w-4 h-4 mr-2" /> Premium Member
                     </p>
                   )}
                 </div>
-                <div className="mt-4">
-                  
+                {/* About Me section */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Info className="w-5 h-5" /> About Me</h3>
+                  {editingBio ? (
+                    <div>
+                      <textarea
+                        value={bioInput}
+                        onChange={e => setBioInput(e.target.value)}
+                        className="input w-full mb-2"
+                        rows={3}
+                        autoFocus
+                      />
+                      <button className="btn btn-primary btn-sm mr-2" onClick={saveBio} disabled={savingField==='bio'}>Save</button>
+                      <button className="btn btn-outline btn-sm" onClick={() => { setEditingBio(false); setBioInput(displayBio); }}>Cancel</button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingBio(true)}>
+                      <span>{displayBio || <span className="italic text-gray-400">Add a short bio to let others know more about you!</span>}</span>
+                      <Edit className="w-4 h-4 text-primary-600 ml-2" />
+                    </div>
+                  )}
+                </div>
+                {/* Looking For section */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Users className="w-5 h-5" /> Looking For</h3>
+                  {editingLookingFor ? (
+                    <div>
+                      <input
+                        value={lookingForInput}
+                        onChange={e => setLookingForInput(e.target.value)}
+                        className="input w-full mb-2"
+                        autoFocus
+                      />
+                      <button className="btn btn-primary btn-sm mr-2" onClick={saveLookingFor} disabled={savingField==='lookingFor'}>Save</button>
+                      <button className="btn btn-outline btn-sm" onClick={() => { setEditingLookingFor(false); setLookingForInput(displayLookingFor); }}>Cancel</button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingLookingFor(true)}>
+                      <span>{displayLookingFor || <span className="italic text-gray-400">Let others know what you’re looking for (e.g., Flatmates, Friends, Shared Homes).</span>}</span>
+                      <Edit className="w-4 h-4 text-primary-600 ml-2" />
+                    </div>
+                  )}
+                </div>
+                {/* Your Choices (Preferences) section */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><MessageCircle className="w-5 h-5" /> Your Choices</h3>
+                  {editingPreferences ? (
+                    <div>
+                      <input
+                        value={preferencesInput.join(', ')}
+                        onChange={e => setPreferencesInput(e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                        className="input w-full mb-2"
+                        autoFocus
+                        placeholder="Enter preferences separated by commas"
+                      />
+                      <button className="btn btn-primary btn-sm mr-2" onClick={savePreferences} disabled={savingField==='preferences'}>Save</button>
+                      <button className="btn btn-outline btn-sm" onClick={() => { setEditingPreferences(false); setPreferencesInput(displayPreferences || []); }}>Cancel</button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap gap-2">
+                        {displayPreferences && displayPreferences.length > 0 ? (
+                          displayPreferences.map((pref: string) => (
+                            <span key={pref} className="px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-sm font-semibold border border-primary-100">
+                              {pref}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-gray-500">No preferences set yet.</span>
+                        )}
+                      </div>
+                      <button className="ml-2" onClick={() => setEditingPreferences(true)}><Edit className="w-4 h-4 text-primary-600" /></button>
+                    </div>
+                  )}
+                </div>
+                {/* Fun Fact section */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Star className="w-5 h-5" /> Fun Fact</h3>
+                  {editingFunFact ? (
+                    <div>
+                      <input
+                        value={funFactInput}
+                        onChange={e => setFunFactInput(e.target.value)}
+                        className="input w-full mb-2"
+                        autoFocus
+                      />
+                      <button className="btn btn-primary btn-sm mr-2" onClick={saveFunFact} disabled={savingField==='funFact'}>Save</button>
+                      <button className="btn btn-outline btn-sm" onClick={() => { setEditingFunFact(false); setFunFactInput(profileUser.funFact || ''); }}>Cancel</button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingFunFact(true)}>
+                      <span>{profileUser.funFact || randomFunFact}</span>
+                      <Edit className="w-4 h-4 text-primary-600 ml-2" />
+                    </div>
+                  )}
+                </div>
+                {/* User stats */}
+                <div className="mt-6 flex flex-wrap gap-6 items-center">
+                  <div className="flex items-center gap-2 text-primary-700 font-semibold">
+                    <CreditCard className="w-5 h-5" />
+                    {userListings.length} Listings Posted
+                  </div>
+                </div>
+                {/* Contact buttons */}
+                <div className="mt-6 flex gap-4 flex-wrap">
+                  {displayPhone && (
+                    <a href={`tel:${displayPhone}`} className="btn btn-primary flex items-center gap-2"><Phone className="w-4 h-4" /> Call</a>
+                  )}
+                  {profileUser.whatsapp && (
+                    <a href={`https://wa.me/${profileUser.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="btn btn-success flex items-center gap-2">
+                      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5" /> WhatsApp
+                    </a>
+                  )}
+                  {displayEmail && (
+                    <a href={`mailto:${displayEmail}`} className="btn btn-outline flex items-center gap-2"><Mail className="w-4 h-4" /> Email</a>
+                  )}
                 </div>
                 <div className="flex justify-center md:justify-start mt-4">
                   <button 
