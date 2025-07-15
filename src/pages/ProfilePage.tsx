@@ -129,7 +129,7 @@ const ProfilePage = () => {
   };
 
   const handleDeleteListing = async (listing: any) => {
-    if (!confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+    if (!confirm(`Are you sure you want to delete the listing "${listing.title || 'this'}"? This action cannot be undone.`)) {
       return;
     }
 
