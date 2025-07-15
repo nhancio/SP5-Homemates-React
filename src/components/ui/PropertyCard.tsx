@@ -202,12 +202,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               ₹{formatCurrency(property.rentDetails?.costs?.rent || property.price || 0)}
             </span>
           </div>
-          <div className="text-xs text-primary-600 font-semibold mb-1">
-            {(property.rentDetails?.roomDetails?.availableRooms ?? '-')} room(s) available in {property.address?.buildingName ?? '-'}, {property.address?.locality ?? '-'}, {property.address?.city ?? '-'}
-          </div>
-          <div className="flex items-center text-sm text-gray-600 mb-2">
-            <MapPin className="w-4 h-4 mr-1" />
-            <span className="line-clamp-1">{property.address?.locality}, {property.address?.city}</span>
+          <div className="text-xs text-primary-600 font-semibold mb-1 flex items-center">
+            <MapPin className="w-4 h-4 mr-1 text-primary-600" />
+            <span className="line-clamp-1">
+              {(property.rentDetails?.roomDetails?.availableRooms ?? '-')} room(s) available in {property.address?.locality}, {property.address?.city}
+            </span>
           </div>
           {/* Amenity Icons Row */}
           <div className="flex gap-2 mt-2 mb-2">
@@ -318,9 +317,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               <h3 className="text-xl font-bold text-gray-900 mb-1">
                 {property.address?.buildingName || 'Property'}
               </h3>
-              <div className="flex items-center text-gray-600 mb-2">
-                <MapPin className="w-4 h-4 mr-1" />
-                <span className="text-sm">{property.address?.locality}, {property.address?.city}</span>
+              <div className="flex items-center text-primary-600 mb-2 text-sm font-semibold">
+                <MapPin className="w-4 h-4 mr-1 text-primary-600" />
+                <span>
+                  {(property.rentDetails?.roomDetails?.availableRooms ?? '-')} room(s) available in {property.address?.locality}, {property.address?.city}
+                </span>
               </div>
             </div>
             <div className="text-right">
@@ -331,9 +332,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                 {listingType === 'rent' ? 'per month' : 'total price'}
               </div>
             </div>
-          </div>
-          <div className="text-sm text-primary-600 font-semibold mb-2">
-            {(property.rentDetails?.roomDetails?.availableRooms ?? '-')} room(s) available in {property.address?.buildingName ?? '-'}, {property.address?.locality ?? '-'}, {property.address?.city ?? '-'}
           </div>
           {/* Amenity Icons Row */}
           <div className="flex gap-3 mb-4">
