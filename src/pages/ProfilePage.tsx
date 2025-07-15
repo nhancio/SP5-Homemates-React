@@ -13,6 +13,8 @@ import QRCode from 'react-qr-code';
 import { getUserFavorites } from '../utils/userFavorites';
 import { getListingsByIds } from '../services/listings';
 import { getUsers } from '../services/users';
+import { USER_PREFERENCES } from '../constants/theme';
+import * as LucideIcons from 'lucide-react';
 
 const ProfilePage = () => {
 
@@ -449,9 +451,9 @@ const ProfilePage = () => {
     <div className="py-8">
       <div className="container">
         <div className="flex justify-end mb-4">
-          <button className="btn btn-outline flex items-center gap-2" onClick={() => setEditProfileModalOpen(true)}>
+          {/* <button className="btn btn-outline flex items-center gap-2" onClick={() => setEditProfileModalOpen(true)}>
             <Edit className="w-4 h-4" /> Edit Profile
-          </button>
+          </button> */}
         </div>
         {/* Profile Completion Progress Bar */}
         <div className="mb-6">
@@ -580,14 +582,14 @@ const ProfilePage = () => {
                 <div className="flex flex-col md:flex-row items-center justify-between">
                   <h1 className="text-2xl font-bold flex items-center gap-2">
                     {displayName}
-                    <button
+                    {/* <button
                       className="ml-2 p-1 rounded-full bg-gray-100 hover:bg-primary-50 text-primary-600"
                       onClick={() => setEditProfileOpen(true)}
                       title="Edit Profile"
                       aria-label="Edit Profile"
                     >
                       <Edit className="w-5 h-5" />
-                    </button>
+                    </button> */}
                   </h1>
                 </div>
                 <div className="mt-4 space-y-2">
@@ -678,18 +680,23 @@ const ProfilePage = () => {
                   <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Users className="w-5 h-5" /> Looking For</h3>
                   {editingLookingFor ? (
                     <div>
-                      <input
+                      <select
+                        className="input w-full mb-2"
                         value={lookingForInput}
                         onChange={e => setLookingForInput(e.target.value)}
-                        className="input w-full mb-2"
                         autoFocus
-                      />
+                      >
+                        <option value="">Select</option>
+                        <option value="Room">Room</option>
+                        <option value="Flat">Flat</option>
+                        <option value="Homemate">Homemate</option>
+                      </select>
                       <button className="btn btn-primary btn-sm mr-2" onClick={saveLookingFor} disabled={savingField==='lookingFor'}>Save</button>
                       <button className="btn btn-outline btn-sm" onClick={() => { setEditingLookingFor(false); setLookingForInput(displayLookingFor); }}>Cancel</button>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingLookingFor(true)}>
-                      <span>{displayLookingFor || <span className="italic text-gray-400">Let others know what you’re looking for (e.g., Flatmates, Friends, Shared Homes).</span>}</span>
+                      <span>{displayLookingFor || <span className="italic text-gray-400">Let others know what you’re looking for (e.g., Room, Flat, Homemate).</span>}</span>
                       <Edit className="w-4 h-4 text-primary-600 ml-2" />
                     </div>
                   )}
@@ -698,16 +705,33 @@ const ProfilePage = () => {
                 <div className="mt-6">
                   <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><MessageCircle className="w-5 h-5" /> Your Choices</h3>
                   {editingPreferences ? (
-                    <div>
-                      <input
-                        value={preferencesInput.join(', ')}
-                        onChange={e => setPreferencesInput(e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-                        className="input w-full mb-2"
-                        autoFocus
-                        placeholder="Enter preferences separated by commas"
-                      />
-                      <button className="btn btn-primary btn-sm mr-2" onClick={savePreferences} disabled={savingField==='preferences'}>Save</button>
-                      <button className="btn btn-outline btn-sm" onClick={() => { setEditingPreferences(false); setPreferencesInput(displayPreferences || []); }}>Cancel</button>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {USER_PREFERENCES.map((pref) => {
+                        const Icon = LucideIcons[pref.icon] || LucideIcons.User;
+                        const selected = preferencesInput.includes(pref.label);
+                        return (
+                          <button
+                            key={pref.id}
+                            type="button"
+                            onClick={() => {
+                              setPreferencesInput(selected
+                                ? preferencesInput.filter((p: string) => p !== pref.label)
+                                : [...preferencesInput, pref.label]);
+                            }}
+                            className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
+                              ? 'bg-primary-600 text-white border-primary-600 shadow'
+                              : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+                            tabIndex={0}
+                          >
+                            <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
+                            <span className="whitespace-nowrap">{pref.label}</span>
+                          </button>
+                        );
+                      })}
+                      <div className="w-full flex gap-2 mt-2">
+                        <button className="btn btn-primary btn-sm" onClick={savePreferences} disabled={savingField==='preferences'}>Save</button>
+                        <button className="btn btn-outline btn-sm" onClick={() => { setEditingPreferences(false); setPreferencesInput(displayPreferences || []); }}>Cancel</button>
+                      </div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between">
@@ -751,14 +775,14 @@ const ProfilePage = () => {
                 <div className="mt-6">
                   <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
                     <span>Social Links</span>
-                    <button
+                    {/* <button
                       className="ml-2 p-1 rounded-full bg-gray-100 hover:bg-primary-50 text-primary-600"
                       onClick={() => setEditProfileOpen(true)}
                       title="Edit Social Links"
                       aria-label="Edit Social Links"
                     >
                       <Edit className="w-5 h-5" />
-                    </button>
+                    </button> */}
                   </h3>
                   <div className="flex flex-wrap gap-4 items-center">
                     {profileUser.instagram && (
@@ -818,9 +842,6 @@ const ProfilePage = () => {
                 </div>
                 {/* Contact buttons */}
                 <div className="mt-6 flex gap-4 flex-wrap">
-                  {displayPhone && (
-                    <a href={`tel:${displayPhone}`} className="btn btn-primary flex items-center gap-2"><Phone className="w-4 h-4" /> Call</a>
-                  )}
                   {profileUser.whatsapp && (
                     <a href={`https://wa.me/${profileUser.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="btn btn-success flex items-center gap-2">
                       <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5" /> WhatsApp
@@ -886,51 +907,6 @@ const ProfilePage = () => {
                 </div>
               ))}
             </div>
-          )}
-        </div>
-
-        {/* Recent Activity section */}
-        <div className="mt-8">
-          <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-            <span>Recent Activity</span>
-          </h3>
-          {recentProperties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recentProperties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-gray-400 italic">No recent activity yet. Start saving properties to see them here!</div>
-          )}
-        </div>
-
-        {/* Mutual Interests section */}
-        <div className="mt-8">
-          <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-            <span>Mutual Interests</span>
-          </h3>
-          {mutualUsers.length > 0 ? (
-            <div className="space-y-4">
-              {mutualUsers.map((u) => (
-                <div key={u.id} className="bg-primary-50 rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-3">
-                    <img src={u.photoURL || '/images/default-avatar.png'} alt={u.userName || u.name} className="w-10 h-10 rounded-full object-cover border" />
-                    <div>
-                      <div className="font-semibold">{u.userName || u.name}</div>
-                      <div className="text-xs text-gray-500">{u.profession}</div>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
-                    {u.shared.map((interest: string) => (
-                      <span key={interest} className="px-2 py-1 bg-primary-200 text-primary-800 rounded-full text-xs font-medium">{interest}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-gray-400 italic">No mutual interests found yet. Update your preferences to find more matches!</div>
           )}
         </div>
 
@@ -1000,124 +976,6 @@ const ProfilePage = () => {
             </div>
           </div>
         )}
-        {editProfileOpen && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-30">
-            <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4 relative">
-              <button
-                onClick={() => setEditProfileOpen(false)}
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <h3 className="text-xl font-semibold mb-4">Edit Profile</h3>
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  if (!user) return;
-                  try {
-                    const userDocRef = doc(db, 'u', user.id);
-                    await updateDoc(userDocRef, {
-                      userName: editProfileData.name,
-                      userEmail: editProfileData.email,
-                      userPhoneNumber: editProfileData.phone,
-                      gender: editProfileData.gender,
-                      age: editProfileData.age,
-                      profession: editProfileData.profession,
-                    });
-                    setProfileUser((prev: any) => ({
-                      ...prev,
-                      userName: editProfileData.name,
-                      userEmail: editProfileData.email,
-                      userPhoneNumber: editProfileData.phone,
-                      gender: editProfileData.gender,
-                      age: editProfileData.age,
-                      profession: editProfileData.profession,
-                    }));
-                    setEditProfileOpen(false);
-                    alert('Profile updated successfully!');
-                  } catch (err) {
-                    alert('Failed to update profile.');
-                    console.error(err);
-                  }
-                }}
-                className="space-y-4"
-              >
-                <div>
-                  <label className="block text-sm font-medium mb-1">Name</label>
-                  <input
-                    type="text"
-                    className="input w-full"
-                    value={editProfileData.name}
-                    onChange={e => setEditProfileData(d => ({ ...d, name: e.target.value }))}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <input
-                    type="email"
-                    className="input w-full"
-                    value={editProfileData.email}
-                    onChange={e => setEditProfileData(d => ({ ...d, email: e.target.value }))}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Phone</label>
-                  <input
-                    type="tel"
-                    className="input w-full"
-                    value={editProfileData.phone}
-                    onChange={e => setEditProfileData(d => ({ ...d, phone: e.target.value }))}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Gender</label>
-                  <input
-                    type="text"
-                    className="input w-full"
-                    value={editProfileData.gender}
-                    onChange={e => setEditProfileData(d => ({ ...d, gender: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Age</label>
-                  <input
-                    type="number"
-                    className="input w-full"
-                    value={editProfileData.age}
-                    onChange={e => setEditProfileData(d => ({ ...d, age: e.target.value }))}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Profession</label>
-                  <input
-                    type="text"
-                    className="input w-full"
-                    value={editProfileData.profession}
-                    onChange={e => setEditProfileData(d => ({ ...d, profession: e.target.value }))}
-                  />
-                </div>
-                <div className="flex justify-end gap-2 mt-4">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setEditProfileOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
         {/* Edit Profile Modal */}
         <Dialog open={editProfileModalOpen} onClose={() => setEditProfileModalOpen(false)} className="fixed z-50 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
@@ -1128,10 +986,6 @@ const ProfilePage = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1">Name</label>
                   <input className="input w-full" value={editProfileForm.name} onChange={e => handleEditProfileChange('name', e.target.value)} />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <input className="input w-full" value={editProfileForm.email} onChange={e => handleEditProfileChange('email', e.target.value)} />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Phone</label>
