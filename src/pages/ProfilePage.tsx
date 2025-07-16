@@ -16,6 +16,15 @@ import { getUsers } from '../services/users';
 import { USER_PREFERENCES } from '../constants/theme';
 import * as LucideIcons from 'lucide-react';
 
+// Add WhatsAppIcon helper
+const WhatsAppIcon = () => (
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5 mr-1 inline-block align-middle" />
+);
+// Add GmailIcon helper
+const GmailIcon = () => (
+  <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png" alt="Gmail" className="w-5 h-5 mr-1 inline-block align-middle" />
+);
+
 const ProfilePage = () => {
 
   const { user, isAuthenticated, login, logout } = useAppContext();
@@ -830,6 +839,29 @@ const ProfilePage = () => {
                     <div>
                       <div className="text-gray-700 mb-1">Scan to view your profile</div>
                       <div className="text-xs text-gray-400">Share this QR code with friends to let them view your profile easily.</div>
+                      <div className="flex gap-2 mt-2">
+                        {/* WhatsApp share button, always show if phone/whatsapp available */}
+                        {(profileUser.whatsapp || profileUser.userPhoneNumber || profileUser.phoneNumber) && (
+                          <a
+                            href={`https://wa.me/91${(profileUser.whatsapp || profileUser.userPhoneNumber || profileUser.phoneNumber).replace(/\D/g, '')}?text=${encodeURIComponent('Hey, check out my Homemates profile: ' + window.location.origin + '/profile/' + profileUser.id)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-success flex items-center gap-2"
+                          >
+                            <WhatsAppIcon /> WhatsApp
+                          </a>
+                        )}
+                        {displayEmail && (
+                          <a
+                            href={`https://mail.google.com/mail/?view=cm&fs=1&to=&su=Check%20out%20my%20Homemates%20profile&body=${encodeURIComponent('Here is my Homemates profile: ' + window.location.origin + '/profile/' + profileUser.id)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-outline flex items-center gap-2"
+                          >
+                            <GmailIcon /> Gmail
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -839,17 +871,6 @@ const ProfilePage = () => {
                     <CreditCard className="w-5 h-5" />
                     {userListings.length} Listings Posted
                   </div>
-                </div>
-                {/* Contact buttons */}
-                <div className="mt-6 flex gap-4 flex-wrap">
-                  {profileUser.whatsapp && (
-                    <a href={`https://wa.me/${profileUser.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="btn btn-success flex items-center gap-2">
-                      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5" /> WhatsApp
-                    </a>
-                  )}
-                  {displayEmail && (
-                    <a href={`mailto:${displayEmail}`} className="btn btn-outline flex items-center gap-2"><Mail className="w-4 h-4" /> Email</a>
-                  )}
                 </div>
                 <div className="flex justify-center md:justify-start mt-4">
                   <button 

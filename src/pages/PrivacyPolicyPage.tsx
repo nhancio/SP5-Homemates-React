@@ -79,7 +79,7 @@ const PrivacyPolicyPage = () => (
       <li>Object to or restrict certain processing</li>
       <li>Withdraw consent (where processing is based on consent)</li>
     </ul>
-    <p>To exercise these rights, please contact us at <a href="mailto:support@homematesapp.in" className="text-primary-600 underline">support@homematesapp.in</a>.</p>
+    <p>To exercise these rights, please contact us at <a href="mailto:hello@nhancio.com" className="text-primary-600 underline">support@homematesapp.in</a>.</p>
 
     <h2 className="text-xl font-semibold mt-6 mb-2">7. Children’s Privacy</h2>
     <p>Homemates AI is not intended for children under the age of 13 (or applicable age in your jurisdiction). We do not knowingly collect personal information from minors.</p>
@@ -94,9 +94,9 @@ const PrivacyPolicyPage = () => (
     <p>If you have any questions or concerns about this Privacy Policy, please contact:</p>
     <ul className="list-disc ml-6 mb-2 text-gray-700">
       <li>Nhancio Technologies Pvt. Ltd.</li>
-      <li>Email: <a href="mailto:support@homematesapp.in" className="text-primary-600 underline">support@homematesapp.in</a></li>
+      <li>Email: <a href="mailto:hello@nhancio.com" className="text-primary-600 underline">hello@nhancio.com</a></li>
       <li>Website: <a href="https://homematesapp.in" className="text-primary-600 underline">https://homematesapp.in</a></li>
-      <li>Address: [Insert Registered Company Address]</li>
+      <li>Address: #36-88/4, Devammabasthi, jagadgirigutta, Balanagar Township, Rangareddy, Hyderabad -500037, Telangana</li>
     </ul>
   </div>
 );
