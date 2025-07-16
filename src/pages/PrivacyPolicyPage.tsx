@@ -4,7 +4,7 @@ import React from 'react';
 const PrivacyPolicyPage = () => (
   <div className="container py-8 max-w-3xl mx-auto">
     <h1 className="text-2xl font-bold mb-4">Privacy Policy</h1>
-    <p className="text-gray-500 mb-6">Effective Date: [Insert Date]</p>
+    <p className="text-gray-500 mb-6">Effective Date: 17th July 2025</p>
     <p className="mb-4">Nhancio Technologies Pvt. Ltd. (“we”, “our”, or “us”), the creators of Homemates AI, respects your privacy and is committed to protecting it through our compliance with this policy. This Privacy Policy describes how your personal information is collected, used, and shared when you visit or interact with our website homematesapp.in (“Website”).</p>
     <h2 className="text-xl font-semibold mt-6 mb-2">1. Information We Collect</h2>
     <p>When you use Homemates AI or visit homematesapp.in, we may collect the following types of information:</p>
@@ -13,6 +13,11 @@ const PrivacyPolicyPage = () => (
       <li>Name</li>
       <li>Email address</li>
       <li>Phone number</li>
+      <li>Preferences</li>
+      <li>Location</li>
+      <li>Gender</li>
+      <li>Age</li>
+      <li>Occupation</li>
       <li>Address (if applicable)</li>
       <li>Government-issued ID (for verification, where required)</li>
       <li>Payment information (when purchasing a service)</li>
