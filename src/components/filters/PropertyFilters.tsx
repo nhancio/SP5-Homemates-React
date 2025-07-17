@@ -35,30 +35,37 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
     }
   }, [drawerOpen]);
 
+  // Type guards for filter types
+  function isRentFilters(obj: any): obj is { minRent: number; maxRent: number; amenities: string } {
+    return obj && typeof obj.minRent === 'number' && typeof obj.maxRent === 'number';
+  }
+  function isBuyFilters(obj: any): obj is { minPrice: number; maxPrice: number; amenities?: string } {
+    return obj && typeof obj.minPrice === 'number' && typeof obj.maxPrice === 'number';
+  }
+
   // Add local state for price/rent inputs
-  // Change local state for price inputs to use priceMin and priceMax
-  const [localPriceMin, setLocalPriceMin] = useState<number | undefined>(filters[listingType]?.priceMin);
-  const [localPriceMax, setLocalPriceMax] = useState<number | undefined>(filters[listingType]?.priceMax);
-  const [localMinRent, setLocalMinRent] = useState(filters[listingType]?.minRent === '' ? '' : filters[listingType]?.minRent);
-  const [localMaxRent, setLocalMaxRent] = useState(filters[listingType]?.maxRent === '' ? '' : filters[listingType]?.maxRent);
+  const [localPriceMin, setLocalPriceMin] = useState<number | undefined>(isBuyFilters(filters[listingType]) ? filters[listingType].minPrice : undefined);
+  const [localPriceMax, setLocalPriceMax] = useState<number | undefined>(isBuyFilters(filters[listingType]) ? filters[listingType].maxPrice : undefined);
+  const [localMinRent, setLocalMinRent] = useState(isRentFilters(filters[listingType]) ? filters[listingType].minRent : '');
+  const [localMaxRent, setLocalMaxRent] = useState(isRentFilters(filters[listingType]) ? filters[listingType].maxRent : '');
 
   // Local state for min/max fields, keyed by listingType
   const [localMin, setLocalMin] = useState<number | undefined>(
-    listingType === 'rent' ? filters[listingType]?.minRent : filters[listingType]?.priceMin
+    isRentFilters(filters[listingType]) ? filters[listingType].minRent : isBuyFilters(filters[listingType]) ? filters[listingType].minPrice : undefined
   );
   const [localMax, setLocalMax] = useState<number | undefined>(
-    listingType === 'rent' ? filters[listingType]?.maxRent : filters[listingType]?.priceMax
+    isRentFilters(filters[listingType]) ? filters[listingType].maxRent : isBuyFilters(filters[listingType]) ? filters[listingType].maxPrice : undefined
   );
 
   // Sync local state with context filters when filters change externally
   useEffect(() => {
-    setLocalPriceMin(filters[listingType]?.priceMin);
-    setLocalPriceMax(filters[listingType]?.priceMax);
-    setLocalMinRent(filters[listingType]?.minRent === '' ? '' : filters[listingType]?.minRent);
-    setLocalMaxRent(filters[listingType]?.maxRent === '' ? '' : filters[listingType]?.maxRent);
-    setLocalMin(listingType === 'rent' ? filters[listingType]?.minRent : filters[listingType]?.priceMin);
-    setLocalMax(listingType === 'rent' ? filters[listingType]?.maxRent : filters[listingType]?.priceMax);
-  }, [filters[listingType]?.priceMin, filters[listingType]?.priceMax, filters[listingType]?.minRent, filters[listingType]?.maxRent, listingType]);
+    setLocalPriceMin(isBuyFilters(filters[listingType]) ? filters[listingType].minPrice : undefined);
+    setLocalPriceMax(isBuyFilters(filters[listingType]) ? filters[listingType].maxPrice : undefined);
+    setLocalMinRent(isRentFilters(filters[listingType]) ? filters[listingType].minRent : '');
+    setLocalMaxRent(isRentFilters(filters[listingType]) ? filters[listingType].maxRent : '');
+    setLocalMin(isRentFilters(filters[listingType]) ? filters[listingType].minRent : isBuyFilters(filters[listingType]) ? filters[listingType].minPrice : undefined);
+    setLocalMax(isRentFilters(filters[listingType]) ? filters[listingType].maxRent : isBuyFilters(filters[listingType]) ? filters[listingType].maxPrice : undefined);
+  }, [filters[listingType], listingType]);
 
   useEffect(() => {
     setFilters({ ...filters, activeType: listingType });
@@ -187,19 +194,24 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             locality: '',
             propertyType: '',
             furnishingType: '',
-            roomType: '',
-            bathroomType: '',
+            bhk: '',
+            bathrooms: '',
             minRent: 0,
-            maxRent: 100000,
-            preferredTenant: '',
+            maxRent: 10000000,
+            minSqft: 0,
+            maxSqft: 0,
+            amenities: '',
+            availability: '',
+            availableFrom: '',
+            ageOfProperty: '',
+            possessionStatus: '',
           }
         : {
             city: '',
             locality: '',
             propertyType: '',
-            furnishingType: '',
-            priceMin: PRICE_MIN,
-            priceMax: PRICE_MAX,
+            minPrice: 0,
+            maxPrice: 10000000,
             minSqft: 0,
             maxSqft: 0,
             ageOfProperty: '',
@@ -246,11 +258,12 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
   ];
 
   const currentFilters = filters[listingType];
-  const selectedAmenities = Array.isArray(currentFilters.amenities)
-    ? currentFilters.amenities
-    : typeof currentFilters.amenities === 'string' && currentFilters.amenities
-      ? currentFilters.amenities.split(',').map((a: string) => a.trim()).filter(Boolean)
-      : [];
+  let selectedAmenities: string[] = [];
+  if (isRentFilters(currentFilters) || isBuyFilters(currentFilters)) {
+    if (typeof (currentFilters as any).amenities === 'string' && (currentFilters as any).amenities) {
+      selectedAmenities = (currentFilters as any).amenities.split(',').map((a: string) => a.trim()).filter(Boolean);
+    }
+  }
   const handleAmenityToggle = (key: string) => {
     let newAmenities: string[];
     if (selectedAmenities.includes(key)) {
@@ -262,26 +275,63 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        amenities: newAmenities,
+        amenities: newAmenities.join(','),
       },
     });
   };
 
   return (
     <div className="bg-white shadow-sm rounded-lg mb-6 relative">
-      {/* Filters Button above amenity chips */}
-      {/*
-      <div className="w-full flex justify-center md:justify-start p-4 border-b border-gray-100 bg-white">
-        <button
-          onClick={() => setDrawerOpen(true)}
-          className="flex items-center gap-2 px-5 py-3 rounded-full border border-primary-200 text-primary-600 font-semibold bg-white shadow hover:bg-primary-50 transition"
-          aria-label="Open Filters"
-        >
-          <Filter className="w-6 h-6" />
-          Filters
-        </button>
+      {/* City and Locality Filters */}
+      <div className="flex flex-col md:flex-row gap-3 p-4 border-b border-gray-100 bg-white">
+        {/* City Dropdown */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">City</label>
+          <select
+            className="input w-full md:w-48"
+            value={currentFilters.city || ''}
+            onChange={e => {
+              setFilters({
+                ...filters,
+                [listingType]: {
+                  ...filters[listingType],
+                  city: e.target.value,
+                  locality: '', // Clear locality when city changes
+                },
+              });
+            }}
+          >
+            <option value="">Select City</option>
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Bangalore">Bangalore</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Ahmedabad">Ahmedabad</option>
+            <option value="Gandhinagar">Gandhinagar</option>
+            <option value="Rajkot">Rajkot</option>
+            <option value="Others">Others</option>
+          </select>
+        </div>
+        {/* Locality Input */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1">Locality</label>
+          <input
+            className="input w-full md:w-64"
+            type="text"
+            placeholder="Enter locality"
+            value={currentFilters.locality || ''}
+            onChange={e => {
+              setFilters({
+                ...filters,
+                [listingType]: {
+                  ...filters[listingType],
+                  locality: e.target.value,
+                },
+              });
+            }}
+            disabled={!currentFilters.city}
+          />
+        </div>
       </div>
-      */}
       {/* Amenity/Feature Select Buttons Row (always visible) */}
       <div className="overflow-x-auto py-3 px-4 border-b border-gray-100 bg-white sticky top-0 z-30">
         <div className="flex gap-3 min-w-max">
