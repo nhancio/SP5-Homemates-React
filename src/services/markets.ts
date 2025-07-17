@@ -1,4 +1,4 @@
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
 export interface Market {
@@ -89,6 +89,27 @@ export async function getMarkets(): Promise<Market[]> {
         stack: error.stack
       });
     }
+    return [];
+  }
+} 
+
+// Fetch localities for a given city from the markets collection
+export async function getLocalitiesByCity(city: string): Promise<string[]> {
+  try {
+    const q = query(collection(db, 'markets'), where('city', '==', city));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      const data = querySnapshot.docs[0].data();
+      // Try both 'localities' (array) and fallback to 'market' (single locality)
+      if (Array.isArray(data.localities)) {
+        return data.localities;
+      } else if (typeof data.market === 'string') {
+        return [data.market];
+      }
+    }
+    return [];
+  } catch (error) {
+    console.error('Error fetching localities for city:', city, error);
     return [];
   }
 } 
