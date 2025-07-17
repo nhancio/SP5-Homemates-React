@@ -3,7 +3,8 @@ import { db } from '../config/firebase';
 
 export interface Market {
   id: string;
-  name: string;
+  city: string;
+  market: string; // locality
 }
 
 // Test function to verify Firebase connection
@@ -70,7 +71,8 @@ export async function getMarkets(): Promise<Market[]> {
       console.log('Processing document:', { id: doc.id, data });
       return {
         id: doc.id,
-        name: data.name || ''
+        city: data.city || '',
+        market: data.market || '',
       };
     });
 

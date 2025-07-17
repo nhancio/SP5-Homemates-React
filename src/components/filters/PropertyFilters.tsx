@@ -8,6 +8,7 @@ import { useAppContext } from '../../context/AppContext';
 import {
   Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home
 } from 'lucide-react';
+import { getMarkets, Market } from '../../services/markets';
 
 interface PropertyFiltersProps {
   propertyTypes: string[];
@@ -27,6 +28,33 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerRef = React.useRef<HTMLDivElement>(null);
+  const [markets, setMarkets] = useState<Market[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [localities, setLocalities] = useState<Market[]>([]);
+  const [marketsLoading, setMarketsLoading] = useState(true);
+
+  // Move currentFilters up so it's available for useEffect
+  const currentFilters = filters[listingType];
+
+  useEffect(() => {
+    // Fetch all markets on mount
+    getMarkets().then((data) => {
+      setMarkets(data);
+      // Extract unique cities
+      const uniqueCities = Array.from(new Set(data.map(m => m.city).filter(Boolean)));
+      setCities(uniqueCities);
+      setMarketsLoading(false);
+    });
+  }, []);
+
+  // Update localities when city changes
+  useEffect(() => {
+    if (currentFilters.city) {
+      setLocalities(markets.filter(m => m.city === currentFilters.city));
+    } else {
+      setLocalities([]);
+    }
+  }, [currentFilters.city, markets]);
 
   // Focus trap for accessibility
   useEffect(() => {
@@ -257,7 +285,6 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
     { key: 'house', label: 'Gated Society', icon: Home },
   ];
 
-  const currentFilters = filters[listingType];
   let selectedAmenities: string[] = [];
   if (isRentFilters(currentFilters) || isBuyFilters(currentFilters)) {
     if (typeof (currentFilters as any).amenities === 'string' && (currentFilters as any).amenities) {
@@ -300,24 +327,19 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                 },
               });
             }}
+            disabled={marketsLoading}
           >
             <option value="">Select City</option>
-            <option value="Hyderabad">Hyderabad</option>
-            <option value="Bangalore">Bangalore</option>
-            <option value="Mumbai">Mumbai</option>
-            <option value="Ahmedabad">Ahmedabad</option>
-            <option value="Gandhinagar">Gandhinagar</option>
-            <option value="Rajkot">Rajkot</option>
-            <option value="Others">Others</option>
+            {cities.map(city => (
+              <option key={city} value={city}>{city}</option>
+            ))}
           </select>
         </div>
-        {/* Locality Input */}
+        {/* Locality Dropdown */}
         <div>
           <label className="block text-xs font-semibold text-gray-700 mb-1">Locality</label>
-          <input
+          <select
             className="input w-full md:w-64"
-            type="text"
-            placeholder="Enter locality"
             value={currentFilters.locality || ''}
             onChange={e => {
               setFilters({
@@ -328,8 +350,13 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                 },
               });
             }}
-            disabled={!currentFilters.city}
-          />
+            disabled={!currentFilters.city || marketsLoading}
+          >
+            <option value="">Select Locality</option>
+            {localities.map(market => (
+              <option key={market.id} value={market.name}>{market.name}</option>
+            ))}
+          </select>
         </div>
       </div>
       {/* Amenity/Feature Select Buttons Row (always visible) */}
