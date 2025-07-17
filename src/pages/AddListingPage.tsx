@@ -157,6 +157,7 @@ const AddListingPage = () => {
   const [listingType, setListingType] = useState<'rent' | 'sell'>('rent');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
+  const [errors, setErrors] = useState<{ contactNumber?: string; handoverDate?: string }>({});
   
   // Image handling state
   const [images, setImages] = useState<string[]>([]);
@@ -176,6 +177,34 @@ const AddListingPage = () => {
       alert('Please login to create a listing');
       return;
     }
+
+    // --- VALIDATION ---
+    const newErrors: { contactNumber?: string; handoverDate?: string } = {};
+    // Contact number validation
+    if (!/^[6-9]\d{9}$/.test(formData.contactNumber)) {
+      newErrors.contactNumber = 'Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.';
+    }
+    // Move-in date validation (only if not immediate)
+    if (formData.isImmediate === false) {
+      if (!formData.handoverDate) {
+        newErrors.handoverDate = 'Please select a move-in date.';
+      } else {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const minDate = new Date(today);
+        minDate.setDate(today.getDate() + 1);
+        const selected = new Date(formData.handoverDate);
+        if (selected < minDate) {
+          newErrors.handoverDate = 'Move-in date must be at least tomorrow.';
+        }
+      }
+    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      setIsSubmitting(false);
+      return;
+    }
+    // --- END VALIDATION ---
 
     setIsSubmitting(true);
     try {
@@ -513,7 +542,13 @@ const AddListingPage = () => {
               placeholder="dd-mm-yyyy"
               value={formData.handoverDate}
               onChange={e => setFormData(prev => ({ ...prev, handoverDate: e.target.value }))}
+              min={(() => {
+                const d = new Date();
+                d.setDate(d.getDate() + 1);
+                return d.toISOString().split('T')[0];
+              })()}
             />
+            {errors.handoverDate && <p className="text-red-500 text-xs mt-1">{errors.handoverDate}</p>}
             <span className="text-xs text-gray-500">Select your move-in date.</span>
           </>
         )}
@@ -651,6 +686,7 @@ const AddListingPage = () => {
             maxLength={10}
             required
           />
+          {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber}</p>}
         </div>
       </section>
     </>

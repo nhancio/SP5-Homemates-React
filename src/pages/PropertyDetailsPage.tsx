@@ -392,6 +392,70 @@ Link: ${url}`;
                 </div>
               )}
 
+              {/* Amenities Section */}
+              <div className="p-6 border-b">
+                <h2 className="text-lg font-semibold mb-4">Amenities</h2>
+                {listingType === 'rent' && property.amenities && (
+                  <div className="space-y-2">
+                    {property.amenities.appliances?.length > 0 && (
+                      <div>
+                        <span className="text-gray-600 font-medium">Appliances:</span>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {property.amenities.appliances.map((amenity: string) => (
+                            <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
+                              {amenityIconMap[amenity.toLowerCase()] || null}
+                              {amenity}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {property.amenities.furniture?.length > 0 && (
+                      <div>
+                        <span className="text-gray-600 font-medium">Furniture:</span>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {property.amenities.furniture.map((amenity: string) => (
+                            <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
+                              {amenityIconMap[amenity.toLowerCase()] || null}
+                              {amenity}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {property.amenities.building?.length > 0 && (
+                      <div>
+                        <span className="text-gray-600 font-medium">Building:</span>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {property.amenities.building.map((amenity: string) => (
+                            <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
+                              {amenityIconMap[amenity.toLowerCase()] || null}
+                              {amenity}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {(!property.amenities.appliances?.length && !property.amenities.furniture?.length && !property.amenities.building?.length) && (
+                      <span className="text-gray-500">No amenities listed.</span>
+                    )}
+                  </div>
+                )}
+                {listingType === 'sell' && property.sellDetails?.amenities?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {property.sellDetails.amenities.map((amenity: string) => (
+                      <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
+                        {amenityIconMap[amenity.toLowerCase()] || null}
+                        {amenity}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {listingType === 'sell' && (!property.sellDetails?.amenities || property.sellDetails.amenities.length === 0) && (
+                  <span className="text-gray-500">No amenities listed.</span>
+                )}
+              </div>
+
               {/* Description */}
               <div className="p-6">
                 <h2 className="text-lg font-semibold mb-4">Description</h2>
