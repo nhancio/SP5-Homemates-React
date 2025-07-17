@@ -29,19 +29,21 @@ interface AddListingFormsProps {
 }
 
 export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) => {
-  const [locationInput, setLocationInput] = useState(formData.address.locality ? `${formData.address.locality}${formData.address.city ? ', ' + formData.address.city : ''}` : '');
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [detecting, setDetecting] = useState(false);
   const [markets, setMarkets] = useState<Market[]>([]);
-  const [showMarkets, setShowMarkets] = useState(false);
+  const [cities, setCities] = useState<string[]>([]);
+  const [localities, setLocalities] = useState<Market[]>([]);
+  const [marketsLoading, setMarketsLoading] = useState(true);
 
-  // Fetch markets on component mount
   useEffect(() => {
     const fetchMarkets = async () => {
       try {
         await testFirebaseConnection();
         const marketsData = await getMarkets();
         setMarkets(marketsData);
+        // Extract unique cities
+        const uniqueCities = Array.from(new Set(marketsData.map(m => m.city).filter(Boolean)));
+        setCities(uniqueCities);
+        setMarketsLoading(false);
       } catch (error) {
         console.error('AddressFields: Error fetching markets:', error);
       }
@@ -49,147 +51,71 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
     fetchMarkets();
   }, []);
 
-  // Nominatim autocomplete fetch - restricted to India only
-  const fetchSuggestions = async (input: string) => {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}&addressdetails=1&limit=5&countrycodes=in&viewbox=68.1766451,8.0883064,97.4025614,37.09024&bounded=1`
-    );
-    const data = await res.json();
-    // Filter results to ensure they are in India
-    const indiaResults = data.filter((item: any) => {
-      const address = item.address;
-      return address && (
-        address.country === 'India' || 
-        address.country_code === 'in' ||
-        address.country_code === 'IN'
-      );
-    });
-    return indiaResults.map((item: any) => ({
-      display_name: item.display_name,
-      city: item.address.city || item.address.town || item.address.village || '',
-      locality: item.address.suburb || item.address.neighbourhood || item.address.village || item.address.town || '',
-      place_id: item.place_id,
-    }));
-  };
-
-  const handleLocationChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocationInput(value);
-    setFormData({
-      ...formData,
-      address: {
-        ...formData.address,
-        locality: '',
-        city: '',
-      },
-    });
-    if (value.length > 2) {
-      setDetecting(true);
-      const results = await fetchSuggestions(value);
-      setSuggestions(results);
-      setDetecting(false);
+  useEffect(() => {
+    if (formData.address.city) {
+      // Case-insensitive, trimmed comparison for city
+      const selectedCity = formData.address.city.trim().toLowerCase();
+      const filteredMarkets = markets.filter(m => (m.city || '').trim().toLowerCase() === selectedCity);
+      // Show unique locality (market.market) values
+      const uniqueLocalities = Array.from(new Set(filteredMarkets.map(m => m.market).filter(Boolean)));
+      setLocalities(uniqueLocalities.map(locality => filteredMarkets.find(m => m.market === locality)!));
     } else {
-      setSuggestions([]);
+      setLocalities([]);
     }
-  };
-
-  const handleSuggestionClick = (suggestion: any) => {
-    setLocationInput(suggestion.display_name);
-    setFormData({
-      ...formData,
-      address: {
-        ...formData.address,
-        city: suggestion.city,
-        locality: suggestion.locality,
-      },
-    });
-    setSuggestions([]);
-  };
+  }, [formData.address.city, markets]);
 
   return (
     <section className="bg-white p-6 rounded-lg shadow-sm">
       <h2 className="text-lg font-semibold mb-4">Address</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="relative col-span-2">
-          <div className="flex gap-2 mb-2">
-            <button
-              type="button"
-              onClick={() => setShowMarkets(!showMarkets)}
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+        <div className="col-span-2 flex flex-col gap-3">
+          {/* City Dropdown */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+            <select
+              className="input w-full"
+              value={formData.address.city || ''}
+              onChange={e => {
+                setFormData({
+                  ...formData,
+                  address: {
+                    ...formData.address,
+                    city: e.target.value,
+                    locality: '', // Clear locality when city changes
+                  },
+                });
+              }}
+              disabled={marketsLoading}
             >
-              {showMarkets ? 'Hide' : 'Show'} Popular Locations
-            </button>
-          </div>
-          {/* Popular Markets Dropdown */}
-          {showMarkets && (
-            <div className="mb-3 p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-600 mb-2">
-                Popular Locations: {markets.length} markets found
-              </p>
-              {markets.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {markets.map((market) => (
-                    <button
-                      key={market.id}
-                      type="button"
-                      onClick={() => {
-                        setLocationInput(market.name);
-                        // Parse the name to extract locality and city
-                        const parts = market.name.split(', ');
-                        const locality = parts[0] || '';
-                        const city = parts[1] || '';
-                        setFormData({
-                          ...formData,
-                          address: {
-                            ...formData.address,
-                            city: city,
-                            locality: locality,
-                          },
-                        });
-                        setShowMarkets(false);
-                      }}
-                      className="px-3 py-1 text-xs bg-white border border-gray-300 rounded-full hover:bg-primary-50 hover:border-primary-300 transition-colors"
-                    >
-                      {market.name}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">No markets available</p>
-              )}
-            </div>
-          )}
-          <input
-            type="text"
-            placeholder="Location (Locality, City or Both)"
-            className="input"
-            value={locationInput}
-            onChange={handleLocationChange}
-            autoComplete="off"
-            onBlur={() => setTimeout(() => setSuggestions([]), 150)}
-            onFocus={async () => {
-              if (locationInput.length > 2) {
-                setDetecting(true);
-                const results = await fetchSuggestions(locationInput);
-                setSuggestions(results);
-                setDetecting(false);
-              }
-            }}
-          />
-          {/* Suggestions dropdown */}
-          {suggestions.length > 0 && (
-            <ul className="absolute bg-white border border-gray-200 rounded shadow z-20 mt-1 w-full max-h-48 overflow-auto">
-              {suggestions.map((s, i) => (
-                <li
-                  key={s.place_id}
-                  className="px-4 py-2 cursor-pointer hover:bg-primary-50 text-sm"
-                  onMouseDown={() => handleSuggestionClick(s)}
-                >
-                  {s.display_name}
-                </li>
+              <option value="">Select City</option>
+              {cities.map(city => (
+                <option key={city} value={city}>{city}</option>
               ))}
-            </ul>
-          )}
+            </select>
+          </div>
+          {/* Locality Dropdown */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
+            <select
+              className="input w-full"
+              value={formData.address.locality || ''}
+              onChange={e => {
+                setFormData({
+                  ...formData,
+                  address: {
+                    ...formData.address,
+                    locality: e.target.value,
+                  },
+                });
+              }}
+              disabled={!formData.address.city || marketsLoading}
+            >
+              <option value="">Select Locality</option>
+              {localities.map(market => (
+                <option key={market.id} value={market.market}>{market.market}</option>
+              ))}
+            </select>
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Building Name</label>
@@ -198,11 +124,13 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
             placeholder="Building Name"
             className="input w-full"
             value={formData.address.buildingName}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
+            onChange={e => setFormData({
               ...formData,
-              address: { ...formData.address, buildingName: e.target.value }
+              address: {
+                ...formData.address,
+                buildingName: e.target.value,
+              },
             })}
-            title="Building name"
           />
         </div>
       </div>
@@ -233,18 +161,12 @@ const ContactNumberField = ({ formData, setFormData }: { formData: any; setFormD
   </section>
 );
 
-export const RentForm: React.FC<AddListingFormsProps> = ({
-  formData,
-  setFormData,
-  images,
-  setImages,
-  handleImageUpload,
-  removeImage
-}) => {
+export const RentForm: React.FC<AddListingFormsProps> = (props) => {
+  const { formData, setFormData, images, setImages, handleImageUpload, removeImage } = props;
   const [isDragActive, setIsDragActive] = useState(false);
   return (
     <>
-      <AddressFields formData={formData} setFormData={setFormData} />
+      <AddressFields {...props} />
       <ContactNumberField formData={formData} setFormData={setFormData} />
 
       {/* Property Details */}
@@ -712,16 +634,11 @@ export const RentForm: React.FC<AddListingFormsProps> = ({
   );
 };
 
-export const SellForm: React.FC<AddListingFormsProps> = ({
-  formData,
-  setFormData,
-  images,
-  handleImageUpload,
-  removeImage
-}) => {
+export const SellForm: React.FC<AddListingFormsProps> = (props) => {
+  const { formData, setFormData, images, handleImageUpload, removeImage } = props;
   return (
     <>
-      <AddressFields formData={formData} setFormData={setFormData} />
+      <AddressFields {...props} />
       <ContactNumberField formData={formData} setFormData={setFormData} />
 
       {/* Property Type (BHK Selection) */}
