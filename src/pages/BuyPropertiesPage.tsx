@@ -86,6 +86,7 @@ const BuyPropertiesPage = () => {
               <p className="text-gray-600">
                 Find full homes which are ready to be designed by you.
               </p>
+              <h2 className="text-xl font-bold text-primary-700 mt-2 mb-2">Showing {properties.length} flats in full homes</h2>
             </div>
             
             <PropertyFilters 
