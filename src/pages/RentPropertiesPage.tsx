@@ -44,28 +44,8 @@ const RentPropertiesPage = () => {
       setIsLoading(true);
       setError(null);
       const listings = await getListings('rent', filters.rent);
-      // For each listing, fetch poster's gender
-      // const listingsWithGender = await Promise.all(listings.map(async (listing) => {
-      //   let posterGender = null;
-      //   if (listing.userId) {
-      //     const posterDoc = await getDoc(doc(db, 'u', listing.userId));
-      //     posterGender = posterDoc.exists() ? (posterDoc.data().gender || '').toLowerCase() : null;
-      //   }
-      //   return { ...listing, posterGender };
-      // }));
-      // Filter: if poster is female, only show to female users; if male, only to male users
-      // const filtered = listingsWithGender.filter(listing => {
-      //   if (listing.posterGender === 'female') {
-      //     return userGender === 'female';
-      //   }
-      //   if (listing.posterGender === 'male') {
-      //     return userGender === 'male';
-      //   }
-      //   return true;
-      // });
-      setProperties(listings); // Show all listings fetched
+      setProperties(listings);
     } catch (err) {
-      console.error('Error fetching properties:', err);
       setError('Failed to load properties. Please try again later.');
     } finally {
       setIsLoading(false);

@@ -8,7 +8,7 @@ import { useAppContext } from '../../context/AppContext';
 import {
   Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home
 } from 'lucide-react';
-import { getMarkets, Market } from '../../services/markets';
+import { getMarkets, Market, getLocalitiesByCity } from '../../services/markets';
 
 interface PropertyFiltersProps {
   propertyTypes: string[];
@@ -30,7 +30,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
   const drawerRef = React.useRef<HTMLDivElement>(null);
   const [markets, setMarkets] = useState<Market[]>([]);
   const [cities, setCities] = useState<string[]>([]);
-  const [localities, setLocalities] = useState<Market[]>([]);
+  const [localities, setLocalities] = useState<string[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
 
   // Move currentFilters up so it's available for useEffect
@@ -50,16 +50,11 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
   // Update localities when city changes
   useEffect(() => {
     if (currentFilters.city) {
-      // Case-insensitive, trimmed comparison for city
-      const selectedCity = currentFilters.city.trim().toLowerCase();
-      const filteredMarkets = markets.filter(m => (m.city || '').trim().toLowerCase() === selectedCity);
-      // Show unique locality (market.market) values
-      const uniqueLocalities = Array.from(new Set(filteredMarkets.map(m => m.market).filter(Boolean)));
-      setLocalities(uniqueLocalities.map(locality => filteredMarkets.find(m => m.market === locality)!));
+      getLocalitiesByCity(currentFilters.city).then(setLocalities);
     } else {
       setLocalities([]);
     }
-  }, [currentFilters.city, markets]);
+  }, [currentFilters.city]);
 
   // Focus trap for accessibility
   useEffect(() => {
@@ -358,8 +353,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             disabled={!currentFilters.city || marketsLoading}
           >
             <option value="">Select Locality</option>
-            {localities.map(market => (
-              <option key={market.id} value={market.market}>{market.market}</option>
+            {localities.map(loc => (
+              <option key={loc} value={loc}>{loc}</option>
             ))}
           </select>
         </div>

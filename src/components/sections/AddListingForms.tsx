@@ -134,6 +134,71 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
         </div>
         
         
+      <div className="flex flex-row gap-4 items-end">
+        {/* City Dropdown */}
+        <div className="flex-1 max-w-xs">
+          <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+          <select
+            className="input"
+            value={formData.address.city || ''}
+            onChange={e => {
+              setFormData({
+                ...formData,
+                address: {
+                  ...formData.address,
+                  city: e.target.value,
+                  locality: '', // Clear locality when city changes
+                },
+              });
+            }}
+            disabled={marketsLoading}
+          >
+            <option value="">Select City</option>
+            {cities.map(city => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+        </div>
+        {/* Locality Dropdown */}
+        <div className="flex-1 max-w-xs">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
+          <select
+            className="input"
+            value={formData.address.locality || ''}
+            onChange={e => {
+              setFormData({
+                ...formData,
+                address: {
+                  ...formData.address,
+                  locality: e.target.value,
+                },
+              });
+            }}
+            disabled={!formData.address.city || marketsLoading}
+          >
+            <option value="">Select Locality</option>
+            {localities.map(market => (
+              <option key={market.id} value={market.market}>{market.market}</option>
+            ))}
+          </select>
+        </div>
+        {/* Building Name */}
+        <div className="flex-1">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Building Name</label>
+          <input
+            type="text"
+            placeholder="Building Name"
+            className="input"
+            value={formData.address.buildingName}
+            onChange={e => setFormData({
+              ...formData,
+              address: {
+                ...formData.address,
+                buildingName: e.target.value,
+              },
+            })}
+          />
+        </div>
       </div>
     </section>
   );

@@ -298,6 +298,29 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
         );
       }
 
+      // Amenities filter
+      if (filters.amenities && filters.amenities.trim() !== '') {
+        const selectedAmenities = filters.amenities.split(',').map((a: string) => a.trim()).filter(Boolean);
+        if (selectedAmenities.length > 0) {
+          filteredListings = filteredListings.filter(listing => {
+            if (type === 'rent') {
+              const rentListing = listing as unknown as import('./listings').RentListing;
+              const allAmenities = [
+                ...(rentListing.amenities?.appliances || []),
+                ...(rentListing.amenities?.furniture || []),
+                ...(rentListing.amenities?.building || [])
+              ].map((a: string) => a.toLowerCase());
+              return selectedAmenities.every((a: string) => allAmenities.includes(a.toLowerCase()));
+            } else if (type === 'sell') {
+              const sellListing = listing as unknown as import('./listings').SellListing;
+              const allAmenities = (sellListing.sellDetails?.amenities || []).map((a: string) => a.toLowerCase());
+              return selectedAmenities.every((a: string) => allAmenities.includes(a.toLowerCase()));
+            }
+            return true;
+          });
+        }
+      }
+
       if (type === 'rent') {
         // Max Rent
         if (filters.maxRent) {
