@@ -41,8 +41,18 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
         await testFirebaseConnection();
         const marketsData = await getMarkets();
         setMarkets(marketsData);
-        // Extract unique cities
-        const uniqueCities = Array.from(new Set(marketsData.map(m => m.city).filter(Boolean)));
+        // Extract unique cities (case-insensitive, trimmed)
+        const cityMap = new Map<string, string>();
+        marketsData.forEach(m => {
+          if (m.city) {
+            const key = m.city.trim().toLowerCase();
+            if (!cityMap.has(key)) {
+              cityMap.set(key, m.city.trim());
+            }
+          }
+        });
+        // Sort cities alphabetically (display original value)
+        const uniqueCities = Array.from(cityMap.values()).sort((a, b) => a.localeCompare(b));
         setCities(uniqueCities);
         setMarketsLoading(false);
       } catch (error) {
@@ -57,9 +67,27 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
       // Case-insensitive, trimmed comparison for city
       const selectedCity = formData.address.city.trim().toLowerCase();
       const filteredMarkets = markets.filter(m => (m.city || '').trim().toLowerCase() === selectedCity);
-      // Show unique locality (market.market) values
-      const uniqueLocalities = Array.from(new Set(filteredMarkets.map(m => m.market).filter(Boolean)));
-      setLocalities(uniqueLocalities.map(locality => filteredMarkets.find(m => m.market === locality)!));
+      // Unique localities (case-insensitive, trimmed)
+      const localityMap = new Map<string, string>();
+      filteredMarkets.forEach(m => {
+        if (m.market) {
+          const key = m.market.trim().toLowerCase();
+          if (!localityMap.has(key)) {
+            localityMap.set(key, m.market.trim());
+          }
+        }
+      });
+      // Sort localities alphabetically (display original value)
+      const uniqueLocalities = Array.from(localityMap.entries()).map(([key, value], i) => {
+        // Find the original market object for id and city
+        const marketObj = filteredMarkets.find(m => m.market && m.market.trim().toLowerCase() === key);
+        return {
+          id: marketObj?.id || key + i,
+          market: value,
+          city: marketObj?.city || formData.address.city || '',
+        };
+      }).sort((a, b) => a.market.localeCompare(b.market));
+      setLocalities(uniqueLocalities);
     } else {
       setLocalities([]);
     }
@@ -112,6 +140,9 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
               disabled={!formData.address.city || marketsLoading}
             >
               <option value="">Select Locality</option>
+              {localities.length === 0 && formData.address.city && !marketsLoading && (
+                <option value="" disabled>No localities found for this city</option>
+              )}
               {localities.map(market => (
                 <option key={market.id} value={market.market}>{market.market}</option>
               ))}

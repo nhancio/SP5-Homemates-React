@@ -673,7 +673,7 @@ const ProfilePage = () => {
                       <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> Unlimited swipes</li>
                     </ul>
                     <div className="flex items-center gap-4 mb-4">
-                      <span className="text-2xl font-bold text-primary-700">₹199/month</span>
+                      <span className="text-2xl font-bold text-primary-700">₹99/month</span>
                       <span className="text-gray-500">or</span>
                       <span className="text-lg font-semibold text-primary-600">₹499/year</span>
                     </div>
