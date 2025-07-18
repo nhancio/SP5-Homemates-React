@@ -68,55 +68,7 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
     <section className="bg-white p-6 rounded-lg shadow-sm">
       <h2 className="text-lg font-semibold mb-4">Address</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="col-span-2 flex flex-col gap-3">
-          {/* City Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-            <select
-              className="input w-full"
-              value={formData.address.city || ''}
-              onChange={e => {
-                setFormData({
-                  ...formData,
-                  address: {
-                    ...formData.address,
-                    city: e.target.value,
-                    locality: '', // Clear locality when city changes
-                  },
-                });
-              }}
-              disabled={marketsLoading}
-            >
-              <option value="">Select City</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-          </div>
-          {/* Locality Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
-            <select
-              className="input w-full"
-              value={formData.address.locality || ''}
-              onChange={e => {
-                setFormData({
-                  ...formData,
-                  address: {
-                    ...formData.address,
-                    locality: e.target.value,
-                  },
-                });
-              }}
-              disabled={!formData.address.city || marketsLoading}
-            >
-              <option value="">Select Locality</option>
-              {localities.map(market => (
-                <option key={market.id} value={market.market}>{market.market}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+        {/* Building Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Building Name</label>
           <input
@@ -133,6 +85,55 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
             })}
           />
         </div>
+        {/* City Dropdown */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+          <select
+            className="input w-full"
+            value={formData.address.city || ''}
+            onChange={e => {
+              setFormData({
+                ...formData,
+                address: {
+                  ...formData.address,
+                  city: e.target.value,
+                  locality: '', // Clear locality when city changes
+                },
+              });
+            }}
+            disabled={marketsLoading}
+          >
+            <option value="">Select City</option>
+            {cities.map(city => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+        </div>
+        {/* Locality Dropdown */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
+          <select
+            className="input w-full"
+            value={formData.address.locality || ''}
+            onChange={e => {
+              setFormData({
+                ...formData,
+                address: {
+                  ...formData.address,
+                  locality: e.target.value,
+                },
+              });
+            }}
+            disabled={!formData.address.city || marketsLoading}
+          >
+            <option value="">Select Locality</option>
+            {localities.map(market => (
+              <option key={market.id} value={market.market}>{market.market}</option>
+            ))}
+          </select>
+        </div>
+        
+        
       </div>
     </section>
   );

@@ -50,7 +50,12 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
   // Update localities when city changes
   useEffect(() => {
     if (currentFilters.city) {
-      setLocalities(markets.filter(m => m.city === currentFilters.city));
+      // Case-insensitive, trimmed comparison for city
+      const selectedCity = currentFilters.city.trim().toLowerCase();
+      const filteredMarkets = markets.filter(m => (m.city || '').trim().toLowerCase() === selectedCity);
+      // Show unique locality (market.market) values
+      const uniqueLocalities = Array.from(new Set(filteredMarkets.map(m => m.market).filter(Boolean)));
+      setLocalities(uniqueLocalities.map(locality => filteredMarkets.find(m => m.market === locality)!));
     } else {
       setLocalities([]);
     }
@@ -354,7 +359,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
           >
             <option value="">Select Locality</option>
             {localities.map(market => (
-              <option key={market.id} value={market.name}>{market.name}</option>
+              <option key={market.id} value={market.market}>{market.market}</option>
             ))}
           </select>
         </div>

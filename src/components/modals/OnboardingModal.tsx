@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '../../config/firebase';
+import { getMarkets, Market } from '../../services/markets';
 
 interface OnboardingModalProps {
   userId: string;
@@ -29,7 +30,32 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
   const [lookingFor, setLookingFor] = useState('');
   const [loading, setLoading] = useState(false);
   const [preferences, setPreferences] = useState<string[]>([]);
+  const [city, setCity] = useState('');
+  const [locality, setLocality] = useState('');
+  const [markets, setMarkets] = useState<Market[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
+  const [localities, setLocalities] = useState<Market[]>([]);
+  const [marketsLoading, setMarketsLoading] = useState(true);
 
+  React.useEffect(() => {
+    getMarkets().then((data) => {
+      setMarkets(data);
+      const uniqueCities = Array.from(new Set(data.map(m => m.city).filter(Boolean)));
+      setCities(uniqueCities);
+      setMarketsLoading(false);
+    });
+  }, []);
+
+  React.useEffect(() => {
+    if (city) {
+      const selectedCity = city.trim().toLowerCase();
+      const filteredMarkets = markets.filter(m => (m.city || '').trim().toLowerCase() === selectedCity);
+      const uniqueLocalities = Array.from(new Set(filteredMarkets.map(m => m.market).filter(Boolean)));
+      setLocalities(uniqueLocalities.map(locality => filteredMarkets.find(m => m.market === locality)!));
+    } else {
+      setLocalities([]);
+    }
+  }, [city, markets]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +75,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
         gender,
         lookingFor,
         preferences,
+        city,
+        locality,
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString(),
         onboardingComplete: true, // Mark onboarding as complete
@@ -104,6 +132,40 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
           >
             <option value="">Select</option>
             {LOOKING_FOR.map(l => <option key={l} value={l}>{l}</option>)}
+          </select>
+        </div>
+        {/* City Dropdown */}
+        <div className="mb-3">
+          <label className="block text-sm font-medium mb-1" htmlFor="onboard-city">City</label>
+          <select
+            id="onboard-city"
+            required
+            value={city}
+            onChange={e => { setCity(e.target.value); setLocality(''); }}
+            className="input input-bordered w-full"
+            disabled={marketsLoading}
+            title="City"
+          >
+            <option value="">Select City</option>
+            {cities.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        {/* Locality Dropdown */}
+        <div className="mb-3">
+          <label className="block text-sm font-medium mb-1" htmlFor="onboard-locality">Locality</label>
+          <select
+            id="onboard-locality"
+            required
+            value={locality}
+            onChange={e => setLocality(e.target.value)}
+            className="input input-bordered w-full"
+            disabled={!city || marketsLoading}
+            title="Locality"
+          >
+            <option value="">Select Locality</option>
+            {localities.map(market => (
+              <option key={market.id} value={market.market}>{market.market}</option>
+            ))}
           </select>
         </div>
         <div className="mb-3">
