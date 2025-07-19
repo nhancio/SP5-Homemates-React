@@ -49,16 +49,33 @@ const PropertyDetailsPage = () => {
     }
   };
 
-  const handleCall = () => {
+  const handleCall = async () => {
     if (!isAuthenticated) {
       handleLoginPrompt();
       return;
     }
 
-    if (property?.contactNumber) {
-      window.location.href = `tel:${property.contactNumber}`;
-    } else {
-      alert('Contact number not available');
+    try {
+      // Check and use credits
+      const { useCredits } = await import('../services/credits');
+      const creditUsed = await useCredits(user!.id, 'call');
+      
+      if (!creditUsed) {
+        // No credits available, redirect to payment page
+        if (window.confirm('You have no credits remaining. Would you like to buy more credits?')) {
+          window.location.href = '/payment';
+        }
+        return;
+      }
+
+      if (property?.contactNumber) {
+        window.location.href = `tel:${property.contactNumber}`;
+      } else {
+        alert('Contact number not available');
+      }
+    } catch (error) {
+      console.error('Error using credits:', error);
+      alert('Failed to process request. Please try again.');
     }
   };
 

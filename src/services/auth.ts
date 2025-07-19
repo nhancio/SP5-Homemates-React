@@ -17,21 +17,32 @@ export const signInWithGoogle = async () => {
     const userDoc = await getDoc(userRef);
     
     if (!userDoc.exists()) {
-      // Create new user document
+      // Create new user document with 5 free credits
       await setDoc(userRef, {
         userId: userId,
         email: result.user.email,
         name: result.user.displayName,
         photoURL: result.user.photoURL,
         createdAt: new Date().toISOString(),
-        lastLoginAt: new Date().toISOString()
+        lastLoginAt: new Date().toISOString(),
+        credits: 5, // Give 5 free credits to new users
+        creditsLastUpdated: new Date().toISOString()
       });
-      console.log('Created new user:', userId);
+      console.log('Created new user with 5 credits:', userId);
     } else {
-      // Update last login
-      await setDoc(userRef, {
+      // Update last login and initialize credits if not present
+      const userData = userDoc.data();
+      const updateData: any = {
         lastLoginAt: new Date().toISOString()
-      }, { merge: true });
+      };
+      
+      // Initialize credits if not present
+      if (typeof userData.credits === 'undefined') {
+        updateData.credits = 5;
+        updateData.creditsLastUpdated = new Date().toISOString();
+      }
+      
+      await setDoc(userRef, updateData, { merge: true });
       console.log('Updated existing user:', userId);
     }
 

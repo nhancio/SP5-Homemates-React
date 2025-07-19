@@ -48,25 +48,71 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 
   const handleImageLoad = () => setIsLoaded(true);
 
-  const handleCall = (e: React.MouseEvent) => {
+  const handleCall = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const phone = property.contactNumber || property.contactInfo?.phone;
-    if (phone) {
-      window.location.href = `tel:${phone}`;
-    } else {
-      alert('Contact number not available for this property');
+    
+    if (!user) {
+      alert('Please login to contact property owners');
+      return;
+    }
+
+    try {
+      // Check and use credits
+      const { useCredits } = await import('../../services/credits');
+      const creditUsed = await useCredits(user.id, 'call');
+      
+      if (!creditUsed) {
+        // No credits available, redirect to payment page
+        if (window.confirm('You have no credits remaining. Would you like to buy more credits?')) {
+          window.location.href = '/payment';
+        }
+        return;
+      }
+
+      const phone = property.contactInfo?.phone;
+      if (phone) {
+        window.location.href = `tel:${phone}`;
+      } else {
+        alert('Contact number not available for this property');
+      }
+    } catch (error) {
+      console.error('Error using credits:', error);
+      alert('Failed to process request. Please try again.');
     }
   };
 
-  const handleWhatsApp = (e: React.MouseEvent) => {
+  const handleWhatsApp = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const phone = property.contactNumber || property.contactInfo?.phone;
-    if (phone) {
-      const message = `Hey, I want to know more about your flat listing I found at homematesapp.in/rent/${property.id}`;
-      const url = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-      window.open(url, '_blank');
-    } else {
-      alert('Contact number not available for this property');
+    
+    if (!user) {
+      alert('Please login to contact property owners');
+      return;
+    }
+
+    try {
+      // Check and use credits
+      const { useCredits } = await import('../../services/credits');
+      const creditUsed = await useCredits(user.id, 'whatsapp');
+      
+      if (!creditUsed) {
+        // No credits available, redirect to payment page
+        if (window.confirm('You have no credits remaining. Would you like to buy more credits?')) {
+          window.location.href = '/payment';
+        }
+        return;
+      }
+
+      const phone = property.contactInfo?.phone;
+      if (phone) {
+        const message = `Hey, I want to know more about your flat listing I found at homematesapp.in/rent/${property.id}`;
+        const url = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+      } else {
+        alert('Contact number not available for this property');
+      }
+    } catch (error) {
+      console.error('Error using credits:', error);
+      alert('Failed to process request. Please try again.');
     }
   };
 
@@ -161,7 +207,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         {/* Property Type Badge */}
         <div className="absolute top-3 left-3 z-10">
           <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
-            {property.propertyType || property.type}
+            {property.type}
           </span>
         </div>
         {/* Left Arrow */}
@@ -300,7 +346,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         {/* Property Type Badge */}
         <div className="absolute top-4 left-4 z-10">
           <span className="bg-primary-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
-            {property.propertyType || property.type}
+            {property.type}
           </span>
         </div>
         {/* Favorite Button */}

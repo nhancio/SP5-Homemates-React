@@ -86,11 +86,28 @@ const ProfilePage = () => {
   const [showContactInfo, setShowContactInfo] = useState(true);
   const [recentProperties, setRecentProperties] = useState<any[]>([]);
   const [mutualUsers, setMutualUsers] = useState<any[]>([]);
+  const [userCredits, setUserCredits] = useState<number>(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = 'My Profile | Homemates';
   }, []);
+
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      fetchUserCredits();
+    }
+  }, [user, isAuthenticated]);
+
+  const fetchUserCredits = async () => {
+    try {
+      const { getUserCredits } = await import('../services/credits');
+      const creditInfo = await getUserCredits(user!.id);
+      setUserCredits(creditInfo.credits);
+    } catch (error) {
+      console.error('Error fetching user credits:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -679,6 +696,29 @@ const ProfilePage = () => {
                     </div>
                     <button className="upgrade-btn btn btn-primary px-6 py-2 text-lg font-semibold">Upgrade Now</button>
                     <div className="text-xs text-gray-400 mt-2 flex items-center gap-1"><span role="img" aria-label="secure">🔒</span> Secure Payment</div>
+                  </div>
+                </div>
+
+                {/* Credits Section */}
+                <div className="mt-6 bg-primary-50 border border-primary-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center">
+                    <CreditCard className="w-5 h-5 mr-2 text-primary-600" />
+                    Your Credits
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-primary-600">{userCredits}</div>
+                      <div className="text-sm text-gray-600">Credits remaining</div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Use credits to contact property owners via call or WhatsApp
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => window.location.href = '/payment'}
+                      className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition"
+                    >
+                      Buy More Credits
+                    </button>
                   </div>
                 </div>
                 {/* About Me and Looking For sections */}
