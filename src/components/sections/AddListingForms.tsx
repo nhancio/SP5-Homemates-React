@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { USER_PREFERENCES } from '../../constants/theme';
 import * as LucideIcons from 'lucide-react';
-import { getMarkets, Market, testFirebaseConnection } from '../../services/markets';
+import { getMarkets, Market, testFirebaseConnection, getLocalitiesByCity } from '../../services/markets';
 
 // Amenity/feature options with icon and label (same as PropertyFilters)
 const AMENITY_OPTIONS = [
@@ -201,6 +201,56 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
   const minDate = new Date(today.getTime() + 24 * 60 * 60 * 1000); // tomorrow
   const maxDate = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000); // 90 days from now
 
+  // Add state for city and locality dropdowns
+  const [cities, setCities] = useState<string[]>([]);
+  const [localities, setLocalities] = useState<string[]>([]);
+  const [marketsLoading, setMarketsLoading] = useState(true);
+
+  // Fetch cities on mount
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const marketsData = await getMarkets();
+        // Extract unique cities (case-insensitive, trimmed)
+        const cityMap = new Map<string, string>();
+        marketsData.forEach(m => {
+          if (m.city) {
+            const key = m.city.trim().toLowerCase();
+            if (!cityMap.has(key)) {
+              cityMap.set(key, m.city.trim());
+            }
+          }
+        });
+        // Sort cities alphabetically
+        const uniqueCities = Array.from(cityMap.values()).sort((a, b) => a.localeCompare(b));
+        setCities(uniqueCities);
+        setMarketsLoading(false);
+      } catch (error) {
+        console.error('RentForm: Error fetching cities:', error);
+        setMarketsLoading(false);
+      }
+    };
+    fetchCities();
+  }, []);
+
+  // Update localities when city changes
+  useEffect(() => {
+    const fetchLocalities = async () => {
+      if (formData.address.city) {
+        try {
+          const localitiesData = await getLocalitiesByCity(formData.address.city);
+          setLocalities(localitiesData);
+        } catch (error) {
+          console.error('RentForm: Error fetching localities:', error);
+          setLocalities([]);
+        }
+      } else {
+        setLocalities([]);
+      }
+    };
+    fetchLocalities();
+  }, [formData.address.city]);
+
   const validate = () => {
     const newErrors: any = {};
     const mobile = formData.contactNumber || '';
@@ -269,10 +319,12 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   },
                 });
               }}
-              disabled={false}
+              disabled={marketsLoading}
             >
               <option value="">Select City</option>
-              {/* You may want to fetch and map cities here as in AddressFields */}
+              {cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
             </select>
           </div>
           {/* Locality Dropdown */}
@@ -290,10 +342,15 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   },
                 });
               }}
-              disabled={!formData.address.city}
+              disabled={!formData.address.city || marketsLoading}
             >
               <option value="">Select Locality</option>
-              {/* You may want to fetch and map localities here as in AddressFields */}
+              {localities.length === 0 && formData.address.city && !marketsLoading && (
+                <option value="" disabled>No localities found for this city</option>
+              )}
+              {localities.map(locality => (
+                <option key={locality} value={locality}>{locality}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -757,6 +814,57 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
 
 export const SellForm: React.FC<AddListingFormsProps> = (props) => {
   const { formData, setFormData, images, handleImageUpload, removeImage } = props;
+  
+  // Add state for city and locality dropdowns
+  const [cities, setCities] = useState<string[]>([]);
+  const [localities, setLocalities] = useState<string[]>([]);
+  const [marketsLoading, setMarketsLoading] = useState(true);
+
+  // Fetch cities on mount
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        const marketsData = await getMarkets();
+        // Extract unique cities (case-insensitive, trimmed)
+        const cityMap = new Map<string, string>();
+        marketsData.forEach(m => {
+          if (m.city) {
+            const key = m.city.trim().toLowerCase();
+            if (!cityMap.has(key)) {
+              cityMap.set(key, m.city.trim());
+            }
+          }
+        });
+        // Sort cities alphabetically
+        const uniqueCities = Array.from(cityMap.values()).sort((a, b) => a.localeCompare(b));
+        setCities(uniqueCities);
+        setMarketsLoading(false);
+      } catch (error) {
+        console.error('SellForm: Error fetching cities:', error);
+        setMarketsLoading(false);
+      }
+    };
+    fetchCities();
+  }, []);
+
+  // Update localities when city changes
+  useEffect(() => {
+    const fetchLocalities = async () => {
+      if (formData.address.city) {
+        try {
+          const localitiesData = await getLocalitiesByCity(formData.address.city);
+          setLocalities(localitiesData);
+        } catch (error) {
+          console.error('SellForm: Error fetching localities:', error);
+          setLocalities([]);
+        }
+      } else {
+        setLocalities([]);
+      }
+    };
+    fetchLocalities();
+  }, [formData.address.city]);
+
   return (
     <>
       {/* Address: Building Name, City, Locality in one row */}
@@ -796,9 +904,12 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                   },
                 });
               }}
+              disabled={marketsLoading}
             >
               <option value="">Select City</option>
-              {/* You may want to fetch and map cities here as in AddressFields */}
+              {cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
             </select>
           </div>
           {/* Locality Dropdown */}
@@ -816,9 +927,15 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                   },
                 });
               }}
+              disabled={!formData.address.city || marketsLoading}
             >
               <option value="">Select Locality</option>
-              {/* You may want to fetch and map localities here as in AddressFields */}
+              {localities.length === 0 && formData.address.city && !marketsLoading && (
+                <option value="" disabled>No localities found for this city</option>
+              )}
+              {localities.map(locality => (
+                <option key={locality} value={locality}>{locality}</option>
+              ))}
             </select>
           </div>
         </div>
