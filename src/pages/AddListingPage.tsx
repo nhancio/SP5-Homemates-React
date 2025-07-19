@@ -371,6 +371,7 @@ const AddListingPage = () => {
         setImages={setImages}
         handleImageUpload={handleImageUpload}
         removeImage={removeImage}
+        onSubmit={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)}
       />
       {/* Preferred Tenant Section */}
       <section className="bg-white p-6 rounded-lg shadow-sm">
@@ -701,6 +702,7 @@ const AddListingPage = () => {
       setImages={setImages}
       handleImageUpload={handleImageUpload}
       removeImage={removeImage}
+      onSubmit={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)}
     />
   );
 
@@ -745,6 +747,7 @@ const AddListingPage = () => {
               setImages={setImages}
               handleImageUpload={handleImageUpload}
               removeImage={removeImage}
+              onSubmit={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)}
             />
           ) : (
             <SellForm
@@ -755,23 +758,25 @@ const AddListingPage = () => {
               setImages={setImages}
               handleImageUpload={handleImageUpload}
               removeImage={removeImage}
+              onSubmit={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)}
             />
           )}
 
+          {/* Only one button, label changes based on listingType */}
           <button 
-          type="submit"
-          className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition disabled:opacity-50"
-          disabled={isSubmitting}
-          onClick={() => {
-            // Track submit/post button click
-            import('../utils/analytics').then(({ trackEvent }) => {
-              trackEvent({
-                action: 'submit_listing',
-                category: 'Button',
-                label: listingType === 'sell' ? 'Full Home Submit' : 'Shared Home Post',
+            type="submit"
+            className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition disabled:opacity-50"
+            disabled={isSubmitting}
+            onClick={() => {
+              // Track submit/post button click
+              import('../utils/analytics').then(({ trackEvent }) => {
+                trackEvent({
+                  action: 'submit_listing',
+                  category: 'Button',
+                  label: listingType === 'sell' ? 'Full Home Submit' : 'Shared Home Post',
+                });
               });
-            });
-          }}
+            }}
           >
             {isSubmitting
               ? 'Submitting...'

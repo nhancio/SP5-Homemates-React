@@ -315,15 +315,15 @@ Link: ${url}`;
               {/* Cost Details - Only for Rent */}
               {listingType === 'rent' && (
                 <div className="p-6 border-b">
-                  <h2 className="text-lg font-semibold mb-4">Cost Details</h2>
+                  <h2 className="text-lg font-semibold mb-4">Rent Details</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <div>
                       <span className="text-gray-600">Monthly Rent</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.rent)}</p>
+                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.rent)} <span className="text-xs text-gray-500">/month</span></p>
                     </div>
                     <div>
                       <span className="text-gray-600">Maintenance</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.maintenance)}</p>
+                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.maintenance)} <span className="text-xs text-gray-500">/month</span></p>
                     </div>
                     <div>
                       <span className="text-gray-600">Security Deposit</span>
@@ -338,6 +338,13 @@ Link: ${url}`;
                       <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.brokerage)}</p>
                     </div>
                   </div>
+                </div>
+              )}
+              {/* Contact Number - Show if available */}
+              {property.contactNumber && (
+                <div className="p-6 border-b">
+                  <h2 className="text-lg font-semibold mb-4">Contact Number</h2>
+                  <p className="font-semibold text-primary-700 text-lg">{property.contactNumber}</p>
                 </div>
               )}
 

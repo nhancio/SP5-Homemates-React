@@ -99,13 +99,15 @@ export async function getLocalitiesByCity(city: string): Promise<string[]> {
     const q = query(collection(db, 'markets'), where('city', '==', city));
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
-      const data = querySnapshot.docs[0].data();
-      // Try both 'localities' (array) and fallback to 'market' (single locality)
-      if (Array.isArray(data.localities)) {
-        return data.localities;
-      } else if (typeof data.market === 'string') {
-        return [data.market];
-      }
+      // Collect all 'market' fields from all docs for this city
+      const allMarkets = querySnapshot.docs
+        .map(doc => doc.data().market)
+        .filter((m): m is string => typeof m === 'string' && m.trim() !== '');
+      // Remove duplicates (case-insensitive, trimmed)
+      const uniqueMarkets = Array.from(new Set(allMarkets.map(m => m.trim().toLowerCase()))).map(
+        key => allMarkets.find(m => m.trim().toLowerCase() === key) || key
+      );
+      return uniqueMarkets;
     }
     return [];
   } catch (error) {

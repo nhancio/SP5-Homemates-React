@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Instagram, Linkedin, Home } from 'lucide-react';
+import { Mail, Instagram, Linkedin, Home, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -19,7 +19,7 @@ const Footer = () => {
           
           {/* Social Media Links */}
           <div className="flex items-center space-x-4">
-            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
+            <a href="https://www.instagram.com/homemates.ai" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
               <Instagram className="w-5 h-5" />
             </a>
             <a href="https://www.linkedin.com/company/homemates-ai" target="_blank" rel="noopener noreferrer" className="hover:text-white transition">
@@ -41,6 +41,10 @@ const Footer = () => {
             <a href="mailto:nithindidigam@gmail.com" className="flex items-center hover:text-white transition">
               <Mail className="w-4 h-4 mr-1" />
               Contact
+            </a>
+            <a href="tel:7095288950" className="flex items-center hover:text-white transition">
+              <Phone className="w-4 h-4 mr-1" />
+              Call Support
             </a>
           </div>
         </div>

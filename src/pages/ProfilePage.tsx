@@ -662,53 +662,75 @@ const ProfilePage = () => {
                     </p>
                   )}
                 </div>
-                {/* About Me section */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Info className="w-5 h-5" /> About Me</h3>
-                  {editingBio ? (
-                    <div>
-                      <textarea
-                        value={bioInput}
-                        onChange={e => setBioInput(e.target.value)}
-                        className="input w-full mb-2"
-                        rows={3}
-                        autoFocus
-                      />
-                      <button className="btn btn-primary btn-sm mr-2" onClick={saveBio} disabled={savingField==='bio'}>Save</button>
-                      <button className="btn btn-outline btn-sm" onClick={() => { setEditingBio(false); setBioInput(displayBio); }}>Cancel</button>
+                {/* Subscription UI - moved here for first scroll visibility */}
+                <div className="mt-6 subscription-section">
+                  <p className="plan-status text-lg mb-2">Plan: <span className="free-tag bg-gray-200 text-primary-700 px-2 py-1 rounded">Free</span></p>
+                  <div className="premium-box bg-primary-50 border border-primary-200 rounded-lg p-6 mt-2">
+                    <h3 className="text-xl font-bold mb-2">Upgrade to Premium</h3>
+                    <ul className="benefits-list list-disc pl-6 mb-4 text-primary-700">
+                      <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> View verified contacts</li>
+                      <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> Appear higher in search</li>
+                      <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> Unlimited swipes</li>
+                    </ul>
+                    <div className="flex items-center gap-4 mb-4">
+                      <span className="text-2xl font-bold text-primary-700">₹99/month</span>
+                      <span className="text-gray-500">or</span>
+                      <span className="text-lg font-semibold text-primary-600">₹499/year</span>
                     </div>
-                  ) : (
-                    <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingBio(true)}>
-                      <span>{displayBio || <span className="italic text-gray-400">Add a short bio to let others know more about you!</span>}</span>
-                      <Edit className="w-4 h-4 text-primary-600 ml-2" />
-                    </div>
-                  )}
+                    <button className="upgrade-btn btn btn-primary px-6 py-2 text-lg font-semibold">Upgrade Now</button>
+                    <div className="text-xs text-gray-400 mt-2 flex items-center gap-1"><span role="img" aria-label="secure">🔒</span> Secure Payment</div>
+                  </div>
                 </div>
-                {/* Looking For section */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Users className="w-5 h-5" /> Looking For</h3>
-                  {editingLookingFor ? (
-                    <div>
-                      <select
-                        className="input w-full mb-2"
-                        value={lookingForInput}
-                        onChange={e => setLookingForInput(e.target.value)}
-                        autoFocus
-                      >
-                        <option value="">Select</option>
-                        <option value="Room">Room</option>
-                        <option value="Flat">Flat</option>
-                        <option value="Homemate">Homemate</option>
-                      </select>
-                      <button className="btn btn-primary btn-sm mr-2" onClick={saveLookingFor} disabled={savingField==='lookingFor'}>Save</button>
-                      <button className="btn btn-outline btn-sm" onClick={() => { setEditingLookingFor(false); setLookingForInput(displayLookingFor); }}>Cancel</button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingLookingFor(true)}>
-                      <span>{displayLookingFor || <span className="italic text-gray-400">Let others know what you’re looking for (e.g., Room, Flat, Homemate).</span>}</span>
-                      <Edit className="w-4 h-4 text-primary-600 ml-2" />
-                    </div>
-                  )}
+                {/* About Me and Looking For sections */}
+                <div className="mt-6 flex flex-col md:flex-row gap-6">
+                  {/* About Me */}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Info className="w-5 h-5" /> About Me</h3>
+                    {editingBio ? (
+                      <div>
+                        <textarea
+                          value={bioInput}
+                          onChange={e => setBioInput(e.target.value)}
+                          className="input w-full mb-2"
+                          rows={3}
+                          autoFocus
+                        />
+                        <button className="btn btn-primary btn-sm mr-2" onClick={saveBio} disabled={savingField==='bio'}>Save</button>
+                        <button className="btn btn-outline btn-sm" onClick={() => { setEditingBio(false); setBioInput(displayBio); }}>Cancel</button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingBio(true)}>
+                        <span>{displayBio || <span className="italic text-gray-400">Add a short bio to let others know more about you!</span>}</span>
+                        <Edit className="w-4 h-4 text-primary-600 ml-2" />
+                      </div>
+                    )}
+                  </div>
+                  {/* Looking For */}
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Users className="w-5 h-5" /> Looking For</h3>
+                    {editingLookingFor ? (
+                      <div>
+                        <select
+                          className="input w-full mb-2"
+                          value={lookingForInput}
+                          onChange={e => setLookingForInput(e.target.value)}
+                          autoFocus
+                        >
+                          <option value="">Select</option>
+                          <option value="Room">Room</option>
+                          <option value="Flat">Flat</option>
+                          <option value="Homemate">Homemate</option>
+                        </select>
+                        <button className="btn btn-primary btn-sm mr-2" onClick={saveLookingFor} disabled={savingField==='lookingFor'}>Save</button>
+                        <button className="btn btn-outline btn-sm" onClick={() => { setEditingLookingFor(false); setLookingForInput(displayLookingFor); }}>Cancel</button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingLookingFor(true)}>
+                        <span>{displayLookingFor || <span className="italic text-gray-400">Let others know what you’re looking for (e.g., Room, Flat, Homemate).</span>}</span>
+                        <Edit className="w-4 h-4 text-primary-600 ml-2" />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {/* Your Choices (Preferences) section */}
                 <div className="mt-6">
@@ -716,7 +738,7 @@ const ProfilePage = () => {
                   {editingPreferences ? (
                     <div className="flex flex-wrap gap-2 mb-2">
                       {USER_PREFERENCES.map((pref) => {
-                        const Icon = LucideIcons[pref.icon] || LucideIcons.User;
+                        const Icon = (LucideIcons as any)[pref.icon] || LucideIcons.User;
                         const selected = preferencesInput.includes(pref.label);
                         return (
                           <button
@@ -756,27 +778,6 @@ const ProfilePage = () => {
                         )}
                       </div>
                       <button className="ml-2" onClick={() => setEditingPreferences(true)}><Edit className="w-4 h-4 text-primary-600" /></button>
-                    </div>
-                  )}
-                </div>
-                {/* Fun Fact section */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Star className="w-5 h-5" /> Fun Fact</h3>
-                  {editingFunFact ? (
-                    <div>
-                      <input
-                        value={funFactInput}
-                        onChange={e => setFunFactInput(e.target.value)}
-                        className="input w-full mb-2"
-                        autoFocus
-                      />
-                      <button className="btn btn-primary btn-sm mr-2" onClick={saveFunFact} disabled={savingField==='funFact'}>Save</button>
-                      <button className="btn btn-outline btn-sm" onClick={() => { setEditingFunFact(false); setFunFactInput(profileUser.funFact || ''); }}>Cancel</button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingFunFact(true)}>
-                      <span>{profileUser.funFact || randomFunFact}</span>
-                      <Edit className="w-4 h-4 text-primary-600 ml-2" />
                     </div>
                   )}
                 </div>
@@ -829,40 +830,21 @@ const ProfilePage = () => {
                     )}
                   </div>
                 </div>
-                {/* QR Code section */}
+                {/* Share Your Profile section with WhatsApp only */}
                 <div className="mt-6">
                   <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
                     <span>Share Your Profile</span>
                   </h3>
                   <div className="flex items-center gap-4">
-                    <QRCode value={window.location.origin + '/profile/' + profileUser.id} size={96} />
-                    <div>
-                      <div className="text-gray-700 mb-1">Scan to view your profile</div>
-                      <div className="text-xs text-gray-400">Share this QR code with friends to let them view your profile easily.</div>
-                      <div className="flex gap-2 mt-2">
-                        {/* WhatsApp share button, always show if phone/whatsapp available */}
-                        {(profileUser.whatsapp || profileUser.userPhoneNumber || profileUser.phoneNumber) && (
-                          <a
-                            href={`https://wa.me/91${(profileUser.whatsapp || profileUser.userPhoneNumber || profileUser.phoneNumber).replace(/\D/g, '')}?text=${encodeURIComponent('Hey, check out my Homemates profile: ' + window.location.origin + '/profile/' + profileUser.id)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-success flex items-center gap-2"
-                          >
-                            <WhatsAppIcon /> WhatsApp
-                          </a>
-                        )}
-                        {displayEmail && (
-                          <a
-                            href={`https://mail.google.com/mail/?view=cm&fs=1&to=&su=Check%20out%20my%20Homemates%20profile&body=${encodeURIComponent('Here is my Homemates profile: ' + window.location.origin + '/profile/' + profileUser.id)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-outline flex items-center gap-2"
-                          >
-                            <GmailIcon /> Gmail
-                          </a>
-                        )}
-                      </div>
-                    </div>
+                    <a
+                      href={`https://wa.me/?text=${encodeURIComponent('Check out my Homemates profile: ' + window.location.origin + '/profile/' + profileUser.id)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-success flex items-center gap-2 whatsapp-share-btn"
+                      style={{ backgroundColor: '#25D366', color: 'white' }}
+                    >
+                      <WhatsAppIcon /> Share on WhatsApp
+                    </a>
                   </div>
                 </div>
                 {/* User stats */}
@@ -937,66 +919,6 @@ const ProfilePage = () => {
           <a href="/refund_policy" className="btn btn-secondary text-sm px-4 py-2">Refund Policy</a>
           <a href="/TandC" className="btn btn-secondary text-sm px-4 py-2">T&amp;C</a>
         </div>
-        {/* Membership Status */}
-        {!isPremium && (
-          <div className="mt-8 bg-gradient-to-r from-accent-500 to-amber-500 text-white rounded-lg p-6">
-            <div className="flex flex-col md:flex-row items-center justify-between">
-              <div>
-                <h2 className="text-xl font-bold mb-2">Upgrade to Premium</h2>
-                <p className="mb-4 md:mb-0">
-                  Get exclusive access to premium listings, priority support, and more!
-                </p>
-              </div>
-              <button
-                onClick={handleUpgradeClick}
-                className="bg-white text-accent-600 hover:bg-gray-100 px-6 py-2 rounded-md font-medium transition"
-              >
-                Upgrade Now
-              </button>
-            </div>
-          </div>
-        )}
-        {showUpgradePopup && (
-          <div className="fixed inset-0 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl p-8 max-w-md mx-4 relative">
-              <button
-                onClick={() => setShowUpgradePopup(false)}
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <h3 className="text-xl font-semibold mb-4">Upgrade to Premium</h3>
-              <p className="text-gray-600 mb-6">
-                Get exclusive access to premium listings, priority support, and more features!
-              </p>
-              <div className="space-y-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2">Premium Benefits:</h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    <li>• Unlimited contacts</li>
-                    <li>• Priority support</li>
-                    <li>• Exclusive features</li>
-                    <li>• And much more...</li>
-                  </ul>
-                </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold text-primary-600 mb-4">
-                    <span className="line-through text-gray-400 mr-2">₹499</span>
-                    <span className="text-primary-600 font-bold text-2xl">₹99</span>
-                    <span className="text-base text-gray-500 ml-1">/ month</span>
-                  </p>
-                  <button
-                    onClick={handlePhonePePayment}
-                    className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 text-lg hover:scale-105 transition-transform border-2 border-yellow-500 focus:outline-none focus:ring-4 focus:ring-yellow-300 w-full justify-center"
-                  >
-                    <CreditCard className="w-6 h-6" />
-                    Pay with PhonePe
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
         {/* Edit Profile Modal */}
         <Dialog open={editProfileModalOpen} onClose={() => setEditProfileModalOpen(false)} className="fixed z-50 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
