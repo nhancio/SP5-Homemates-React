@@ -16,6 +16,8 @@ const propertyTypes = [
   '4BHK'
 ];
 
+const PROPERTIES_PER_PAGE = 9;
+
 const RentPropertiesPage = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<any[]>([]);
@@ -23,7 +25,8 @@ const RentPropertiesPage = () => {
   const [error, setError] = useState<string | null>(null);
   const { filters, isAuthenticated, login, user } = useAppContext();
   const [userGender, setUserGender] = useState<string | null>(null);
-  
+  const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
     fetchProperties();
   }, [filters.rent]); // Re-fetch when filters change
@@ -45,6 +48,7 @@ const RentPropertiesPage = () => {
       setError(null);
       const listings = await getListings('rent', filters.rent);
       setProperties(listings);
+      setCurrentPage(1); // Reset to first page on new fetch
     } catch (err) {
       setError('Failed to load properties. Please try again later.');
     } finally {
@@ -55,12 +59,26 @@ const RentPropertiesPage = () => {
   const handlePropertyClick = (propertyId: string) => {
     navigate(`/rent/${propertyId}`);
   };
-  
+
   useEffect(() => {
     window.scrollTo(0, 0);
     document.title = 'Shared Home Listings | Homemates';
   }, []);
-  
+
+  // Pagination logic
+  const totalPages = Math.ceil(properties.length / PROPERTIES_PER_PAGE);
+  const paginatedProperties = properties.slice(
+    (currentPage - 1) * PROPERTIES_PER_PAGE,
+    currentPage * PROPERTIES_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="py-8">
       <div className="container">
@@ -105,17 +123,47 @@ const RentPropertiesPage = () => {
             <p className="text-gray-600">{error}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {properties.map(property => (
-              <PropertyCard 
-                key={property.id} 
-                property={property}
-                listingType="rent"
-                variant="small"
-                onClick={() => handlePropertyClick(property.id)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {paginatedProperties.map(property => (
+                <PropertyCard 
+                  key={property.id} 
+                  property={property}
+                  listingType="rent"
+                  variant="small"
+                  onClick={() => handlePropertyClick(property.id)}
+                />
+              ))}
+            </div>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-8">
+                <button
+                  className="px-3 py-1 rounded border bg-white text-primary-600 hover:bg-primary-50 disabled:opacity-50"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    className={`px-3 py-1 rounded border ${page === currentPage ? 'bg-primary-600 text-white' : 'bg-white text-primary-600 hover:bg-primary-50'}`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  className="px-3 py-1 rounded border bg-white text-primary-600 hover:bg-primary-50 disabled:opacity-50"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
         
         {properties.length === 0 && !isLoading && !error && (
