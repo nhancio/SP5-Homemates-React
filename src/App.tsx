@@ -15,7 +15,6 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
 import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
 import CardDemoPage from './pages/CardDemoPage';
-import PaymentPage from './pages/PaymentPage';
 import { AppContextProvider } from './context/AppContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -46,7 +45,6 @@ const router = createBrowserRouter([
       { path: 'saved', element: <SavedPage /> },
       { path: 'users', element: <FindFriendsPage /> },
       { path: 'card-demo', element: <CardDemoPage /> },
-      { path: 'payment', element: <PaymentPage /> },
       { path: 'privacy_policy', element: <PrivacyPolicyPage /> },
       { path: 'refund_policy', element: <RefundPolicyPage /> },
       { path: 'TandC', element: <TermsAndConditionsPage /> },
