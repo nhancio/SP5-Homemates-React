@@ -1,22 +1,42 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import HeroBanner from '../components/sections/HeroBanner';
-import Footer from '../components/layout/Footer';
 import FeaturedProperties from '../components/sections/FeaturedProperties';
 import HomeCategories from '../components/sections/HomeCategories';
 import HomeServices from '../components/sections/HomeServices';
 import Testimonials from '../components/sections/Testimonials';
+import MatchingDashboard from '../components/MatchingDashboard';
+import { useAppContext } from '../context/AppContext';
 
-const HomePage = () => {
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    document.title = 'Homemates | Property & Home Services Marketplace';
-  }, []);
-  
+const HomePage: React.FC = () => {
+  const { user } = useAppContext();
+
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <>
       <HeroBanner />
-      <Footer />
-    </div>
+      {/* Show matching dashboard for logged-in users */}
+      {user && (
+        <div className="container py-8">
+          <MatchingDashboard onViewMatches={() => window.location.href = '/find-friends'} />
+        </div>
+      )}
+      <FeaturedProperties
+        title="Featured Shared Homes"
+        subtitle="Top shared home listings for you"
+        viewAllLink="/rent"
+        type="rent"
+        limit={4}
+      />
+      <FeaturedProperties
+        title="Featured Full Homes"
+        subtitle="Best full home listings for families and professionals"
+        viewAllLink="/buy"
+        type="buy"
+        limit={4}
+      />
+      <HomeCategories />
+      <HomeServices />
+      <Testimonials />
+    </>
   );
 };
 
