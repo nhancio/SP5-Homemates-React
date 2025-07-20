@@ -31,7 +31,7 @@ const HeroBanner = () => {
 
   return (
     <>
-      <section className="relative flex flex-col justify-center items-center overflow-hidden h-[calc(100vh-64px-64px)]"> {/* Fit between navbar and footer, no negative margin */}
+      <section className="relative flex flex-col justify-center items-center overflow-hidden h-full"> {/* Full height */}
         {/* Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat before:absolute before:inset-0 before:bg-black before:opacity-40"

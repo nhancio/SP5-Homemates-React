@@ -12,7 +12,7 @@ const Navbar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-white shadow-nav">
+    <header className="fixed top-0 left-0 right-0 z-30 bg-white shadow-nav">
       <div className="container py-3">
         <div className="flex items-center justify-between">
             {/* Left side: Logo */}

@@ -16,7 +16,7 @@ const Layout = () => {
     <div className="flex flex-col min-h-screen">
       <PageViewTracker />
       <Navbar />
-      <main className="flex-grow">
+      <main className="flex-grow pt-16"> {/* Add top padding to account for fixed navbar */}
         <Outlet />
       </main>
       {location.pathname !== '/' && <Footer />}
