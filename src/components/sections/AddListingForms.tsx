@@ -258,8 +258,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       newErrors.contactNumber = 'Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.';
     }
     const availableRooms = Number(formData.rentDetails.roomDetails.availableRooms);
-    if (![1,2,3,4,5].includes(availableRooms)) {
-      newErrors.availableRooms = 'Available rooms must be 1, 2, 3, 4, or 5.';
+    if (![1,2,3].includes(availableRooms)) {
+      newErrors.availableRooms = 'Available rooms must be 1, 2, 3';
     }
     if (formData.isImmediate === false) {
       const date = new Date(formData.handoverDate);
@@ -374,9 +374,9 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="">Select Flat Type</option>
               <option value="1BHK">1BHK</option>
               <option value="2BHK">2BHK</option>
+              <option value="3BHK">3BHK</option>
               <option value="4BHK">4BHK</option>
               <option value="4BHK+">4BHK+</option>
-              <option value="7BHK">7BHK</option>
             </select>
           </div>
           <div>
