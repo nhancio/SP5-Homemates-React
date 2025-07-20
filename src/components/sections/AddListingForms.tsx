@@ -827,13 +827,12 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber}</p>}
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
       </div>
-      <button type="submit" className="btn btn-primary mt-4">Post</button>
     </form>
   );
 };
 
 export const SellForm: React.FC<AddListingFormsProps> = (props) => {
-  const { formData, setFormData, images, handleImageUpload, removeImage } = props;
+  const { formData, setFormData, images, handleImageUpload, removeImage, onSubmit } = props;
   
   // Add state for city and locality dropdowns
   const [cities, setCities] = useState<string[]>([]);
@@ -1237,7 +1236,6 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         </div>
         <div className="text-xs text-gray-400 mt-1">Tip: Add clear, well-lit photos for better responses.</div>
       </section>
-      <button type="button" className="btn btn-primary mt-4">Post</button>
     </>
   );
 };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
