@@ -27,7 +27,7 @@ const HomePage: React.FC = () => {
         limit={4}
       />
       <FeaturedProperties
-        title="Featured Full Homes"
+        title="Featured Full Home"
         subtitle="Best full home listings for families and professionals"
         viewAllLink="/buy"
         type="buy"
