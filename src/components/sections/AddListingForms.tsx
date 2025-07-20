@@ -359,7 +359,26 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Home Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
-          {/* Row 1 */}
+          {/* Row 1 - Flat Type (NEW for Shared Listing) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type*</label>
+            <select
+              className="input w-full"
+              value={formData.flatType || ''}
+              onChange={e => setFormData({
+                ...formData,
+                flatType: e.target.value
+              })}
+              required
+            >
+              <option value="">Select Flat Type</option>
+              <option value="1BHK">1BHK</option>
+              <option value="2BHK">2BHK</option>
+              <option value="4BHK">4BHK</option>
+              <option value="4BHK+">4BHK+</option>
+              <option value="7BHK">7BHK</option>
+            </select>
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Available Rooms</label>
             <select
@@ -381,6 +400,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             </select>
             {errors.availableRooms && <p className="text-red-500 text-xs mt-1">{errors.availableRooms}</p>}
           </div>
+          {/* Row 2 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
             <select
@@ -402,7 +422,6 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="shared">Shared</option>
             </select>
           </div>
-          {/* Row 2 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Washroom Type</label>
             <select
@@ -424,6 +443,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="common">Common</option>
             </select>
           </div>
+          {/* Row 3 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
             <select
@@ -441,7 +461,6 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="villa">Villa</option>
             </select>
           </div>
-          {/* Row 3 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
             <select
@@ -458,6 +477,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="unfurnished">Unfurnished</option>
             </select>
           </div>
+          {/* Row 4 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
             <select
@@ -945,59 +965,24 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Home Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
-          {/* Row 1 */}
+          {/* Row 1 - Flat Type (NEW for Full Home) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Available Rooms</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type*</label>
             <select
               className="input w-full"
-              value={formData.sellDetails.availableRooms || ''}
+              value={formData.flatType || ''}
               onChange={e => setFormData({
                 ...formData,
-                sellDetails: {
-                  ...formData.sellDetails,
-                  availableRooms: e.target.value
-                }
+                flatType: e.target.value
               })}
+              required
             >
-              <option value="">Select</option>
-              {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
-            <select
-              className="input w-full"
-              value={formData.sellDetails.roomType || ''}
-              onChange={e => setFormData({
-                ...formData,
-                sellDetails: {
-                  ...formData.sellDetails,
-                  roomType: e.target.value
-                }
-              })}
-            >
-              <option value="">Select Room Type</option>
-              <option value="private">Private</option>
-              <option value="shared">Shared</option>
-            </select>
-          </div>
-          {/* Row 2 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Washroom Type</label>
-            <select
-              className="input w-full"
-              value={formData.sellDetails.bathroomType || ''}
-              onChange={e => setFormData({
-                ...formData,
-                sellDetails: {
-                  ...formData.sellDetails,
-                  bathroomType: e.target.value
-                }
-              })}
-            >
-              <option value="">Select Bathroom Type</option>
-              <option value="attached">Attached</option>
-              <option value="common">Common</option>
+              <option value="">Select Flat Type</option>
+              <option value="1BHK">1BHK</option>
+              <option value="2BHK">2BHK</option>
+              <option value="4BHK">4BHK</option>
+              <option value="4BHK+">4BHK+</option>
+              <option value="7BHK">7BHK</option>
             </select>
           </div>
           <div>
@@ -1020,7 +1005,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="villa">Villa</option>
             </select>
           </div>
-          {/* Row 3 */}
+          {/* Row 2 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
             <select
@@ -1040,6 +1025,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="unfurnished">Unfurnished</option>
             </select>
           </div>
+          {/* Row 3 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
             <select
