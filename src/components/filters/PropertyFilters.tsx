@@ -359,6 +359,71 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
           </select>
         </div>
       </div>
+      {/* Property Type and BHK Filters */}
+      <div className="flex flex-col md:flex-row gap-3 p-4 border-b border-gray-100 bg-white">
+        {/* Property Type Dropdown */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
+            Property Type
+            <span className="relative group cursor-pointer">
+              <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text></svg>
+              <span className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+                Property type refers to the kind of home: Apartment, Villa, Independent House, etc.
+              </span>
+            </span>
+          </label>
+          <select
+            className="input w-full md:w-48"
+            value={currentFilters.propertyType || ''}
+            onChange={e => {
+              setFilters({
+                ...filters,
+                [listingType]: {
+                  ...filters[listingType],
+                  propertyType: e.target.value,
+                },
+              });
+            }}
+            disabled={marketsLoading}
+          >
+            <option value="">Select Property Type</option>
+            {propertyTypes.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
+        {/* BHK Dropdown */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
+            BHK
+            <span className="relative group cursor-pointer">
+              <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text></svg>
+              <span className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+                BHK stands for Bedrooms, Hall, Kitchen. 1BHK = 1 Bedroom, 2BHK = 2 Bedrooms, etc.
+              </span>
+            </span>
+          </label>
+          <select
+            className="input w-full md:w-48"
+            value={currentFilters.bhk || ''}
+            onChange={e => {
+              setFilters({
+                ...filters,
+                [listingType]: {
+                  ...filters[listingType],
+                  bhk: e.target.value,
+                },
+              });
+            }}
+            disabled={marketsLoading}
+          >
+            <option value="">Select BHK</option>
+            {Array.from({ length: 10 }, (_, i) => i + 1).map(bhk => (
+              <option key={bhk} value={bhk}>{bhk} BHK</option>
+            ))}
+          </select>
+        </div>
+      </div>
       {/* Rent/Price Range Filter */}
       {listingType === 'rent' && (
         <div className="flex flex-col md:flex-row gap-4 items-center p-4 border-b border-gray-100 bg-white">
