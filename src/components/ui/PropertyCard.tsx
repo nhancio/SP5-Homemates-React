@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug, X, Check } from 'lucide-react';
+import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
@@ -60,6 +60,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const swiperRef = useRef<any>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImage, setModalImage] = useState<string | null>(null);
+  const [modalImageIndex, setModalImageIndex] = useState<number>(0);
   const [showSavedAnimation, setShowSavedAnimation] = useState(false);
 
   const isFavorite = favoriteProperties.includes(property.id);
@@ -224,7 +225,16 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         >
           {(property.images?.length ? property.images : ['placeholder']).map((img, idx) => (
             <SwiperSlide key={idx}>
-              <div className={`h-48 bg-gray-200 ${!isLoaded ? 'animate-pulse' : ''}`}>
+              <div className={`h-48 bg-gray-200 ${!isLoaded ? 'animate-pulse' : ''}`}
+                onClick={() => {
+                  if (img !== 'placeholder') {
+                    setModalImage(img);
+                    setModalImageIndex(idx);
+                    setShowImageModal(true);
+                  }
+                }}
+                style={{ cursor: img !== 'placeholder' ? 'zoom-in' : 'default' }}
+              >
                 {img === 'placeholder' ? (
                   <div className="w-full h-full flex justify-center items-center text-gray-400">
                     <Building className="w-10 h-10" />
@@ -340,6 +350,54 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           </button>
         </div>
       </div>
+      {/* Full-resolution Image Modal */}
+      {showImageModal && modalImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setShowImageModal(false)}>
+          <button
+            className="absolute top-6 right-6 text-white text-3xl font-bold"
+            onClick={e => { e.stopPropagation(); setShowImageModal(false); }}
+            aria-label="Close"
+          >
+            <X className="w-8 h-8" />
+          </button>
+          <button
+            className="absolute left-6 top-1/2 -translate-y-1/2 text-white text-3xl font-bold bg-black bg-opacity-40 rounded-full p-2"
+            onClick={e => {
+              e.stopPropagation();
+              setModalImageIndex(i => {
+                const total = property.images?.length || 1;
+                const next = (i - 1 + total) % total;
+                setModalImage(property.images?.[next] || modalImage);
+                return next;
+              });
+            }}
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-8 h-8" />
+          </button>
+          <img
+            src={modalImage}
+            alt="Property"
+            className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg"
+            onClick={e => e.stopPropagation()}
+          />
+          <button
+            className="absolute right-6 top-1/2 -translate-y-1/2 text-white text-3xl font-bold bg-black bg-opacity-40 rounded-full p-2"
+            onClick={e => {
+              e.stopPropagation();
+              setModalImageIndex(i => {
+                const total = property.images?.length || 1;
+                const next = (i + 1) % total;
+                setModalImage(property.images?.[next] || modalImage);
+                return next;
+              });
+            }}
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-8 h-8" />
+          </button>
+        </div>
+      )}
     </div>
   );
 
@@ -373,6 +431,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                     onClick={e => {
                       e.stopPropagation();
                       setModalImage(img);
+                      setModalImageIndex(idx);
                       setShowImageModal(true);
                     }}
                     onLoad={handleImageLoad}
