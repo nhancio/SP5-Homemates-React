@@ -617,6 +617,8 @@ const AddListingPage = () => {
                     }
                   }
                 }))}
+                spellCheck={false}
+                autoCorrect="off"
               />
               {errors[field] && <p className="text-red-500 text-xs mt-1">{errors[field]}</p>}
             </div>
@@ -647,6 +649,8 @@ const AddListingPage = () => {
                     }
                   }
                 }))}
+                spellCheck={false}
+                autoCorrect="off"
               />
             </div>
           ))}
@@ -728,6 +732,8 @@ const AddListingPage = () => {
             pattern="[0-9]{10}"
             maxLength={10}
             required
+            spellCheck={false}
+            autoCorrect="off"
           />
           {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber}</p>}
         </div>

@@ -108,6 +108,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             className={`input w-full${mobileError ? ' border-red-500 bg-red-50' : ''}`}
             placeholder="Enter your mobile number"
             title="Mobile Number"
+            spellCheck={false}
+            autoCorrect="off"
           />
           {mobileError && (
             <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
@@ -125,6 +127,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             onChange={e => setGender(e.target.value)}
             className={`input w-full${gender === '' ? ' border-red-500 bg-red-50' : ''}`}
             title="Gender"
+            spellCheck={true}
+            autoCorrect="on"
           >
             <option value="">Select</option>
             {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
@@ -145,6 +149,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             onChange={e => setLookingFor(e.target.value)}
             className={`input w-full${lookingFor === '' ? ' border-red-500 bg-red-50' : ''}`}
             title="Looking for"
+            spellCheck={true}
+            autoCorrect="on"
           >
             <option value="">Select</option>
             {LOOKING_FOR.map(l => <option key={l} value={l}>{l}</option>)}
@@ -167,6 +173,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             className={`input w-full${city === '' ? ' border-red-500 bg-red-50' : ''}`}
             disabled={marketsLoading}
             title="City"
+            spellCheck={true}
+            autoCorrect="on"
           >
             <option value="">Select City</option>
             {cities.map(c => <option key={c} value={c}>{c}</option>)}
@@ -189,6 +197,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             className={`input w-full${locality === '' ? ' border-red-500 bg-red-50' : ''}`}
             disabled={!city || marketsLoading}
             title="Locality"
+            spellCheck={true}
+            autoCorrect="on"
           >
             <option value="">Select Locality</option>
             {localities.map(market => (
@@ -216,6 +226,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
                       : [...prev, pref.id]);
                   }}
                   className="form-checkbox h-4 w-4 text-primary-600"
+                  spellCheck={true}
+                  autoCorrect="on"
                 />
                 <span>{pref.label}</span>
               </label>

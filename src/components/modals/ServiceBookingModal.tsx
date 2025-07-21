@@ -91,6 +91,8 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
                 value={bookingData.date}
                 onChange={(e) => handleInputChange('date', e.target.value)}
                 className="w-full input"
+                spellCheck={true}
+                autoCorrect="on"
               />
             </div>
             <div>
@@ -104,6 +106,8 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
                 value={bookingData.time}
                 onChange={(e) => handleInputChange('time', e.target.value)}
                 className="w-full input"
+                spellCheck={true}
+                autoCorrect="on"
               />
             </div>
           </div>
@@ -120,6 +124,8 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
               onChange={(e) => handleInputChange('name', e.target.value)}
               className="w-full input"
               placeholder="Enter your full name"
+              spellCheck={true}
+              autoCorrect="on"
             />
           </div>
 
@@ -135,6 +141,8 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
               onChange={(e) => handleInputChange('phone', e.target.value)}
               className="w-full input"
               placeholder="Enter your phone number"
+              spellCheck={false}
+              autoCorrect="off"
             />
           </div>
 
@@ -150,6 +158,8 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
               className="w-full input"
               rows={3}
               placeholder="Enter the address where you need the service"
+              spellCheck={true}
+              autoCorrect="on"
             />
           </div>
 
@@ -163,6 +173,8 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
               className="w-full input"
               rows={2}
               placeholder="Any special requirements or instructions"
+              spellCheck={true}
+              autoCorrect="on"
             />
           </div>
 

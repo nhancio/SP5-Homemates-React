@@ -164,7 +164,7 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
           <input
             type="text"
             placeholder="Building Name"
-            className="input w-full"
+            className={`input w-full${errors.buildingName ? ' border-red-500 bg-red-50' : ''}`}
             value={formData.address.buildingName}
             onChange={e => setFormData({
               ...formData,
@@ -173,6 +173,8 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
                 buildingName: e.target.value,
               },
             })}
+            spellCheck={true}
+            autoCorrect="on"
           />
           {errors.buildingName && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
             <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -201,6 +203,8 @@ const ContactNumberField = ({ formData, setFormData }: { formData: any; setFormD
         pattern="[0-9]{10}"
         maxLength={10}
         required
+        spellCheck={false}
+        autoCorrect="off"
       />
       <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
     </div>
@@ -322,6 +326,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   buildingName: e.target.value,
                 },
               })}
+              spellCheck={true}
+              autoCorrect="on"
             />
             {errors.buildingName && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -714,6 +720,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 });
               }}
+              spellCheck={false}
+              autoCorrect="off"
             />
             {errors.rent && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -737,6 +745,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 }
               })}
+              spellCheck={false}
+              autoCorrect="off"
             />
             {errors.maintenance && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -760,6 +770,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 }
               })}
+              spellCheck={false}
+              autoCorrect="off"
             />
             {errors.securityDeposit && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -783,6 +795,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 }
               })}
+              spellCheck={false}
+              autoCorrect="off"
             />
             {errors.setupCost && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -806,6 +820,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 }
               })}
+              spellCheck={false}
+              autoCorrect="off"
             />
             {errors.brokerage && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -826,7 +842,12 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             ...formData,
             description: e.target.value
           })}
+          spellCheck={true}
+          autoCorrect="on"
         />
+        <p className="text-xs text-gray-500 mt-1">
+          Tip: Use this box to share unique details about your property, such as house rules, vibe, or anything not covered above. Avoid repeating amenities, phone number, or location.
+        </p>
         {errors.description && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
           <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
           {errors.description}
@@ -900,6 +921,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           pattern="[0-9]{10}"
           maxLength={10}
           required
+          spellCheck={false}
+          autoCorrect="off"
         />
         {errors.contactNumber && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
           <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -1010,6 +1033,8 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                   buildingName: e.target.value,
                 },
               })}
+              spellCheck={true}
+              autoCorrect="on"
             />
             {errors.buildingName && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -1283,6 +1308,8 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               })}
               min={1000}
               required
+              spellCheck={false}
+              autoCorrect="off"
             />
             {errors.price && (
               <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
@@ -1305,6 +1332,8 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                   maintenance: e.target.value
                 }
               })}
+              spellCheck={false}
+              autoCorrect="off"
             />
             {errors.maintenance && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -1325,6 +1354,8 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                   securityDeposit: e.target.value
                 }
               })}
+              spellCheck={false}
+              autoCorrect="off"
             />
             {errors.securityDeposit && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -1345,6 +1376,8 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                   brokerage: e.target.value
                 }
               })}
+              spellCheck={false}
+              autoCorrect="off"
             />
             {errors.brokerage && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -1365,7 +1398,12 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             ...formData,
             description: e.target.value
           })}
+          spellCheck={true}
+          autoCorrect="on"
         />
+        <p className="text-xs text-gray-500 mt-1">
+          Tip: Use this box to share unique details about your property, such as house rules, vibe, or anything not covered above. Avoid repeating amenities, phone number, or location.
+        </p>
         {errors.description && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
           <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
           {errors.description}
@@ -1418,6 +1456,8 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           pattern="[0-9]{10}"
           maxLength={10}
           required
+          spellCheck={false}
+          autoCorrect="off"
         />
         {errors.contactNumber && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
           <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
