@@ -17,6 +17,7 @@ interface PropertyCardProps {
   listingType?: 'rent' | 'buy';
   variant?: 'small' | 'large';
   onClick?: () => void;
+  showBadge?: boolean;
 }
 
 // Key amenities to show as icons
@@ -30,13 +31,30 @@ const AMENITY_ICONS: Record<string, React.ReactNode> = {
   power: <Plug className="w-4 h-4" />,
 };
 
+// Matching score calculation helper
+function getMatchScore(userPrefs: string[] = [], propertyPrefs: string[] = []) {
+  if (!userPrefs.length || !propertyPrefs.length) return null;
+  const userSet = new Set(userPrefs);
+  let matches = 0;
+  propertyPrefs.forEach(pref => {
+    if (userSet.has(pref)) matches++;
+  });
+  const percent = Math.round((matches / userPrefs.length) * 100);
+  return { matches, total: userPrefs.length, percent };
+}
+
 const PropertyCard: React.FC<PropertyCardProps> = ({ 
   property, 
   listingType = 'rent',
   variant = 'small',
-  onClick
+  onClick,
+  showBadge = true
 }) => {
+  console.log('Rendering PropertyCard for property:', property?.id, property?.address?.buildingName);
   const { favoriteProperties, toggleFavorite, user } = useAppContext();
+  console.log('User:', user);
+  console.log('User preferences:', user?.preferences);
+  console.log('Property preferences:', property.rentDetails?.preferredTenant?.preferences);
   const [isLoaded, setIsLoaded] = useState(false);
   const navigate = useNavigate();
   const swiperRef = useRef<any>(null);
@@ -175,6 +193,20 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     });
   };
 
+  const matchScore = React.useMemo(() => {
+    if (!user || !user.preferences || !user.preferences.length) return null;
+    let propertyPrefs: string[] = [];
+    if (listingType === 'rent') {
+      propertyPrefs = property.rentDetails?.preferredTenant?.preferences || [];
+    } else {
+      propertyPrefs = property.features || [];
+    }
+    // Debug logs
+    console.log('User preferences:', user.preferences);
+    console.log('Property preferences/features:', propertyPrefs);
+    return getMatchScore(user.preferences, propertyPrefs);
+  }, [user, property, listingType]);
+
   // --- Small Card Variant ---
   const renderSmallCard = () => (
     <div
@@ -205,11 +237,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           ))}
         </Swiper>
         {/* Property Type Badge */}
-        <div className="absolute top-3 left-3 z-10">
-          <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
-            {property.type}
-          </span>
-        </div>
+        {listingType === 'rent' && variant === 'small' && showBadge && (
+          <div className="absolute top-3 left-3 z-10">
+            <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
+              {property.rentDetails?.preferredTenant?.lookingFor || 'Shared'}
+            </span>
+          </div>
+        )}
         {/* Left Arrow */}
         <div
           className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
@@ -256,6 +290,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                 : `${property.address?.locality}, ${property.address?.city}`}
             </span>
           </div>
+          {/* Match Score Badge */}
+          {matchScore && (
+            <div className="inline-block bg-green-50 text-green-700 text-xs font-semibold rounded-full px-3 py-1 mb-1 mt-1">
+              {matchScore.matches}/{matchScore.total} match ({matchScore.percent}%)
+            </div>
+          )}
           {/* Amenity Icons Row */}
           <div className="flex gap-2 mt-2 mb-2">
             {Object.entries(AMENITY_ICONS).map(([key, icon]) => (
@@ -373,6 +413,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                     : `${property.address?.locality}, ${property.address?.city}`}
                 </span>
               </div>
+              {/* Match Score Badge */}
+              {matchScore && (
+                <div className="inline-block bg-green-50 text-green-700 text-xs font-semibold rounded-full px-3 py-1 mb-2 mt-1">
+                  {matchScore.matches}/{matchScore.total} match ({matchScore.percent}%)
+                </div>
+              )}
             </div>
             <div className="text-right">
               <div className="text-2xl font-extrabold text-primary-600">

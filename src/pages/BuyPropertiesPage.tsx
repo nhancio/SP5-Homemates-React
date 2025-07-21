@@ -107,6 +107,7 @@ const BuyPropertiesPage = () => {
                   listingType={property.rentDetails ? 'rent' : 'buy'}
                   variant="small"
                   onClick={() => handlePropertyClick(property)}
+                  showBadge={false}
                 />
               ))}
             </div>
