@@ -182,6 +182,27 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
             {errors.buildingName}
           </p>}
         </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Google Maps Link</label>
+          <input
+            type="text"
+            className={`input w-full${errors.googleMapsLink ? ' border-red-500 bg-red-50' : ''}`}
+            placeholder="Paste Google Maps link (optional)"
+            value={formData.address.googleMapsLink || ''}
+            onChange={e => setFormData({
+              ...formData,
+              address: {
+                ...formData.address,
+                googleMapsLink: e.target.value,
+              },
+            })}
+            spellCheck={false}
+            autoCorrect="off"
+          />
+          {formData.address.googleMapsLink && !formData.address.googleMapsLink.startsWith('https://maps.google.') && (
+            <p className="text-red-600 text-xs mt-1">Please enter a valid Google Maps link.</p>
+          )}
+        </div>
       </div>
     </section>
   );
