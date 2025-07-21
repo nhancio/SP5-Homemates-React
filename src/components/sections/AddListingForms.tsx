@@ -255,7 +255,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
     const newErrors: any = {};
     const mobile = formData.contactNumber || '';
     if (!/^[6-9][0-9]{9}$/.test(mobile)) {
-      newErrors.contactNumber = 'Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.';
+      newErrors.contactNumber = 'Please enter a valid mobile number.';
     }
     const availableRooms = Number(formData.rentDetails.roomDetails.availableRooms);
     if (![1,2,3].includes(availableRooms)) {
@@ -268,6 +268,11 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       } else if (date < minDate || date > maxDate) {
         newErrors.handoverDate = `Date must be between ${minDate.toLocaleDateString()} and ${maxDate.toLocaleDateString()}`;
       }
+    }
+    // Rent validation
+    const rent = Number(formData.rentDetails?.costs?.rent);
+    if (!rent || rent < 1000) {
+      newErrors.rent = 'Rent must be at least ₹1,000.';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -662,6 +667,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 });
               }}
             />
+            {errors.rent && <p className="text-red-500 text-xs mt-1">{errors.rent}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance (₹/month)</label>
@@ -838,6 +844,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
   const [cities, setCities] = useState<string[]>([]);
   const [localities, setLocalities] = useState<string[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
+  const [errors, setErrors] = useState<any>({});
 
   // Fetch cities on mount
   useEffect(() => {
@@ -884,8 +891,30 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
     fetchLocalities();
   }, [formData.address.city]);
 
+  const validate = () => {
+    const newErrors: any = {};
+    const mobile = formData.contactNumber || '';
+    if (!/^[6-9][0-9]{9}$/.test(mobile)) {
+      newErrors.contactNumber = 'Please enter a valid mobile number.';
+    }
+    // Price validation (for full flat listing)
+    const price = Number(formData.sellDetails?.price);
+    if (!price || price < 1000) {
+      newErrors.price = 'Price must be at least ₹1,000.';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validate()) {
+      if (props.onSubmit) props.onSubmit();
+    }
+  };
+
   return (
-    <>
+    <form onSubmit={handleSubmit}>
       {/* Address: Building Name, City, Locality in one row */}
       <section className="bg-white p-6 rounded-lg shadow-sm">
         <h2 className="text-lg font-semibold mb-4">Address</h2>
@@ -1125,20 +1154,23 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Price Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Rent</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Price*</label>
             <input
               type="number"
-              className="input w-full focus:ring-2 focus:ring-primary-300"
-              placeholder="Enter rent"
-              value={formData.sellDetails?.rent || ''}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
+              className="input w-full"
+              placeholder="Enter price"
+              value={formData.sellDetails.price}
+              onChange={e => setFormData({
                 ...formData,
                 sellDetails: {
                   ...formData.sellDetails,
-                  rent: e.target.value
+                  price: e.target.value
                 }
               })}
+              min={1000}
+              required
             />
+            {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance</label>
@@ -1236,6 +1268,25 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         </div>
         <div className="text-xs text-gray-400 mt-1">Tip: Add clear, well-lit photos for better responses.</div>
       </section>
-    </>
+      {/* 13. Mobile Number at the bottom */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
+        <input
+          type="tel"
+          className="input"
+          placeholder="Enter your 10-digit mobile number"
+          value={formData.contactNumber || ''}
+          onChange={e => setFormData({
+            ...formData,
+            contactNumber: e.target.value
+          })}
+          pattern="[0-9]{10}"
+          maxLength={10}
+          required
+        />
+        {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber}</p>}
+        <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
+      </div>
+    </form>
   );
 };                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         

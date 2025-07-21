@@ -36,6 +36,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
   const [cities, setCities] = useState<string[]>([]);
   const [localities, setLocalities] = useState<Market[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
+  const [mobileError, setMobileError] = useState('');
 
   React.useEffect(() => {
     getMarkets().then((data) => {
@@ -59,9 +60,12 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (mobile.replace(/\D/g, '').length !==10) {
-      alert('Mobile number');
+    // Validate mobile number: 10 digits, starts with 6,7,8,9
+    if (!/^[6-9][0-9]{9}$/.test(mobile)) {
+      setMobileError('Please enter a valid mobile number.');
       return;
+    } else {
+      setMobileError('');
     }
     setLoading(true);
     try {
@@ -105,6 +109,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             placeholder="Enter your mobile number"
             title="Mobile Number"
           />
+          {mobileError && <p className="text-red-500 text-xs mt-1">{mobileError}</p>}
         </div>
         <div className="mb-3">
           <label className="block text-sm font-medium mb-1" htmlFor="onboard-gender">Gender</label>
