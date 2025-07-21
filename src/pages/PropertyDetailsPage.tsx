@@ -15,13 +15,36 @@ const PropertyDetailsPage = () => {
   const [property, setProperty] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { favoriteProperties, toggleFavorite, isAuthenticated, login, user } = useAppContext();
+  const { favoriteProperties, toggleFavorite, isAuthenticated, login, user, filters } = useAppContext();
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImage, setModalImage] = useState<string | null>(null);
   const [modalImageIndex, setModalImageIndex] = useState<number>(0);
 
   // Determine listing type from URL
   const listingType = location.pathname.startsWith('/rent') ? 'rent' : 'sell';
+
+  // Helper to get applied filters as chips
+  const getAppliedFilters = () => {
+    const activeType = filters.activeType || listingType;
+    const f = filters[activeType] || {};
+    const chips: { label: string, value: string }[] = [];
+    if (f.city) chips.push({ label: 'City', value: f.city });
+    if (f.locality) chips.push({ label: 'Locality', value: f.locality });
+    if (f.propertyType) chips.push({ label: 'Type', value: f.propertyType });
+    if (f.bhk) chips.push({ label: 'BHK', value: f.bhk });
+    if (f.furnishingType) chips.push({ label: 'Furnishing', value: f.furnishingType });
+    if (f.bathrooms) chips.push({ label: 'Bathrooms', value: f.bathrooms });
+    if (f.minRent) chips.push({ label: 'Min Rent', value: `₹${f.minRent}` });
+    if (f.maxRent && f.maxRent !== 10000000) chips.push({ label: 'Max Rent', value: `₹${f.maxRent}` });
+    if (f.minPrice) chips.push({ label: 'Min Price', value: `₹${f.minPrice}` });
+    if (f.maxPrice && f.maxPrice !== 10000000) chips.push({ label: 'Max Price', value: `₹${f.maxPrice}` });
+    if (f.amenities) chips.push({ label: 'Amenities', value: f.amenities });
+    if (f.availability) chips.push({ label: 'Availability', value: f.availability });
+    if (f.availableFrom) chips.push({ label: 'Available From', value: f.availableFrom });
+    if (f.ageOfProperty) chips.push({ label: 'Age', value: f.ageOfProperty });
+    if (f.possessionStatus) chips.push({ label: 'Possession', value: f.possessionStatus });
+    return chips;
+  };
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -193,17 +216,15 @@ Link: ${url}`;
         {!isAuthenticated && (
           <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-primary-700">Sign in to contact property owners</h2>
-                <p className="text-primary-600">Create an account to get full access to all features</p>
-              </div>
-              <button 
-                onClick={() => login()}
-                className="btn btn-primary"
-              >
-                Sign in with Google
-              </button>
+              <h2 className="text-lg font-semibold text-primary-700">Sign in to contact property owners</h2>
+              <p className="text-primary-600">Create an account to get full access to all features</p>
             </div>
+            <button 
+              onClick={() => login()}
+              className="btn btn-primary"
+            >
+              Sign in with Google
+            </button>
           </div>
         )}
 
@@ -215,6 +236,15 @@ Link: ${url}`;
           <ArrowLeft className="w-4 h-4 mr-1" />
           Back to {listingType === 'rent' ? 'Rental' : 'Sale'} Properties
         </button>
+
+        {/* Applied Filters Row */}
+        <div className="mb-4 flex flex-wrap gap-2">
+          {getAppliedFilters().map((chip, i) => (
+            <span key={i} className="px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-200">
+              {chip.label}: {chip.value}
+            </span>
+          ))}
+        </div>
 
         {/* Property Type Badge */}
         <div className="mb-4">

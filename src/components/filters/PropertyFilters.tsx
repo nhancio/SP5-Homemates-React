@@ -518,7 +518,70 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
           })}
         </div>
       </div>
-      {/* Drawer/Modal for detailed filters is disabled */}
+      {/* Floating Filters Button */}
+      <button
+        onClick={() => setDrawerOpen(true)}
+        className="fixed left-4 top-1/2 -translate-y-1/2 z-50 flex items-center gap-2 px-5 py-3 rounded-full border border-primary-200 text-primary-600 font-semibold bg-white shadow-lg hover:bg-primary-50 transition hidden md:flex"
+        style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}
+        aria-label="Open Filters"
+      >
+        <Filter className="w-6 h-6" />
+        Filters
+      </button>
+      {/* Mobile sticky Filters Button */}
+      <button
+        onClick={() => setDrawerOpen(true)}
+        className="fixed left-4 bottom-4 z-50 flex items-center gap-2 px-5 py-3 rounded-full border border-primary-200 text-primary-600 font-semibold bg-white shadow-lg hover:bg-primary-50 transition md:hidden"
+        style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}
+        aria-label="Open Filters"
+      >
+        <Filter className="w-6 h-6" />
+        Filters
+      </button>
+      {/* Filter Drawer/Modal */}
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-40 transition-opacity"
+            onClick={() => setDrawerOpen(false)}
+            aria-label="Close Filters Overlay"
+          />
+          {/* Drawer Panel */}
+          <div
+            ref={drawerRef}
+            tabIndex={-1}
+            className="relative h-full bg-white shadow-2xl rounded-r-2xl w-full max-w-md md:max-w-lg lg:max-w-xl flex flex-col animate-slide-in-left focus:outline-none"
+            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.16)' }}
+            role="dialog"
+            aria-modal="true"
+          >
+            {/* Sticky Header */}
+            <div className="sticky top-0 z-10 bg-white pt-6 pb-3 px-6 border-b flex items-center justify-between rounded-tr-2xl">
+              <h3 className="font-bold text-xl flex items-center gap-2"><Filter className="w-6 h-6" /> Filters</h3>
+              <div className="flex gap-2">
+                <button onClick={clearFilters} className="text-gray-500 hover:text-primary-600 text-sm font-medium px-3 py-1 rounded transition">Clear All</button>
+                <button onClick={() => setDrawerOpen(false)} className="text-gray-500 hover:text-primary-600 p-2 rounded-full transition" aria-label="Close Filters"><X className="w-6 h-6" /></button>
+              </div>
+            </div>
+            {/* Filter Content */}
+            <div className="flex-1 overflow-y-auto px-6 pb-32 pt-4">
+              {/* Place all filter fields here (city, locality, price, amenities, etc.) */}
+              {/* You can reuse the main filter JSX here, or extract to a subcomponent for DRYness */}
+            </div>
+            {/* Sticky Footer with Apply Button */}
+            <div className="sticky bottom-0 z-20 bg-white border-t pt-3 pb-5 px-6 flex justify-end rounded-br-2xl shadow-lg">
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="btn btn-primary px-8 py-3 rounded-full text-lg font-semibold shadow hover:scale-105 transition"
+                aria-label="Apply Filters"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
