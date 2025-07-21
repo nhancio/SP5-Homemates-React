@@ -191,6 +191,17 @@ const AddListingPage = () => {
         const value = Number((formData.rentDetails?.costs as any)?.[field]);
         if (value < 0) newErrors[field] = 'Cannot be negative.';
       });
+      // Make availableRooms mandatory for shared flats >1 BHK
+      const flatType = formData.rentDetails?.roomDetails?.flatType;
+      const propertyType = formData.propertyType;
+      const availableRooms = formData.rentDetails?.roomDetails?.availableRooms;
+      if (
+        flatType === 'Shared' &&
+        ['2 BHK', '3 BHK', '4 BHK', '4+ BHK'].includes(propertyType) &&
+        (!availableRooms || Number(availableRooms) <= 0)
+      ) {
+        newErrors.availableRooms = 'Please enter the number of available spots (required for shared flats with more than 1 BHK).';
+      }
     }
     // Price validation
     if (listingType === 'sell') {

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Filter, X } from 'lucide-react';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
+import Tooltip from 'rc-tooltip';
+import 'rc-tooltip/assets/bootstrap.css';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useAppContext } from '../../context/AppContext';
@@ -15,8 +17,18 @@ interface PropertyFiltersProps {
   listingType: 'buy' | 'rent';
 }
 
-const PRICE_MIN = 1000; // Allow min price from 1,000
-const PRICE_MAX = 100000000; // Allow max price up to 10,00,00,000 (1 Cr)
+const PRICE_MIN = 1000; // Fixed min price
+const PRICE_MAX = 300000; // Max rent set to 3L
+const SLIDER_STEP = 500;
+const SLIDER_MARKS = {
+  1000: '₹1k',
+  50000: '₹50k',
+  100000: '₹1L',
+  150000: '₹1.5L',
+  200000: '₹2L',
+  250000: '₹2.5L',
+  300000: '₹3L',
+};
 
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listingType }) => {
   const { filters, setFilters } = useAppContext();
@@ -73,11 +85,12 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
   const [localMaxRent, setLocalMaxRent] = useState(isRentFilters(filters[listingType]) ? filters[listingType].maxRent : '');
 
   // Local state for min/max fields, keyed by listingType
-  const [localMin, setLocalMin] = useState<number | undefined>(
-    isRentFilters(filters[listingType]) ? filters[listingType].minRent : isBuyFilters(filters[listingType]) ? filters[listingType].minPrice : undefined
+  const isRent = listingType === 'rent';
+  const [localMin, setLocalMin] = useState<number>(
+    isRent ? (filters[listingType]?.minRent ?? PRICE_MIN) : (filters[listingType]?.minPrice ?? PRICE_MIN)
   );
-  const [localMax, setLocalMax] = useState<number | undefined>(
-    isRentFilters(filters[listingType]) ? filters[listingType].maxRent : isBuyFilters(filters[listingType]) ? filters[listingType].maxPrice : undefined
+  const [localMax, setLocalMax] = useState<number>(
+    isRent ? (filters[listingType]?.maxRent ?? PRICE_MAX) : (filters[listingType]?.maxPrice ?? PRICE_MAX)
   );
 
   // Sync local state with context filters when filters change externally
@@ -86,8 +99,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
     setLocalPriceMax(isBuyFilters(filters[listingType]) ? filters[listingType].maxPrice : undefined);
     setLocalMinRent(isRentFilters(filters[listingType]) ? filters[listingType].minRent : '');
     setLocalMaxRent(isRentFilters(filters[listingType]) ? filters[listingType].maxRent : '');
-    setLocalMin(isRentFilters(filters[listingType]) ? filters[listingType].minRent : isBuyFilters(filters[listingType]) ? filters[listingType].minPrice : undefined);
-    setLocalMax(isRentFilters(filters[listingType]) ? filters[listingType].maxRent : isBuyFilters(filters[listingType]) ? filters[listingType].maxPrice : undefined);
+    setLocalMin(isRent ? filters[listingType].minRent : filters[listingType].minPrice);
+    setLocalMax(isRent ? filters[listingType].maxRent : filters[listingType].maxPrice);
   }, [filters[listingType], listingType]);
 
   useEffect(() => {
@@ -141,22 +154,30 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
 
   // Handler for input changes
   const handleMinInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === '') {
-      setLocalMin(undefined);
-    } else {
-      const num = Number(value);
-      if (!isNaN(num)) setLocalMin(num);
-    }
+    let val = Number(e.target.value);
+    if (isNaN(val)) val = PRICE_MIN;
+    val = Math.max(PRICE_MIN, Math.min(val, localMax));
+    setLocalMin(val);
+    setFilters({
+      ...filters,
+      [listingType]: {
+        ...filters[listingType],
+        ...(isRent ? { minRent: val, maxRent: localMax } : { minPrice: val, maxPrice: localMax }),
+      },
+    });
   };
   const handleMaxInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value === '') {
-      setLocalMax(undefined);
-    } else {
-      const num = Number(value);
-      if (!isNaN(num)) setLocalMax(num);
-    }
+    let val = Number(e.target.value);
+    if (isNaN(val)) val = PRICE_MAX;
+    val = Math.min(PRICE_MAX, Math.max(val, localMin));
+    setLocalMax(val);
+    setFilters({
+      ...filters,
+      [listingType]: {
+        ...filters[listingType],
+        ...(isRent ? { minRent: localMin, maxRent: val } : { minPrice: localMin, maxPrice: val }),
+      },
+    });
   };
 
   // Commit filter on blur/enter
@@ -166,7 +187,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        ...(listingType === 'rent' ? { minRent: localMin } : { priceMin: localMin }),
+        ...(isRent ? { minRent: localMin } : { priceMin: localMin }),
       },
     });
   };
@@ -176,7 +197,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        ...(listingType === 'rent' ? { maxRent: localMax } : { priceMax: localMax }),
+        ...(isRent ? { maxRent: localMax } : { priceMax: localMax }),
       },
     });
   };
@@ -267,482 +288,207 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
     } else {
       newAmenities = [...selectedAmenities, key];
     }
-    setFilters({
-      ...filters,
-      [listingType]: {
-        ...filters[listingType],
+                  setFilters({
+                    ...filters,
+                    [listingType]: {
+                      ...filters[listingType],
         amenities: newAmenities.join(','),
-      },
-    });
+                    },
+                  });
   };
 
   return (
-    <div className="bg-white shadow-sm rounded-lg mb-6 relative">
-      {/* City and Locality Filters */}
-      <div className="flex flex-col md:flex-row gap-3 p-4 border-b border-gray-100 bg-white">
-        {/* City Dropdown */}
+    <div className="bg-white shadow-sm rounded-lg mb-6 p-4">
+      {/* Row 1: City and Locality */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-primary-50 rounded-xl p-4 border border-primary-100">
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">City</label>
-          <select
-            className="input w-full md:w-48"
-            value={currentFilters.city || ''}
-            onChange={e => {
-              setFilters({
-                ...filters,
-                [listingType]: {
-                  ...filters[listingType],
-                  city: e.target.value,
-                  locality: '', // Clear locality when city changes
-                },
-              });
-            }}
-            disabled={marketsLoading}
-          >
+          <label className="block text-xs font-semibold text-primary-700 mb-1">City</label>
+          <select className="input w-full" value={currentFilters.city || ''} onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } })} disabled={marketsLoading}>
             <option value="">Select City</option>
-            {cities.map(city => (
-              <option key={city} value={city}>{city}</option>
-            ))}
+            {cities.map(city => <option key={city} value={city}>{city}</option>)}
           </select>
-        </div>
-        {/* Locality Dropdown */}
+              </div>
         <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1">Locality</label>
-          <select
-            className="input w-full md:w-64"
-            value={currentFilters.locality || ''}
-            onChange={e => {
-              setFilters({
-                ...filters,
-                [listingType]: {
-                  ...filters[listingType],
-                  locality: e.target.value,
-                },
-              });
-            }}
-            disabled={!currentFilters.city || marketsLoading}
-          >
+          <label className="block text-xs font-semibold text-primary-700 mb-1">Locality</label>
+          <select className="input w-full" value={currentFilters.locality || ''} onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], locality: e.target.value } })} disabled={!currentFilters.city || marketsLoading}>
             <option value="">Select Locality</option>
-            {localities.map(loc => (
-              <option key={loc} value={loc}>{loc}</option>
-            ))}
+            {localities.map(loc => <option key={loc} value={loc}>{loc}</option>)}
           </select>
-        </div>
-      </div>
-      {/* Property Type and BHK Filters */}
-      <div className="flex flex-col md:flex-row gap-3 p-4 border-b border-gray-100 bg-white">
-        {/* Property Type Dropdown */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
-            Property Type
-            <span className="relative group cursor-pointer">
-              <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text></svg>
-              <span className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
-                Property type refers to the kind of home: Apartment, Villa, Independent House, etc.
-              </span>
-            </span>
-          </label>
-          <select
-            className="input w-full md:w-48"
-            value={currentFilters.propertyType || ''}
-            onChange={e => {
-              setFilters({
-                ...filters,
-                [listingType]: {
-                  ...filters[listingType],
-                  propertyType: e.target.value,
-                },
-              });
-            }}
-            disabled={marketsLoading}
-          >
-            <option value="">Select Property Type</option>
-            {propertyTypes.map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-        </div>
-        {/* BHK Dropdown */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
-            BHK
-            <span className="relative group cursor-pointer">
-              <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text></svg>
-              <span className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
-                BHK stands for Bedrooms, Hall, Kitchen. 1BHK = 1 Bedroom, 2BHK = 2 Bedrooms, etc.
-              </span>
-            </span>
-          </label>
-          <select
-            className="input w-full md:w-48"
-            value={currentFilters.bhk || ''}
-            onChange={e => {
-              setFilters({
-                ...filters,
-                [listingType]: {
-                  ...filters[listingType],
-                  bhk: e.target.value,
-                },
-              });
-            }}
-            disabled={marketsLoading}
-          >
-            <option value="">Select BHK</option>
-            {Array.from({ length: 10 }, (_, i) => i + 1).map(bhk => (
-              <option key={bhk} value={bhk}>{bhk} BHK</option>
-            ))}
-          </select>
-        </div>
-      </div>
-      {/* Rent/Price Range Filter */}
-      {listingType === 'rent' && (
-        <div className="flex flex-col md:flex-row gap-4 items-center p-4 border-b border-gray-100 bg-white">
-          <div className="flex flex-col gap-1 w-full md:w-1/2">
-            <label className="block text-xs font-semibold text-gray-700 mb-1">Rent Range (₹/month)</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                className="input w-24 text-xs"
-                min={PRICE_MIN}
-                max={localMax || PRICE_MAX}
-                value={localMin === undefined ? '' : localMin}
-                onChange={handleMinInput}
-                onBlur={commitMin}
-                onKeyDown={e => { if (e.key === 'Enter') commitMin(); }}
-                placeholder="Min"
-                aria-label="Minimum Rent"
-              />
-              <span className="text-gray-400">-</span>
-              <input
-                type="number"
-                className="input w-24 text-xs"
-                min={localMin || PRICE_MIN}
-                max={PRICE_MAX}
-                value={localMax === undefined ? '' : localMax}
-                onChange={handleMaxInput}
-                onBlur={commitMax}
-                onKeyDown={e => { if (e.key === 'Enter') commitMax(); }}
-                placeholder="Max"
-                aria-label="Maximum Rent"
-              />
-              <span className="ml-2 text-xs text-gray-500">per month</span>
-            </div>
-            <div className="px-2 mt-2">
-              {(() => {
-                const sliderValue: [number, number] = [
-                  typeof localMin === 'number' ? localMin : PRICE_MIN,
-                  typeof localMax === 'number' ? localMax : PRICE_MAX
-                ];
-                return (
-                  <Slider
-                    range
-                    min={PRICE_MIN}
-                    max={PRICE_MAX}
-                    value={sliderValue}
-                    onChange={(value) => {
-                      if (Array.isArray(value) && value.length === 2) {
-                        const [min, max] = value;
-                        setLocalMin(min);
-                        setLocalMax(max);
-                      }
-                    }}
-                    onAfterChange={(value) => {
-                      if (Array.isArray(value) && value.length === 2) {
-                        const [min, max] = value;
-                        setLocalMin(min);
-                        setLocalMax(max);
-                        setFilters({
-                          ...filters,
-                          [listingType]: {
-                            ...filters[listingType],
-                            minRent: min,
-                            maxRent: max,
-                          },
-                        });
-                      }
-                    }}
-                    allowCross={false}
-                    step={500}
-                    trackStyle={[{ backgroundColor: '#C2185B' }]}
-                    handleStyle={[{ borderColor: '#C2185B' }, { borderColor: '#C2185B' }]}
-                  />
-                );
-              })()}
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>{formatRent(PRICE_MIN)}</span>
-                <span>{formatRent(PRICE_MAX)}</span>
               </div>
             </div>
+      {/* Row 2: Property Type and BHK */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-primary-50 rounded-xl p-4 border border-primary-100">
+        <div>
+          <label className="block text-xs font-semibold text-primary-700 mb-1 flex items-center gap-1">Property Type <span className="relative group cursor-pointer"><svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text></svg><span className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">Property type refers to the kind of home: Apartment, Villa, Independent House, etc.</span></span></label>
+          <select className="input w-full" value={currentFilters.propertyType || ''} onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], propertyType: e.target.value } })} disabled={marketsLoading}>
+            <option value="">Select Property Type</option>
+            {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
+          </select>
+        </div>
+            <div>
+          <label className="block text-xs font-semibold text-primary-700 mb-1 flex items-center gap-1">BHK <span className="relative group cursor-pointer"><svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text></svg><span className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">BHK stands for Bedrooms, Hall, Kitchen. 1BHK = 1 Bedroom, 2BHK = 2 Bedrooms, etc.</span></span></label>
+          <select className="input w-full" value={currentFilters.bhk || ''} onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } })} disabled={marketsLoading}>
+            <option value="">Select BHK</option>
+            {Array.from({ length: 10 }, (_, i) => i + 1).map(bhk => <option key={bhk} value={bhk}>{bhk} BHK</option>)}
+          </select>
+        </div>
+      </div>
+      {/* Row 3: Rent/Price Range */}
+      {listingType === 'rent' && (
+        <div className="mb-4">
+          <label className="block text-sm font-bold text-primary-700 mb-2">Rent Range (₹/month)</label>
+          <div className="bg-white rounded-xl shadow p-6 border border-primary-100 flex flex-col gap-2">
+            {/* Inputs Row with labels */}
+            <div className="flex flex-row items-end gap-2 w-full mb-4">
+              <div className="flex flex-col items-start">
+                <span className="text-xs text-primary-500 font-medium mb-1">Min</span>
+                <div className="relative w-32">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                  <input
+                    type="number"
+                    className="input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border border-primary-100 rounded-md text-left"
+                    min={1000}
+                    max={localMax}
+                    value={localMin}
+                    onChange={e => {
+                      let val = Number(e.target.value);
+                      if (isNaN(val)) val = 1000;
+                      val = Math.max(1000, Math.min(val, localMax));
+                      setLocalMin(val);
+                      setFilters({
+                        ...filters,
+                        [listingType]: {
+                          ...filters[listingType],
+                          ...(isRent ? { minRent: val, maxRent: localMax } : { minPrice: val, maxPrice: localMax }),
+                        },
+                      });
+                    }}
+                    onBlur={commitMin}
+                    onKeyDown={e => { if (e.key === 'Enter') commitMin(); }}
+                    placeholder="Min"
+                    aria-label="Minimum Rent"
+                  />
+                </div>
+              </div>
+              <span className="text-gray-400 font-bold mb-1">-</span>
+              <div className="flex flex-col items-start">
+                <span className="text-xs text-primary-500 font-medium mb-1">Max</span>
+                <div className="relative w-32">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                  <input
+                    type="number"
+                    className="input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border border-primary-100 rounded-md text-left"
+                    min={localMin}
+                    max={300000}
+                    value={localMax}
+                    onChange={e => {
+                      let val = Number(e.target.value);
+                      if (isNaN(val)) val = 300000;
+                      val = Math.max(localMin, Math.min(val, 300000));
+                      setLocalMax(val);
+                      setFilters({
+                        ...filters,
+                        [listingType]: {
+                          ...filters[listingType],
+                          ...(isRent ? { minRent: localMin, maxRent: val } : { minPrice: localMin, maxPrice: val }),
+                        },
+                      });
+                    }}
+                    onBlur={commitMax}
+                    onKeyDown={e => { if (e.key === 'Enter') commitMax(); }}
+                    placeholder="Max"
+                    aria-label="Maximum Rent"
+                  />
+                </div>
+              </div>
+              <span className="text-sm text-primary-700 font-semibold mb-1 ml-2">per month</span>
+            </div>
+            {/* Slider Row */}
+            <div className="flex flex-col justify-center w-full">
+              <div className="relative w-full flex items-center" style={{ minHeight: 48 }}>
+                {/* Slider */}
+                <div className="w-full px-2 flex items-center justify-center">
+                  {(() => {
+                    return (
+                      <Slider
+                        range
+                        min={PRICE_MIN}
+                        max={PRICE_MAX}
+                        step={SLIDER_STEP}
+                        marks={SLIDER_MARKS}
+                        value={[localMin, localMax]}
+                        handleRender={(node: React.ReactElement, handleProps: any) => (
+                          <Tooltip
+                            prefixCls="rc-slider-tooltip"
+                            overlay={`₹${handleProps.value.toLocaleString()}`}
+                            visible={handleProps.dragging}
+                            placement="top"
+                            key={handleProps.index}
+                          >
+                            {node}
+                          </Tooltip>
+                        )}
+                        onChange={(value: number | number[]) => {
+                          if (Array.isArray(value) && value.length === 2) {
+                            let [min, max] = value;
+                            min = Math.max(PRICE_MIN, Math.min(min, max));
+                            max = Math.min(PRICE_MAX, Math.max(max, min));
+                            setLocalMin(min);
+                            setLocalMax(max);
+                            setFilters({
+                              ...filters,
+                              [listingType]: {
+                                ...filters[listingType],
+                                ...(isRent ? { minRent: min, maxRent: max } : { minPrice: min, maxPrice: max }),
+                              },
+                            });
+                          }
+                        }}
+                        onAfterChange={(value: number | number[]) => {
+                          if (Array.isArray(value) && value.length === 2) {
+                            const [min, max] = value;
+                            setLocalMin(min);
+                            setLocalMax(max);
+                            setFilters({ ...filters, [listingType]: { ...filters[listingType], minRent: min, maxRent: max, }, });
+                          }
+                        }}
+                        allowCross={false}
+                        trackStyle={[{ backgroundColor: '#C2185B', height: 10 }]}
+                        handleStyle={[
+                          { borderColor: '#C2185B', backgroundColor: '#fff', borderWidth: 3, width: 28, height: 28, marginTop: -10, boxShadow: '0 2px 8px rgba(194,24,91,0.10)' },
+                          { borderColor: '#C2185B', backgroundColor: '#fff', borderWidth: 3, width: 28, height: 28, marginTop: -10, boxShadow: '0 2px 8px rgba(194,24,91,0.10)' }
+                        ]}
+                        railStyle={{ backgroundColor: '#f3e8ee', height: 10, borderRadius: 5 }}
+                      />
+                    );
+                  })()}
+          </div>
+        </div>
+          </div>
           </div>
         </div>
       )}
-      {/* Amenity/Feature Select Buttons Row (always visible) */}
-      <div className="overflow-x-auto py-3 px-4 border-b border-gray-100 bg-white sticky top-0 z-30">
+      {/* Row 4: Amenities */}
+      <div className="overflow-x-auto py-3 px-1 border-b border-gray-100 bg-primary-50 rounded-xl border border-primary-100 mb-2">
         <div className="flex gap-3 min-w-max">
           {AMENITY_OPTIONS.map(opt => {
             const Icon = opt.icon;
             const selected = selectedAmenities.includes(opt.key);
             return (
-              <button
+          <button
                 key={opt.key}
                 type="button"
                 onClick={() => handleAmenityToggle(opt.key)}
-                className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
-                  ? 'bg-primary-600 text-white border-primary-600 shadow'
-                  : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+                className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected ? 'bg-primary-600 text-white border-primary-600 shadow' : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
                 tabIndex={0}
               >
                 <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
                 <span className="whitespace-nowrap">{opt.label}</span>
-              </button>
+          </button>
             );
           })}
         </div>
       </div>
-      {/* Floating Filters Button */}
-      <button
-        onClick={() => setDrawerOpen(true)}
-        className="fixed left-4 top-1/2 -translate-y-1/2 z-50 flex items-center gap-2 px-5 py-3 rounded-full border border-primary-200 text-primary-600 font-semibold bg-white shadow-lg hover:bg-primary-50 transition hidden md:flex"
-        style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}
-        aria-label="Open Filters"
-      >
-        <Filter className="w-6 h-6" />
-        Filters
-      </button>
-      {/* Mobile sticky Filters Button */}
-      <button
-        onClick={() => setDrawerOpen(true)}
-        className="fixed left-4 bottom-4 z-50 flex items-center gap-2 px-5 py-3 rounded-full border border-primary-200 text-primary-600 font-semibold bg-white shadow-lg hover:bg-primary-50 transition md:hidden"
-        style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}
-        aria-label="Open Filters"
-      >
-        <Filter className="w-6 h-6" />
-        Filters
-      </button>
-      {/* Filter Drawer/Modal */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          {/* Overlay */}
-          <div
-            className="fixed inset-0 bg-black bg-opacity-40 transition-opacity"
-            onClick={() => setDrawerOpen(false)}
-            aria-label="Close Filters Overlay"
-          />
-          {/* Drawer Panel */}
-          <div
-            ref={drawerRef}
-            tabIndex={-1}
-            className="relative h-full bg-white shadow-2xl rounded-r-2xl w-full max-w-md md:max-w-lg lg:max-w-xl flex flex-col animate-slide-in-left focus:outline-none"
-            style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.16)' }}
-            role="dialog"
-            aria-modal="true"
-          >
-            {/* Sticky Header */}
-            <div className="sticky top-0 z-10 bg-white pt-6 pb-3 px-6 border-b flex items-center justify-between rounded-tr-2xl">
-              <h3 className="font-bold text-xl flex items-center gap-2"><Filter className="w-6 h-6" /> Filters</h3>
-              <div className="flex gap-2">
-                <button onClick={clearFilters} className="text-gray-500 hover:text-primary-600 text-sm font-medium px-3 py-1 rounded transition">Clear All</button>
-                <button onClick={() => setDrawerOpen(false)} className="text-gray-500 hover:text-primary-600 p-2 rounded-full transition" aria-label="Close Filters"><X className="w-6 h-6" /></button>
-              </div>
-            </div>
-            {/* Filter Content */}
-            <div className="flex-1 overflow-y-auto px-6 pb-32 pt-4">
-              {/* Place all filter fields here (city, locality, price, amenities, etc.) */}
-              {/* You can reuse the main filter JSX here, or extract to a subcomponent for DRYness */}
-              {/* City Dropdown */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">City</label>
-                <select
-                  className="input w-full md:w-48"
-                  value={localDrawerFilters?.city || ''}
-                  onChange={e => handleDrawerFilterChange('city', e.target.value)}
-                  disabled={marketsLoading}
-                >
-                  <option value="">Select City</option>
-                  {cities.map(city => (
-                    <option key={city} value={city}>{city}</option>
-                  ))}
-                </select>
-              </div>
-              {/* Locality Dropdown */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Locality</label>
-                <select
-                  className="input w-full md:w-64"
-                  value={localDrawerFilters?.locality || ''}
-                  onChange={e => handleDrawerFilterChange('locality', e.target.value)}
-                  disabled={!localDrawerFilters?.city || marketsLoading}
-                >
-                  <option value="">Select Locality</option>
-                  {localities.map(loc => (
-                    <option key={loc} value={loc}>{loc}</option>
-                  ))}
-                </select>
-              </div>
-              {/* Property Type Dropdown */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
-                  Property Type
-                  <span className="relative group cursor-pointer">
-                    <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text></svg>
-                    <span className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
-                      Property type refers to the kind of home: Apartment, Villa, Independent House, etc.
-                    </span>
-                  </span>
-                </label>
-                <select
-                  className="input w-full md:w-48"
-                  value={localDrawerFilters?.propertyType || ''}
-                  onChange={e => handleDrawerFilterChange('propertyType', e.target.value)}
-                  disabled={marketsLoading}
-                >
-                  <option value="">Select Property Type</option>
-                  {propertyTypes.map(type => (
-                    <option key={type} value={type}>{type}</option>
-                  ))}
-                </select>
-              </div>
-              {/* BHK Dropdown */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
-                  BHK
-                  <span className="relative group cursor-pointer">
-                    <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text></svg>
-                    <span className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
-                      BHK stands for Bedrooms, Hall, Kitchen. 1BHK = 1 Bedroom, 2BHK = 2 Bedrooms, etc.
-                    </span>
-                  </span>
-                </label>
-                <select
-                  className="input w-full md:w-48"
-                  value={localDrawerFilters?.bhk || ''}
-                  onChange={e => handleDrawerFilterChange('bhk', e.target.value)}
-                  disabled={marketsLoading}
-                >
-                  <option value="">Select BHK</option>
-                  {Array.from({ length: 10 }, (_, i) => i + 1).map(bhk => (
-                    <option key={bhk} value={bhk}>{bhk} BHK</option>
-                  ))}
-                </select>
-              </div>
-              {/* Rent/Price Range Filter */}
-              {listingType === 'rent' && (
-                <div className="flex flex-col md:flex-row gap-4 items-center p-4 border-b border-gray-100 bg-white">
-                  <div className="flex flex-col gap-1 w-full md:w-1/2">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Rent Range (₹/month)</label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="number"
-                        className="input w-24 text-xs"
-                        min={PRICE_MIN}
-                        max={localDrawerFilters?.maxRent || PRICE_MAX}
-                        value={localDrawerFilters?.minRent === undefined ? '' : localDrawerFilters?.minRent}
-                        onChange={e => handleDrawerFilterChange('minRent', e.target.value)}
-                        onBlur={commitMin}
-                        onKeyDown={e => { if (e.key === 'Enter') commitMin(); }}
-                        placeholder="Min"
-                        aria-label="Minimum Rent"
-                      />
-                      <span className="text-gray-400">-</span>
-                      <input
-                        type="number"
-                        className="input w-24 text-xs"
-                        min={localDrawerFilters?.minRent || PRICE_MIN}
-                        max={PRICE_MAX}
-                        value={localDrawerFilters?.maxRent === undefined ? '' : localDrawerFilters?.maxRent}
-                        onChange={e => handleDrawerFilterChange('maxRent', e.target.value)}
-                        onBlur={commitMax}
-                        onKeyDown={e => { if (e.key === 'Enter') commitMax(); }}
-                        placeholder="Max"
-                        aria-label="Maximum Rent"
-                      />
-                      <span className="ml-2 text-xs text-gray-500">per month</span>
-                    </div>
-                    <div className="px-2 mt-2">
-                      {(() => {
-                        const sliderValue: [number, number] = [
-                          typeof localDrawerFilters?.minRent === 'number' ? localDrawerFilters?.minRent : PRICE_MIN,
-                          typeof localDrawerFilters?.maxRent === 'number' ? localDrawerFilters?.maxRent : PRICE_MAX
-                        ];
-                        return (
-                          <Slider
-                            range
-                            min={PRICE_MIN}
-                            max={PRICE_MAX}
-                            value={sliderValue}
-                            onChange={(value) => {
-                              if (Array.isArray(value) && value.length === 2) {
-                                const [min, max] = value;
-                                setLocalMin(min);
-                                setLocalMax(max);
-                              }
-                            }}
-                            onAfterChange={(value) => {
-                              if (Array.isArray(value) && value.length === 2) {
-                                const [min, max] = value;
-                                setLocalMin(min);
-                                setLocalMax(max);
-                                setFilters({
-                                  ...filters,
-                                  [listingType]: {
-                                    ...filters[listingType],
-                                    minRent: min,
-                                    maxRent: max,
-                                  },
-                                });
-                              }
-                            }}
-                            allowCross={false}
-                            step={500}
-                            trackStyle={[{ backgroundColor: '#C2185B' }]}
-                            handleStyle={[{ borderColor: '#C2185B' }, { borderColor: '#C2185B' }]}
-                          />
-                        );
-                      })()}
-                      <div className="flex justify-between text-xs text-gray-400 mt-1">
-                        <span>{formatRent(PRICE_MIN)}</span>
-                        <span>{formatRent(PRICE_MAX)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {/* Amenity/Feature Select Buttons Row (always visible) */}
-              <div className="overflow-x-auto py-3 px-4 border-b border-gray-100 bg-white sticky top-0 z-30">
-                <div className="flex gap-3 min-w-max">
-                  {AMENITY_OPTIONS.map(opt => {
-                    const Icon = opt.icon;
-                    const selected = selectedAmenities.includes(opt.key);
-                    return (
-                      <button
-                        key={opt.key}
-                        type="button"
-                        onClick={() => handleAmenityToggle(opt.key)}
-                        className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
-                          ? 'bg-primary-600 text-white border-primary-600 shadow'
-                          : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
-                        tabIndex={0}
-                      >
-                        <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
-                        <span className="whitespace-nowrap">{opt.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-            {/* Sticky Footer with Apply Button */}
-            <div className="sticky bottom-0 z-20 bg-white border-t pt-3 pb-5 px-6 flex justify-end rounded-br-2xl shadow-lg">
-              <button
-                onClick={handleApplyDrawerFilters}
-                className="btn btn-primary px-8 py-3 rounded-full text-lg font-semibold shadow hover:scale-105 transition"
-                aria-label="Apply Filters"
-              >
-                Apply Filters
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -108,14 +108,14 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
               className={`input w-full${formData.address.city ? '' : ' border-red-500 bg-red-50'}`}
               value={formData.address.city || ''}
               onChange={e => {
-                setFormData({
-                  ...formData,
-                  address: {
-                    ...formData.address,
+    setFormData({
+      ...formData,
+      address: {
+        ...formData.address,
                     city: e.target.value,
                     locality: '', // Clear locality when city changes
-                  },
-                });
+      },
+    });
               }}
               disabled={marketsLoading}
             >
@@ -158,17 +158,17 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
               {errors.locality}
             </p>}
-          </div>
+        </div>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Building Name</label>
-          <input
-            type="text"
-            placeholder="Building Name"
+      <input
+        type="text"
+        placeholder="Building Name"
             className={`input w-full${errors.buildingName ? ' border-red-500 bg-red-50' : ''}`}
-            value={formData.address.buildingName}
+        value={formData.address.buildingName}
             onChange={e => setFormData({
-              ...formData,
+          ...formData,
               address: {
                 ...formData.address,
                 buildingName: e.target.value,
@@ -203,9 +203,9 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
             <p className="text-red-600 text-xs mt-1">Please enter a valid Google Maps link.</p>
           )}
         </div>
-      </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 };
 
 const ContactNumberField = ({ formData, setFormData }: { formData: any; setFormData: (data: any) => void }) => (
@@ -414,16 +414,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
               {errors.city}
             </p>}
-          </div>
+        </div>
           {/* Locality Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
-            <select
+            <select 
               className={`input w-full${errors.locality ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.address.locality || ''}
               onChange={e => {
                 setFormData({
-                  ...formData,
+                ...formData,
                   address: {
                     ...formData.address,
                     locality: e.target.value,
@@ -504,7 +504,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           {/* Row 2 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
-            <select
+            <select 
               className={`input w-full${errors.roomType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.roomDetails.roomType}
               onChange={e => setFormData({
@@ -601,7 +601,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           {/* Row 4 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
-            <select
+            <select 
               className={`input w-full${errors.parking ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.parking}
               onChange={e => setFormData({
@@ -635,7 +635,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 onClick={() => {
                   const amenities = formData.rentDetails.amenities || [];
                   setFormData({
-                    ...formData,
+                ...formData,
                     rentDetails: {
                       ...formData.rentDetails,
                       amenities: amenities.includes(opt.key)
@@ -654,7 +654,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               </button>
             );
           })}
-        </div>
+          </div>
         {errors.amenities && (
           <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
             <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
@@ -668,7 +668,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
-            <select
+            <select 
               className={`input w-full${errors.gender ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.preferredTenant.lookingFor}
               onChange={e => setFormData({
@@ -1226,14 +1226,14 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           {/* Row 2 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
-            <select
+            <select 
               className={`input w-full${errors.furnishingType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.sellDetails.furnishingType || ''}
               onChange={e => setFormData({
                 ...formData,
                 sellDetails: {
                   ...formData.sellDetails,
-                  furnishingType: e.target.value
+                furnishingType: e.target.value
                 }
               })}
             >
@@ -1250,14 +1250,14 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           {/* Row 3 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
-            <select
+            <select 
               className={`input w-full${errors.parking ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.sellDetails.parking || ''}
               onChange={e => setFormData({
                 ...formData,
                 sellDetails: {
                   ...formData.sellDetails,
-                  parking: e.target.value
+                parking: e.target.value
                 }
               })}
             >
@@ -1513,13 +1513,13 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       {/* 13. Mobile Number at the bottom */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
-        <input
+              <input
           type="tel"
           className={`input${errors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
           placeholder="Enter your 10-digit mobile number"
           value={formData.contactNumber || ''}
           onChange={e => setFormData({
-            ...formData,
+                    ...formData,
             contactNumber: e.target.value
           })}
           pattern="[0-9]{10}"
@@ -1533,7 +1533,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           {errors.contactNumber}
         </p>}
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
-      </div>
+        </div>
     </form>
   );
-};                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+};

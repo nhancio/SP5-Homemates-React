@@ -669,14 +669,14 @@ const ProfilePage = () => {
                   {/* Contact Info (conditionally rendered) */}
                   {showContactInfo && (
                     <>
-                      <p className="flex items-center justify-center md:justify-start text-gray-600">
-                        <Mail className="w-4 h-4 mr-2" />
-                        {displayEmail}
-                      </p>
-                      {displayPhone && (
-                        <p className="flex items-center justify-center md:justify-start text-gray-600">
-                          <Phone className="w-4 h-4 mr-2" />
-                          {displayPhone}
+                  <p className="flex items-center justify-center md:justify-start text-gray-600">
+                    <Mail className="w-4 h-4 mr-2" />
+                    {displayEmail}
+                  </p>
+                  {displayPhone && (
+                    <p className="flex items-center justify-center md:justify-start text-gray-600">
+                      <Phone className="w-4 h-4 mr-2" />
+                      {displayPhone}
                         </p>
                       )}
                     </>
@@ -814,22 +814,22 @@ const ProfilePage = () => {
                         const Icon = (LucideIcons as any)[pref.icon] || LucideIcons.User;
                         const selected = preferencesInput.includes(pref.label);
                         return (
-                          <button
+                  <button
                             key={pref.id}
                             type="button"
-                            onClick={() => {
+                    onClick={() => {
                               setPreferencesInput(selected
                                 ? preferencesInput.filter((p: string) => p !== pref.label)
                                 : [...preferencesInput, pref.label]);
-                            }}
+                    }}
                             className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
                               ? 'bg-primary-600 text-white border-primary-600 shadow'
                               : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
                             tabIndex={0}
-                          >
+                  >
                             <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
                             <span className="whitespace-nowrap">{pref.label}</span>
-                          </button>
+                  </button>
                         );
                       })}
                       <div className="w-full flex gap-2 mt-2">
@@ -1024,7 +1024,7 @@ const ProfilePage = () => {
                   <input className="input w-full" value={editProfileForm.profession} onChange={e => handleEditProfileChange('profession', e.target.value)} />
                   {profileErrors.profession && <p className="text-red-500 text-xs mt-1">{profileErrors.profession}</p>}
                 </div>
-                <div>
+              <div>
                   <label className="block text-sm font-medium mb-1">City</label>
                   <input className="input w-full" value={editProfileForm.city} onChange={e => handleEditProfileChange('city', e.target.value)} />
                   {profileErrors.city && <p className="text-red-500 text-xs mt-1">{profileErrors.city}</p>}
@@ -1041,16 +1041,16 @@ const ProfilePage = () => {
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">Preferences (comma separated)</label>
                   <input className="input w-full" value={editProfileForm.preferences.join(', ')} onChange={e => handleEditProfileChange('preferences', e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean))} />
-                </div>
+              </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">Fun Fact</label>
                   <input className="input w-full" value={editProfileForm.funFact} onChange={e => handleEditProfileChange('funFact', e.target.value)} />
-                </div>
+            </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">LinkedIn</label>
                   <input className="input w-full" value={editProfileForm.linkedin} onChange={e => handleEditProfileChange('linkedin', e.target.value)} />
                   {profileErrors.linkedin && <p className="text-red-500 text-xs mt-1">{profileErrors.linkedin}</p>}
-                </div>
+          </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Instagram</label>
                   <input className="input w-full" value={editProfileForm.instagram} onChange={e => handleEditProfileChange('instagram', e.target.value)} />

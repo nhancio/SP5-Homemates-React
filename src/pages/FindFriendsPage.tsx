@@ -223,8 +223,8 @@ const FindFriendsPage = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/');
-      return;
-    }
+        return;
+      }
 
     const loadUsers = async () => {
       try {
@@ -344,50 +344,50 @@ const FindFriendsPage = () => {
         {/* Profession Filter */}
         <div className="flex flex-wrap gap-3 mb-4 items-center">
           <span className="font-semibold text-gray-700 mr-2">Profession:</span>
-          {CATEGORY_OPTIONS.map(option => (
-            <button
-              key={option.value}
+        {CATEGORY_OPTIONS.map(option => (
+          <button
+            key={option.value}
               onClick={() => setSelectedCategory(selectedCategory === option.value ? null : option.value)}
               className={`px-6 py-2 rounded-full border transition font-medium text-base ${selectedCategory === option.value
-                ? 'bg-primary-600 text-white border-primary-600'
-                : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
-            >
-              {option.label}
-            </button>
-          ))}
+              ? 'bg-primary-600 text-white border-primary-600'
+              : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+          >
+            {option.label}
+          </button>
+        ))}
         </div>
         
         {/* Interests Filter */}
         <div className="flex flex-wrap gap-3 items-center">
           <span className="font-semibold text-gray-700 mr-2">Interests:</span>
           {INTEREST_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => setSelectedLookingFor(prev => prev.includes(opt.value)
-                ? prev.filter(v => v !== opt.value)
-                : [...prev, opt.value])}
-              className={`px-6 py-2 rounded-full border transition font-medium text-base ${selectedLookingFor.includes(opt.value)
-                ? 'bg-primary-600 text-white border-primary-600'
-                : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
-            >
-              {opt.label}
-            </button>
-          ))}
+          <button
+            key={opt.value}
+            onClick={() => setSelectedLookingFor(prev => prev.includes(opt.value)
+              ? prev.filter(v => v !== opt.value)
+              : [...prev, opt.value])}
+            className={`px-6 py-2 rounded-full border transition font-medium text-base ${selectedLookingFor.includes(opt.value)
+              ? 'bg-primary-600 text-white border-primary-600'
+              : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+          >
+            {opt.label}
+          </button>
+        ))}
           
           {/* Custom Interest Pills */}
-          {customFilters.map(opt => (
-            <button
-              key={opt}
-              onClick={() => setCustomFilters(prev => prev.includes(opt)
-                ? prev.filter(v => v !== opt)
-                : [...prev, opt])}
-              className={`px-6 py-2 rounded-full border transition font-medium text-base ${customFilters.includes(opt)
-                ? 'bg-primary-600 text-white border-primary-600'
-                : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
-            >
-              {opt}
-            </button>
-          ))}
+        {customFilters.map(opt => (
+          <button
+            key={opt}
+            onClick={() => setCustomFilters(prev => prev.includes(opt)
+              ? prev.filter(v => v !== opt)
+              : [...prev, opt])}
+            className={`px-6 py-2 rounded-full border transition font-medium text-base ${customFilters.includes(opt)
+              ? 'bg-primary-600 text-white border-primary-600'
+              : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+          >
+            {opt}
+          </button>
+        ))}
           
           <input
             type="text"
@@ -430,13 +430,13 @@ const FindFriendsPage = () => {
                 </div>
               </div>
 
-              {/* User Avatar Section */}
+            {/* User Avatar Section */}
               <div className="relative h-40 bg-primary-50 flex items-center justify-center">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt={user.userName}
+              <div className="absolute inset-0 flex items-center justify-center">
+                {user.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt={user.userName}
                       className="w-24 h-24 rounded-full object-cover border-4 border-white shadow group-hover:scale-105 transition-transform duration-300"
                       onError={e => { e.currentTarget.src = '/images/default-avatar.png'; }}
                     />
@@ -644,19 +644,19 @@ const FindFriendsPage = () => {
                       <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                       {rec}
                     </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             <div className="flex gap-3">
-              <button
+                <button 
                 onClick={closeCompatibilityModal}
                 className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-              >
+                >
                 Close
-              </button>
-              <button
+                </button>
+                <button 
                 onClick={() => {
                   closeCompatibilityModal();
                   openProfileModal(selectedUser);
@@ -664,11 +664,11 @@ const FindFriendsPage = () => {
                 className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 transition-colors"
               >
                 View Full Profile
-              </button>
+                </button>
             </div>
           </div>
-        </div>
-      )}
+          </div>
+        )}
     </div>
   );
 };
