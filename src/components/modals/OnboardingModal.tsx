@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, auth } from '../../config/firebase';
 import { getMarkets, Market } from '../../services/markets';
+import * as Yup from 'yup';
 
 interface OnboardingModalProps {
   userId: string;
@@ -23,6 +24,16 @@ const LOOKING_FOR = [
 ];
 
 const GENDERS = ['Male', 'Female', 'Other'];
+
+const onboardingSchema = Yup.object().shape({
+  mobile: Yup.string()
+    .matches(/^[6-9][0-9]{9}$/, 'Enter a valid 10-digit mobile number')
+    .required('Mobile number is required'),
+  gender: Yup.string().required('Gender is required'),
+  lookingFor: Yup.string().required('Looking for is required'),
+  city: Yup.string().required('City is required'),
+  locality: Yup.string().required('Locality is required'),
+});
 
 const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, onClose }) => {
   const [mobile, setMobile] = useState('');
@@ -60,12 +71,28 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate mobile number: 10 digits, starts with 6,7,8,9
-    if (!/^[6-9][0-9]{9}$/.test(mobile)) {
-      setMobileError('Please enter a valid mobile number.');
-      return;
-    } else {
+    // Validate with Yup
+    try {
+      await onboardingSchema.validate({
+        mobile,
+        gender,
+        lookingFor,
+        city,
+        locality,
+      }, { abortEarly: false });
       setMobileError('');
+    } catch (err: any) {
+      if (err.inner && err.inner.length > 0) {
+        const errorMap: any = {};
+        err.inner.forEach((e: any) => {
+          if (e.path && e.message) errorMap[e.path] = e.message;
+        });
+        if (errorMap.mobile) setMobileError(errorMap.mobile);
+        // Add similar error state for other fields if needed
+      } else if (err.message) {
+        setMobileError(err.message);
+      }
+      return;
     }
     setLoading(true);
     try {

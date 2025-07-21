@@ -6,6 +6,7 @@ import {
 import { USER_PREFERENCES } from '../../constants/theme';
 import * as LucideIcons from 'lucide-react';
 import { getMarkets, Market, testFirebaseConnection, getLocalitiesByCity } from '../../services/markets';
+import * as Yup from 'yup';
 
 // Amenity/feature options with icon and label (same as PropertyFilters)
 const AMENITY_OPTIONS = [
@@ -211,6 +212,33 @@ const ContactNumberField = ({ formData, setFormData }: { formData: any; setFormD
   </section>
 );
 
+// Yup validation schema for Add Listing
+const listingSchema = Yup.object().shape({
+  address: Yup.object().shape({
+    city: Yup.string().required('City is required'),
+    locality: Yup.string().required('Locality is required'),
+    buildingName: Yup.string().required('Building name is required'),
+  }),
+  propertyType: Yup.string().required('Property type is required'),
+  furnishingType: Yup.string().required('Furnishing type is required'),
+  contactNumber: Yup.string()
+    .matches(/^[6-9][0-9]{9}$/, 'Enter a valid 10-digit mobile number')
+    .required('Contact number is required'),
+  description: Yup.string().min(10, 'Description should be at least 10 characters').required('Description is required'),
+  rentDetails: Yup.object().shape({
+    costs: Yup.object().shape({
+      rent: Yup.number().min(1000, 'Rent must be at least ₹1,000').required('Rent is required'),
+    }),
+    preferredTenant: Yup.object().shape({
+      lookingFor: Yup.string().required('Looking for is required'),
+      preferences: Yup.array().of(Yup.string()),
+    }),
+  }),
+  sellDetails: Yup.object().shape({
+    price: Yup.number().min(1000, 'Price must be at least ₹1,000').required('Price is required'),
+  }),
+});
+
 export const RentForm: React.FC<AddListingFormsProps> = (props) => {
   const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors } = props;
   const [isDragActive, setIsDragActive] = useState(false);
@@ -271,31 +299,35 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
     fetchLocalities();
   }, [formData.address.city]);
 
-  const validate = () => {
-    const newErrors: any = {};
-    const mobile = formData.contactNumber || '';
-    if (!/^[6-9][0-9]{9}$/.test(mobile)) {
-      newErrors.contactNumber = 'Please enter a valid mobile number.';
-    }
-    const availableRooms = Number(formData.rentDetails.roomDetails.availableRooms);
-    if (![1,2,3].includes(availableRooms)) {
-      newErrors.availableRooms = 'Available rooms must be 1, 2, 3';
-    }
-    if (formData.isImmediate === false) {
-      const date = new Date(formData.handoverDate);
-      if (!formData.handoverDate) {
-        newErrors.handoverDate = 'Please select a date.';
-      } else if (date < minDate || date > maxDate) {
-        newErrors.handoverDate = `Date must be between ${minDate.toLocaleDateString()} and ${maxDate.toLocaleDateString()}`;
+  // Replace the validate function with Yup validation
+  const validate = async () => {
+    try {
+      await listingSchema.validate(formData, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (err: any) {
+      const errors: any = {};
+      if (err.inner) {
+        err.inner.forEach((e: any) => {
+          if (e.path) {
+            // Support nested errors
+            const path = e.path.split('.');
+            if (path.length === 2) {
+              errors[path[1]] = e.message;
+            } else if (path.length === 3) {
+              if (!errors[path[1]]) errors[path[1]] = {};
+              errors[path[1]][path[2]] = e.message;
+            } else {
+              errors[e.path] = e.message;
+            }
+          }
+        });
+      } else if (err.path) {
+        errors[err.path] = err.message;
       }
+      setErrors(errors);
+      return false;
     }
-    // Rent validation
-    const rent = Number(formData.rentDetails?.costs?.rent);
-    if (!rent || rent < 1000) {
-      newErrors.rent = 'Rent must be at least ₹1,000.';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -990,19 +1022,35 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
     fetchLocalities();
   }, [formData.address.city]);
 
-  const validate = () => {
-    const newErrors: any = {};
-    const mobile = formData.contactNumber || '';
-    if (!/^[6-9][0-9]{9}$/.test(mobile)) {
-      newErrors.contactNumber = 'Please enter a valid mobile number.';
+  // Replace the validate function with Yup validation
+  const validate = async () => {
+    try {
+      await listingSchema.validate(formData, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (err: any) {
+      const errors: any = {};
+      if (err.inner) {
+        err.inner.forEach((e: any) => {
+          if (e.path) {
+            // Support nested errors
+            const path = e.path.split('.');
+            if (path.length === 2) {
+              errors[path[1]] = e.message;
+            } else if (path.length === 3) {
+              if (!errors[path[1]]) errors[path[1]] = {};
+              errors[path[1]][path[2]] = e.message;
+            } else {
+              errors[e.path] = e.message;
+            }
+          }
+        });
+      } else if (err.path) {
+        errors[err.path] = err.message;
+      }
+      setErrors(errors);
+      return false;
     }
-    // Price validation (for full flat listing)
-    const price = Number(formData.sellDetails?.price);
-    if (!price || price < 1000) {
-      newErrors.price = 'Price must be at least ₹1,000.';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -1091,7 +1139,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 <option value="" disabled>No localities found for this city</option>
               )}
               {localities.map(locality => (
-                <option key={locality} value={locality}>{locality}</option>
+                <option key={locality.id} value={locality.market}>{locality.market}</option>
               ))}
             </select>
             {errors.locality && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">

@@ -15,6 +15,7 @@ import { getListingsByIds } from '../services/listings';
 import { getUsers } from '../services/users';
 import { USER_PREFERENCES } from '../constants/theme';
 import * as LucideIcons from 'lucide-react';
+import * as Yup from 'yup';
 
 // Add WhatsAppIcon helper
 const WhatsAppIcon = () => (
@@ -24,6 +25,25 @@ const WhatsAppIcon = () => (
 const GmailIcon = () => (
   <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Gmail_Icon.png" alt="Gmail" className="w-5 h-5 mr-1 inline-block align-middle" />
 );
+
+const profileSchema = Yup.object().shape({
+  name: Yup.string().required('Name is required'),
+  email: Yup.string().email('Enter a valid email').required('Email is required'),
+  phone: Yup.string()
+    .matches(/^[6-9][0-9]{9}$/, 'Enter a valid 10-digit mobile number')
+    .required('Phone number is required'),
+  age: Yup.number().min(16, 'Age must be at least 16').max(120, 'Age must be realistic').required('Age is required'),
+  gender: Yup.string().required('Gender is required'),
+  profession: Yup.string().required('Profession is required'),
+  city: Yup.string().required('City is required'),
+  bio: Yup.string().min(10, 'Bio should be at least 10 characters'),
+  lookingFor: Yup.string(),
+  preferences: Yup.array().of(Yup.string()),
+  funFact: Yup.string(),
+  linkedin: Yup.string().url('Enter a valid LinkedIn URL').nullable(),
+  instagram: Yup.string().url('Enter a valid Instagram URL').nullable(),
+  facebook: Yup.string().url('Enter a valid Facebook URL').nullable(),
+});
 
 const ProfilePage = () => {
 
@@ -60,6 +80,7 @@ const ProfilePage = () => {
   const [editingPreferences, setEditingPreferences] = useState(false);
   const [preferencesInput, setPreferencesInput] = useState<string[]>([]);
   const [savingField, setSavingField] = useState<string | null>(null);
+  const [profileErrors, setProfileErrors] = useState<any>({});
 
   // Edit Profile Modal state
   const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
@@ -296,6 +317,8 @@ const ProfilePage = () => {
   const handleEditProfileSave = async () => {
     setSavingField('editProfileModal');
     try {
+      await profileSchema.validate(editProfileForm, { abortEarly: false });
+      setProfileErrors({});
       await updateDoc(doc(db, 'u', profileUser.id), {
         photoURL: editProfileForm.photoURL,
         userName: editProfileForm.name,
@@ -315,7 +338,17 @@ const ProfilePage = () => {
       });
       setProfileUser((prev: any) => ({ ...prev, ...editProfileForm }));
       setEditProfileModalOpen(false);
-    } finally {
+      setSavingField(null);
+    } catch (err: any) {
+      const errors: any = {};
+      if (err.inner && err.inner.length > 0) {
+        err.inner.forEach((e: any) => {
+          if (e.path && e.message) errors[e.path] = e.message;
+        });
+      } else if (err.message) {
+        errors.general = err.message;
+      }
+      setProfileErrors(errors);
       setSavingField(null);
     }
   };
@@ -969,30 +1002,37 @@ const ProfilePage = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1">Name</label>
                   <input className="input w-full" value={editProfileForm.name} onChange={e => handleEditProfileChange('name', e.target.value)} />
+                  {profileErrors.name && <p className="text-red-500 text-xs mt-1">{profileErrors.name}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Phone</label>
                   <input className="input w-full" value={editProfileForm.phone} onChange={e => handleEditProfileChange('phone', e.target.value)} />
+                  {profileErrors.phone && <p className="text-red-500 text-xs mt-1">{profileErrors.phone}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Age</label>
                   <input className="input w-full" value={editProfileForm.age} onChange={e => handleEditProfileChange('age', e.target.value)} />
+                  {profileErrors.age && <p className="text-red-500 text-xs mt-1">{profileErrors.age}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Gender</label>
                   <input className="input w-full" value={editProfileForm.gender} onChange={e => handleEditProfileChange('gender', e.target.value)} />
+                  {profileErrors.gender && <p className="text-red-500 text-xs mt-1">{profileErrors.gender}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Profession</label>
                   <input className="input w-full" value={editProfileForm.profession} onChange={e => handleEditProfileChange('profession', e.target.value)} />
+                  {profileErrors.profession && <p className="text-red-500 text-xs mt-1">{profileErrors.profession}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">City</label>
                   <input className="input w-full" value={editProfileForm.city} onChange={e => handleEditProfileChange('city', e.target.value)} />
+                  {profileErrors.city && <p className="text-red-500 text-xs mt-1">{profileErrors.city}</p>}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">About Me</label>
                   <textarea className="input w-full" rows={2} value={editProfileForm.bio} onChange={e => handleEditProfileChange('bio', e.target.value)} />
+                  {profileErrors.bio && <p className="text-red-500 text-xs mt-1">{profileErrors.bio}</p>}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">Looking For</label>
@@ -1009,14 +1049,17 @@ const ProfilePage = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1">LinkedIn</label>
                   <input className="input w-full" value={editProfileForm.linkedin} onChange={e => handleEditProfileChange('linkedin', e.target.value)} />
+                  {profileErrors.linkedin && <p className="text-red-500 text-xs mt-1">{profileErrors.linkedin}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Instagram</label>
                   <input className="input w-full" value={editProfileForm.instagram} onChange={e => handleEditProfileChange('instagram', e.target.value)} />
+                  {profileErrors.instagram && <p className="text-red-500 text-xs mt-1">{profileErrors.instagram}</p>}
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Facebook</label>
                   <input className="input w-full" value={editProfileForm.facebook} onChange={e => handleEditProfileChange('facebook', e.target.value)} />
+                  {profileErrors.facebook && <p className="text-red-500 text-xs mt-1">{profileErrors.facebook}</p>}
                 </div>
               </div>
               <div className="flex justify-end gap-4 mt-6">

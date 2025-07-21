@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Calendar, Clock, User, Phone, MapPin } from 'lucide-react';
 import { Service } from '../../types/service';
+import * as Yup from 'yup';
 
 interface ServiceBookingModalProps {
   service: Service | null;
@@ -20,6 +21,16 @@ interface BookingData {
   specialInstructions: string;
 }
 
+const bookingSchema = Yup.object().shape({
+  name: Yup.string().required('Name is required'),
+  phone: Yup.string()
+    .matches(/^[6-9][0-9]{9}$/, 'Enter a valid 10-digit mobile number')
+    .required('Phone number is required'),
+  date: Yup.string().required('Date is required'),
+  time: Yup.string().required('Time is required'),
+  address: Yup.string().min(10, 'Address should be at least 10 characters').required('Address is required'),
+});
+
 const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
   service,
   isOpen,
@@ -37,10 +48,27 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
     specialInstructions: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [errors, setErrors] = useState<any>({});
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onBook(bookingData);
-    onClose();
+    // Validate with Yup
+    try {
+      await bookingSchema.validate(bookingData, { abortEarly: false });
+      setErrors({});
+      onBook(bookingData);
+      onClose();
+    } catch (err: any) {
+      const errorMap: any = {};
+      if (err.inner && err.inner.length > 0) {
+        err.inner.forEach((e: any) => {
+          if (e.path && e.message) errorMap[e.path] = e.message;
+        });
+      } else if (err.message) {
+        errorMap.general = err.message;
+      }
+      setErrors(errorMap);
+    }
   };
 
   const handleInputChange = (field: keyof BookingData, value: string) => {
@@ -94,6 +122,7 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
                 spellCheck={true}
                 autoCorrect="on"
               />
+              {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -109,6 +138,7 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
                 spellCheck={true}
                 autoCorrect="on"
               />
+              {errors.time && <p className="text-red-500 text-xs mt-1">{errors.time}</p>}
             </div>
           </div>
 
@@ -127,6 +157,7 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
               spellCheck={true}
               autoCorrect="on"
             />
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
 
           <div>
@@ -144,6 +175,7 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
               spellCheck={false}
               autoCorrect="off"
             />
+            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
           </div>
 
           <div>
@@ -161,6 +193,7 @@ const ServiceBookingModal: React.FC<ServiceBookingModalProps> = ({
               spellCheck={true}
               autoCorrect="on"
             />
+            {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
           </div>
 
           <div>
