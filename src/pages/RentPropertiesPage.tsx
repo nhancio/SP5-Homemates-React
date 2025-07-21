@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropertyFilters from '../components/filters/PropertyFilters';
 import PropertyCard from '../components/ui/PropertyCard';
-import { Building, Loader, User } from 'lucide-react';
+import { Building, Loader, User, Search, X } from 'lucide-react';
 import { getListings } from '../services/listings';
 import { useAppContext } from '../context/AppContext';
 import { getDoc, doc } from 'firebase/firestore';
@@ -26,6 +26,26 @@ const RentPropertiesPage = () => {
   const { filters, isAuthenticated, login, user } = useAppContext();
   const [userGender, setUserGender] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Filter properties by search query
+  const filteredProperties = properties.filter((property) => {
+    if (!debouncedQuery) return true;
+    const q = debouncedQuery.toLowerCase();
+    return (
+      (property.address?.buildingName?.toLowerCase().includes(q)) ||
+      (property.address?.locality?.toLowerCase().includes(q)) ||
+      (property.address?.city?.toLowerCase().includes(q)) ||
+      (property.description?.toLowerCase().includes(q))
+    );
+  });
 
   useEffect(() => {
     fetchProperties();
@@ -66,8 +86,8 @@ const RentPropertiesPage = () => {
   }, []);
 
   // Pagination logic
-  const totalPages = Math.ceil(properties.length / PROPERTIES_PER_PAGE);
-  const paginatedProperties = properties.slice(
+  const totalPages = Math.ceil(filteredProperties.length / PROPERTIES_PER_PAGE);
+  const paginatedProperties = filteredProperties.slice(
     (currentPage - 1) * PROPERTIES_PER_PAGE,
     currentPage * PROPERTIES_PER_PAGE
   );
@@ -104,9 +124,33 @@ const RentPropertiesPage = () => {
           <p className="text-gray-600">
             Plug and play homes which are in your comfort zone.
           </p>
-          <h2 className="text-xl font-bold text-primary-700 mt-2 mb-2">Showing {properties.length} rooms</h2>
+          <h2 className="text-xl font-bold text-primary-700 mt-2 mb-2">Showing {filteredProperties.length} rooms</h2>
         </div>
         
+        {/* Search Bar */}
+        <div className="mb-6 flex items-center gap-2">
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              className="input w-full pl-10 pr-10 py-2 rounded-full border border-gray-200 focus:border-primary-500 focus:ring-1 focus:ring-primary-100 text-base"
+              placeholder="Search by location, building, or description..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              spellCheck={true}
+            />
+            {searchQuery && (
+              <button
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary-600"
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </div>
+        {/* Property Filters */}
         <PropertyFilters 
           propertyTypes={propertyTypes} 
           listingType="rent"
@@ -166,7 +210,7 @@ const RentPropertiesPage = () => {
           </>
         )}
         
-        {properties.length === 0 && !isLoading && !error && (
+        {filteredProperties.length === 0 && !isLoading && !error && (
           <div className="text-center py-16 bg-gray-50 rounded-lg">
             <Building className="w-12 h-12 mx-auto text-gray-400 mb-4" />
             <h3 className="text-xl font-semibold mb-2">No properties found</h3>
