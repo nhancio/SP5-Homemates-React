@@ -29,6 +29,7 @@ const RentPropertiesPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showFloatingFilter, setShowFloatingFilter] = useState(false);
   const filterSectionRef = React.useRef<HTMLDivElement>(null);
 
   // Debounce search input
@@ -63,6 +64,16 @@ const RentPropertiesPage = () => {
       setUserGender(null);
     }
   }, [user]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!filterSectionRef.current) return;
+      const rect = filterSectionRef.current.getBoundingClientRect();
+      setShowFloatingFilter(rect.bottom < 80);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const fetchProperties = async () => {
     try {
@@ -160,7 +171,7 @@ const RentPropertiesPage = () => {
           />
         </div>
         
-        {paginatedProperties.length > 0 && (
+        {showFloatingFilter && (
           <button
             style={{ zIndex: 9999, bottom: '30vh', background: 'linear-gradient(90deg, #C2185B 60%, #FF80AB 100%)' }}
             className="fixed right-24 text-white p-5 rounded-full shadow-2xl flex items-center justify-center hover:bg-primary-700 transition group"
