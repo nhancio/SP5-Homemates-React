@@ -359,6 +359,77 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
           </select>
         </div>
       </div>
+      {/* Rent/Price Range Filter */}
+      {listingType === 'rent' && (
+        <div className="flex flex-col md:flex-row gap-4 items-center p-4 border-b border-gray-100 bg-white">
+          <div className="flex flex-col gap-1 w-full md:w-1/2">
+            <label className="block text-xs font-semibold text-gray-700 mb-1">Rent Range (₹/month)</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                className="input w-24 text-xs"
+                min={PRICE_MIN}
+                max={localMax || PRICE_MAX}
+                value={localMin === undefined ? '' : localMin}
+                onChange={handleMinInput}
+                onBlur={commitMin}
+                onKeyDown={e => { if (e.key === 'Enter') commitMin(); }}
+                placeholder="Min"
+                aria-label="Minimum Rent"
+              />
+              <span className="text-gray-400">-</span>
+              <input
+                type="number"
+                className="input w-24 text-xs"
+                min={localMin || PRICE_MIN}
+                max={PRICE_MAX}
+                value={localMax === undefined ? '' : localMax}
+                onChange={handleMaxInput}
+                onBlur={commitMax}
+                onKeyDown={e => { if (e.key === 'Enter') commitMax(); }}
+                placeholder="Max"
+                aria-label="Maximum Rent"
+              />
+              <span className="ml-2 text-xs text-gray-500">per month</span>
+            </div>
+            <div className="px-2 mt-2">
+              <Slider
+                range
+                min={PRICE_MIN}
+                max={PRICE_MAX}
+                value={[
+                  localMin === undefined ? PRICE_MIN : localMin,
+                  localMax === undefined ? PRICE_MAX : localMax
+                ]}
+                onChange={([min, max]) => {
+                  setLocalMin(min);
+                  setLocalMax(max);
+                }}
+                onAfterChange={([min, max]) => {
+                  setLocalMin(min);
+                  setLocalMax(max);
+                  setFilters({
+                    ...filters,
+                    [listingType]: {
+                      ...filters[listingType],
+                      minRent: min,
+                      maxRent: max,
+                    },
+                  });
+                }}
+                allowCross={false}
+                step={500}
+                trackStyle={[{ backgroundColor: '#C2185B' }]}
+                handleStyle={[{ borderColor: '#C2185B' }, { borderColor: '#C2185B' }]}
+              />
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                <span>{formatRent(PRICE_MIN)}</span>
+                <span>{formatRent(PRICE_MAX)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Amenity/Feature Select Buttons Row (always visible) */}
       <div className="overflow-x-auto py-3 px-4 border-b border-gray-100 bg-white sticky top-0 z-30">
         <div className="flex gap-3 min-w-max">
