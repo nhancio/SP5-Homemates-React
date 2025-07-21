@@ -19,6 +19,15 @@ const AMENITY_OPTIONS = [
   { key: 'power', label: 'Power Backup', icon: Plug },
 ];
 
+// Services available options
+const SERVICES = [
+  { key: 'maid', label: 'Maid' },
+  { key: 'cook', label: 'Cook' },
+  { key: 'laundry', label: 'Laundry' },
+  { key: 'wifi', label: 'WiFi' },
+  { key: 'security', label: 'Security' },
+];
+
 interface AddListingFormsProps {
   listingType: 'rent' | 'sell';
   formData: any;

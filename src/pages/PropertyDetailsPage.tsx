@@ -8,6 +8,14 @@ import { getShareableUrl } from '../utils/share';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 
+const SERVICES = [
+  { key: 'maid', label: 'Maid' },
+  { key: 'cook', label: 'Cook' },
+  { key: 'laundry', label: 'Laundry' },
+  { key: 'wifi', label: 'WiFi' },
+  { key: 'security', label: 'Security' },
+];
+
 const PropertyDetailsPage = () => {
   const { propertyId } = useParams();
   const location = useLocation();
@@ -551,6 +559,16 @@ Link: ${url}`;
               {/* Description */}
               <div className="p-6">
                 <h2 className="text-lg font-semibold mb-4">Description</h2>
+                <div className="mb-4">
+                  <h3 className="font-bold mb-1">Location</h3>
+                  <div>City: {property.address?.city}</div>
+                  <div>Locality: {property.address?.locality}</div>
+                  {property.address?.buildingName && <div>Address: {property.address.buildingName}</div>}
+                </div>
+                <div className="mb-4">
+                  <h3 className="font-bold mb-1">Services</h3>
+                  <div>{property.services?.length ? property.services.map(s => SERVICES.find(x => x.key === s)?.label).join(', ') : 'None'}</div>
+                </div>
                 <p className="text-gray-700 whitespace-pre-line">{property.description}</p>
               </div>
             </div>

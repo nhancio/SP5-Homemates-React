@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropertyFilters from '../components/filters/PropertyFilters';
 import PropertyCard from '../components/ui/PropertyCard';
-import { Building, Loader, User, Search, X } from 'lucide-react';
+import { Building, Loader, User, Search, X, SlidersHorizontal } from 'lucide-react';
 import { getListings } from '../services/listings';
 import { useAppContext } from '../context/AppContext';
 import { getDoc, doc } from 'firebase/firestore';
@@ -28,6 +28,8 @@ const RentPropertiesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const filterSectionRef = React.useRef<HTMLDivElement>(null);
 
   // Debounce search input
   useEffect(() => {
@@ -151,11 +153,44 @@ const RentPropertiesPage = () => {
           </div>
         </div>
         {/* Property Filters */}
-        <PropertyFilters 
-          propertyTypes={propertyTypes} 
-          listingType="rent"
-        />
+        <div ref={filterSectionRef}>
+          <PropertyFilters 
+            propertyTypes={propertyTypes} 
+            listingType="rent"
+          />
+        </div>
         
+        {paginatedProperties.length > 0 && (
+          <button
+            style={{ zIndex: 9999, bottom: '30vh', background: 'linear-gradient(90deg, #C2185B 60%, #FF80AB 100%)' }}
+            className="fixed right-24 text-white p-5 rounded-full shadow-2xl flex items-center justify-center hover:bg-primary-700 transition group"
+            onClick={() => setShowFilterModal(true)}
+            aria-label="Open Filters"
+            title="Filters"
+          >
+            <SlidersHorizontal className="w-8 h-8 text-white" />
+            <span className="ml-2 text-base font-semibold hidden sm:inline group-hover:inline">Filters</span>
+          </button>
+        )}
+
+        {showFilterModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl p-6 w-full max-w-2xl relative">
+              <button
+                className="absolute top-4 right-4 flex items-center justify-center w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-800 text-black dark:text-white text-3xl font-bold hover:bg-red-500 hover:text-white transition"
+                onClick={() => setShowFilterModal(false)}
+                aria-label="Close"
+              >
+                <X className="w-8 h-8" />
+              </button>
+              <PropertyFilters 
+                propertyTypes={propertyTypes} 
+                listingType="rent"
+              />
+            </div>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="flex items-center justify-center min-h-[400px]">
             <Loader className="w-8 h-8 animate-spin text-primary-600" />
