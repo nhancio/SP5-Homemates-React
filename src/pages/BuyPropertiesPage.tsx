@@ -30,8 +30,13 @@ const BuyPropertiesPage = () => {
     }
   };
 
-  const handlePropertyClick = (propertyId: string) => {
-    navigate(`/buy/${propertyId}`);
+  const handlePropertyClick = (property: any) => {
+    // If the property has rentDetails, treat as rent listing
+    if (property.rentDetails) {
+      navigate(`/rent/${property.id}`);
+    } else {
+      navigate(`/buy/${property.id}`);
+    }
   };
 
   useEffect(() => {
@@ -99,9 +104,9 @@ const BuyPropertiesPage = () => {
                 <PropertyCard 
                   key={property.id} 
                   property={property}
-                  listingType="buy"
+                  listingType={property.rentDetails ? 'rent' : 'buy'}
                   variant="small"
-                  onClick={() => handlePropertyClick(property.id)}
+                  onClick={() => handlePropertyClick(property)}
                 />
               ))}
             </div>

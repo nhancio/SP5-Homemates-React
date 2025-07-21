@@ -26,12 +26,24 @@ const PropertyDetailsPage = () => {
   useEffect(() => {
     const fetchProperty = async () => {
       if (!propertyId) return;
-      
+      setIsLoading(true);
+      setError(null);
       try {
-        setIsLoading(true);
-        setError(null);
-        const propertyData = await getPropertyById(listingType, propertyId);
-        setProperty(propertyData);
+        // Try fetching as rent first
+        let propertyData = null;
+        try {
+          propertyData = await getPropertyById('rent', propertyId);
+          setProperty(propertyData);
+        } catch (err) {
+          // If not found as rent, try as sell
+          try {
+            propertyData = await getPropertyById('sell', propertyId);
+            setProperty(propertyData);
+          } catch (err2) {
+            setError('Property not found');
+            setProperty(null);
+          }
+        }
       } catch (error) {
         console.error('Error fetching property:', error);
         setError(error instanceof Error ? error.message : 'Failed to load property');
@@ -39,9 +51,8 @@ const PropertyDetailsPage = () => {
         setIsLoading(false);
       }
     };
-
     fetchProperty();
-  }, [propertyId, listingType]);
+  }, [propertyId]);
 
   const handleLoginPrompt = () => {
     if (window.confirm('Please login to use this feature. Would you like to login now?')) {
