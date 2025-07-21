@@ -21,11 +21,6 @@ const PRICE_MAX = 100000000; // Allow max price up to 10,00,00,000 (1 Cr)
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listingType }) => {
   const { filters, setFilters } = useAppContext();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [locationInput, setLocationInput] = useState('');
-  const [detectedCity, setDetectedCity] = useState('');
-  const [detectedState, setDetectedState] = useState('');
-  const [detecting, setDetecting] = useState(false);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerRef = React.useRef<HTMLDivElement>(null);
   const [markets, setMarkets] = useState<Market[]>([]);
@@ -99,59 +94,32 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
     setFilters({ ...filters, activeType: listingType });
   }, [listingType]);
 
-  // Nominatim autocomplete fetch
-  const fetchSuggestions = async (input: string) => {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(input)}&addressdetails=1&limit=5`
-    );
-    const data = await res.json();
-    return data.map((item: any) => ({
-      display_name: item.display_name,
-      city: item.address.city || item.address.town || item.address.village || '',
-      state: item.address.state || '',
-      place_id: item.place_id,
-    }));
-  };
+  // Add localDrawerFilters state for all filter fields
+  const [localDrawerFilters, setLocalDrawerFilters] = useState<any>(null);
 
-  const handleLocationChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocationInput(value);
-    setFilters({
-      ...filters,
-      [listingType]: {
-        ...filters[listingType],
-        location: value,
-        city: '', // clear old city/locality
-        locality: '',
-      },
-    });
-    if (value.length > 2) {
-      setDetecting(true);
-      const results = await fetchSuggestions(value);
-      setSuggestions(results);
-      setDetecting(false);
-    } else {
-      setDetectedCity('');
-      setDetectedState('');
-      setSuggestions([]);
+  // When opening the drawer, initialize localDrawerFilters from currentFilters
+  useEffect(() => {
+    if (drawerOpen) {
+      setLocalDrawerFilters({ ...currentFilters });
     }
+  }, [drawerOpen, currentFilters]);
+
+  // Handler for local drawer filter changes
+  const handleDrawerFilterChange = (name: string, value: any) => {
+    setLocalDrawerFilters((prev: any) => ({ ...prev, [name]: value }));
   };
 
-  const handleSuggestionClick = (suggestion: any) => {
-    setLocationInput(suggestion.display_name);
-    setDetectedCity(suggestion.city);
-    setDetectedState(suggestion.state);
-    setSuggestions([]);
+  // Handler for Apply Filters button
+  const handleApplyDrawerFilters = () => {
     setFilters({
       ...filters,
-      [listingType]: {
-        ...filters[listingType],
-        location: suggestion.display_name,
-        city: suggestion.city,
-        locality: '',
-      },
+      [listingType]: { ...localDrawerFilters },
     });
+    setDrawerOpen(false);
   };
+
+  // Only show city and locality dropdowns for location selection
+  // In the JSX, ensure only the city and locality dropdowns are present for location selection
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -238,6 +206,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             city: '',
             locality: '',
             propertyType: '',
+            bhk: '',
             minPrice: 0,
             maxPrice: 10000000,
             minSqft: 0,
@@ -458,35 +427,46 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
               <span className="ml-2 text-xs text-gray-500">per month</span>
             </div>
             <div className="px-2 mt-2">
-              <Slider
-                range
-                min={PRICE_MIN}
-                max={PRICE_MAX}
-                value={[
-                  localMin === undefined ? PRICE_MIN : localMin,
-                  localMax === undefined ? PRICE_MAX : localMax
-                ]}
-                onChange={([min, max]) => {
-                  setLocalMin(min);
-                  setLocalMax(max);
-                }}
-                onAfterChange={([min, max]) => {
-                  setLocalMin(min);
-                  setLocalMax(max);
-                  setFilters({
-                    ...filters,
-                    [listingType]: {
-                      ...filters[listingType],
-                      minRent: min,
-                      maxRent: max,
-                    },
-                  });
-                }}
-                allowCross={false}
-                step={500}
-                trackStyle={[{ backgroundColor: '#C2185B' }]}
-                handleStyle={[{ borderColor: '#C2185B' }, { borderColor: '#C2185B' }]}
-              />
+              {(() => {
+                const sliderValue: [number, number] = [
+                  typeof localMin === 'number' ? localMin : PRICE_MIN,
+                  typeof localMax === 'number' ? localMax : PRICE_MAX
+                ];
+                return (
+                  <Slider
+                    range
+                    min={PRICE_MIN}
+                    max={PRICE_MAX}
+                    value={sliderValue}
+                    onChange={(value) => {
+                      if (Array.isArray(value) && value.length === 2) {
+                        const [min, max] = value;
+                        setLocalMin(min);
+                        setLocalMax(max);
+                      }
+                    }}
+                    onAfterChange={(value) => {
+                      if (Array.isArray(value) && value.length === 2) {
+                        const [min, max] = value;
+                        setLocalMin(min);
+                        setLocalMax(max);
+                        setFilters({
+                          ...filters,
+                          [listingType]: {
+                            ...filters[listingType],
+                            minRent: min,
+                            maxRent: max,
+                          },
+                        });
+                      }
+                    }}
+                    allowCross={false}
+                    step={500}
+                    trackStyle={[{ backgroundColor: '#C2185B' }]}
+                    handleStyle={[{ borderColor: '#C2185B' }, { borderColor: '#C2185B' }]}
+                  />
+                );
+              })()}
               <div className="flex justify-between text-xs text-gray-400 mt-1">
                 <span>{formatRent(PRICE_MIN)}</span>
                 <span>{formatRent(PRICE_MAX)}</span>
@@ -568,11 +548,192 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
             <div className="flex-1 overflow-y-auto px-6 pb-32 pt-4">
               {/* Place all filter fields here (city, locality, price, amenities, etc.) */}
               {/* You can reuse the main filter JSX here, or extract to a subcomponent for DRYness */}
+              {/* City Dropdown */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">City</label>
+                <select
+                  className="input w-full md:w-48"
+                  value={localDrawerFilters?.city || ''}
+                  onChange={e => handleDrawerFilterChange('city', e.target.value)}
+                  disabled={marketsLoading}
+                >
+                  <option value="">Select City</option>
+                  {cities.map(city => (
+                    <option key={city} value={city}>{city}</option>
+                  ))}
+                </select>
+              </div>
+              {/* Locality Dropdown */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Locality</label>
+                <select
+                  className="input w-full md:w-64"
+                  value={localDrawerFilters?.locality || ''}
+                  onChange={e => handleDrawerFilterChange('locality', e.target.value)}
+                  disabled={!localDrawerFilters?.city || marketsLoading}
+                >
+                  <option value="">Select Locality</option>
+                  {localities.map(loc => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
+              {/* Property Type Dropdown */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
+                  Property Type
+                  <span className="relative group cursor-pointer">
+                    <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text></svg>
+                    <span className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+                      Property type refers to the kind of home: Apartment, Villa, Independent House, etc.
+                    </span>
+                  </span>
+                </label>
+                <select
+                  className="input w-full md:w-48"
+                  value={localDrawerFilters?.propertyType || ''}
+                  onChange={e => handleDrawerFilterChange('propertyType', e.target.value)}
+                  disabled={marketsLoading}
+                >
+                  <option value="">Select Property Type</option>
+                  {propertyTypes.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+              </div>
+              {/* BHK Dropdown */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1">
+                  BHK
+                  <span className="relative group cursor-pointer">
+                    <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text></svg>
+                    <span className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+                      BHK stands for Bedrooms, Hall, Kitchen. 1BHK = 1 Bedroom, 2BHK = 2 Bedrooms, etc.
+                    </span>
+                  </span>
+                </label>
+                <select
+                  className="input w-full md:w-48"
+                  value={localDrawerFilters?.bhk || ''}
+                  onChange={e => handleDrawerFilterChange('bhk', e.target.value)}
+                  disabled={marketsLoading}
+                >
+                  <option value="">Select BHK</option>
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map(bhk => (
+                    <option key={bhk} value={bhk}>{bhk} BHK</option>
+                  ))}
+                </select>
+              </div>
+              {/* Rent/Price Range Filter */}
+              {listingType === 'rent' && (
+                <div className="flex flex-col md:flex-row gap-4 items-center p-4 border-b border-gray-100 bg-white">
+                  <div className="flex flex-col gap-1 w-full md:w-1/2">
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Rent Range (₹/month)</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        className="input w-24 text-xs"
+                        min={PRICE_MIN}
+                        max={localDrawerFilters?.maxRent || PRICE_MAX}
+                        value={localDrawerFilters?.minRent === undefined ? '' : localDrawerFilters?.minRent}
+                        onChange={e => handleDrawerFilterChange('minRent', e.target.value)}
+                        onBlur={commitMin}
+                        onKeyDown={e => { if (e.key === 'Enter') commitMin(); }}
+                        placeholder="Min"
+                        aria-label="Minimum Rent"
+                      />
+                      <span className="text-gray-400">-</span>
+                      <input
+                        type="number"
+                        className="input w-24 text-xs"
+                        min={localDrawerFilters?.minRent || PRICE_MIN}
+                        max={PRICE_MAX}
+                        value={localDrawerFilters?.maxRent === undefined ? '' : localDrawerFilters?.maxRent}
+                        onChange={e => handleDrawerFilterChange('maxRent', e.target.value)}
+                        onBlur={commitMax}
+                        onKeyDown={e => { if (e.key === 'Enter') commitMax(); }}
+                        placeholder="Max"
+                        aria-label="Maximum Rent"
+                      />
+                      <span className="ml-2 text-xs text-gray-500">per month</span>
+                    </div>
+                    <div className="px-2 mt-2">
+                      {(() => {
+                        const sliderValue: [number, number] = [
+                          typeof localDrawerFilters?.minRent === 'number' ? localDrawerFilters?.minRent : PRICE_MIN,
+                          typeof localDrawerFilters?.maxRent === 'number' ? localDrawerFilters?.maxRent : PRICE_MAX
+                        ];
+                        return (
+                          <Slider
+                            range
+                            min={PRICE_MIN}
+                            max={PRICE_MAX}
+                            value={sliderValue}
+                            onChange={(value) => {
+                              if (Array.isArray(value) && value.length === 2) {
+                                const [min, max] = value;
+                                setLocalMin(min);
+                                setLocalMax(max);
+                              }
+                            }}
+                            onAfterChange={(value) => {
+                              if (Array.isArray(value) && value.length === 2) {
+                                const [min, max] = value;
+                                setLocalMin(min);
+                                setLocalMax(max);
+                                setFilters({
+                                  ...filters,
+                                  [listingType]: {
+                                    ...filters[listingType],
+                                    minRent: min,
+                                    maxRent: max,
+                                  },
+                                });
+                              }
+                            }}
+                            allowCross={false}
+                            step={500}
+                            trackStyle={[{ backgroundColor: '#C2185B' }]}
+                            handleStyle={[{ borderColor: '#C2185B' }, { borderColor: '#C2185B' }]}
+                          />
+                        );
+                      })()}
+                      <div className="flex justify-between text-xs text-gray-400 mt-1">
+                        <span>{formatRent(PRICE_MIN)}</span>
+                        <span>{formatRent(PRICE_MAX)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {/* Amenity/Feature Select Buttons Row (always visible) */}
+              <div className="overflow-x-auto py-3 px-4 border-b border-gray-100 bg-white sticky top-0 z-30">
+                <div className="flex gap-3 min-w-max">
+                  {AMENITY_OPTIONS.map(opt => {
+                    const Icon = opt.icon;
+                    const selected = selectedAmenities.includes(opt.key);
+                    return (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => handleAmenityToggle(opt.key)}
+                        className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
+                          ? 'bg-primary-600 text-white border-primary-600 shadow'
+                          : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
+                        tabIndex={0}
+                      >
+                        <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
+                        <span className="whitespace-nowrap">{opt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
             {/* Sticky Footer with Apply Button */}
             <div className="sticky bottom-0 z-20 bg-white border-t pt-3 pb-5 px-6 flex justify-end rounded-br-2xl shadow-lg">
               <button
-                onClick={() => setDrawerOpen(false)}
+                onClick={handleApplyDrawerFilters}
                 className="btn btn-primary px-8 py-3 rounded-full text-lg font-semibold shadow hover:scale-105 transition"
                 aria-label="Apply Filters"
               >

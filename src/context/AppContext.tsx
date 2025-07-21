@@ -71,6 +71,8 @@ export type Filters = {
     city: string;
     locality: string;
     propertyType: string;
+    bhk?: string;
+    bathrooms?: string;
     minPrice: number;
     maxPrice: number;
     minSqft: number;
