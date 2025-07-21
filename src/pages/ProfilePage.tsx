@@ -939,7 +939,7 @@ const ProfilePage = () => {
                           <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-sm gap-2" onClick={() => { setShowOptionsFor(null); handleDeleteListing(listing); }} disabled={deletingListing === listing.id}>
                             <Trash className="w-4 h-4 text-red-500" /> Delete
                           </button>
-                          <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-sm gap-2" onClick={() => { setShowOptionsFor(null); navigate(`/listing/${listing.listingType}/${listing.id}`); }}>
+                          <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-sm gap-2" onClick={() => { setShowOptionsFor(null); navigate(listing.listingType === 'rent' ? `/rent/${listing.id}` : `/buy/${listing.id}`); }}>
                             <Eye className="w-4 h-4 text-gray-600" /> View
                           </button>
                         </div>

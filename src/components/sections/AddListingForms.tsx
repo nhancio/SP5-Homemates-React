@@ -26,7 +26,9 @@ interface AddListingFormsProps {
   setImages: (images: string[] | ((prev: string[]) => string[])) => void;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   removeImage: (index: number) => void;
-  onSubmit: () => void; // Added for form submission
+  onSubmit?: () => void; // Made optional for edit page
+  errors?: any; // Optional errors prop for inline error display
+  setErrors?: (errors: any) => void; // Optional setErrors for edit page
 }
 
 export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) => {
@@ -194,9 +196,11 @@ const ContactNumberField = ({ formData, setFormData }: { formData: any; setFormD
 );
 
 export const RentForm: React.FC<AddListingFormsProps> = (props) => {
-  const { formData, setFormData, images, setImages, handleImageUpload, removeImage } = props;
+  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors } = props;
   const [isDragActive, setIsDragActive] = useState(false);
-  const [errors, setErrors] = useState<any>({});
+  const [localErrors, setLocalErrors] = useState<any>({});
+  const errors = propErrors || localErrors;
+  const setErrors = propSetErrors || setLocalErrors;
   const today = new Date();
   const minDate = new Date(today.getTime() + 24 * 60 * 60 * 1000); // tomorrow
   const maxDate = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000); // 90 days from now
@@ -307,6 +311,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 },
               })}
             />
+            {errors.buildingName && <p className="text-red-500 text-xs mt-1">{errors.buildingName}</p>}
           </div>
           {/* City Dropdown */}
           <div>
@@ -331,6 +336,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 <option key={city} value={city}>{city}</option>
               ))}
             </select>
+            {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
           </div>
           {/* Locality Dropdown */}
           <div>
@@ -357,6 +363,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 <option key={locality} value={locality}>{locality}</option>
               ))}
             </select>
+            {errors.locality && <p className="text-red-500 text-xs mt-1">{errors.locality}</p>}
           </div>
         </div>
       </section>
@@ -383,6 +390,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="4BHK">4BHK</option>
               <option value="4BHK+">4BHK+</option>
             </select>
+            {errors.flatType && <p className="text-red-500 text-xs mt-1">{errors.flatType}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Available Rooms</label>
@@ -426,6 +434,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="private">Private</option>
               <option value="shared">Shared</option>
             </select>
+            {errors.roomType && <p className="text-red-500 text-xs mt-1">{errors.roomType}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Washroom Type</label>
@@ -447,6 +456,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="attached">Attached</option>
               <option value="common">Common</option>
             </select>
+            {errors.bathroomType && <p className="text-red-500 text-xs mt-1">{errors.bathroomType}</p>}
           </div>
           {/* Row 3 */}
           <div>
@@ -465,6 +475,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="individual">Individual House</option>
               <option value="villa">Villa</option>
             </select>
+            {errors.buildingType && <p className="text-red-500 text-xs mt-1">{errors.buildingType}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
@@ -481,6 +492,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="semi">Semi Furnished</option>
               <option value="unfurnished">Unfurnished</option>
             </select>
+            {errors.furnishingType && <p className="text-red-500 text-xs mt-1">{errors.furnishingType}</p>}
           </div>
           {/* Row 4 */}
           <div>
@@ -498,6 +510,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="car">Car Parking</option>
               <option value="bike">Bike Parking</option>
             </select>
+            {errors.parking && <p className="text-red-500 text-xs mt-1">{errors.parking}</p>}
           </div>
         </div>
       </section>
@@ -562,6 +575,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="Female">Female</option>
               <option value="Any">Any</option>
             </select>
+            {errors.lookingFor && <p className="text-red-500 text-xs mt-1">{errors.lookingFor}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Preferences</label>
@@ -599,6 +613,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 );
               })}
             </div>
+            {errors.preferences && <p className="text-red-500 text-xs mt-1">{errors.preferences}</p>}
           </div>
         </div>
       </section>
@@ -640,6 +655,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <span className="text-xs text-gray-500">Select your move-in date.</span>
           </>
         )}
+        {errors.isImmediate && <p className="text-red-500 text-xs mt-1">{errors.isImmediate}</p>}
       </section>
       {/* 10. Rental Details */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
@@ -687,6 +703,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
+            {errors.maintenance && <p className="text-red-500 text-xs mt-1">{errors.maintenance}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (₹)</label>
@@ -706,6 +723,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
+            {errors.securityDeposit && <p className="text-red-500 text-xs mt-1">{errors.securityDeposit}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Setup Cost (₹)</label>
@@ -725,6 +743,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
+            {errors.setupCost && <p className="text-red-500 text-xs mt-1">{errors.setupCost}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage (₹)</label>
@@ -744,6 +763,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
+            {errors.brokerage && <p className="text-red-500 text-xs mt-1">{errors.brokerage}</p>}
           </div>
         </div>
       </section>
@@ -760,6 +780,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             description: e.target.value
           })}
         />
+        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
       </section>
 
       {/* 12. Upload Images */}
@@ -838,13 +859,15 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
 };
 
 export const SellForm: React.FC<AddListingFormsProps> = (props) => {
-  const { formData, setFormData, images, handleImageUpload, removeImage, onSubmit } = props;
+  const { formData, setFormData, images, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors } = props;
   
   // Add state for city and locality dropdowns
   const [cities, setCities] = useState<string[]>([]);
   const [localities, setLocalities] = useState<string[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
-  const [errors, setErrors] = useState<any>({});
+  const [localErrors, setLocalErrors] = useState<any>({});
+  const errors = propErrors || localErrors;
+  const setErrors = propSetErrors || setLocalErrors;
 
   // Fetch cities on mount
   useEffect(() => {
@@ -935,6 +958,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 },
               })}
             />
+            {errors.buildingName && <p className="text-red-500 text-xs mt-1">{errors.buildingName}</p>}
           </div>
           {/* City Dropdown */}
           <div>
@@ -959,6 +983,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 <option key={city} value={city}>{city}</option>
               ))}
             </select>
+            {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
           </div>
           {/* Locality Dropdown */}
           <div>
@@ -985,6 +1010,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 <option key={locality} value={locality}>{locality}</option>
               ))}
             </select>
+            {errors.locality && <p className="text-red-500 text-xs mt-1">{errors.locality}</p>}
           </div>
         </div>
       </section>
@@ -1012,6 +1038,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="4BHK+">4BHK+</option>
               <option value="7BHK">7BHK</option>
             </select>
+            {errors.flatType && <p className="text-red-500 text-xs mt-1">{errors.flatType}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
@@ -1032,6 +1059,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="individual">Individual House</option>
               <option value="villa">Villa</option>
             </select>
+            {errors.propertyType && <p className="text-red-500 text-xs mt-1">{errors.propertyType}</p>}
           </div>
           {/* Row 2 */}
           <div>
@@ -1052,6 +1080,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="semi">Semi Furnished</option>
               <option value="unfurnished">Unfurnished</option>
             </select>
+            {errors.furnishingType && <p className="text-red-500 text-xs mt-1">{errors.furnishingType}</p>}
           </div>
           {/* Row 3 */}
           <div>
@@ -1072,6 +1101,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="bike">Bike Parking</option>
               <option value="both">Both</option>
             </select>
+            {errors.parking && <p className="text-red-500 text-xs mt-1">{errors.parking}</p>}
           </div>
         </div>
       </section>
@@ -1147,6 +1177,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             <span className="text-xs text-gray-500">Select your move-in date.</span>
           </div>
         )}
+        {errors.handoverDate && <p className="text-red-500 text-xs mt-1">{errors.handoverDate}</p>}
       </section>
 
       {/* Price Details Section */}
@@ -1187,6 +1218,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
+            {errors.maintenance && <p className="text-red-500 text-xs mt-1">{errors.maintenance}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit</label>
@@ -1203,6 +1235,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
+            {errors.securityDeposit && <p className="text-red-500 text-xs mt-1">{errors.securityDeposit}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage</label>
@@ -1219,6 +1252,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
+            {errors.brokerage && <p className="text-red-500 text-xs mt-1">{errors.brokerage}</p>}
           </div>
         </div>
       </section>
@@ -1235,6 +1269,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             description: e.target.value
           })}
         />
+        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
       </section>
 
       {/* Upload Images Section (modern, user-friendly) */}

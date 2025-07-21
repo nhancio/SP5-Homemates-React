@@ -14,6 +14,7 @@ const EditListingPage = () => {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<any>(null);
+  const [errors, setErrors] = useState<any>({});
   
   // Image handling state
   const [images, setImages] = useState<string[]>([]);
@@ -107,13 +108,58 @@ const EditListingPage = () => {
     setImages(existingListing.images || []);
   }, [isAuthenticated, navigate, existingListing]);
 
+  const validate = () => {
+    const newErrors: any = {};
+    // Mobile validation
+    const mobile = formData.contactNumber || '';
+    if (!/^[6-9][0-9]{9}$/.test(mobile)) {
+      newErrors.contactNumber = 'Please enter a valid mobile number.';
+    }
+    // Rent validation
+    if (listingType === 'rent') {
+      const rent = Number(formData.rentDetails?.costs?.rent);
+      if (!rent || rent < 1000) {
+        newErrors.rent = 'Rent must be at least ₹1,000.';
+      }
+      // Numeric fields non-negative
+      ['maintenance', 'securityDeposit', 'setupCost', 'brokerage'].forEach(field => {
+        const value = Number(formData.rentDetails?.costs?.[field]);
+        if (value < 0) newErrors[field] = 'Cannot be negative.';
+      });
+    }
+    // Price validation
+    if (listingType === 'sell') {
+      const price = Number(formData.sellDetails?.price);
+      if (!price || price < 1000) {
+        newErrors.price = 'Price must be at least ₹1,000.';
+      }
+      // Numeric fields non-negative
+      ['maintenance', 'securityDeposit', 'brokerage'].forEach(field => {
+        const value = Number(formData.sellDetails?.[field]);
+        if (value < 0) newErrors[field] = 'Cannot be negative.';
+      });
+    }
+    // Required fields
+    if (!formData.address.city) newErrors.city = 'City is required.';
+    if (!formData.address.locality) newErrors.locality = 'Locality is required.';
+    if (!formData.address.buildingName) newErrors.buildingName = 'Building name is required.';
+    if (!formData.propertyType) newErrors.propertyType = 'Property type is required.';
+    if (!formData.description || formData.description.length < 10) newErrors.description = 'Description must be at least 10 characters.';
+    if (!images || images.length === 0) newErrors.images = 'Please upload at least one image.';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !listingId || !listingType) {
       alert('Missing required data');
       return;
     }
-
+    if (!validate()) {
+      setIsSubmitting(false);
+      return;
+    }
     setIsSubmitting(true);
     try {
       console.log('Updating listing type:', listingType);
@@ -286,19 +332,27 @@ const EditListingPage = () => {
           <form onSubmit={handleSubmit} className="space-y-8">
             {listingType === 'rent' ? (
               <RentForm
+                listingType={listingType === 'rent' ? 'rent' : 'sell'}
                 formData={formData}
                 setFormData={setFormData}
                 images={images}
+                setImages={setImages}
                 handleImageUpload={handleImageUpload}
                 removeImage={removeImage}
+                errors={errors}
+                setErrors={setErrors}
               />
             ) : (
               <SellForm
+                listingType={listingType === 'sell' ? 'sell' : 'rent'}
                 formData={formData}
                 setFormData={setFormData}
                 images={images}
+                setImages={setImages}
                 handleImageUpload={handleImageUpload}
                 removeImage={removeImage}
+                errors={errors}
+                setErrors={setErrors}
               />
             )}
 
