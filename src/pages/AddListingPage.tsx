@@ -80,6 +80,8 @@ const initialFormData = {
       availableRooms: '',
       availability: '',
       bathroomType: '',
+      flatType: '',
+      roomType: '',
     },
     amenities: [], // <-- Add this line!
     costs: {
@@ -157,7 +159,7 @@ const AddListingPage = () => {
   const [listingType, setListingType] = useState<'rent' | 'sell'>('rent');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
-  const [errors, setErrors] = useState<{ contactNumber?: string; handoverDate?: string }>({});
+  const [errors, setErrors] = useState<any>({});
   
   // Image handling state
   const [images, setImages] = useState<string[]>([]);
@@ -171,41 +173,76 @@ const AddListingPage = () => {
     document.title = 'Add Listing | Homemates';
   }, [isAuthenticated, navigate]);
 
+  const validate = () => {
+    const newErrors: any = {};
+    // Mobile validation
+    const mobile = formData.contactNumber || '';
+    if (!/^[6-9][0-9]{9}$/.test(mobile)) {
+      newErrors.contactNumber = 'Please enter a valid mobile number.';
+    }
+    // Rent validation
+    if (listingType === 'rent') {
+      const rent = Number(formData.rentDetails?.costs?.rent);
+      if (!rent || rent < 1000) {
+        newErrors.rent = 'Rent must be at least ₹1,000.';
+      }
+      // Numeric fields non-negative
+      ['maintenance', 'securityDeposit', 'setupCost', 'brokerage'].forEach(field => {
+        const value = Number((formData.rentDetails?.costs as any)?.[field]);
+        if (value < 0) newErrors[field] = 'Cannot be negative.';
+      });
+    }
+    // Price validation
+    if (listingType === 'sell') {
+      const price = Number(formData.sellDetails?.price);
+      if (!price || price < 1000) {
+        newErrors.price = 'Price must be at least ₹1,000.';
+      }
+      // Numeric fields non-negative
+      ['maintenance', 'securityDeposit', 'brokerage'].forEach(field => {
+        const value = Number((formData.sellDetails as any)?.[field]);
+        if (value < 0) newErrors[field] = 'Cannot be negative.';
+      });
+    }
+    // Required fields (apply to both rent and sell)
+    if (!formData.address.city) newErrors.city = 'City is required.';
+    if (!formData.address.locality) newErrors.locality = 'Locality is required.';
+    if (!formData.address.buildingName) newErrors.buildingName = 'Building name is required.';
+    if (!formData.rentDetails?.roomDetails?.flatType) newErrors.flatType = 'Please select a flat type.';
+    if (!formData.rentDetails?.roomDetails?.roomType) newErrors.roomType = 'Please select a room type.';
+    if (!formData.propertyType) newErrors.propertyType = 'Please select a property type.';
+    if (!formData.furnishingType) newErrors.furnishingType = 'Please select a furnish type.';
+    if (!formData.parking) newErrors.parking = 'Please select a parking type.';
+    // For rent (shared home)
+    if (listingType === 'rent') {
+      if (!formData.rentDetails?.roomDetails?.availableRooms) newErrors.availableRooms = 'Please select available rooms.';
+      if (!formData.rentDetails?.roomDetails?.bathroomType) newErrors.bathroomType = 'Please select a washroom type.';
+      if (!formData.rentDetails?.amenities || formData.rentDetails.amenities.length === 0) newErrors.amenities = 'Please select at least one amenity.';
+      if (!formData.rentDetails?.preferredTenant?.lookingFor) newErrors.gender = 'Please select a gender.';
+      if (formData.isImmediate === undefined || (formData.isImmediate === false && !formData.handoverDate)) newErrors.moveIn = 'Please select a move-in option.';
+    }
+    // For sell (full home)
+    if (listingType === 'sell') {
+      if (!formData.sellDetails?.totalFloors) newErrors.totalFloors = 'Please enter total floors.';
+      if (!formData.sellDetails?.floorNumber) newErrors.floorNumber = 'Please enter floor number.';
+      if (!formData.sellDetails?.waterSupply) newErrors.waterSupply = 'Please select water supply.';
+    }
+    if (!images || images.length === 0) newErrors.images = 'Please upload at least one image.';
+    if (!formData.description || formData.description.length < 10) newErrors.description = 'Description must be at least 10 characters.';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
       alert('Please login to create a listing');
       return;
     }
-
-    // --- VALIDATION ---
-    const newErrors: { contactNumber?: string; handoverDate?: string } = {};
-    // Contact number validation
-    if (!/^[6-9]\d{9}$/.test(formData.contactNumber)) {
-      newErrors.contactNumber = 'Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9.';
-    }
-    // Move-in date validation (only if not immediate)
-    if (formData.isImmediate === false) {
-      if (!formData.handoverDate) {
-        newErrors.handoverDate = 'Please select a move-in date.';
-      } else {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const minDate = new Date(today);
-        minDate.setDate(today.getDate() + 1);
-        const selected = new Date(formData.handoverDate);
-        if (selected < minDate) {
-          newErrors.handoverDate = 'Move-in date must be at least tomorrow.';
-        }
-      }
-    }
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) {
+    if (!validate()) {
       setIsSubmitting(false);
       return;
     }
-    // --- END VALIDATION ---
-
     setIsSubmitting(true);
     try {
       // No validation checks, allow any data
@@ -239,6 +276,8 @@ const AddListingPage = () => {
             roomDetails: {
               availableRooms: formData.rentDetails.roomDetails.availableRooms,
               bathroomType: formData.rentDetails.roomDetails.bathroomType,
+              flatType: formData.rentDetails.roomDetails.flatType,
+              roomType: formData.rentDetails.roomDetails.roomType,
             },
             costs: {
               rent: formData.rentDetails.costs.rent,
@@ -579,6 +618,7 @@ const AddListingPage = () => {
                   }
                 }))}
               />
+              {errors[field] && <p className="text-red-500 text-xs mt-1">{errors[field]}</p>}
             </div>
           ))}
         </div>
@@ -625,6 +665,7 @@ const AddListingPage = () => {
             description: e.target.value
           }))}
         />
+        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
       </section>
 
       {/* Images Section */}
@@ -667,6 +708,7 @@ const AddListingPage = () => {
             </div>
           ))}
         </div>
+        {errors.images && <p className="text-red-500 text-xs mt-1">{errors.images}</p>}
       </section>
 
       {/* Contact Details Section */}
@@ -695,14 +737,15 @@ const AddListingPage = () => {
 
   const renderSellFields = () => (
     <SellForm
-      listingType={listingType}
+      listingType="sell"
       formData={formData}
       setFormData={setFormData}
       images={images}
       setImages={setImages}
       handleImageUpload={handleImageUpload}
       removeImage={removeImage}
-      onSubmit={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)}
+      errors={errors}
+      setErrors={setErrors}
     />
   );
 
@@ -747,6 +790,8 @@ const AddListingPage = () => {
               setImages={setImages}
               handleImageUpload={handleImageUpload}
               removeImage={removeImage}
+              errors={errors}
+              setErrors={setErrors}
               onSubmit={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)}
             />
           ) : (
@@ -758,6 +803,8 @@ const AddListingPage = () => {
               setImages={setImages}
               handleImageUpload={handleImageUpload}
               removeImage={removeImage}
+              errors={errors}
+              setErrors={setErrors}
               onSubmit={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)}
             />
           )}

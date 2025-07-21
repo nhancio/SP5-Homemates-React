@@ -104,7 +104,7 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
             <select
-              className="input w-full"
+              className={`input w-full${formData.address.city ? '' : ' border-red-500 bg-red-50'}`}
               value={formData.address.city || ''}
               onChange={e => {
                 setFormData({
@@ -123,12 +123,16 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
                 <option key={city} value={city}>{city}</option>
               ))}
             </select>
+            {formData.address.city && errors.city && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.city}
+            </p>}
           </div>
           {/* Locality Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
             <select
-              className="input w-full"
+              className={`input w-full${formData.address.locality ? '' : ' border-red-500 bg-red-50'}`}
               value={formData.address.locality || ''}
               onChange={e => {
                 setFormData({
@@ -149,6 +153,10 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
                 <option key={market.id} value={market.market}>{market.market}</option>
               ))}
             </select>
+            {formData.address.locality && errors.locality && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.locality}
+            </p>}
           </div>
         </div>
         <div>
@@ -166,6 +174,10 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
               },
             })}
           />
+          {errors.buildingName && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+            <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+            {errors.buildingName}
+          </p>}
         </div>
       </div>
     </section>
@@ -301,7 +313,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <input
               type="text"
               placeholder="Building Name"
-              className="input w-full"
+              className={`input w-full${errors.buildingName ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.address.buildingName}
               onChange={e => setFormData({
                 ...formData,
@@ -311,13 +323,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 },
               })}
             />
-            {errors.buildingName && <p className="text-red-500 text-xs mt-1">{errors.buildingName}</p>}
+            {errors.buildingName && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.buildingName}
+            </p>}
           </div>
           {/* City Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.city ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.address.city || ''}
               onChange={e => {
                 setFormData({
@@ -336,13 +351,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 <option key={city} value={city}>{city}</option>
               ))}
             </select>
-            {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+            {errors.city && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.city}
+            </p>}
           </div>
           {/* Locality Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.locality ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.address.locality || ''}
               onChange={e => {
                 setFormData({
@@ -360,10 +378,13 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 <option value="" disabled>No localities found for this city</option>
               )}
               {localities.map(locality => (
-                <option key={locality} value={locality}>{locality}</option>
+                <option key={locality.id} value={locality.market}>{locality.market}</option>
               ))}
             </select>
-            {errors.locality && <p className="text-red-500 text-xs mt-1">{errors.locality}</p>}
+            {errors.locality && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.locality}
+            </p>}
           </div>
         </div>
       </section>
@@ -375,7 +396,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type*</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.flatType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.flatType || ''}
               onChange={e => setFormData({
                 ...formData,
@@ -390,12 +411,17 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="4BHK">4BHK</option>
               <option value="4BHK+">4BHK+</option>
             </select>
-            {errors.flatType && <p className="text-red-500 text-xs mt-1">{errors.flatType}</p>}
+            {errors.flatType && (
+              <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+                <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+                {errors.flatType}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Available Rooms</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.availableRooms ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.roomDetails.availableRooms}
               onChange={e => setFormData({
                 ...formData,
@@ -411,13 +437,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="">Select</option>
               {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
             </select>
-            {errors.availableRooms && <p className="text-red-500 text-xs mt-1">{errors.availableRooms}</p>}
+            {errors.availableRooms && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.availableRooms}
+            </p>}
           </div>
           {/* Row 2 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.roomType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.roomDetails.roomType}
               onChange={e => setFormData({
                 ...formData,
@@ -434,12 +463,17 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="private">Private</option>
               <option value="shared">Shared</option>
             </select>
-            {errors.roomType && <p className="text-red-500 text-xs mt-1">{errors.roomType}</p>}
+            {errors.roomType && (
+              <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+                <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+                {errors.roomType}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Washroom Type</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.bathroomType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.roomDetails.bathroomType}
               onChange={e => setFormData({
                 ...formData,
@@ -456,17 +490,20 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="attached">Attached</option>
               <option value="common">Common</option>
             </select>
-            {errors.bathroomType && <p className="text-red-500 text-xs mt-1">{errors.bathroomType}</p>}
+            {errors.bathroomType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.bathroomType}
+            </p>}
           </div>
           {/* Row 3 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
             <select
-              className="input w-full"
-              value={formData.buildingType}
+              className={`input w-full${errors.propertyType ? ' border-red-500 bg-red-50' : ''}`}
+              value={formData.propertyType}
               onChange={e => setFormData({
                 ...formData,
-                buildingType: e.target.value
+                propertyType: e.target.value
               })}
             >
               <option value="">Select Property Type</option>
@@ -475,12 +512,17 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="individual">Individual House</option>
               <option value="villa">Villa</option>
             </select>
-            {errors.buildingType && <p className="text-red-500 text-xs mt-1">{errors.buildingType}</p>}
+            {errors.propertyType && (
+              <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+                <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+                {errors.propertyType}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.furnishingType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.furnishingType}
               onChange={e => setFormData({
                 ...formData,
@@ -492,13 +534,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="semi">Semi Furnished</option>
               <option value="unfurnished">Unfurnished</option>
             </select>
-            {errors.furnishingType && <p className="text-red-500 text-xs mt-1">{errors.furnishingType}</p>}
+            {errors.furnishingType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.furnishingType}
+            </p>}
           </div>
           {/* Row 4 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.parking ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.parking}
               onChange={e => setFormData({
                 ...formData,
@@ -510,7 +555,10 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="car">Car Parking</option>
               <option value="bike">Bike Parking</option>
             </select>
-            {errors.parking && <p className="text-red-500 text-xs mt-1">{errors.parking}</p>}
+            {errors.parking && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.parking}
+            </p>}
           </div>
         </div>
       </section>
@@ -548,6 +596,12 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             );
           })}
         </div>
+        {errors.amenities && (
+          <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+            <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+            {errors.amenities}
+          </p>
+        )}
       </section>
       {/* 8. Preferred Tenant */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-4">
@@ -556,7 +610,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
             <select
-              className="input"
+              className={`input w-full${errors.gender ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.preferredTenant.lookingFor}
               onChange={e => setFormData({
                 ...formData,
@@ -568,58 +622,24 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 }
               })}
-              title="Looking for"
             >
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
-              <option value="Any">Any</option>
+              <option value="Other">Other</option>
             </select>
-            {errors.lookingFor && <p className="text-red-500 text-xs mt-1">{errors.lookingFor}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Preferences</label>
-            <div className="flex flex-wrap gap-3">
-              {USER_PREFERENCES.map(pref => {
-                const Icon = (LucideIcons as any)[pref.icon] || LucideIcons.User;
-                const selected = formData.rentDetails.preferredTenant.preferences.includes(pref.label);
-                return (
-                  <button
-                    key={pref.id}
-                    type="button"
-                    onClick={() => {
-                      const preferences = formData.rentDetails.preferredTenant.preferences;
-                      setFormData({
-                        ...formData,
-                        rentDetails: {
-                          ...formData.rentDetails,
-                          preferredTenant: {
-                            ...formData.rentDetails.preferredTenant,
-                            preferences: preferences.includes(pref.label)
-                              ? preferences.filter((p: string) => p !== pref.label)
-                              : [...preferences, pref.label]
-                          }
-                        }
-                      });
-                    }}
-                    className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
-                      ? 'bg-primary-600 text-white border-primary-600 shadow'
-                      : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
-                    tabIndex={0}
-                  >
-                    <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
-                    <span className="whitespace-nowrap">{pref.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-            {errors.preferences && <p className="text-red-500 text-xs mt-1">{errors.preferences}</p>}
+            {errors.gender && (
+              <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+                <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+                {errors.gender}
+              </p>
+            )}
           </div>
         </div>
       </section>
-      {/* 9. Move In */}
+      {/* Move In Section */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-4">
-        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Move In</h2>
+        <h2 className="text-lg font-semibold mb-4">Move In</h2>
         <div className="flex items-center gap-8 mb-2">
           <label className="flex items-center gap-2">
             <input
@@ -651,11 +671,23 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               min={minDate.toISOString().split('T')[0]}
               max={maxDate.toISOString().split('T')[0]}
             />
-            {errors.handoverDate && <p className="text-red-500 text-xs mt-1">{errors.handoverDate}</p>}
+            {errors.handoverDate && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.handoverDate}
+            </p>}
             <span className="text-xs text-gray-500">Select your move-in date.</span>
           </>
         )}
-        {errors.isImmediate && <p className="text-red-500 text-xs mt-1">{errors.isImmediate}</p>}
+        {errors.isImmediate && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+          {errors.isImmediate}
+        </p>}
+        {errors.moveIn && (
+          <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+            <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+            {errors.moveIn}
+          </p>
+        )}
       </section>
       {/* 10. Rental Details */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
@@ -665,7 +697,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Rent (₹/month)</label>
             <input
               type="number"
-              className="input w-full"
+              className={`input w-full${errors.rent ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter rent amount"
               min={0}
               value={formData.rentDetails.costs.rent || ''}
@@ -683,13 +715,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 });
               }}
             />
-            {errors.rent && <p className="text-red-500 text-xs mt-1">{errors.rent}</p>}
+            {errors.rent && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.rent}
+            </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance (₹/month)</label>
             <input
               type="number"
-              className="input w-full"
+              className={`input w-full${errors.maintenance ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter maintenance amount"
               value={formData.rentDetails.costs.maintenance}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -703,13 +738,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
-            {errors.maintenance && <p className="text-red-500 text-xs mt-1">{errors.maintenance}</p>}
+            {errors.maintenance && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.maintenance}
+            </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (₹)</label>
             <input
               type="number"
-              className="input w-full"
+              className={`input w-full${errors.securityDeposit ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter security deposit"
               value={formData.rentDetails.costs.securityDeposit}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -723,13 +761,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
-            {errors.securityDeposit && <p className="text-red-500 text-xs mt-1">{errors.securityDeposit}</p>}
+            {errors.securityDeposit && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.securityDeposit}
+            </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Setup Cost (₹)</label>
             <input
               type="number"
-              className="input w-full"
+              className={`input w-full${errors.setupCost ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter setup cost"
               value={formData.rentDetails.costs.setupCost}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -743,13 +784,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
-            {errors.setupCost && <p className="text-red-500 text-xs mt-1">{errors.setupCost}</p>}
+            {errors.setupCost && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.setupCost}
+            </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage (₹)</label>
             <input
               type="number"
-              className="input w-full"
+              className={`input w-full${errors.brokerage ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter brokerage amount"
               value={formData.rentDetails.costs.brokerage}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -763,7 +807,10 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
-            {errors.brokerage && <p className="text-red-500 text-xs mt-1">{errors.brokerage}</p>}
+            {errors.brokerage && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.brokerage}
+            </p>}
           </div>
         </div>
       </section>
@@ -772,7 +819,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       <section className="bg-white p-6 rounded-2xl shadow mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Description</h2>
         <textarea
-          className="input min-h-[100px] focus:ring-2 focus:ring-primary-300"
+          className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${errors.description ? ' border-red-500 bg-red-50' : ''}`}
           placeholder="Add property description..."
           value={formData.description}
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setFormData({
@@ -780,7 +827,10 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             description: e.target.value
           })}
         />
-        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
+        {errors.description && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+          {errors.description}
+        </p>}
       </section>
 
       {/* 12. Upload Images */}
@@ -840,7 +890,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
         <input
           type="tel"
-          className="input"
+          className={`input${errors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
           placeholder="Enter your 10-digit mobile number"
           value={formData.contactNumber || ''}
           onChange={e => setFormData({
@@ -851,7 +901,10 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           maxLength={10}
           required
         />
-        {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber}</p>}
+        {errors.contactNumber && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+          {errors.contactNumber}
+        </p>}
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
       </div>
     </form>
@@ -948,7 +1001,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             <input
               type="text"
               placeholder="Building Name"
-              className="input w-full"
+              className={`input w-full${errors.buildingName ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.address.buildingName}
               onChange={e => setFormData({
                 ...formData,
@@ -958,13 +1011,16 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 },
               })}
             />
-            {errors.buildingName && <p className="text-red-500 text-xs mt-1">{errors.buildingName}</p>}
+            {errors.buildingName && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.buildingName}
+            </p>}
           </div>
           {/* City Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.city ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.address.city || ''}
               onChange={e => {
                 setFormData({
@@ -983,13 +1039,16 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 <option key={city} value={city}>{city}</option>
               ))}
             </select>
-            {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+            {errors.city && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.city}
+            </p>}
           </div>
           {/* Locality Dropdown */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.locality ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.address.locality || ''}
               onChange={e => {
                 setFormData({
@@ -1010,7 +1069,10 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 <option key={locality} value={locality}>{locality}</option>
               ))}
             </select>
-            {errors.locality && <p className="text-red-500 text-xs mt-1">{errors.locality}</p>}
+            {errors.locality && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.locality}
+            </p>}
           </div>
         </div>
       </section>
@@ -1023,7 +1085,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type*</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.flatType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.flatType || ''}
               onChange={e => setFormData({
                 ...formData,
@@ -1038,12 +1100,15 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="4BHK+">4BHK+</option>
               <option value="7BHK">7BHK</option>
             </select>
-            {errors.flatType && <p className="text-red-500 text-xs mt-1">{errors.flatType}</p>}
+            {errors.flatType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.flatType}
+            </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.propertyType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.sellDetails.propertyType || ''}
               onChange={e => setFormData({
                 ...formData,
@@ -1059,13 +1124,16 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="individual">Individual House</option>
               <option value="villa">Villa</option>
             </select>
-            {errors.propertyType && <p className="text-red-500 text-xs mt-1">{errors.propertyType}</p>}
+            {errors.propertyType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.propertyType}
+            </p>}
           </div>
           {/* Row 2 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.furnishingType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.sellDetails.furnishingType || ''}
               onChange={e => setFormData({
                 ...formData,
@@ -1080,13 +1148,16 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="semi">Semi Furnished</option>
               <option value="unfurnished">Unfurnished</option>
             </select>
-            {errors.furnishingType && <p className="text-red-500 text-xs mt-1">{errors.furnishingType}</p>}
+            {errors.furnishingType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.furnishingType}
+            </p>}
           </div>
           {/* Row 3 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
             <select
-              className="input w-full"
+              className={`input w-full${errors.parking ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.sellDetails.parking || ''}
               onChange={e => setFormData({
                 ...formData,
@@ -1101,7 +1172,10 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="bike">Bike Parking</option>
               <option value="both">Both</option>
             </select>
-            {errors.parking && <p className="text-red-500 text-xs mt-1">{errors.parking}</p>}
+            {errors.parking && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.parking}
+            </p>}
           </div>
         </div>
       </section>
@@ -1177,7 +1251,16 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             <span className="text-xs text-gray-500">Select your move-in date.</span>
           </div>
         )}
-        {errors.handoverDate && <p className="text-red-500 text-xs mt-1">{errors.handoverDate}</p>}
+        {errors.handoverDate && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+          {errors.handoverDate}
+        </p>}
+        {errors.moveIn && (
+          <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+            <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+            {errors.moveIn}
+          </p>
+        )}
       </section>
 
       {/* Price Details Section */}
@@ -1188,7 +1271,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Price*</label>
             <input
               type="number"
-              className="input w-full"
+              className={`input w-full${errors.price ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter price"
               value={formData.sellDetails.price}
               onChange={e => setFormData({
@@ -1201,13 +1284,18 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               min={1000}
               required
             />
-            {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
+            {errors.price && (
+              <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+                <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+                {errors.price}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance</label>
             <input
               type="number"
-              className="input w-full focus:ring-2 focus:ring-primary-300"
+              className={`input w-full focus:ring-2 focus:ring-primary-300${errors.maintenance ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter maintenance"
               value={formData.sellDetails?.maintenance || ''}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -1218,13 +1306,16 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
-            {errors.maintenance && <p className="text-red-500 text-xs mt-1">{errors.maintenance}</p>}
+            {errors.maintenance && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.maintenance}
+            </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit</label>
             <input
               type="number"
-              className="input w-full focus:ring-2 focus:ring-primary-300"
+              className={`input w-full focus:ring-2 focus:ring-primary-300${errors.securityDeposit ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter security deposit"
               value={formData.sellDetails?.securityDeposit || ''}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -1235,13 +1326,16 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
-            {errors.securityDeposit && <p className="text-red-500 text-xs mt-1">{errors.securityDeposit}</p>}
+            {errors.securityDeposit && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.securityDeposit}
+            </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage</label>
             <input
               type="number"
-              className="input w-full focus:ring-2 focus:ring-primary-300"
+              className={`input w-full focus:ring-2 focus:ring-primary-300${errors.brokerage ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter brokerage"
               value={formData.sellDetails?.brokerage || ''}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -1252,7 +1346,10 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 }
               })}
             />
-            {errors.brokerage && <p className="text-red-500 text-xs mt-1">{errors.brokerage}</p>}
+            {errors.brokerage && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.brokerage}
+            </p>}
           </div>
         </div>
       </section>
@@ -1261,7 +1358,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       <section className="bg-white p-6 rounded-2xl shadow mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Description</h2>
         <textarea
-          className="input min-h-[100px] focus:ring-2 focus:ring-primary-300"
+          className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${errors.description ? ' border-red-500 bg-red-50' : ''}`}
           placeholder="Add property description..."
           value={formData.description}
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setFormData({
@@ -1269,7 +1366,10 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             description: e.target.value
           })}
         />
-        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
+        {errors.description && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+          {errors.description}
+        </p>}
       </section>
 
       {/* Upload Images Section (modern, user-friendly) */}
@@ -1308,7 +1408,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
         <input
           type="tel"
-          className="input"
+          className={`input${errors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
           placeholder="Enter your 10-digit mobile number"
           value={formData.contactNumber || ''}
           onChange={e => setFormData({
@@ -1319,7 +1419,10 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           maxLength={10}
           required
         />
-        {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber}</p>}
+        {errors.contactNumber && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+          {errors.contactNumber}
+        </p>}
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
       </div>
     </form>

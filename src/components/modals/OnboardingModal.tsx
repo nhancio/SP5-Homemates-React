@@ -105,11 +105,16 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             required
             value={mobile}
             onChange={e => setMobile(e.target.value)}
-            className="input input-bordered w-full"
+            className={`input w-full${mobileError ? ' border-red-500 bg-red-50' : ''}`}
             placeholder="Enter your mobile number"
             title="Mobile Number"
           />
-          {mobileError && <p className="text-red-500 text-xs mt-1">{mobileError}</p>}
+          {mobileError && (
+            <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {mobileError}
+            </p>
+          )}
         </div>
         <div className="mb-3">
           <label className="block text-sm font-medium mb-1" htmlFor="onboard-gender">Gender</label>
@@ -118,12 +123,18 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             required
             value={gender}
             onChange={e => setGender(e.target.value)}
-            className="input input-bordered w-full"
+            className={`input w-full${gender === '' ? ' border-red-500 bg-red-50' : ''}`}
             title="Gender"
           >
             <option value="">Select</option>
             {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
           </select>
+          {gender === '' && (
+            <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              Gender is required.
+            </p>
+          )}
         </div>
         <div className="mb-3">
           <label className="block text-sm font-medium mb-1" htmlFor="onboard-lookingfor">Looking for</label>
@@ -132,12 +143,18 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             required
             value={lookingFor}
             onChange={e => setLookingFor(e.target.value)}
-            className="input input-bordered w-full"
+            className={`input w-full${lookingFor === '' ? ' border-red-500 bg-red-50' : ''}`}
             title="Looking for"
           >
             <option value="">Select</option>
             {LOOKING_FOR.map(l => <option key={l} value={l}>{l}</option>)}
           </select>
+          {lookingFor === '' && (
+            <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              Looking for is required.
+            </p>
+          )}
         </div>
         {/* City Dropdown */}
         <div className="mb-3">
@@ -147,13 +164,19 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             required
             value={city}
             onChange={e => { setCity(e.target.value); setLocality(''); }}
-            className="input input-bordered w-full"
+            className={`input w-full${city === '' ? ' border-red-500 bg-red-50' : ''}`}
             disabled={marketsLoading}
             title="City"
           >
             <option value="">Select City</option>
             {cities.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
+          {city === '' && (
+            <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              City is required.
+            </p>
+          )}
         </div>
         {/* Locality Dropdown */}
         <div className="mb-3">
@@ -163,7 +186,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             required
             value={locality}
             onChange={e => setLocality(e.target.value)}
-            className="input input-bordered w-full"
+            className={`input w-full${locality === '' ? ' border-red-500 bg-red-50' : ''}`}
             disabled={!city || marketsLoading}
             title="Locality"
           >
@@ -172,6 +195,12 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
               <option key={market.id} value={market.market}>{market.market}</option>
             ))}
           </select>
+          {locality === '' && (
+            <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              Locality is required.
+            </p>
+          )}
         </div>
         <div className="mb-3">
           <label className="block text-sm font-medium mb-1">Preferences</label>
