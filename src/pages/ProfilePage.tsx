@@ -758,7 +758,7 @@ const ProfilePage = () => {
                   </h3>
                   <div className="flex items-center gap-4">
                     <a
-                      href={`https://wa.me/?text=${encodeURIComponent('Check out my Homemates profile: ' + window.location.origin + '/profile/' + profileUser.id)}`}
+                      href={`https://wa.me/?text=${encodeURIComponent('Check out my Homemates profile: ' + window.location.origin + '/profile')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-success flex items-center gap-2 whatsapp-share-btn"
