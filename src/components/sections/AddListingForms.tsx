@@ -446,7 +446,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                 <option value="" disabled>No localities found for this city</option>
               )}
               {localities.map(locality => (
-                <option key={locality.id} value={locality.market}>{locality.market}</option>
+                <option key={locality} value={locality}>{locality}</option>
               ))}
             </select>
             {errors.locality && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
@@ -1207,7 +1207,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                 <option value="" disabled>No localities found for this city</option>
               )}
               {localities.map(locality => (
-                <option key={locality.id} value={locality.market}>{locality.market}</option>
+                <option key={locality} value={locality}>{locality}</option>
               ))}
             </select>
             {errors.locality && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">

@@ -96,20 +96,22 @@ export async function getMarkets(): Promise<Market[]> {
 // Fetch localities for a given city from the markets collection
 export async function getLocalitiesByCity(city: string): Promise<string[]> {
   try {
-    const q = query(collection(db, 'markets'), where('city', '==', city));
-    const querySnapshot = await getDocs(q);
-    if (!querySnapshot.empty) {
-      // Collect all 'market' fields from all docs for this city
-      const allMarkets = querySnapshot.docs
-        .map(doc => doc.data().market)
-        .filter((m): m is string => typeof m === 'string' && m.trim() !== '');
-      // Remove duplicates (case-insensitive, trimmed)
-      const uniqueMarkets = Array.from(new Set(allMarkets.map(m => m.trim().toLowerCase()))).map(
-        key => allMarkets.find(m => m.trim().toLowerCase() === key) || key
-      );
-      return uniqueMarkets;
-    }
-    return [];
+    const normalizedCity = city.trim().toLowerCase();
+    const allMarketsSnapshot = await getDocs(collection(db, 'markets'));
+    const allMarkets = allMarketsSnapshot.docs
+      .map(doc => doc.data())
+      .filter((m: any) => typeof m.city === 'string' && m.city.trim().toLowerCase() === normalizedCity)
+      .map((m: any) => m.market)
+      .filter((m: any) => typeof m === 'string' && m.trim() !== '');
+    // Remove duplicates (case-insensitive, trimmed)
+    const uniqueMarkets = Array.from(new Set(allMarkets.map((m: string) => m.trim().toLowerCase())))
+      .map(key => allMarkets.find((m: string) => m.trim().toLowerCase() === key) || key);
+    // Debug logs
+    console.log('Looking for city:', normalizedCity);
+    console.log('All markets:', allMarketsSnapshot.docs.map(doc => doc.data()));
+    console.log('Filtered markets:', allMarkets);
+    console.log('Unique markets:', uniqueMarkets);
+    return uniqueMarkets;
   } catch (error) {
     console.error('Error fetching localities for city:', city, error);
     return [];
