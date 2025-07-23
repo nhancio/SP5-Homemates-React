@@ -965,7 +965,7 @@ const ProfilePage = () => {
                         <MoreVertical className="w-5 h-5 text-gray-600" />
                       </button>
                       {showOptionsFor === listing.id && (
-                        <div className="absolute right-0 mt-2 w-44 bg-white border rounded shadow z-20 animate-fade-in">
+                        <div className="absolute right-0 mt-2 w-44 bg-white border rounded z-20">
                           <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-sm gap-2" onClick={() => { setShowOptionsFor(null); handleEditListing(listing); }}>
                             <Pencil className="w-4 h-4 text-primary-600" /> Edit
                           </button>

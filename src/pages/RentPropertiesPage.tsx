@@ -174,7 +174,7 @@ const RentPropertiesPage = () => {
         {showFloatingFilter && (
           <button
             style={{ zIndex: 9999, bottom: '30vh', background: 'linear-gradient(90deg, #C2185B 60%, #FF80AB 100%)' }}
-            className="fixed right-24 text-white p-5 rounded-full shadow-2xl flex items-center justify-center hover:bg-primary-700 transition group"
+            className="fixed right-24 text-white p-5 rounded-full flex items-center justify-center hover:bg-primary-700 transition group"
             onClick={() => setShowFilterModal(true)}
             aria-label="Open Filters"
             title="Filters"

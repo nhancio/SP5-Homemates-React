@@ -10,6 +10,8 @@ interface FeaturedPropertiesProps {
   viewAllLink: string;
   type: 'buy' | 'rent';
   limit?: number;
+  minRent?: number;
+  maxRent?: number;
 }
 
 const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({ 
@@ -17,7 +19,9 @@ const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
   subtitle, 
   viewAllLink,
   type,
-  limit = 6
+  limit = 6,
+  minRent,
+  maxRent
 }) => {
   // Get properties filtered by type and limited to the specified number
   const properties = getMockProperties()
@@ -31,6 +35,11 @@ const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
           <div>
             <h2 className="text-2xl font-bold mb-2">{title}</h2>
             <p className="text-gray-600">{subtitle}</p>
+            {typeof minRent === 'number' && typeof maxRent === 'number' && (
+              <span className="inline-block mt-2 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-sm font-semibold border border-rose-200">
+                Rent Range: ₹{minRent.toLocaleString()} - ₹{maxRent.toLocaleString()}
+              </span>
+            )}
           </div>
           <Link to={viewAllLink} className="flex items-center text-primary-600 hover:text-primary-700 mt-2 md:mt-0">
             <span className="font-medium">View all</span>

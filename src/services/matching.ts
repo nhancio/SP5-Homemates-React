@@ -276,12 +276,16 @@ export async function findUserMatches(currentUser: UserProfile, limit: number = 
       const lifestyleMatch = calculateLifestyleMatch(currentUser, user);
       const compatibilityScore = calculateCompatibilityScore(currentUser, user);
       
-      const totalScore = 
-        preferenceMatch.score * MATCH_WEIGHTS.PREFERENCE_MATCH +
-        locationMatch * MATCH_WEIGHTS.LOCATION_MATCH +
-        budgetMatch * MATCH_WEIGHTS.BUDGET_MATCH +
-        lifestyleMatch.score * MATCH_WEIGHTS.LIFESTYLE_MATCH +
-        compatibilityScore.score * MATCH_WEIGHTS.COMPATIBILITY;
+      const totalScore =
+        (preferenceMatch.score + locationMatch + budgetMatch + lifestyleMatch.score + compatibilityScore.score) / 5;
+      console.log('Matching', currentUser.userName, 'with', user.userName, {
+        preference: preferenceMatch.score,
+        location: locationMatch,
+        budget: budgetMatch,
+        lifestyle: lifestyleMatch.score,
+        compatibility: compatibilityScore.score,
+        total: totalScore
+      });
       
       return {
         user,
@@ -512,6 +516,10 @@ export function getCompatibilityInsights(user1: UserProfile, user2: UserProfile)
   areas: string[];
   recommendations: string[];
 } {
+  console.log('Compatibility Insights:', {
+    user1: { name: user1.userName, preferences: user1.preferences, city: user1.city, locality: user1.locality },
+    user2: { name: user2.userName, preferences: user2.preferences, city: user2.city, locality: user2.locality }
+  });
   const preferenceMatch = calculatePreferenceMatch(user1, user2);
   const locationMatch = calculateLocationMatch(user1, user2);
   const budgetMatch = calculateBudgetMatch(user1, user2);
@@ -567,3 +575,93 @@ export function getCompatibilityInsights(user1: UserProfile, user2: UserProfile)
     recommendations
   };
 } 
+
+export { calculatePreferenceMatch, calculateLocationMatch, calculateBudgetMatch, calculateLifestyleMatch };
+
+// MOCK USERS FOR LOCAL TESTING
+export const mockUsers: UserProfile[] = [
+  {
+    id: 'u1',
+    userEmail: 'alice@example.com',
+    userName: 'Alice',
+    userPhoneNumber: '9876543210',
+    age: 24,
+    gender: 'Female',
+    profession: 'Engineer',
+    preferences: ['Music', 'Yoga', 'Movies'],
+    photoURL: '',
+    online: true,
+    lastActive: Date.now() - 10000,
+    city: 'Bangalore',
+    locality: 'Indiranagar',
+    budget: { min: 10000, max: 20000 },
+    lookingFor: 'Flatmate',
+    moveInDate: '2024-07-01',
+    flatType: '2BHK',
+    roomType: 'Single',
+    bathroomType: 'Attached',
+  },
+  {
+    id: 'u2',
+    userEmail: 'bob@example.com',
+    userName: 'Bob',
+    userPhoneNumber: '9123456789',
+    age: 29,
+    gender: 'Male',
+    profession: 'Doctor',
+    preferences: ['Cricket', 'Cooking', 'Music'],
+    photoURL: '',
+    online: false,
+    lastActive: Date.now() - 600000,
+    city: 'Hyderabad',
+    locality: 'Gachibowli',
+    budget: { min: 15000, max: 25000 },
+    lookingFor: 'Roommate',
+    moveInDate: '2024-08-01',
+    flatType: '3BHK',
+    roomType: 'Shared',
+    bathroomType: 'Common',
+  },
+  {
+    id: 'u3',
+    userEmail: 'carol@example.com',
+    userName: 'Carol',
+    userPhoneNumber: '9988776655',
+    age: 22,
+    gender: 'Female',
+    profession: 'Student',
+    preferences: ['Reading', 'Yoga', 'Badminton'],
+    photoURL: '',
+    online: true,
+    lastActive: Date.now() - 30000,
+    city: 'Chennai',
+    locality: 'Adyar',
+    budget: { min: 8000, max: 12000 },
+    lookingFor: 'Flatmate',
+    moveInDate: '2024-07-15',
+    flatType: '1BHK',
+    roomType: 'Single',
+    bathroomType: 'Attached',
+  },
+  {
+    id: 'u4',
+    userEmail: 'dave@example.com',
+    userName: 'Dave',
+    userPhoneNumber: '9871234560',
+    age: 35,
+    gender: 'Male',
+    profession: 'Artist',
+    preferences: ['Music', 'Movies', 'Cooking'],
+    photoURL: '',
+    online: false,
+    lastActive: Date.now() - 900000,
+    city: 'Bangalore',
+    locality: 'Whitefield',
+    budget: { min: 20000, max: 30000 },
+    lookingFor: 'Roommate',
+    moveInDate: '2024-09-01',
+    flatType: '2BHK',
+    roomType: 'Shared',
+    bathroomType: 'Common',
+  },
+]; 

@@ -651,7 +651,7 @@ Link: ${url}`;
           <img
             src={modalImage}
             alt="Property Full"
-            className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg z-50"
+            className="max-h-[90vh] max-w-[90vw] rounded-lg z-50"
             onClick={e => e.stopPropagation()}
           />
           {/* Close Button */}

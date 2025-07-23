@@ -18,16 +18,13 @@ interface PropertyFiltersProps {
 }
 
 const PRICE_MIN = 1000; // Fixed min price
-const PRICE_MAX = 300000; // Max rent set to 3L
+const PRICE_MAX = 30000; // Max rent set to 30K
 const SLIDER_STEP = 500;
 const SLIDER_MARKS = {
   1000: '₹1k',
-  50000: '₹50k',
-  100000: '₹1L',
-  150000: '₹1.5L',
-  200000: '₹2L',
-  250000: '₹2.5L',
-  300000: '₹3L',
+  10000: '₹10k',
+  20000: '₹20k',
+  30000: '₹30k',
 };
 
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listingType }) => {
@@ -86,11 +83,11 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
 
   // Local state for min/max fields, keyed by listingType
   const isRent = listingType === 'rent';
-  const [localMin, setLocalMin] = useState<number>(
-    isRent ? (filters[listingType]?.minRent ?? PRICE_MIN) : (filters[listingType]?.minPrice ?? PRICE_MIN)
+  const [localMin, setLocalMin] = useState<string>(
+    String(isRent ? (filters[listingType]?.minRent ?? PRICE_MIN) : (filters[listingType]?.minPrice ?? PRICE_MIN))
   );
-  const [localMax, setLocalMax] = useState<number>(
-    isRent ? (filters[listingType]?.maxRent ?? PRICE_MAX) : (filters[listingType]?.maxPrice ?? PRICE_MAX)
+  const [localMax, setLocalMax] = useState<string>(
+    String(isRent ? (filters[listingType]?.maxRent ?? PRICE_MAX) : (filters[listingType]?.maxPrice ?? PRICE_MAX))
   );
 
   // Sync local state with context filters when filters change externally
@@ -99,8 +96,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
     setLocalPriceMax(isBuyFilters(filters[listingType]) ? filters[listingType].maxPrice : undefined);
     setLocalMinRent(isRentFilters(filters[listingType]) ? filters[listingType].minRent : '');
     setLocalMaxRent(isRentFilters(filters[listingType]) ? filters[listingType].maxRent : '');
-    setLocalMin(isRent ? filters[listingType].minRent : filters[listingType].minPrice);
-    setLocalMax(isRent ? filters[listingType].maxRent : filters[listingType].maxPrice);
+    setLocalMin(isRent ? String(filters[listingType].minRent) : String(filters[listingType].minPrice));
+    setLocalMax(isRent ? String(filters[listingType].maxRent) : String(filters[listingType].maxPrice));
   }, [filters[listingType], listingType]);
 
   useEffect(() => {
@@ -152,30 +149,60 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
     });
   };
 
+  // Validation state for min/max rent
+  const [minRentError, setMinRentError] = useState<string | null>(null);
+  const [maxRentError, setMaxRentError] = useState<string | null>(null);
+
   // Handler for input changes
   const handleMinInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = Number(e.target.value);
-    if (isNaN(val)) val = PRICE_MIN;
-    val = Math.max(PRICE_MIN, Math.min(val, localMax));
-    setLocalMin(val);
+    let val = e.target.value.replace(/[^0-9]/g, ''); // Only allow digits
+    if (val.length > 5) val = val.slice(0, 5);
+    let numVal = Number(val);
+    if (val === '' || isNaN(numVal)) {
+      setMinRentError('Please enter a number');
+      setLocalMin(val);
+      return;
+    }
+    if (numVal < PRICE_MIN) {
+      numVal = PRICE_MIN;
+    }
+    const maxNum = Number(localMax);
+    if (!isNaN(maxNum) && numVal > maxNum) {
+      numVal = maxNum;
+    }
+    setMinRentError(null);
+    setLocalMin(String(numVal));
     setFilters({
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        ...(isRent ? { minRent: val, maxRent: localMax } : { minPrice: val, maxPrice: localMax }),
+        ...(isRent ? { minRent: numVal, maxRent: maxNum } : { minPrice: numVal, maxPrice: maxNum }),
       },
     });
   };
   const handleMaxInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = Number(e.target.value);
-    if (isNaN(val)) val = PRICE_MAX;
-    val = Math.min(PRICE_MAX, Math.max(val, localMin));
-    setLocalMax(val);
+    let val = e.target.value.replace(/[^0-9]/g, ''); // Only allow digits
+    if (val.length > 5) val = val.slice(0, 5);
+    let numVal = Number(val);
+    if (val === '' || isNaN(numVal)) {
+      setMaxRentError('Please enter a number');
+      setLocalMax(val);
+      return;
+    }
+    if (numVal > PRICE_MAX) {
+      numVal = PRICE_MAX;
+    }
+    const minNum = Number(localMin);
+    if (!isNaN(minNum) && numVal < minNum) {
+      numVal = minNum;
+    }
+    setMaxRentError(null);
+    setLocalMax(String(numVal));
     setFilters({
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        ...(isRent ? { minRent: localMin, maxRent: val } : { minPrice: localMin, maxPrice: val }),
+        ...(isRent ? { minRent: minNum, maxRent: numVal } : { minPrice: minNum, maxPrice: numVal }),
       },
     });
   };
@@ -187,7 +214,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        ...(isRent ? { minRent: localMin } : { priceMin: localMin }),
+        ...(isRent ? { minRent: Number(localMin) } : { priceMin: Number(localMin) }),
       },
     });
   };
@@ -197,7 +224,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        ...(isRent ? { maxRent: localMax } : { priceMax: localMax }),
+        ...(isRent ? { maxRent: Number(localMax) } : { priceMax: Number(localMax) }),
       },
     });
   };
@@ -346,28 +373,16 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                   <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                   <input
                     type="number"
-                    className="input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border border-primary-100 rounded-md text-left"
+                    className={`input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border rounded-md text-left ${minRentError ? 'border-red-400' : 'border-primary-100'}`}
                     min={1000}
-                    max={localMax}
+                    max={30000}
+                    maxLength={5}
                     value={localMin}
-                    onChange={e => {
-                      let val = Number(e.target.value);
-                      if (isNaN(val)) val = 1000;
-                      val = Math.max(1000, Math.min(val, localMax));
-                      setLocalMin(val);
-                      setFilters({
-                        ...filters,
-                        [listingType]: {
-                          ...filters[listingType],
-                          ...(isRent ? { minRent: val, maxRent: localMax } : { minPrice: val, maxPrice: localMax }),
-                        },
-                      });
-                    }}
-                    onBlur={commitMin}
-                    onKeyDown={e => { if (e.key === 'Enter') commitMin(); }}
+                    onChange={handleMinInput}
                     placeholder="Min"
                     aria-label="Minimum Rent"
                   />
+                  {minRentError && <div className="text-xs text-red-500 mt-1">{minRentError}</div>}
                 </div>
               </div>
               <span className="text-gray-400 font-bold mb-1">-</span>
@@ -377,28 +392,16 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                   <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                   <input
                     type="number"
-                    className="input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border border-primary-100 rounded-md text-left"
-                    min={localMin}
-                    max={300000}
+                    className={`input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border rounded-md text-left ${maxRentError ? 'border-red-400' : 'border-primary-100'}`}
+                    min={Number(localMin) || 1000}
+                    max={30000}
+                    maxLength={5}
                     value={localMax}
-                    onChange={e => {
-                      let val = Number(e.target.value);
-                      if (isNaN(val)) val = 300000;
-                      val = Math.max(localMin, Math.min(val, 300000));
-                      setLocalMax(val);
-                      setFilters({
-                        ...filters,
-                        [listingType]: {
-                          ...filters[listingType],
-                          ...(isRent ? { minRent: localMin, maxRent: val } : { minPrice: localMin, maxPrice: val }),
-                        },
-                      });
-                    }}
-                    onBlur={commitMax}
-                    onKeyDown={e => { if (e.key === 'Enter') commitMax(); }}
+                    onChange={handleMaxInput}
                     placeholder="Max"
                     aria-label="Maximum Rent"
                   />
+                  {maxRentError && <div className="text-xs text-red-500 mt-1">{maxRentError}</div>}
                 </div>
               </div>
               <span className="text-sm text-primary-700 font-semibold mb-1 ml-2">per month</span>
@@ -416,7 +419,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                         max={PRICE_MAX}
                         step={SLIDER_STEP}
                         marks={SLIDER_MARKS}
-                        value={[localMin, localMax]}
+                        value={[Number(localMin), Number(localMax)]}
                         handleRender={(node: React.ReactElement, handleProps: any) => (
                           <Tooltip
                             prefixCls="rc-slider-tooltip"
@@ -433,8 +436,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                             let [min, max] = value;
                             min = Math.max(PRICE_MIN, Math.min(min, max));
                             max = Math.min(PRICE_MAX, Math.max(max, min));
-                            setLocalMin(min);
-                            setLocalMax(max);
+                            setLocalMin(String(min));
+                            setLocalMax(String(max));
                             setFilters({
                               ...filters,
                               [listingType]: {
@@ -447,8 +450,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                         onAfterChange={(value: number | number[]) => {
                           if (Array.isArray(value) && value.length === 2) {
                             const [min, max] = value;
-                            setLocalMin(min);
-                            setLocalMax(max);
+                            setLocalMin(String(min));
+                            setLocalMax(String(max));
                             setFilters({ ...filters, [listingType]: { ...filters[listingType], minRent: min, maxRent: max, }, });
                           }
                         }}
