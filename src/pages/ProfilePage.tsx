@@ -103,8 +103,6 @@ const ProfilePage = () => {
     instagram: '',
     facebook: ''
   });
-  // Add showContactInfo to profile state and edit form
-  const [showContactInfo, setShowContactInfo] = useState(true);
   const [recentProperties, setRecentProperties] = useState<any[]>([]);
   const [mutualUsers, setMutualUsers] = useState<any[]>([]);
   const [userCredits, setUserCredits] = useState<number>(0);
@@ -124,7 +122,7 @@ const ProfilePage = () => {
     try {
       const { getUserCredits } = await import('../services/credits');
       const creditInfo = await getUserCredits(user!.id);
-      setUserCredits(creditInfo.credits);
+      setUserCredits(Math.max(0, creditInfo.credits));
     } catch (error) {
       console.error('Error fetching user credits:', error);
     }
@@ -186,7 +184,6 @@ const ProfilePage = () => {
   }, [profileUser]);
 
   useEffect(() => {
-    setShowContactInfo(profileUser?.showContactInfo !== false); // default to true if undefined
     setEditProfileForm({
       photoURL: profileUser?.photoURL || '',
       coverPhotoURL: profileUser?.coverPhotoURL || '',
@@ -375,15 +372,6 @@ const ProfilePage = () => {
     }
   };
 
-  const handleContactToggle = async () => {
-    const newValue = !showContactInfo;
-    setShowContactInfo(newValue);
-    if (user && user.id) {
-      await updateDoc(doc(db, 'u', user.id), { showContactInfo: newValue });
-      setProfileUser((prev: any) => ({ ...prev, showContactInfo: newValue }));
-    }
-  };
-
   if (!isAuthenticated) {
     return (
       <div className="py-20">
@@ -531,110 +519,38 @@ const ProfilePage = () => {
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           {/* Cover Image - now supports upload and display */}
           <div className="relative h-32 bg-gradient-to-r from-primary-600 to-primary-800">
-            {profileUser.coverPhotoURL && (
-              <img
-                src={profileUser.coverPhotoURL}
-                alt="Cover"
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ zIndex: 1 }}
-              />
-            )}
-            <button
-              type="button"
-              className="absolute top-2 right-2 bg-primary-600 text-white rounded-full p-2 shadow hover:bg-primary-700 transition-opacity opacity-90 focus:outline-none"
-              style={{ zIndex: 2 }}
-              title="Change cover photo"
-              aria-label="Edit cover photo"
-              onClick={() => document.getElementById('cover-photo-input')?.click()}
-            >
-              <Pencil className="w-5 h-5" />
-            </button>
-            <input
-              id="cover-photo-input"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleCoverPhotoUpload}
+            {/* Show a default cover photo based on user preferences, or fallback */}
+            <div
+              className="absolute inset-0 w-full h-full"
+              style={{
+                zIndex: 1,
+                backgroundImage: `linear-gradient(90deg, #be185d 0%, #881337 100%), url('/images/floral-pattern.png'), url('data:image/svg+xml;utf8,<svg width=\"32\" height=\"32\" viewBox=\"0 0 32 32\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g opacity=\"0.13\"><circle cx=\"16\" cy=\"16\" r=\"2\" fill=\"white\"/><path d=\"M16 4 V10 M16 22 V28 M4 16 H10 M22 16 H28 M8 8 L12 12 M20 20 L24 24 M8 24 L12 20 M20 12 L24 8\" stroke=\"white\" stroke-width=\"1.2\"/></g></svg>')`,
+                backgroundRepeat: 'repeat',
+                backgroundSize: 'auto',
+                backgroundBlendMode: 'overlay',
+              }}
             />
-            {uploading && (
-              <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center z-40">
-                <span className="text-primary-600 font-semibold">Uploading...</span>
-              </div>
-            )}
           </div>
           {/* Profile Info */}
           <div className="relative px-6 pb-6">
             <div className="flex flex-col md:flex-row">
               {/* Avatar */}
-              <div className="flex justify-center md:justify-start -mt-16 mb-4 md:mb-0">
-                <div className="relative group w-32 h-32">
-                      <img 
+              <div className="flex justify-center md:justify-start -mt-16 mb-4 md:mb-0" style={{zIndex:2, position:'relative'}}>
+                <div className="relative group w-32 h-32 flex items-center justify-center">
+                  <img
                     src={photoURL ? photoURL : '/images/default-avatar.png'}
                     onError={(e) => {
                       (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=E0E0E0&color=7c2d6e&size=128`;
                     }}
-                        alt={displayName} 
-                    className="w-32 h-32 rounded-full object-cover border-4 border-white shadow"
+                    alt={displayName}
+                    className="w-32 h-32 rounded-full object-cover shadow-md"
                   />
-                  {/* Pencil icon overlay */}
-                  <button
-                    type="button"
-                    className="absolute bottom-2 right-2 bg-primary-600 text-white rounded-full p-2 shadow hover:bg-primary-700 transition-opacity opacity-90 group-hover:opacity-100 focus:outline-none"
-                    style={{ fontSize: 16, zIndex: 20 }}
-                    onClick={() => setShowFileInput(true)}
-                    title="Change profile picture"
-                    aria-label="Edit profile photo"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  {/* File input (hidden) */}
-                  {showFileInput && (
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="absolute bottom-0 left-0 w-full h-full opacity-0 cursor-pointer"
-                      style={{ zIndex: 30 }}
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-                        if (!user || !user.id) {
-                          alert('You must be logged in to upload a profile photo.');
-                          return;
-                        }
-                        setUploading(true);
-                        try {
-                          // Upload to Firebase Storage
-                          const storageRef = ref(storage, `profile_photos/${user.id}.jpg`);
-                          await uploadBytes(storageRef, file);
-                          const downloadURL = await getDownloadURL(storageRef);
-                          // Update Firestore user profile
-                          const userDocRef = doc(db, 'u', user.id);
-                          await updateDoc(userDocRef, { photoURL: downloadURL });
-                          // Update local state
-                          setProfileUser((prev: any) => ({ ...prev, photoURL: downloadURL }));
-                          setShowFileInput(false);
-                        } catch (err) {
-                          alert('Failed to upload profile photo.');
-                          console.error(err);
-                        } finally {
-                          setUploading(false);
-                        }
-                      }}
-                      onBlur={() => setShowFileInput(false)}
-                      autoFocus
-                    />
-                  )}
-                  {uploading && (
-                    <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center rounded-full z-40">
-                      <span className="text-primary-600 font-semibold">Uploading...</span>
-                      </div>
-                    )}
+                </div>
                   {isPremium && (
                     <div className="absolute -right-2 -bottom-2 bg-accent-500 text-white p-1 rounded-full z-10">
                       <Award className="w-5 h-5" />
                     </div>
                   )}
-                </div>
               </div>
               {/* User Info */}
               <div className="md:ml-6 text-center md:text-left flex-grow">
@@ -652,23 +568,6 @@ const ProfilePage = () => {
                   </h1>
                 </div>
                 <div className="mt-4 space-y-2">
-                  {/* Contact Info Toggle */}
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-sm text-gray-600">Show Contact Info</span>
-                    <button
-                      className={`w-10 h-6 flex items-center bg-gray-200 rounded-full p-1 transition-colors duration-300 ${showContactInfo ? 'bg-primary-500' : 'bg-gray-300'}`}
-                      onClick={handleContactToggle}
-                      title="Toggle contact info visibility"
-                      aria-label="Toggle contact info visibility"
-                    >
-                      <span
-                        className={`w-4 h-4 bg-white rounded-full shadow transform transition-transform duration-300 ${showContactInfo ? 'translate-x-4' : ''}`}
-                      />
-                    </button>
-                  </div>
-                  {/* Contact Info (conditionally rendered) */}
-                  {showContactInfo && (
-                    <>
                   <p className="flex items-center justify-center md:justify-start text-gray-600">
                     <Mail className="w-4 h-4 mr-2" />
                     {displayEmail}
@@ -677,9 +576,7 @@ const ProfilePage = () => {
                     <p className="flex items-center justify-center md:justify-start text-gray-600">
                       <Phone className="w-4 h-4 mr-2" />
                       {displayPhone}
-                        </p>
-                      )}
-                    </>
+                    </p>
                   )}
                   {displayCity && (
                     <p className="flex items-center justify-center md:justify-start text-gray-600">
@@ -712,46 +609,46 @@ const ProfilePage = () => {
                     </p>
                   )}
                 </div>
-                {/* Subscription UI - moved here for first scroll visibility */}
-                <div className="mt-6 subscription-section">
-                  <p className="plan-status text-lg mb-2">Plan: <span className="free-tag bg-gray-200 text-primary-700 px-2 py-1 rounded">Free</span></p>
-                  <div className="premium-box bg-primary-50 border border-primary-200 rounded-lg p-6 mt-2">
-                    <h3 className="text-xl font-bold mb-2">Upgrade to Premium</h3>
-                    <ul className="benefits-list list-disc pl-6 mb-4 text-primary-700">
-                      <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> View verified contacts</li>
-                      <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> Appear higher in search</li>
-                      <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> Unlimited swipes</li>
-                    </ul>
-                    <div className="flex items-center gap-4 mb-4">
-                      <span className="text-2xl font-bold text-primary-700">₹99/month</span>
-                      <span className="text-gray-500">or</span>
-                      <span className="text-lg font-semibold text-primary-600">₹499/year</span>
+                {/* Premium and Credits side by side */}
+                <div className="flex flex-col md:flex-row gap-6 mt-6">
+                  {/* Upgrade to Premium */}
+                  <div className="flex-1 bg-primary-50 border border-primary-200 rounded-lg p-6">
+                    <p className="plan-status text-lg mb-2">Plan: <span className="free-tag bg-gray-200 text-primary-700 px-2 py-1 rounded">Free</span></p>
+                    <div className="premium-box">
+                      <h3 className="text-xl font-bold mb-2">Upgrade to Premium</h3>
+                      <ul className="benefits-list list-disc pl-6 mb-4 text-primary-700">
+                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> Priority support from Homemates team</li>
+                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> Exclusive Homemates community events</li>
+                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> Get personalized property recommendations</li>
+                      </ul>
+                      <div className="flex items-center gap-4 mb-4">
+                        <span className="flex items-center gap-2">
+                          <span className="line-through text-gray-400 text-xl">₹499</span>
+                          <span className="text-2xl font-bold text-primary-700">₹99/month</span>
+                        </span>
+                      </div>
+                      <button className="upgrade-btn btn btn-primary px-6 py-2 text-lg font-semibold">Upgrade to Premium</button>
+                      <div className="text-xs text-gray-600 mt-2">Get exclusive benefits and features with a Premium membership.</div>
+                      <div className="text-xs text-gray-400 mt-2 flex items-center gap-1"><span role="img" aria-label="secure">🔒</span> Secure Payment</div>
                     </div>
-                    <button className="upgrade-btn btn btn-primary px-6 py-2 text-lg font-semibold">Upgrade Now</button>
-                    <div className="text-xs text-gray-400 mt-2 flex items-center gap-1"><span role="img" aria-label="secure">🔒</span> Secure Payment</div>
                   </div>
-                </div>
-
-                {/* Credits Section */}
-                <div className="mt-6 bg-primary-50 border border-primary-200 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <CreditCard className="w-5 h-5 mr-2 text-primary-600" />
-                    Your Credits
-                  </h3>
-                  <div className="flex items-center justify-between">
+                  {/* Your Credits */}
+                  <div className="flex-1 bg-primary-50 border border-primary-200 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center">
+                      <CreditCard className="w-5 h-5 mr-2 text-primary-600" />
+                      Your Credits
+                    </h3>
                     <div>
-                      <div className="text-3xl font-bold text-primary-600">{userCredits}</div>
-                      <div className="text-sm text-gray-600">Credits remaining</div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Use credits to contact property owners via call or WhatsApp
-                      </p>
+                      <div className="text-3xl font-bold text-primary-600 mb-1">{Math.max(0, userCredits)}</div>
+                      <div className="text-sm text-gray-600 mb-1">Credits remaining</div>
+                      <div className="text-xs text-gray-500 mb-4">Use credits to contact property owners via call or WhatsApp.</div>
+                      <button
+                        onClick={() => window.location.href = '/payment'}
+                        className="upgrade-btn btn btn-primary px-6 py-2 text-lg font-semibold"
+                      >
+                        Buy Contact Credits
+                      </button>
                     </div>
-                    <button
-                      onClick={() => window.location.href = '/payment'}
-                      className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition"
-                    >
-                      Buy More Credits
-                    </button>
                   </div>
                 </div>
                 {/* About Me and Looking For sections */}
@@ -853,55 +750,6 @@ const ProfilePage = () => {
                       <button className="ml-2" onClick={() => setEditingPreferences(true)}><Edit className="w-4 h-4 text-primary-600" /></button>
                     </div>
                   )}
-                </div>
-                {/* Social Links section */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-                    <span>Social Links</span>
-                    {/* <button
-                      className="ml-2 p-1 rounded-full bg-gray-100 hover:bg-primary-50 text-primary-600"
-                      onClick={() => setEditProfileOpen(true)}
-                      title="Edit Social Links"
-                      aria-label="Edit Social Links"
-                    >
-                      <Edit className="w-5 h-5" />
-                    </button> */}
-                  </h3>
-                  <div className="flex flex-wrap gap-4 items-center">
-                    {profileUser.instagram && (
-                      <a href={`https://instagram.com/${profileUser.instagram.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-pink-600 hover:underline">
-                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5A4.25 4.25 0 0 0 20.5 16.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5zm4.25 2.75a5.75 5.75 0 1 1 0 11.5 5.75 5.75 0 0 1 0-11.5zm0 1.5a4.25 4.25 0 1 0 0 8.5 4.25 4.25 0 0 0 0-8.5zm5.25.75a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>
-                        Instagram
-                      </a>
-                    )}
-                    {profileUser.linkedin && (
-                      <a href={profileUser.linkedin.startsWith('http') ? profileUser.linkedin : `https://linkedin.com/in/${profileUser.linkedin.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-700 hover:underline">
-                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.761 0 5-2.239 5-5v-14c0-2.761-2.239-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.268c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm13.5 11.268h-3v-5.604c0-1.337-.025-3.063-1.868-3.063-1.868 0-2.154 1.459-2.154 2.967v5.7h-3v-10h2.881v1.367h.041c.401-.761 1.381-1.563 2.845-1.563 3.043 0 3.604 2.004 3.604 4.609v5.587z"/></svg>
-                        LinkedIn
-                      </a>
-                    )}
-                    {profileUser.facebook && (
-                      <a href={profileUser.facebook.startsWith('http') ? profileUser.facebook : `https://facebook.com/${profileUser.facebook.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-blue-600 hover:underline">
-                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.733 0-1.325.592-1.325 1.326v21.348c0 .733.592 1.326 1.325 1.326h11.495v-9.294h-3.128v-3.622h3.128v-2.672c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.797.143v3.24l-1.918.001c-1.504 0-1.797.715-1.797 1.763v2.313h3.587l-.467 3.622h-3.12v9.294h6.116c.733 0 1.325-.593 1.325-1.326v-21.349c0-.733-.592-1.326-1.325-1.326z"/></svg>
-                        Facebook
-                      </a>
-                    )}
-                    {profileUser.twitter && (
-                      <a href={profileUser.twitter.startsWith('http') ? profileUser.twitter : `https://twitter.com/${profileUser.twitter.replace(/^@/, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sky-500 hover:underline">
-                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557a9.93 9.93 0 0 1-2.828.775 4.932 4.932 0 0 0 2.165-2.724c-.951.564-2.005.974-3.127 1.195a4.92 4.92 0 0 0-8.384 4.482c-4.086-.205-7.713-2.164-10.141-5.144a4.822 4.822 0 0 0-.664 2.475c0 1.708.87 3.216 2.188 4.099a4.904 4.904 0 0 1-2.229-.616c-.054 2.281 1.581 4.415 3.949 4.89a4.936 4.936 0 0 1-2.224.084c.627 1.956 2.444 3.377 4.6 3.417a9.868 9.868 0 0 1-6.102 2.104c-.396 0-.787-.023-1.175-.069a13.945 13.945 0 0 0 7.548 2.212c9.057 0 14.009-7.513 14.009-14.009 0-.213-.005-.425-.014-.636a10.012 10.012 0 0 0 2.457-2.548z"/></svg>
-                        Twitter
-                      </a>
-                    )}
-                    {profileUser.website && (
-                      <a href={profileUser.website.startsWith('http') ? profileUser.website : `https://${profileUser.website}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary-700 hover:underline">
-                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm0-14a6 6 0 1 0 0 12A6 6 0 0 0 12 6z"/></svg>
-                        Website
-                      </a>
-                    )}
-                    {!(profileUser.instagram || profileUser.linkedin || profileUser.facebook || profileUser.twitter || profileUser.website) && (
-                      <span className="italic text-gray-400">No social links added yet.</span>
-                    )}
-                  </div>
                 </div>
                 {/* Share Your Profile section with WhatsApp only */}
                 <div className="mt-6">
@@ -1041,11 +889,11 @@ const ProfilePage = () => {
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">Preferences (comma separated)</label>
                   <input className="input w-full" value={editProfileForm.preferences.join(', ')} onChange={e => handleEditProfileChange('preferences', e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean))} />
-              </div>
+                </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium mb-1">Fun Fact</label>
                   <input className="input w-full" value={editProfileForm.funFact} onChange={e => handleEditProfileChange('funFact', e.target.value)} />
-            </div>
+                </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">LinkedIn</label>
                   <input className="input w-full" value={editProfileForm.linkedin} onChange={e => handleEditProfileChange('linkedin', e.target.value)} />
