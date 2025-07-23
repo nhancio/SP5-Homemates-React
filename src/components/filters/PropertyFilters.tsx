@@ -378,7 +378,9 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                     max={30000}
                     maxLength={5}
                     value={localMin}
-                    onChange={handleMinInput}
+                    onChange={e => setLocalMin(e.target.value)}
+                    onBlur={commitMin}
+                    onKeyDown={e => { if (e.key === 'Enter') commitMin(); }}
                     placeholder="Min"
                     aria-label="Minimum Rent"
                   />
@@ -397,7 +399,9 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
                     max={30000}
                     maxLength={5}
                     value={localMax}
-                    onChange={handleMaxInput}
+                    onChange={e => setLocalMax(e.target.value)}
+                    onBlur={commitMax}
+                    onKeyDown={e => { if (e.key === 'Enter') commitMax(); }}
                     placeholder="Max"
                     aria-label="Maximum Rent"
                   />
