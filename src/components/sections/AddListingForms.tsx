@@ -221,7 +221,7 @@ const ContactNumberField = ({ formData, setFormData }: { formData: any; setFormD
   <section className="bg-white p-6 rounded-lg shadow-sm">
     <h2 className="text-lg font-semibold mb-4">Contact Details</h2>
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
+      <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
       <input
         type="tel"
         className="input"
@@ -462,7 +462,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
           {/* Row 1 - Flat Type (NEW for Shared Listing) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type*</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type</label>
             <select
               className={`input w-full${errors.flatType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.flatType || ''}
@@ -970,14 +970,14 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       </section>
       {/* 13. Mobile Number at the bottom */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
-        <input
+        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
+              <input
           type="tel"
           className={`input${errors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
           placeholder="Enter your 10-digit mobile number"
           value={formData.contactNumber || ''}
           onChange={e => setFormData({
-            ...formData,
+                    ...formData,
             contactNumber: e.target.value
           })}
           pattern="[0-9]{10}"
@@ -991,7 +991,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           {errors.contactNumber}
         </p>}
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
-      </div>
+        </div>
     </form>
   );
 };
@@ -1186,7 +1186,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
           {/* Row 1 - Flat Type (NEW for Full Home) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type*</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type</label>
             <select
               className={`input w-full${errors.flatType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.flatType || ''}
@@ -1366,48 +1366,54 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         )}
       </section>
 
-      {/* Price Details Section */}
+      {/* Rental Details Section */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Price Details</h2>
+        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Rental Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Price*</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rent (₹/month)</label>
             <input
               type="number"
-              className={`input w-full${errors.price ? ' border-red-500 bg-red-50' : ''}`}
-              placeholder="Enter price"
-              value={formData.sellDetails.price}
-              onChange={e => setFormData({
-                ...formData,
-                sellDetails: {
-                  ...formData.sellDetails,
-                  price: e.target.value
-                }
-              })}
-              min={1000}
-              required
+              className={`input w-full${errors.rent ? ' border-red-500 bg-red-50' : ''}`}
+              placeholder="Enter rent amount"
+              min={0}
+              value={formData.rentDetails.costs.rent || ''}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                const rent = Number(e.target.value);
+                setFormData({
+                  ...formData,
+                  rentDetails: {
+                    ...formData.rentDetails,
+                    costs: {
+                      ...formData.rentDetails.costs,
+                      rent
+                    }
+                  }
+                });
+              }}
               spellCheck={false}
               autoCorrect="off"
             />
-            {errors.price && (
-              <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-                <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-                {errors.price}
-              </p>
-            )}
+            {errors.rent && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.rent}
+            </p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance (₹/month)</label>
             <input
               type="number"
-              className={`input w-full focus:ring-2 focus:ring-primary-300${errors.maintenance ? ' border-red-500 bg-red-50' : ''}`}
-              placeholder="Enter maintenance"
-              value={formData.sellDetails?.maintenance || ''}
+              className={`input w-full${errors.maintenance ? ' border-red-500 bg-red-50' : ''}`}
+              placeholder="Enter maintenance amount"
+              value={formData.rentDetails.costs.maintenance}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
                 ...formData,
-                sellDetails: {
-                  ...formData.sellDetails,
-                  maintenance: e.target.value
+                rentDetails: {
+                  ...formData.rentDetails,
+                  costs: {
+                    ...formData.rentDetails.costs,
+                    maintenance: e.target.value
+                  }
                 }
               })}
               spellCheck={false}
@@ -1419,17 +1425,20 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             </p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (₹)</label>
             <input
               type="number"
-              className={`input w-full focus:ring-2 focus:ring-primary-300${errors.securityDeposit ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${errors.securityDeposit ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter security deposit"
-              value={formData.sellDetails?.securityDeposit || ''}
+              value={formData.rentDetails.costs.securityDeposit}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
                 ...formData,
-                sellDetails: {
-                  ...formData.sellDetails,
-                  securityDeposit: e.target.value
+                rentDetails: {
+                  ...formData.rentDetails,
+                  costs: {
+                    ...formData.rentDetails.costs,
+                    securityDeposit: e.target.value
+                  }
                 }
               })}
               spellCheck={false}
@@ -1441,17 +1450,45 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             </p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Setup Cost (₹)</label>
             <input
               type="number"
-              className={`input w-full focus:ring-2 focus:ring-primary-300${errors.brokerage ? ' border-red-500 bg-red-50' : ''}`}
-              placeholder="Enter brokerage"
-              value={formData.sellDetails?.brokerage || ''}
+              className={`input w-full${errors.setupCost ? ' border-red-500 bg-red-50' : ''}`}
+              placeholder="Enter setup cost"
+              value={formData.rentDetails.costs.setupCost}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
                 ...formData,
-                sellDetails: {
-                  ...formData.sellDetails,
-                  brokerage: e.target.value
+                rentDetails: {
+                  ...formData.rentDetails,
+                  costs: {
+                    ...formData.rentDetails.costs,
+                    setupCost: e.target.value
+                  }
+                }
+              })}
+              spellCheck={false}
+              autoCorrect="off"
+            />
+            {errors.setupCost && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+              {errors.setupCost}
+            </p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage (₹)</label>
+            <input
+              type="number"
+              className={`input w-full${errors.brokerage ? ' border-red-500 bg-red-50' : ''}`}
+              placeholder="Enter brokerage amount"
+              value={formData.rentDetails.costs.brokerage}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
+                ...formData,
+                rentDetails: {
+                  ...formData.rentDetails,
+                  costs: {
+                    ...formData.rentDetails.costs,
+                    brokerage: e.target.value
+                  }
                 }
               })}
               spellCheck={false}
@@ -1521,7 +1558,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       </section>
       {/* 13. Mobile Number at the bottom */}
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
               <input
           type="tel"
           className={`input${errors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}

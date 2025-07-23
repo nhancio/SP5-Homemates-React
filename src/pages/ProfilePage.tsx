@@ -617,9 +617,9 @@ const ProfilePage = () => {
                     <div className="premium-box">
                       <h3 className="text-xl font-bold mb-2">Upgrade to Premium</h3>
                       <ul className="benefits-list list-disc pl-6 mb-4 text-primary-700">
-                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> Priority support from Homemates team</li>
-                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> Exclusive Homemates community events</li>
-                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> Get personalized property recommendations</li>
+                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> <span className="font-semibold">Unlimited Calls</span> to property owners</li>
+                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> <span className="font-semibold">Unlimited Chats</span> with potential flatmates</li>
+                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> <span className="font-semibold">Advanced AI-based Matching</span> for best results</li>
                       </ul>
                       <div className="flex items-center gap-4 mb-4">
                         <span className="flex items-center gap-2">
