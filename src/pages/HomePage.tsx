@@ -18,6 +18,7 @@ import {
 const HomePage: React.FC = () => {
   const { user } = useAppContext();
   const [showContent, setShowContent] = useState(false);
+  // Revert animation state
 
   // Always scroll to the Smart Matching Algorithm section
   const handleScrollToContent = () => {
@@ -51,7 +52,6 @@ const HomePage: React.FC = () => {
           </button>
         </div>
       </div>
-      {/* Always show Smart Matching Algorithm section */}
       {showContent && (
         <div id="home-content" className="bg-gray-50 mt-48">
           {/* --- Smart Matching Algorithm heading and description --- */}

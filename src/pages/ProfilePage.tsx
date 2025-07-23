@@ -524,7 +524,7 @@ const ProfilePage = () => {
               className="absolute inset-0 w-full h-full"
               style={{
                 zIndex: 1,
-                backgroundImage: `linear-gradient(90deg, #be185d 0%, #881337 100%), url('/images/floral-pattern.png'), url('data:image/svg+xml;utf8,<svg width=\"32\" height=\"32\" viewBox=\"0 0 32 32\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g opacity=\"0.13\"><circle cx=\"16\" cy=\"16\" r=\"2\" fill=\"white\"/><path d=\"M16 4 V10 M16 22 V28 M4 16 H10 M22 16 H28 M8 8 L12 12 M20 20 L24 24 M8 24 L12 20 M20 12 L24 8\" stroke=\"white\" stroke-width=\"1.2\"/></g></svg>')`,
+                backgroundImage: `linear-gradient(90deg, #be185d 0%, #881337 100%), url('data:image/svg+xml;utf8,<svg width=\"32\" height=\"32\" viewBox=\"0 0 32 32\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\"><g opacity=\"0.13\"><circle cx=\"16\" cy=\"16\" r=\"2\" fill=\"white\"/><path d=\"M16 4 V10 M16 22 V28 M4 16 H10 M22 16 H28 M8 8 L12 12 M20 20 L24 24 M8 24 L12 20 M20 12 L24 8\" stroke=\"white\" stroke-width=\"1.2\"/></g></svg>')`,
                 backgroundRepeat: 'repeat',
                 backgroundSize: 'auto',
                 backgroundBlendMode: 'overlay',
@@ -627,7 +627,7 @@ const ProfilePage = () => {
                           <span className="text-2xl font-bold text-primary-700">₹99/month</span>
                         </span>
                       </div>
-                      <button className="upgrade-btn btn btn-primary px-6 py-2 text-lg font-semibold">Upgrade to Premium</button>
+                      <button className="upgrade-btn btn btn-primary px-6 py-2 text-lg font-semibold" onClick={handleUpgradeClick}>Upgrade to Premium</button>
                       <div className="text-xs text-gray-600 mt-2">Get exclusive benefits and features with a Premium membership.</div>
                       <div className="text-xs text-gray-400 mt-2 flex items-center gap-1"><span role="img" aria-label="secure">🔒</span> Secure Payment</div>
                     </div>
@@ -913,6 +913,25 @@ const ProfilePage = () => {
               <div className="flex justify-end gap-4 mt-6">
                 <button className="btn btn-outline" onClick={() => setEditProfileModalOpen(false)}>Cancel</button>
                 <button className="btn btn-primary" onClick={handleEditProfileSave} disabled={savingField==='editProfileModal'}>Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </Dialog>
+        {/* Upgrade to Premium Popup */}
+        <Dialog open={showUpgradePopup} onClose={() => setShowUpgradePopup(false)} className="fixed z-50 inset-0 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-30" />
+            <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-8 z-10">
+              <Dialog.Title className="text-2xl font-bold mb-4">Upgrade to Premium</Dialog.Title>
+              <p className="mb-4 text-gray-700">Get exclusive benefits and features with a Premium membership for just <span className="font-bold text-primary-700">₹99/month</span>.</p>
+              <ul className="list-disc pl-6 mb-4 text-primary-700">
+                <li className="mb-1">Priority support from Homemates team</li>
+                <li className="mb-1">Exclusive Homemates community events</li>
+                <li className="mb-1">Personalized property recommendations</li>
+              </ul>
+              <div className="flex gap-4 mt-6">
+                <button className="btn btn-primary flex-1" onClick={handlePhonePePayment}>Pay ₹99 & Upgrade</button>
+                <button className="btn btn-outline flex-1" onClick={() => setShowUpgradePopup(false)}>Cancel</button>
               </div>
             </div>
           </div>
