@@ -703,6 +703,44 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               </p>
             )}
           </div>
+          {/* Preferences Multi-select */}
+          <div className="flex flex-wrap gap-3 mt-2">
+            {USER_PREFERENCES.map(opt => {
+              const LucideIcon = LucideIcons[opt.icon] || LucideIcons.Sparkles;
+              const selected = Array.isArray(formData.rentDetails.preferredTenant.preferences) && formData.rentDetails.preferredTenant.preferences.includes(opt.id);
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => {
+                    const prefs = formData.rentDetails.preferredTenant.preferences || [];
+                    setFormData({
+                      ...formData,
+                      rentDetails: {
+                        ...formData.rentDetails,
+                        preferredTenant: {
+                          ...formData.rentDetails.preferredTenant,
+                          preferences: prefs.includes(opt.id)
+                            ? prefs.filter((p: string) => p !== opt.id)
+                            : [...prefs, opt.id]
+                        }
+                      }
+                    });
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all duration-200 text-sm font-medium focus:outline-none min-w-[120px] shadow-sm
+                    ${selected
+                      ? 'bg-primary-600 text-white border-primary-700 shadow-md scale-105'
+                      : 'bg-white text-primary-700 border-primary-200 hover:bg-primary-100 hover:border-primary-400 hover:shadow-lg active:bg-primary-200'}
+                  `}
+                  tabIndex={0}
+                  style={{ boxShadow: selected ? '0 2px 8px 0 rgba(220,38,120,0.10)' : undefined }}
+                >
+                  <LucideIcon className={`w-5 h-5 ${selected ? 'text-white' : 'text-primary-600'} transition-all duration-200`} />
+                  <span className="ml-1">{opt.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
       {/* Move In Section */}

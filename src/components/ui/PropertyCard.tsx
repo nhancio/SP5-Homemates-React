@@ -50,6 +50,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   onClick,
   showBadge = true
 }) => {
+  console.log('PropertyCard property:', property);
   console.log('Rendering PropertyCard for property:', property?.id, property?.address?.buildingName);
   const { favoriteProperties, toggleFavorite, user } = useAppContext();
   console.log('User:', user);
@@ -247,13 +248,33 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           ))}
         </Swiper>
         {/* Property Type Badge */}
-        {listingType === 'rent' && variant === 'small' && showBadge && (
-          <div className="absolute top-3 left-3 z-10">
-            <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
-              {property.rentDetails?.preferredTenant?.lookingFor || 'Shared'}
-            </span>
-          </div>
-        )}
+        <div className="absolute top-3 right-3 z-10">
+          <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
+            {(() => {
+              // 1. Try bedrooms
+              if (typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+                return `${property.bedrooms}BHK`;
+              }
+              // 2. Try common BHK string fields
+              const bhkRegex = /[1-9]BHK\+?/;
+              const candidates = [
+                property.rentDetails && property.rentDetails.roomDetails && (property.rentDetails.roomDetails as any).flatType,
+                (property as any).flatType,
+                property.propertyType,
+                property.type,
+                property.title,
+                property.description,
+              ];
+              for (const val of candidates) {
+                if (typeof val === 'string' && bhkRegex.test(val)) {
+                  return val.match(bhkRegex)![0];
+                }
+              }
+              // 3. Fallback
+              return '-';
+            })()}
+          </span>
+        </div>
         {/* Left Arrow */}
         <div
           className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
