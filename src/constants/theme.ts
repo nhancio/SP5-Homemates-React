@@ -1,13 +1,9 @@
 export const THEME_COLOR = '#C2185B';
 
 export const USER_PREFERENCES = [
-  { id: 'non-smoker', label: 'Non-Smoker', icon: 'Smoking' },
-  { id: 'non-drinker', label: 'Non-Drinker', icon: 'Wine' },
-  { id: 'outgoing', label: 'Outgoing', icon: 'Users' },
-  { id: 'health-conscious', label: 'Health Conscious', icon: 'Heart' },
-  { id: 'night-owl', label: 'Night Owl', icon: 'Moon' },
+  { id: 'veg', label: 'Veg', icon: 'Leaf' },
+  { id: 'non-smoking', label: 'Non Smoking', icon: 'Smoking' },
+  { id: 'non-drinking', label: 'Non Drinking', icon: 'Wine' },
   { id: 'morning-person', label: 'Morning Person', icon: 'Sun' },
-  { id: 'creative', label: 'Creative', icon: 'Palette' },
-  { id: 'coffee-to-code', label: 'CoffeeToCode', icon: 'Code' },
-  { id: 'couple', label: 'Couple', icon: 'Heart' }
+  { id: 'party-owl', label: 'Party Owl', icon: 'PartyPopper' },
 ];
