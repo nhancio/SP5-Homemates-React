@@ -185,6 +185,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 
   const handleCardClick = () => {
     navigate(`/${listingType}/${property.id}`);
+    window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
   const formatAvailabilityDate = (date: string | undefined) => {

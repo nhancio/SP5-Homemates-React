@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 import { Camera, X } from 'lucide-react';
 import {
   Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home
@@ -256,6 +256,9 @@ const listingSchema = Yup.object().shape({
     .required('Contact number is required'),
   description: Yup.string().min(10, 'Description should be at least 10 characters').required('Description is required'),
   rentDetails: Yup.object().shape({
+    roomDetails: Yup.object().shape({
+      flatType: Yup.string().required('Please select a flat type.'),
+    }),
     costs: Yup.object().shape({
       rent: Yup.number().min(1000, 'Rent must be at least ₹1,000').required('Rent is required'),
     }),
@@ -356,6 +359,13 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         errors[err.path] = err.message;
       }
       setErrors(errors);
+      // Scroll to first error field
+      setTimeout(() => {
+        const errorField = document.querySelector('.border-red-500, .bg-red-50');
+        if (errorField && typeof errorField.scrollIntoView === 'function') {
+          errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return false;
     }
   };
@@ -365,6 +375,23 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
     if (validate()) {
       if (props.onSubmit) props.onSubmit();
     }
+  };
+
+  // Refs for error fields
+  const fieldRefs: Record<string, React.RefObject<any>> = {
+    'address.buildingName': React.createRef(),
+    'address.city': React.createRef(),
+    'address.locality': React.createRef(),
+    'rentDetails.roomDetails.flatType': React.createRef(),
+    'rentDetails.roomDetails.availableRooms': React.createRef(),
+    'rentDetails.roomDetails.roomType': React.createRef(),
+    'rentDetails.roomDetails.bathroomType': React.createRef(),
+    'propertyType': React.createRef(),
+    'furnishingType': React.createRef(),
+    'parking': React.createRef(),
+    'rentDetails.costs.rent': React.createRef(),
+    'contactNumber': React.createRef(),
+    'description': React.createRef(),
   };
 
   return (
@@ -400,6 +427,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
             <select
+              ref={fieldRefs['address.city']}
               className={`input w-full${errors.city ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.address.city || ''}
               onChange={e => {
@@ -428,6 +456,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
             <select 
+              ref={fieldRefs['address.locality']}
               className={`input w-full${errors.locality ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.address.locality || ''}
               onChange={e => {
@@ -464,11 +493,18 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type</label>
             <select
-              className={`input w-full${errors.flatType ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.flatType || ''}
+              ref={fieldRefs['rentDetails.roomDetails.flatType']}
+              className={`input w-full${errors.rentDetails?.roomDetails?.flatType ? ' border-red-500 bg-red-50' : ''}`}
+              value={formData.rentDetails.roomDetails.flatType || ''}
               onChange={e => setFormData({
                 ...formData,
-                flatType: e.target.value
+                rentDetails: {
+                  ...formData.rentDetails,
+                  roomDetails: {
+                    ...formData.rentDetails.roomDetails,
+                    flatType: e.target.value
+                  }
+                }
               })}
               required
             >
@@ -479,17 +515,18 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="4BHK">4BHK</option>
               <option value="4BHK+">4BHK+</option>
             </select>
-            {errors.flatType && (
+            {errors.rentDetails?.roomDetails?.flatType && (
               <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
                 <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-                {errors.flatType}
+                {errors.rentDetails.roomDetails.flatType}
               </p>
             )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Available Rooms</label>
             <select
-              className={`input w-full${errors.availableRooms ? ' border-red-500 bg-red-50' : ''}`}
+              ref={fieldRefs['rentDetails.roomDetails.availableRooms']}
+              className={`input w-full${errors.rentDetails?.roomDetails?.availableRooms ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.roomDetails.availableRooms}
               onChange={e => setFormData({
                 ...formData,
@@ -505,16 +542,17 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="">Select</option>
               {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
             </select>
-            {errors.availableRooms && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+            {errors.rentDetails?.roomDetails?.availableRooms && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.availableRooms}
+              {errors.rentDetails.roomDetails.availableRooms}
             </p>}
           </div>
           {/* Row 2 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
             <select 
-              className={`input w-full${errors.roomType ? ' border-red-500 bg-red-50' : ''}`}
+              ref={fieldRefs['rentDetails.roomDetails.roomType']}
+              className={`input w-full${errors.rentDetails?.roomDetails?.roomType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.roomDetails.roomType}
               onChange={e => setFormData({
                 ...formData,
@@ -531,17 +569,18 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="private">Private</option>
               <option value="shared">Shared</option>
             </select>
-            {errors.roomType && (
+            {errors.rentDetails?.roomDetails?.roomType && (
               <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
                 <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-                {errors.roomType}
+                {errors.rentDetails.roomDetails.roomType}
               </p>
             )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Washroom Type</label>
             <select
-              className={`input w-full${errors.bathroomType ? ' border-red-500 bg-red-50' : ''}`}
+              ref={fieldRefs['rentDetails.roomDetails.bathroomType']}
+              className={`input w-full${errors.rentDetails?.roomDetails?.bathroomType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.roomDetails.bathroomType}
               onChange={e => setFormData({
                 ...formData,
@@ -558,15 +597,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="attached">Attached</option>
               <option value="common">Common</option>
             </select>
-            {errors.bathroomType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
+            {errors.rentDetails?.roomDetails?.bathroomType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.bathroomType}
+              {errors.rentDetails.roomDetails.bathroomType}
             </p>}
           </div>
           {/* Row 3 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
             <select
+              ref={fieldRefs['propertyType']}
               className={`input w-full${errors.propertyType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.propertyType}
               onChange={e => setFormData({
@@ -590,6 +630,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
             <select
+              ref={fieldRefs['furnishingType']}
               className={`input w-full${errors.furnishingType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.furnishingType}
               onChange={e => setFormData({
@@ -611,6 +652,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
             <select 
+              ref={fieldRefs['parking']}
               className={`input w-full${errors.parking ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.parking}
               onChange={e => setFormData({
@@ -802,6 +844,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Rent (₹/month)</label>
             <input
+              ref={fieldRefs['rentDetails.costs.rent']}
               type="number"
               className={`input w-full${errors.rent ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter rent amount"
@@ -935,6 +978,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       <section className="bg-white p-6 rounded-2xl shadow mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Description</h2>
         <textarea
+          ref={fieldRefs['description']}
           className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${errors.description ? ' border-red-500 bg-red-50' : ''}`}
           placeholder="Add property description..."
           value={formData.description}
@@ -1011,6 +1055,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
               <input
           type="tel"
+          ref={fieldRefs['contactNumber']}
           className={`input${errors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
           placeholder="Enter your 10-digit mobile number"
           value={formData.contactNumber || ''}
@@ -1117,6 +1162,13 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         errors[err.path] = err.message;
       }
       setErrors(errors);
+      // Scroll to first error field
+      setTimeout(() => {
+        const errorField = document.querySelector('.border-red-500, .bg-red-50');
+        if (errorField && typeof errorField.scrollIntoView === 'function') {
+          errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
       return false;
     }
   };

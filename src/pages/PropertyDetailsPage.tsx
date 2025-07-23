@@ -36,21 +36,67 @@ const PropertyDetailsPage = () => {
     const activeType = filters.activeType || listingType;
     const f = filters[activeType] || {};
     const chips: { label: string, value: string }[] = [];
-    if (f.city) chips.push({ label: 'City', value: f.city });
-    if (f.locality) chips.push({ label: 'Locality', value: f.locality });
-    if (f.propertyType) chips.push({ label: 'Type', value: f.propertyType });
-    if (f.bhk) chips.push({ label: 'BHK', value: f.bhk });
-    if (f.furnishingType) chips.push({ label: 'Furnishing', value: f.furnishingType });
-    if (f.bathrooms) chips.push({ label: 'Bathrooms', value: f.bathrooms });
-    if (f.minRent) chips.push({ label: 'Min Rent', value: `₹${f.minRent}` });
-    if (f.maxRent && f.maxRent !== 10000000) chips.push({ label: 'Max Rent', value: `₹${f.maxRent}` });
-    if (f.minPrice) chips.push({ label: 'Min Price', value: `₹${f.minPrice}` });
-    if (f.maxPrice && f.maxPrice !== 10000000) chips.push({ label: 'Max Price', value: `₹${f.maxPrice}` });
-    if (f.amenities) chips.push({ label: 'Amenities', value: f.amenities });
-    if (f.availability) chips.push({ label: 'Availability', value: f.availability });
-    if (f.availableFrom) chips.push({ label: 'Available From', value: f.availableFrom });
-    if (f.ageOfProperty) chips.push({ label: 'Age', value: f.ageOfProperty });
-    if (f.possessionStatus) chips.push({ label: 'Possession', value: f.possessionStatus });
+    // Define possible fields for each filter type
+    const fieldMap: Record<string, Array<{ key: string, label: string, isCurrency?: boolean }>> = {
+      fullHome: [
+        { key: 'city', label: 'City' },
+        { key: 'locality', label: 'Locality' },
+        { key: 'propertyType', label: 'Type' },
+        { key: 'furnishingType', label: 'Furnishing' },
+        { key: 'bhk', label: 'BHK' },
+        { key: 'bathrooms', label: 'Bathrooms' },
+        { key: 'minPrice', label: 'Min Price', isCurrency: true },
+        { key: 'maxPrice', label: 'Max Price', isCurrency: true },
+        { key: 'minSqft', label: 'Min Sqft' },
+        { key: 'maxSqft', label: 'Max Sqft' },
+        { key: 'amenities', label: 'Amenities' },
+        { key: 'availability', label: 'Availability' },
+        { key: 'availableFrom', label: 'Available From' },
+        { key: 'ageOfProperty', label: 'Age' },
+        { key: 'possessionStatus', label: 'Possession' },
+      ],
+      rent: [
+        { key: 'city', label: 'City' },
+        { key: 'locality', label: 'Locality' },
+        { key: 'propertyType', label: 'Type' },
+        { key: 'furnishingType', label: 'Furnishing' },
+        { key: 'bhk', label: 'BHK' },
+        { key: 'bathrooms', label: 'Bathrooms' },
+        { key: 'minRent', label: 'Min Rent', isCurrency: true },
+        { key: 'maxRent', label: 'Max Rent', isCurrency: true },
+        { key: 'minSqft', label: 'Min Sqft' },
+        { key: 'maxSqft', label: 'Max Sqft' },
+        { key: 'amenities', label: 'Amenities' },
+        { key: 'availability', label: 'Availability' },
+        { key: 'availableFrom', label: 'Available From' },
+        { key: 'ageOfProperty', label: 'Age' },
+        { key: 'possessionStatus', label: 'Possession' },
+      ],
+      buy: [
+        { key: 'city', label: 'City' },
+        { key: 'locality', label: 'Locality' },
+        { key: 'propertyType', label: 'Type' },
+        { key: 'bhk', label: 'BHK' },
+        { key: 'bathrooms', label: 'Bathrooms' },
+        { key: 'minPrice', label: 'Min Price', isCurrency: true },
+        { key: 'maxPrice', label: 'Max Price', isCurrency: true },
+        { key: 'minSqft', label: 'Min Sqft' },
+        { key: 'maxSqft', label: 'Max Sqft' },
+        { key: 'ageOfProperty', label: 'Age' },
+        { key: 'possessionStatus', label: 'Possession' },
+      ],
+    };
+    const fields = fieldMap[activeType] || [];
+    fields.forEach(({ key, label, isCurrency }) => {
+      const value = (f as any)[key];
+      if (value !== undefined && value !== '' && value !== null) {
+        if (isCurrency) {
+          chips.push({ label, value: `₹${value}` });
+        } else {
+          chips.push({ label, value });
+        }
+      }
+    });
     return chips;
   };
 
@@ -245,14 +291,7 @@ Link: ${url}`;
           Back to {listingType === 'rent' ? 'Rental' : 'Sale'} Properties
         </button>
 
-        {/* Applied Filters Row */}
-        <div className="mb-4 flex flex-wrap gap-2">
-          {getAppliedFilters().map((chip, i) => (
-            <span key={i} className="px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-200">
-              {chip.label}: {chip.value}
-            </span>
-          ))}
-        </div>
+        {/* No applied filters row rendered */}
 
         {/* Property Type Badge */}
         <div className="mb-4">
@@ -567,7 +606,7 @@ Link: ${url}`;
                 </div>
                 <div className="mb-4">
                   <h3 className="font-bold mb-1">Services</h3>
-                  <div>{property.services?.length ? property.services.map(s => SERVICES.find(x => x.key === s)?.label).join(', ') : 'None'}</div>
+                  <div>{property.services?.length ? property.services.map((s: string) => SERVICES.find(x => x.key === s)?.label).join(', ') : 'None'}</div>
                 </div>
                 <p className="text-gray-700 whitespace-pre-line">{property.description}</p>
               </div>
