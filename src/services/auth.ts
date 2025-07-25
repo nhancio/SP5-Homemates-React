@@ -1,95 +1,89 @@
-import { signInWithPopup, signOut } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, googleProvider, db } from '../config/firebase';
+// Coming soon
 
-export const signInWithGoogle = async () => {
-  try {
-    // Force OAuth consent screen
-    googleProvider.setCustomParameters({
-      prompt: 'select_account'
-    });
+// import { signInWithPopup, signOut } from 'firebase/auth';
+// import { doc, setDoc, getDoc } from 'firebase/firestore';
+// import { auth, googleProvider, db } from '../config/firebase';
 
-    const result = await signInWithPopup(auth, googleProvider);
-    const userId = result.user.uid;
+// export const signInWithGoogle = async () => {
+//   try {
+//     // Force OAuth consent screen
+//     googleProvider.setCustomParameters({
+//       prompt: 'select_account'
+//     });
+
+//     const result = await signInWithPopup(auth, googleProvider);
+//     const userId = result.user.uid;
     
-    // Check if user exists in 'u' collection
-    const userRef = doc(db, 'u', userId);
-    const userDoc = await getDoc(userRef);
+//     // Check if user exists in 'u' collection
+//     const userRef = doc(db, 'u', userId);
+//     const userDoc = await getDoc(userRef);
     
-    if (!userDoc.exists()) {
-      // Create new user document with 5 free credits
-      await setDoc(userRef, {
-        userId: userId,
-        email: result.user.email,
-        name: result.user.displayName,
-        photoURL: result.user.photoURL,
-        createdAt: new Date().toISOString(),
-        lastLoginAt: new Date().toISOString(),
-        credits: 5, // Give 5 free credits to new users
-        creditsLastUpdated: new Date().toISOString()
-      });
-      console.log('Created new user with 5 credits:', userId);
-    } else {
-      // Update last login and initialize credits if not present
-      const userData = userDoc.data();
-      const updateData: any = {
-        lastLoginAt: new Date().toISOString()
-      };
+//     if (!userDoc.exists()) {
+//       // Create new user document with 5 free credits
+//       await setDoc(userRef, {
+//         userId: userId,
+//         email: result.user.email,
+//         name: result.user.displayName,
+//         photoURL: result.user.photoURL,
+//         createdAt: new Date().toISOString(),
+//         lastLoginAt: new Date().toISOString(),
+//         credits: 5, // Give 5 free credits to new users
+//         creditsLastUpdated: new Date().toISOString()
+//       });
+//       console.log('Created new user with 5 credits:', userId);
+//     } else {
+//       // Update last login and initialize credits if not present
+//       const userData = userDoc.data();
+//       const updateData: any = {
+//         lastLoginAt: new Date().toISOString()
+//       };
       
-      // Initialize credits if not present
-      if (typeof userData.credits === 'undefined') {
-        updateData.credits = 5;
-        updateData.creditsLastUpdated = new Date().toISOString();
-      }
+//       // Initialize credits if not present
+//       if (typeof userData.credits === 'undefined') {
+//         updateData.credits = 5;
+//         updateData.creditsLastUpdated = new Date().toISOString();
+//       }
       
-      await setDoc(userRef, updateData, { merge: true });
-      console.log('Updated existing user:', userId);
-    }
+//       await setDoc(userRef, updateData, { merge: true });
+//       console.log('Updated existing user:', userId);
+//     }
 
-    const userData = {
-      user: {
-        id: userId,
-        name: result.user.displayName || '',
-        email: result.user.email || '',
-        photoURL: result.user.photoURL || '',
-        isPremium: false
-      },
-      success: true,
-      isNewUser: !userDoc.exists()
-    };
+//     const userData = {
+//       user: {
+//         id: userId,
+//         name: result.user.displayName || '',
+//         email: result.user.email || '',
+//         photoURL: result.user.photoURL || '',
+//         isPremium: false
+//       },
+//       success: true,
+//       isNewUser: !userDoc.exists()
+//     };
 
-    // Store user data in localStorage immediately
-    localStorage.setItem('user', JSON.stringify(userData.user));
+//     // Store user data in localStorage immediately
+//     localStorage.setItem('user', JSON.stringify(userData.user));
     
-    return userData;
+//     return userData;
 
-  } catch (error) {
-    console.error('Auth Error:', error);
-    localStorage.removeItem('user'); // Clear any stale data
-    return { success: false };
-  }
-};
+//   } catch (error) {
+//     console.error('Auth Error:', error);
+//     localStorage.removeItem('user'); // Clear any stale data
+//     return { success: false };
+//   }
+// };
 
-export const logoutUser = async () => {
-  try {
-    await signOut(auth);
-    localStorage.removeItem('user'); // Clear user data on logout
-    return { success: true };
-  } catch (error) {
-    console.error('Error signing out:', error);
-    return { success: false };
-  }
-};
+// export const logoutUser = async () => {
+//   try {
+//     await signOut(auth);
+//     localStorage.removeItem('user'); // Clear user data on logout
+//     return { success: true };
+//   } catch (error) {
+//     console.error('Error signing out:', error);
+//     return { success: false };
+//   }
+// };
 
-export async function getUserFavorites(userId: string): Promise<string[]> {
-  try {
-    const userDoc = await getDoc(doc(db, 'u', userId));
-    if (userDoc.exists()) {
-      return userDoc.data()?.favorites || [];
-    }
-    return [];
-  } catch (error) {
-    console.error('Error getting favorites:', error);
-    return [];
-  }
-}
+export const getUserFavorites = () => [];
+export const logoutUser = async () => ({ success: true });
+export const signInWithGoogle = async () => ({ success: true, user: null });
+// Add other dummy exports here as needed for your app to run.

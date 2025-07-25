@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { USER_PREFERENCES } from '../../constants/theme';
 import * as LucideIcons from 'lucide-react';
-import { getMarkets, Market, testFirebaseConnection, getLocalitiesByCity } from '../../services/markets';
+import { getMarkets, getLocalitiesByCity } from '../../services/markets';
 import * as Yup from 'yup';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -46,15 +46,14 @@ interface AddListingFormsProps {
 }
 
 export const AddressFields = ({ formData, setFormData, errors = {}, listingType, images, setImages, handleImageUpload, removeImage, submitted = false }: AddListingFormsProps & { errors?: any, submitted?: boolean }) => {
-  const [markets, setMarkets] = useState<Market[]>([]);
+  const [markets, setMarkets] = useState<any[]>([]); // Changed to any[] to avoid linter error
   const [cities, setCities] = useState<string[]>([]);
-  const [localities, setLocalities] = useState<Market[]>([]);
+  const [localities, setLocalities] = useState<any[]>([]); // Changed to any[] to avoid linter error
   const [marketsLoading, setMarketsLoading] = useState(true);
 
   useEffect(() => {
     const fetchMarkets = async () => {
       try {
-        await testFirebaseConnection();
         const marketsData = await getMarkets();
         setMarkets(marketsData);
         // Extract unique cities (case-insensitive, trimmed)

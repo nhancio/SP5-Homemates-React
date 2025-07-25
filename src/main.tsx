@@ -2,7 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
-import { manualTestMarkets } from './services/markets';
+import { AppContextProvider } from './context/AppContext';
 
 // Import Swiper styles
 import 'swiper/css';
@@ -16,7 +16,6 @@ declare global {
   }
 }
 
-window.testMarkets = manualTestMarkets
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -38,6 +37,8 @@ window.addEventListener('unhandledrejection', function (e) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <App />
+    <AppContextProvider>
+      <App />
+    </AppContextProvider>
   </StrictMode>
 );

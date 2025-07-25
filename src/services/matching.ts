@@ -1,3 +1,5 @@
+// Coming soon
+
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
