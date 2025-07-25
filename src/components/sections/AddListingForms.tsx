@@ -7,6 +7,10 @@ import { USER_PREFERENCES } from '../../constants/theme';
 import * as LucideIcons from 'lucide-react';
 import { getMarkets, Market, testFirebaseConnection, getLocalitiesByCity } from '../../services/markets';
 import * as Yup from 'yup';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import InputMask from 'react-input-mask';
+import type { InputMaskProps } from 'react-input-mask';
 
 // Amenity/feature options with icon and label (same as PropertyFilters)
 const AMENITY_OPTIONS = [
@@ -41,7 +45,7 @@ interface AddListingFormsProps {
   setErrors?: (errors: any) => void; // Optional setErrors for edit page
 }
 
-export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) => {
+export const AddressFields = ({ formData, setFormData, errors = {}, listingType, images, setImages, handleImageUpload, removeImage, submitted = false }: AddListingFormsProps & { errors?: any, submitted?: boolean }) => {
   const [markets, setMarkets] = useState<Market[]>([]);
   const [cities, setCities] = useState<string[]>([]);
   const [localities, setLocalities] = useState<Market[]>([]);
@@ -109,75 +113,16 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
     <section className="bg-white p-6 rounded-lg shadow-sm">
       <h2 className="text-lg font-semibold mb-4">Address</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="col-span-2 flex flex-col gap-3">
-          {/* City Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-            <select
-              className={`input w-full${formData.address.city ? '' : ' border-red-500 bg-red-50'}`}
-              value={formData.address.city || ''}
-              onChange={e => {
-    setFormData({
-      ...formData,
-      address: {
-        ...formData.address,
-                    city: e.target.value,
-                    locality: '', // Clear locality when city changes
-      },
-    });
-              }}
-              disabled={marketsLoading}
-            >
-              <option value="">Select City</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-            {formData.address.city && errors.city && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.city}
-            </p>}
-          </div>
-          {/* Locality Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
-            <select
-              className={`input w-full${formData.address.locality ? '' : ' border-red-500 bg-red-50'}`}
-              value={formData.address.locality || ''}
-              onChange={e => {
-                setFormData({
-                  ...formData,
-                  address: {
-                    ...formData.address,
-                    locality: e.target.value,
-                  },
-                });
-              }}
-              disabled={!formData.address.city || marketsLoading}
-            >
-              <option value="">Select Locality</option>
-              {localities.length === 0 && formData.address.city && !marketsLoading && (
-                <option value="" disabled>No localities found for this city</option>
-              )}
-              {localities.map(market => (
-                <option key={market.id} value={market.market}>{market.market}</option>
-              ))}
-            </select>
-            {formData.address.locality && errors.locality && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.locality}
-            </p>}
-        </div>
-        </div>
-        <div>
+        {/* Building Name first, full width */}
+        <div className="col-span-3">
           <label className="block text-sm font-medium text-gray-700 mb-2">Building Name</label>
-      <input
-        type="text"
-        placeholder="Building Name"
+          <input
+            type="text"
+            placeholder="Building Name"
             className={`input w-full${errors.buildingName ? ' border-red-500 bg-red-50' : ''}`}
-        value={formData.address.buildingName}
+            value={formData.address.buildingName}
             onChange={e => setFormData({
-          ...formData,
+              ...formData,
               address: {
                 ...formData.address,
                 buildingName: e.target.value,
@@ -186,11 +131,66 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
             spellCheck={true}
             autoCorrect="on"
           />
-          {errors.buildingName && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-            <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+          {errors.buildingName && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
             {errors.buildingName}
           </p>}
         </div>
+        {/* City and Locality side by side */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+          <select
+            className={`input w-full${errors.city ? ' border-red-500 bg-red-50' : ''}`}
+            value={formData.address.city || ''}
+            onChange={e => {
+              setFormData({
+                ...formData,
+                address: {
+                  ...formData.address,
+                  city: e.target.value,
+                  locality: '', // Clear locality when city changes
+                },
+              });
+            }}
+            disabled={marketsLoading}
+          >
+            <option value="">Select City</option>
+            {cities.map(city => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+          {errors.city && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {errors.city}
+          </p>}
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
+          <select
+            className={`input w-full${errors.locality ? ' border-red-500 bg-red-50' : ''}`}
+            value={formData.address.locality || ''}
+            onChange={e => {
+              setFormData({
+                ...formData,
+                address: {
+                  ...formData.address,
+                  locality: e.target.value,
+                },
+              });
+            }}
+            disabled={!formData.address.city || marketsLoading}
+          >
+            <option value="">Select Locality</option>
+            {localities.length === 0 && formData.address.city && !marketsLoading && (
+              <option value="" disabled>No localities found for this city</option>
+            )}
+            {localities.map(market => (
+              <option key={market.id} value={market.market}>{market.market}</option>
+            ))}
+          </select>
+          {errors.locality && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {errors.locality}
+          </p>}
+        </div>
+        {/* Google Maps Link (optional) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Google Maps Link</label>
           <input
@@ -212,9 +212,9 @@ export const AddressFields = ({ formData, setFormData }: AddListingFormsProps) =
             <p className="text-red-600 text-xs mt-1">Please enter a valid Google Maps link.</p>
           )}
         </div>
-    </div>
-  </section>
-);
+      </div>
+    </section>
+  );
 };
 
 const ContactNumberField = ({ formData, setFormData }: { formData: any; setFormData: (data: any) => void }) => (
@@ -233,7 +233,6 @@ const ContactNumberField = ({ formData, setFormData }: { formData: any; setFormD
         })}
         pattern="[0-9]{10}"
         maxLength={10}
-        required
         spellCheck={false}
         autoCorrect="off"
       />
@@ -276,11 +275,19 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
   const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors } = props;
   const [isDragActive, setIsDragActive] = useState(false);
   const [localErrors, setLocalErrors] = useState<any>({});
-  const errors = propErrors || localErrors;
+  const errors: Record<string, any> = propErrors || localErrors;
   const setErrors = propSetErrors || setLocalErrors;
   const today = new Date();
-  const minDate = new Date(today.getTime() + 24 * 60 * 60 * 1000); // tomorrow
-  const maxDate = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000); // 90 days from now
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const year = today.getFullYear();
+  const maxRadiusDays = 90;
+  const maxDate = new Date(tomorrow);
+  maxDate.setDate(tomorrow.getDate() + maxRadiusDays);
+  const minDateStr = tomorrow.toISOString().split('T')[0];
+  const maxDateStr = maxDate.toISOString().split('T')[0];
+
+  const getDaysInMonth = (month: number, year: number) => new Date(year, month, 0).getDate();
 
   // Add state for city and locality dropdowns
   const [cities, setCities] = useState<string[]>([]);
@@ -343,20 +350,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       if (err.inner) {
         err.inner.forEach((e: any) => {
           if (e.path) {
-            // Support nested errors
+            // Flatten nested error keys (e.g., address.city -> city)
             const path = e.path.split('.');
-            if (path.length === 2) {
-              errors[path[1]] = e.message;
-            } else if (path.length === 3) {
-              if (!errors[path[1]]) errors[path[1]] = {};
-              errors[path[1]][path[2]] = e.message;
-            } else {
-              errors[e.path] = e.message;
-            }
+            const flatKey = path[path.length - 1];
+            errors[flatKey] = e.message;
           }
         });
       } else if (err.path) {
-        errors[err.path] = err.message;
+        const path = err.path.split('.');
+        const flatKey = path[path.length - 1];
+        errors[flatKey] = err.message;
       }
       setErrors(errors);
       // Scroll to first error field
@@ -370,12 +373,21 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Show all errors immediately on page load
+  const [submitted, setSubmitted] = useState(true);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) {
+    setSubmitted(true);
+    const isValid = await validate();
+    if (isValid) {
       if (props.onSubmit) props.onSubmit();
     }
   };
+
+  // Helper to mark a field as touched
+  const markTouched = (field: string) => setTouched(prev => ({ ...prev, [field]: true }));
 
   // Refs for error fields
   const fieldRefs: Record<string, React.RefObject<any>> = {
@@ -394,97 +406,123 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
     'description': React.createRef(),
   };
 
+  const [moveInDate, setMoveInDate] = useState<Date | null>(null);
+  const minYear = tomorrow.getFullYear();
+  const maxYear = maxDate.getFullYear();
+  const fixedYear = minYear === maxYear ? String(minYear) : "202_";
+  const mask = `99/99/${fixedYear}`;
+  const [inputValue, setInputValue] = useState(`__/__/${fixedYear}`);
+  const [inputMaskError, setInputMaskError] = useState<string | null>(null);
+  const [lastValidInputValue, setLastValidInputValue] = useState(`__/__/${fixedYear}`);
+
+  useEffect(() => {
+    if (formData.handoverDate) {
+      const d = new Date(formData.handoverDate);
+      if (!isNaN(d.getTime())) {
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        const formatted = `${day}/${month}/${year}`;
+        setInputValue(formatted);
+        setLastValidInputValue(formatted);
+        setMoveInDate(d);
+      }
+    } else {
+      // Only reset to mask if the form is explicitly reset (not after save)
+      setInputValue(lastValidInputValue);
+      setMoveInDate(null);
+    }
+  }, [formData.handoverDate, fixedYear]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value;
+    // Always keep the year part fixed
+    if (!val.endsWith(`/${fixedYear}`)) {
+      val = val.slice(0, 5) + `/${fixedYear}`;
+    }
+    setInputValue(val);
+
+    // Parse only if both day and month are filled
+    const match = val.match(/^\d{2}\/\d{2}\/\d{4}$/);
+    if (match) {
+      const d = parseInt(match[1], 10);
+      const m = parseInt(match[2], 10);
+      const y = parseInt(match[3], 10);
+      const typedDate = new Date(y, m - 1, d);
+      if (
+        !isNaN(typedDate.getTime()) &&
+        typedDate.getDate() === d &&
+        typedDate.getMonth() === m - 1 &&
+        typedDate.getTime() >= tomorrow.getTime() &&
+        typedDate.getTime() <= maxDate.getTime()
+      ) {
+        setMoveInDate(typedDate);
+        setFormData({ ...formData, handoverDate: typedDate.toISOString().split('T')[0] });
+        setInputMaskError(null);
+        // Always keep inputValue in sync with the valid date
+        const formatted = `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+        setInputValue(formatted);
+        setLastValidInputValue(formatted);
+      } else {
+        setInputMaskError('Please enter a valid date within the allowed range.');
+      }
+    } else if (val.replace(/_/g, '').length === mask.length) {
+      setInputMaskError('Please enter a valid date in the format DD/MM/YYYY.');
+    } else {
+      setInputMaskError(null);
+    }
+  };
+
+  const handleMoveInDateChange = (date: Date | null) => {
+    setMoveInDate(date);
+    if (date) {
+      // Clamp to allowed range using getTime() for comparison
+      if (date.getTime() >= tomorrow.getTime() && date.getTime() <= maxDate.getTime()) {
+        setFormData({ ...formData, handoverDate: date.toISOString().split('T')[0] });
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        setInputValue(`${day}/${month}/${year}`);
+      }
+    }
+  };
+
+  let placeholder = '';
+  if (minYear === maxYear) {
+    placeholder = `__/__/${minYear}`;
+  } else {
+    placeholder = `__/__/202_`;
+  }
+
+  // Icon mapping for safe dynamic rendering
+  const ICON_MAP: Record<string, React.ComponentType<any>> = {
+    Leaf,
+    Sun,
+    // Add more icons here as needed
+  };
+
+  // Use 'submitted' or 'touched' to control error display for all fields
+  const displayErrors: typeof errors = {};
+  for (const key in errors) {
+    if (submitted || touched[key]) {
+      displayErrors[key] = errors[key];
+    }
+  }
+
   return (
-    <form onSubmit={handleSubmit}>
+    <>
       {/* Address: Building Name, City, Locality in one row */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Address</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Building Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Building Name</label>
-            <input
-              type="text"
-              placeholder="Building Name"
-              className={`input w-full${errors.buildingName ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.address.buildingName}
-              onChange={e => setFormData({
-                ...formData,
-                address: {
-                  ...formData.address,
-                  buildingName: e.target.value,
-                },
-              })}
-              spellCheck={true}
-              autoCorrect="on"
-            />
-            {errors.buildingName && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.buildingName}
-            </p>}
-          </div>
-          {/* City Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-            <select
-              ref={fieldRefs['address.city']}
-              className={`input w-full${errors.city ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.address.city || ''}
-              onChange={e => {
-                setFormData({
-                  ...formData,
-                  address: {
-                    ...formData.address,
-                    city: e.target.value,
-                    locality: '', // Clear locality when city changes
-                  },
-                });
-              }}
-              disabled={marketsLoading}
-            >
-              <option value="">Select City</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-            {errors.city && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.city}
-            </p>}
-        </div>
-          {/* Locality Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
-            <select 
-              ref={fieldRefs['address.locality']}
-              className={`input w-full${errors.locality ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.address.locality || ''}
-              onChange={e => {
-                setFormData({
-                ...formData,
-                  address: {
-                    ...formData.address,
-                    locality: e.target.value,
-                  },
-                });
-              }}
-              disabled={!formData.address.city || marketsLoading}
-            >
-              <option value="">Select Locality</option>
-              {localities.length === 0 && formData.address.city && !marketsLoading && (
-                <option value="" disabled>No localities found for this city</option>
-              )}
-              {localities.map(locality => (
-                <option key={locality} value={locality}>{locality}</option>
-              ))}
-            </select>
-            {errors.locality && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.locality}
-            </p>}
-          </div>
-        </div>
-      </section>
+      <AddressFields
+        formData={formData}
+        setFormData={setFormData}
+        errors={displayErrors}
+        listingType={props.listingType}
+        images={images}
+        setImages={setImages}
+        handleImageUpload={handleImageUpload}
+        removeImage={removeImage}
+        submitted={submitted}
+      />
       {/* 2-column, 3-row grid for main fields */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Home Details</h2>
@@ -494,7 +532,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type</label>
             <select
               ref={fieldRefs['rentDetails.roomDetails.flatType']}
-              className={`input w-full${errors.rentDetails?.roomDetails?.flatType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.flatType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.roomDetails.flatType || ''}
               onChange={e => setFormData({
                 ...formData,
@@ -506,7 +544,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 }
               })}
-              required
+              onBlur={() => markTouched('flatType')}
             >
               <option value="">Select Flat Type</option>
               <option value="1BHK">1BHK</option>
@@ -515,10 +553,9 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="4BHK">4BHK</option>
               <option value="4BHK+">4BHK+</option>
             </select>
-            {errors.rentDetails?.roomDetails?.flatType && (
-              <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-                <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-                {errors.rentDetails.roomDetails.flatType}
+            {displayErrors.flatType && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+                {displayErrors.flatType}
               </p>
             )}
           </div>
@@ -526,7 +563,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Available Rooms</label>
             <select
               ref={fieldRefs['rentDetails.roomDetails.availableRooms']}
-              className={`input w-full${errors.rentDetails?.roomDetails?.availableRooms ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.availableRooms ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.roomDetails.availableRooms}
               onChange={e => setFormData({
                 ...formData,
@@ -538,13 +575,13 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 }
               })}
+              onBlur={() => markTouched('availableRooms')}
             >
               <option value="">Select</option>
               {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
             </select>
-            {errors.rentDetails?.roomDetails?.availableRooms && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.rentDetails.roomDetails.availableRooms}
+            {displayErrors.availableRooms && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.availableRooms}
             </p>}
           </div>
           {/* Row 2 */}
@@ -552,7 +589,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
             <select 
               ref={fieldRefs['rentDetails.roomDetails.roomType']}
-              className={`input w-full${errors.rentDetails?.roomDetails?.roomType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.roomType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.roomDetails.roomType}
               onChange={e => setFormData({
                 ...formData,
@@ -564,15 +601,15 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 }
               })}
+              onBlur={() => markTouched('roomType')}
             >
               <option value="">Select Room Type</option>
               <option value="private">Private</option>
               <option value="shared">Shared</option>
             </select>
-            {errors.rentDetails?.roomDetails?.roomType && (
-              <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-                <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-                {errors.rentDetails.roomDetails.roomType}
+            {displayErrors.roomType && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+                {displayErrors.roomType}
               </p>
             )}
           </div>
@@ -580,7 +617,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Washroom Type</label>
             <select
               ref={fieldRefs['rentDetails.roomDetails.bathroomType']}
-              className={`input w-full${errors.rentDetails?.roomDetails?.bathroomType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.bathroomType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.roomDetails.bathroomType}
               onChange={e => setFormData({
                 ...formData,
@@ -592,14 +629,14 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 }
               })}
+              onBlur={() => markTouched('bathroomType')}
             >
               <option value="">Select Bathroom Type</option>
               <option value="attached">Attached</option>
               <option value="common">Common</option>
             </select>
-            {errors.rentDetails?.roomDetails?.bathroomType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.rentDetails.roomDetails.bathroomType}
+            {displayErrors.bathroomType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.bathroomType}
             </p>}
           </div>
           {/* Row 3 */}
@@ -607,12 +644,13 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
             <select
               ref={fieldRefs['propertyType']}
-              className={`input w-full${errors.propertyType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.propertyType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.propertyType}
               onChange={e => setFormData({
                 ...formData,
                 propertyType: e.target.value
               })}
+              onBlur={() => markTouched('propertyType')}
             >
               <option value="">Select Property Type</option>
               <option value="standalone">Standalone Apartment</option>
@@ -620,10 +658,9 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="individual">Individual House</option>
               <option value="villa">Villa</option>
             </select>
-            {errors.propertyType && (
-              <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-                <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-                {errors.propertyType}
+            {displayErrors.propertyType && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+                {displayErrors.propertyType}
               </p>
             )}
           </div>
@@ -631,21 +668,21 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
             <select
               ref={fieldRefs['furnishingType']}
-              className={`input w-full${errors.furnishingType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.furnishingType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.furnishingType}
               onChange={e => setFormData({
                 ...formData,
                 furnishingType: e.target.value
               })}
+              onBlur={() => markTouched('furnishingType')}
             >
               <option value="">Select Furnishing</option>
               <option value="fully">Fully Furnished</option>
               <option value="semi">Semi Furnished</option>
               <option value="unfurnished">Unfurnished</option>
             </select>
-            {errors.furnishingType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.furnishingType}
+            {displayErrors.furnishingType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.furnishingType}
             </p>}
           </div>
           {/* Row 4 */}
@@ -653,21 +690,21 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
             <select 
               ref={fieldRefs['parking']}
-              className={`input w-full${errors.parking ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.parking ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.parking}
               onChange={e => setFormData({
                 ...formData,
                 parking: e.target.value
               })}
+              onBlur={() => markTouched('parking')}
             >
               <option value="">Select Parking Type</option>
               <option value="both">Both</option>
               <option value="car">Car Parking</option>
               <option value="bike">Bike Parking</option>
             </select>
-            {errors.parking && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.parking}
+            {displayErrors.parking && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.parking}
             </p>}
           </div>
         </div>
@@ -706,10 +743,9 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             );
           })}
           </div>
-        {errors.amenities && (
-          <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-            <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-            {errors.amenities}
+        {displayErrors.amenities && (
+          <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {displayErrors.amenities}
           </p>
         )}
       </section>
@@ -720,7 +756,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
             <select 
-              className={`input w-full${errors.gender ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.gender ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.preferredTenant.lookingFor}
               onChange={e => setFormData({
                 ...formData,
@@ -732,23 +768,23 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 }
               })}
+              onBlur={() => markTouched('gender')}
             >
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
               <option value="Other">Other</option>
             </select>
-            {errors.gender && (
-              <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-                <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-                {errors.gender}
+            {displayErrors.gender && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+                {displayErrors.gender}
               </p>
             )}
           </div>
           {/* Preferences Multi-select */}
           <div className="flex flex-wrap gap-3 mt-2">
             {USER_PREFERENCES.map(opt => {
-              const LucideIcon = LucideIcons[opt.icon] || LucideIcons.Sparkles;
+              const IconComponent = ICON_MAP[opt.icon] || Sun;
               const selected = Array.isArray(formData.rentDetails.preferredTenant.preferences) && formData.rentDetails.preferredTenant.preferences.includes(opt.id);
               return (
                 <button
@@ -776,8 +812,11 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   `}
                   tabIndex={0}
                   style={{ boxShadow: selected ? '0 2px 8px 0 rgba(220,38,120,0.10)' : undefined }}
+                  onBlur={() => markTouched('preferences')}
                 >
-                  <LucideIcon className={`w-5 h-5 ${selected ? 'text-white' : 'text-primary-600'} transition-all duration-200`} />
+                  {typeof IconComponent === 'function' && (
+                    <IconComponent className={`w-5 h-5 ${selected ? 'text-white' : 'text-primary-600'} transition-all duration-200`} />
+                  )}
                   <span className="ml-1">{opt.label}</span>
                 </button>
               );
@@ -809,31 +848,28 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           </label>
         </div>
         {formData.isImmediate === false && (
-          <>
+          <div className="mb-2">
             <input
               type="date"
-              className="input w-full mb-1"
-              placeholder="dd-mm-yyyy"
-              value={formData.handoverDate}
-              onChange={e => setFormData({ ...formData, handoverDate: e.target.value })}
-              min={minDate.toISOString().split('T')[0]}
-              max={maxDate.toISOString().split('T')[0]}
+              className={`input max-w-xs${displayErrors.handoverDate ? ' border-red-500 bg-red-50' : ''}`}
+              value={formData.handoverDate || ''}
+              min={minDateStr}
+              max={maxDateStr}
+              onChange={e => handleMoveInDateChange(e.target.value ? new Date(e.target.value) : null)}
+              onBlur={() => markTouched('handoverDate')}
             />
-            {errors.handoverDate && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.handoverDate}
+            <span className="block text-xs text-gray-500 mt-1">Select your move-in date.</span>
+            {displayErrors.handoverDate && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.handoverDate}
             </p>}
-            <span className="text-xs text-gray-500">Select your move-in date.</span>
-          </>
+          </div>
         )}
-        {errors.isImmediate && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-          {errors.isImmediate}
+        {displayErrors.isImmediate && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {displayErrors.isImmediate}
         </p>}
-        {errors.moveIn && (
-          <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-            <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-            {errors.moveIn}
+        {displayErrors.moveIn && (
+          <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {displayErrors.moveIn}
           </p>
         )}
       </section>
@@ -846,7 +882,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <input
               ref={fieldRefs['rentDetails.costs.rent']}
               type="number"
-              className={`input w-full${errors.rent ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.rent ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter rent amount"
               min={0}
               value={formData.rentDetails.costs.rent || ''}
@@ -865,17 +901,17 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               }}
               spellCheck={false}
               autoCorrect="off"
+              onBlur={() => markTouched('rent')}
             />
-            {errors.rent && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.rent}
+            {displayErrors.rent && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.rent}
             </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance (₹/month)</label>
             <input
               type="number"
-              className={`input w-full${errors.maintenance ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.maintenance ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter maintenance amount"
               value={formData.rentDetails.costs.maintenance}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -890,17 +926,17 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               })}
               spellCheck={false}
               autoCorrect="off"
+              onBlur={() => markTouched('maintenance')}
             />
-            {errors.maintenance && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.maintenance}
+            {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.maintenance}
             </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (₹)</label>
             <input
               type="number"
-              className={`input w-full${errors.securityDeposit ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.securityDeposit ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter security deposit"
               value={formData.rentDetails.costs.securityDeposit}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -915,17 +951,17 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               })}
               spellCheck={false}
               autoCorrect="off"
+              onBlur={() => markTouched('securityDeposit')}
             />
-            {errors.securityDeposit && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.securityDeposit}
+            {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.securityDeposit}
             </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Setup Cost (₹)</label>
             <input
               type="number"
-              className={`input w-full${errors.setupCost ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.setupCost ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter setup cost"
               value={formData.rentDetails.costs.setupCost}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -940,17 +976,17 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               })}
               spellCheck={false}
               autoCorrect="off"
+              onBlur={() => markTouched('setupCost')}
             />
-            {errors.setupCost && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.setupCost}
+            {displayErrors.setupCost && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.setupCost}
             </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage (₹)</label>
             <input
               type="number"
-              className={`input w-full${errors.brokerage ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.brokerage ? ' border-red-500 bg-red-50' : ''}`}
               placeholder="Enter brokerage amount"
               value={formData.rentDetails.costs.brokerage}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -965,10 +1001,10 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               })}
               spellCheck={false}
               autoCorrect="off"
+              onBlur={() => markTouched('brokerage')}
             />
-            {errors.brokerage && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.brokerage}
+            {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.brokerage}
             </p>}
           </div>
         </div>
@@ -979,7 +1015,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Description</h2>
         <textarea
           ref={fieldRefs['description']}
-          className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${errors.description ? ' border-red-500 bg-red-50' : ''}`}
+          className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${displayErrors.description ? ' border-red-500 bg-red-50' : ''}`}
           placeholder="Add property description..."
           value={formData.description}
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setFormData({
@@ -988,13 +1024,13 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           })}
           spellCheck={true}
           autoCorrect="on"
+          onBlur={() => markTouched('description')}
         />
         <p className="text-xs text-gray-500 mt-1">
           Tip: Use this box to share unique details about your property, such as house rules, vibe, or anything not covered above. Avoid repeating amenities, phone number, or location.
         </p>
-        {errors.description && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-          {errors.description}
+        {displayErrors.description && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {displayErrors.description}
         </p>}
       </section>
 
@@ -1056,7 +1092,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <input
           type="tel"
           ref={fieldRefs['contactNumber']}
-          className={`input${errors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
+          className={`input${displayErrors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
           placeholder="Enter your 10-digit mobile number"
           value={formData.contactNumber || ''}
           onChange={e => setFormData({
@@ -1065,335 +1101,223 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           })}
           pattern="[0-9]{10}"
           maxLength={10}
-          required
           spellCheck={false}
           autoCorrect="off"
+          onBlur={() => markTouched('contactNumber')}
         />
-        {errors.contactNumber && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-          {errors.contactNumber}
+        {displayErrors.contactNumber && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {displayErrors.contactNumber}
         </p>}
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
         </div>
-    </form>
+      {/* Only one submit button at the bottom */}
+      <button type="submit" className="btn btn-primary">Submit</button>
+    </>
   );
 };
 
+// Minimal SellForm implementation to resolve missing export
 export const SellForm: React.FC<AddListingFormsProps> = (props) => {
-  const { formData, setFormData, images, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors } = props;
-  
-  // Add state for city and locality dropdowns
-  const [cities, setCities] = useState<string[]>([]);
-  const [localities, setLocalities] = useState<string[]>([]);
-  const [marketsLoading, setMarketsLoading] = useState(true);
+  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors = {}, setErrors, onSubmit } = props;
+  const [moveInDate, setMoveInDate] = useState<Date | null>(null);
+  const [isImmediate, setIsImmediate] = useState(formData.isImmediate ?? true);
   const [localErrors, setLocalErrors] = useState<any>({});
-  const errors = propErrors || localErrors;
-  const setErrors = propSetErrors || setLocalErrors;
 
-  // Fetch cities on mount
-  useEffect(() => {
-    const fetchCities = async () => {
-      try {
-        const marketsData = await getMarkets();
-        // Extract unique cities (case-insensitive, trimmed)
-        const cityMap = new Map<string, string>();
-        marketsData.forEach(m => {
-          if (m.city) {
-            const key = m.city.trim().toLowerCase();
-            if (!cityMap.has(key)) {
-              cityMap.set(key, m.city.trim());
-            }
-          }
-        });
-        // Sort cities alphabetically
-        const uniqueCities = Array.from(cityMap.values()).sort((a, b) => a.localeCompare(b));
-        setCities(uniqueCities);
-        setMarketsLoading(false);
-      } catch (error) {
-        console.error('SellForm: Error fetching cities:', error);
-        setMarketsLoading(false);
-      }
-    };
-    fetchCities();
-  }, []);
+  // Property type options
+  const propertyTypes = ['1RK', '1 BHK', '2 BHK', '3 BHK', '4 BHK', '4+ BHK'];
+  const furnishingTypes = ['Fully Furnished', 'Semi Furnished', 'Unfurnished'];
+  const parkingTypes = ['Both', 'Car Parking', 'Bike Parking'];
 
-  // Update localities when city changes
-  useEffect(() => {
-    const fetchLocalities = async () => {
-      if (formData.address.city) {
-        try {
-          const localitiesData = await getLocalitiesByCity(formData.address.city);
-          setLocalities(localitiesData);
-        } catch (error) {
-          console.error('SellForm: Error fetching localities:', error);
-          setLocalities([]);
-        }
-      } else {
-        setLocalities([]);
-      }
-    };
-    fetchLocalities();
-  }, [formData.address.city]);
+  // Handle move-in radio
+  const handleMoveInOption = (immediate: boolean) => {
+    setIsImmediate(immediate);
+    setFormData({ ...formData, isImmediate: immediate, handoverDate: immediate ? '' : formData.handoverDate });
+  };
 
-  // Replace the validate function with Yup validation
-  const validate = async () => {
-    try {
-      await listingSchema.validate(formData, { abortEarly: false });
-      setErrors({});
-      return true;
-    } catch (err: any) {
-      const errors: any = {};
-      if (err.inner) {
-        err.inner.forEach((e: any) => {
-          if (e.path) {
-            // Support nested errors
-            const path = e.path.split('.');
-            if (path.length === 2) {
-              errors[path[1]] = e.message;
-            } else if (path.length === 3) {
-              if (!errors[path[1]]) errors[path[1]] = {};
-              errors[path[1]][path[2]] = e.message;
-            } else {
-              errors[e.path] = e.message;
-            }
-          }
-        });
-      } else if (err.path) {
-        errors[err.path] = err.message;
-      }
-      setErrors(errors);
-      // Scroll to first error field
-      setTimeout(() => {
-        const errorField = document.querySelector('.border-red-500, .bg-red-50');
-        if (errorField && typeof errorField.scrollIntoView === 'function') {
-          errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 100);
-      return false;
+  // Handle move-in date
+  const handleMoveInDateChange = (date: Date | null) => {
+    setMoveInDate(date);
+    setFormData({ ...formData, handoverDate: date ? date.toISOString().split('T')[0] : '' });
+  };
+
+  // Calculate min and max dates for move-in
+  const today = new Date();
+  const minDate = today.toISOString().split('T')[0];
+  const maxDateObj = new Date(today);
+  maxDateObj.setDate(today.getDate() + 90);
+  const maxDate = maxDateObj.toISOString().split('T')[0];
+
+  // Validation
+  const validate = () => {
+    const errs: any = {};
+    if (!formData.address?.city) errs.city = 'City is required';
+    if (!formData.address?.locality) errs.locality = 'Locality is required';
+    if (!formData.address?.buildingName) errs.buildingName = 'Building name is required';
+    if (!formData.contactNumber || !/^[6-9][0-9]{9}$/.test(formData.contactNumber)) errs.contactNumber = 'Enter a valid 10-digit mobile number';
+    if (!formData.propertyType) errs.propertyType = 'Property type is required';
+    if (!formData.furnishingType) errs.furnishingType = 'Furnishing type is required';
+    if (!formData.description || formData.description.length < 10) errs.description = 'Description must be at least 10 characters.';
+    // Rent validation
+    if (!formData.rent || formData.rent === '') {
+      errs.rent = 'Rent is required';
+    } else if (Number(formData.rent) < 1000 || Number(formData.rent) > 30000) {
+      errs.rent = 'Rent must be between ₹1,000 and ₹30,000';
     }
+    if (!formData.sellDetails?.price) errs.price = 'Price is required';
+    // Move-in date validation (string compare)
+    if (!isImmediate) {
+      const handoverDate = formData.handoverDate || '';
+      if (!handoverDate) {
+        errs.handoverDate = 'Move-in date is required.';
+      } else if (handoverDate < minDate || handoverDate > maxDate) {
+        errs.handoverDate = `Move-in date must be between today and the next 90 days.`;
+      }
+    }
+    setLocalErrors(errs);
+    if (setErrors) setErrors(errs);
+    return Object.keys(errs).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validate()) {
-      if (props.onSubmit) props.onSubmit();
+      if (onSubmit) onSubmit();
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Address: Building Name, City, Locality in one row */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Address</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Building Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Building Name</label>
-            <input
-              type="text"
-              placeholder="Building Name"
-              className={`input w-full${errors.buildingName ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.address.buildingName}
-              onChange={e => setFormData({
-                ...formData,
-                address: {
-                  ...formData.address,
-                  buildingName: e.target.value,
-                },
-              })}
-              spellCheck={true}
-              autoCorrect="on"
-            />
-            {errors.buildingName && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.buildingName}
-            </p>}
-          </div>
-          {/* City Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-            <select
-              className={`input w-full${errors.city ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.address.city || ''}
-              onChange={e => {
-                setFormData({
-                  ...formData,
-                  address: {
-                    ...formData.address,
-                    city: e.target.value,
-                    locality: '', // Clear locality when city changes
-                  },
-                });
-              }}
-              disabled={marketsLoading}
-            >
-              <option value="">Select City</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
-            {errors.city && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.city}
-            </p>}
-          </div>
-          {/* Locality Dropdown */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
-            <select
-              className={`input w-full${errors.locality ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.address.locality || ''}
-              onChange={e => {
-                setFormData({
-                  ...formData,
-                  address: {
-                    ...formData.address,
-                    locality: e.target.value,
-                  },
-                });
-              }}
-              disabled={!formData.address.city || marketsLoading}
-            >
-              <option value="">Select Locality</option>
-              {localities.length === 0 && formData.address.city && !marketsLoading && (
-                <option value="" disabled>No localities found for this city</option>
-              )}
-              {localities.map(locality => (
-                <option key={locality} value={locality}>{locality}</option>
-              ))}
-            </select>
-            {errors.locality && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.locality}
-            </p>}
-          </div>
-        </div>
-      </section>
+  // Use localErrors for error display
+  const displayErrors = { ...errors, ...localErrors };
 
-      {/* 2-column, 3-row grid for main fields */}
+  // In SellForm, set submitted to true by default to show all errors immediately
+  const [submitted, setSubmitted] = useState(true);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  return (
+    <>
+      {/* Address Section */}
+      <AddressFields
+        formData={formData}
+        setFormData={setFormData}
+        errors={displayErrors}
+        listingType={props.listingType}
+        images={images}
+        setImages={setImages}
+        handleImageUpload={handleImageUpload}
+        removeImage={removeImage}
+        submitted={submitted}
+      />
+      {/* Contact Details */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Home Details</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
-          {/* Row 1 - Flat Type (NEW for Full Home) */}
+        <h2 className="text-lg font-semibold mb-4">Contact Details</h2>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
+        <input
+          type="tel"
+          className={`input w-full${displayErrors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
+          placeholder="Enter your 10-digit mobile number"
+          value={formData.contactNumber || ''}
+          onChange={e => setFormData({ ...formData, contactNumber: e.target.value })}
+          pattern="[0-9]{10}"
+          maxLength={10}
+          spellCheck={false}
+          autoCorrect="off"
+          onBlur={() => markTouched('contactNumber')}
+        />
+        <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
+        {displayErrors.contactNumber && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {displayErrors.contactNumber}
+        </p>}
+      </section>
+      {/* Property Type */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4">Property Type</h2>
+        <div className="flex flex-wrap gap-2">
+          {propertyTypes.map(type => (
+            <button
+              key={type}
+              type="button"
+              className={`px-4 py-2 rounded-full border ${formData.propertyType === type ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-primary-600 border-primary-200'}`}
+              onClick={() => setFormData({ ...formData, propertyType: type })}
+              onBlur={() => markTouched('propertyType')}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
+        {displayErrors.propertyType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {displayErrors.propertyType}
+        </p>}
+      </section>
+      {/* Details */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4">Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
             <select
-              className={`input w-full${errors.flatType ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.flatType || ''}
-              onChange={e => setFormData({
-                ...formData,
-                flatType: e.target.value
-              })}
-              required
+              className="input w-full"
+              value={formData.lookingFor || ''}
+              onChange={e => setFormData({ ...formData, lookingFor: e.target.value })}
+              onBlur={() => markTouched('lookingFor')}
             >
-              <option value="">Select Flat Type</option>
-              <option value="1BHK">1BHK</option>
-              <option value="2BHK">2BHK</option>
-              <option value="4BHK">4BHK</option>
-              <option value="4BHK+">4BHK+</option>
-              <option value="7BHK">7BHK</option>
+              <option value="">Select</option>
+              <option value="Anyone">Anyone</option>
+              <option value="Family">Family</option>
+              <option value="Bachelors">Bachelors</option>
             </select>
-            {errors.flatType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.flatType}
+            {displayErrors.lookingFor && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.lookingFor}
             </p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Furnishing Type</label>
             <select
-              className={`input w-full${errors.propertyType ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.sellDetails.propertyType || ''}
-              onChange={e => setFormData({
-                ...formData,
-                sellDetails: {
-                  ...formData.sellDetails,
-                  propertyType: e.target.value
-                }
-              })}
+              className="input w-full"
+              value={formData.furnishingType || ''}
+              onChange={e => setFormData({ ...formData, furnishingType: e.target.value })}
+              onBlur={() => markTouched('furnishingType')}
             >
-              <option value="">Select Property Type</option>
-              <option value="standalone">Standalone Apartment</option>
-              <option value="gated">Gated Community</option>
-              <option value="individual">Individual House</option>
-              <option value="villa">Villa</option>
+              <option value="">Select Furnishing Type</option>
+              {furnishingTypes.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
-            {errors.propertyType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.propertyType}
+            {displayErrors.furnishingType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.furnishingType}
             </p>}
           </div>
-          {/* Row 2 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
-            <select 
-              className={`input w-full${errors.furnishingType ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.sellDetails.furnishingType || ''}
-              onChange={e => setFormData({
-                ...formData,
-                sellDetails: {
-                  ...formData.sellDetails,
-                furnishingType: e.target.value
-                }
-              })}
-            >
-              <option value="">Select Furnishing</option>
-              <option value="fully">Fully Furnished</option>
-              <option value="semi">Semi Furnished</option>
-              <option value="unfurnished">Unfurnished</option>
-            </select>
-            {errors.furnishingType && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.furnishingType}
-            </p>}
-          </div>
-          {/* Row 3 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
-            <select 
-              className={`input w-full${errors.parking ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.sellDetails.parking || ''}
-              onChange={e => setFormData({
-                ...formData,
-                sellDetails: {
-                  ...formData.sellDetails,
-                parking: e.target.value
-                }
-              })}
+            <select
+              className="input w-full"
+              value={formData.parking || ''}
+              onChange={e => setFormData({ ...formData, parking: e.target.value })}
+              onBlur={() => markTouched('parking')}
             >
               <option value="">Select Parking Type</option>
-              <option value="car">Car Parking</option>
-              <option value="bike">Bike Parking</option>
-              <option value="both">Both</option>
+              {parkingTypes.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
-            {errors.parking && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.parking}
+            {displayErrors.parking && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.parking}
             </p>}
           </div>
         </div>
       </section>
-
-      {/* Amenities Section for SellForm (Full Homes) */}
+      {/* Amenities */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Amenities</h2>
+        <h2 className="text-lg font-semibold mb-4">Amenities</h2>
         <div className="flex flex-wrap gap-3">
           {AMENITY_OPTIONS.map(opt => {
             const Icon = opt.icon;
-            const selected = Array.isArray(formData.sellDetails.amenities) && formData.sellDetails.amenities.includes(opt.key);
+            const selected = Array.isArray(formData.amenities) && formData.amenities.includes(opt.key);
             return (
               <button
                 key={opt.key}
                 type="button"
                 onClick={() => {
-                  const amenities = formData.sellDetails.amenities || [];
+                  const amenities = formData.amenities || [];
                   setFormData({
                     ...formData,
-                    sellDetails: {
-                      ...formData.sellDetails,
-                      amenities: amenities.includes(opt.key)
-                        ? amenities.filter((a: string) => a !== opt.key)
-                        : [...amenities, opt.key]
-                    }
+                    amenities: amenities.includes(opt.key)
+                      ? amenities.filter((a: string) => a !== opt.key)
+                      : [...amenities, opt.key]
                   });
                 }}
                 className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
@@ -1408,17 +1332,16 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           })}
         </div>
       </section>
-
-      {/* Move In Section (for both RentForm and SellForm) */}
+      {/* Move In */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Move In</h2>
+        <h2 className="text-lg font-semibold mb-4">Move In</h2>
         <div className="flex items-center gap-8 mb-2">
           <label className="flex items-center gap-2">
             <input
               type="radio"
               name="moveInOption"
-              checked={formData.isImmediate === true}
-              onChange={() => setFormData({ ...formData, isImmediate: true, handoverDate: '' })}
+              checked={isImmediate === true}
+              onChange={() => handleMoveInOption(true)}
             />
             Immediate
           </label>
@@ -1426,199 +1349,117 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             <input
               type="radio"
               name="moveInOption"
-              checked={formData.isImmediate === false}
-              onChange={() => setFormData({ ...formData, isImmediate: false })}
+              checked={isImmediate === false}
+              onChange={() => handleMoveInOption(false)}
             />
             Specific Date
           </label>
         </div>
-        {formData.isImmediate === false && (
-          <div className="flex flex-col gap-2 mt-2">
+        {isImmediate === false && (
+          <div className="mb-2">
             <input
               type="date"
-              className="input w-full"
-              placeholder="dd-mm-yyyy"
-              value={formData.handoverDate}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, handoverDate: e.target.value })}
+              className={`input max-w-xs${displayErrors.handoverDate ? ' border-red-500 bg-red-50' : ''}`}
+              value={formData.handoverDate || ''}
+              min={minDate}
+              max={maxDate}
+              onChange={e => handleMoveInDateChange(e.target.value ? new Date(e.target.value) : null)}
+              onBlur={() => markTouched('handoverDate')}
             />
-            <span className="text-xs text-gray-500">Select your move-in date.</span>
+            <span className="block text-xs text-gray-500 mt-1">Select your move-in date.</span>
+            {displayErrors.handoverDate && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.handoverDate}
+            </p>}
           </div>
-        )}
-        {errors.handoverDate && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-          {errors.handoverDate}
-        </p>}
-        {errors.moveIn && (
-          <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-            <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-            {errors.moveIn}
-          </p>
         )}
       </section>
-
-      {/* Rental Details Section */}
+      {/* Price Details */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Rental Details</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <h2 className="text-lg font-semibold mb-4">Price Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Rent (₹/month)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Rent</label>
             <input
               type="number"
-              className={`input w-full${errors.rent ? ' border-red-500 bg-red-50' : ''}`}
-              placeholder="Enter rent amount"
+              className={`input w-full${displayErrors.rent ? ' border-red-500 bg-red-50' : ''}`}
+              placeholder="Enter rent"
+              value={formData.rent || ''}
+              onChange={e => setFormData({ ...formData, rent: e.target.value })}
               min={0}
-              value={formData.rentDetails.costs.rent || ''}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                const rent = Number(e.target.value);
-                setFormData({
-                  ...formData,
-                  rentDetails: {
-                    ...formData.rentDetails,
-                    costs: {
-                      ...formData.rentDetails.costs,
-                      rent
-                    }
-                  }
-                });
-              }}
-              spellCheck={false}
-              autoCorrect="off"
+              onBlur={() => markTouched('rent')}
             />
-            {errors.rent && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.rent}
+            {displayErrors.rent && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.rent}
             </p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance (₹/month)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance</label>
             <input
               type="number"
-              className={`input w-full${errors.maintenance ? ' border-red-500 bg-red-50' : ''}`}
-              placeholder="Enter maintenance amount"
-              value={formData.rentDetails.costs.maintenance}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  costs: {
-                    ...formData.rentDetails.costs,
-                    maintenance: e.target.value
-                  }
-                }
-              })}
-              spellCheck={false}
-              autoCorrect="off"
+              className="input w-full"
+              placeholder="Enter maintenance"
+              value={formData.maintenance || ''}
+              onChange={e => setFormData({ ...formData, maintenance: e.target.value })}
+              min={0}
+              onBlur={() => markTouched('maintenance')}
             />
-            {errors.maintenance && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.maintenance}
+            {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.maintenance}
             </p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (₹)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit</label>
             <input
               type="number"
-              className={`input w-full${errors.securityDeposit ? ' border-red-500 bg-red-50' : ''}`}
+              className="input w-full"
               placeholder="Enter security deposit"
-              value={formData.rentDetails.costs.securityDeposit}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  costs: {
-                    ...formData.rentDetails.costs,
-                    securityDeposit: e.target.value
-                  }
-                }
-              })}
-              spellCheck={false}
-              autoCorrect="off"
+              value={formData.securityDeposit || ''}
+              onChange={e => setFormData({ ...formData, securityDeposit: e.target.value })}
+              min={0}
+              onBlur={() => markTouched('securityDeposit')}
             />
-            {errors.securityDeposit && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.securityDeposit}
+            {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.securityDeposit}
             </p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Setup Cost (₹)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage</label>
             <input
               type="number"
-              className={`input w-full${errors.setupCost ? ' border-red-500 bg-red-50' : ''}`}
-              placeholder="Enter setup cost"
-              value={formData.rentDetails.costs.setupCost}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  costs: {
-                    ...formData.rentDetails.costs,
-                    setupCost: e.target.value
-                  }
-                }
-              })}
-              spellCheck={false}
-              autoCorrect="off"
+              className="input w-full"
+              placeholder="Enter brokerage"
+              value={formData.brokerage || ''}
+              onChange={e => setFormData({ ...formData, brokerage: e.target.value })}
+              min={0}
+              onBlur={() => markTouched('brokerage')}
             />
-            {errors.setupCost && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.setupCost}
-            </p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage (₹)</label>
-            <input
-              type="number"
-              className={`input w-full${errors.brokerage ? ' border-red-500 bg-red-50' : ''}`}
-              placeholder="Enter brokerage amount"
-              value={formData.rentDetails.costs.brokerage}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  costs: {
-                    ...formData.rentDetails.costs,
-                    brokerage: e.target.value
-                  }
-                }
-              })}
-              spellCheck={false}
-              autoCorrect="off"
-            />
-            {errors.brokerage && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              {errors.brokerage}
+            {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.brokerage}
             </p>}
           </div>
         </div>
       </section>
-
-      {/* Description Section */}
+      {/* Description */}
       <section className="bg-white p-6 rounded-2xl shadow mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Description</h2>
         <textarea
-          className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${errors.description ? ' border-red-500 bg-red-50' : ''}`}
+          className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${displayErrors.description ? ' border-red-500 bg-red-50' : ''}`}
           placeholder="Add property description..."
-          value={formData.description}
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setFormData({
-            ...formData,
-            description: e.target.value
-          })}
+          value={formData.description || ''}
+          onChange={e => setFormData({ ...formData, description: e.target.value })}
           spellCheck={true}
           autoCorrect="on"
+          onBlur={() => markTouched('description')}
         />
-        <p className="text-xs text-gray-500 mt-1">
-          Tip: Use this box to share unique details about your property, such as house rules, vibe, or anything not covered above. Avoid repeating amenities, phone number, or location.
-        </p>
-        {errors.description && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-          {errors.description}
+        <p className="text-xs text-gray-500 mt-1">Tip: Add clear, well-lit photos for better responses.</p>
+        {displayErrors.description && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {displayErrors.description}
         </p>}
       </section>
-
-      {/* Upload Images Section (modern, user-friendly) */}
+      {/* Upload Images */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Upload Images</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-2 border-2 border-dashed rounded-lg p-2">
           {images.map((image, index) => (
             <div key={index} className="relative rounded-lg shadow hover:shadow-lg transition overflow-hidden group bg-gray-50">
               <img src={image} alt={`Property ${index + 1}`} className="w-full h-24 sm:h-28 object-cover" />
@@ -1633,10 +1474,10 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             </div>
           ))}
           {images.length < 5 && (
-            <label htmlFor="image-upload" className="flex flex-col items-center justify-center h-24 sm:h-28 rounded-lg border-2 border-dashed border-primary-300 cursor-pointer hover:border-primary-500 bg-primary-50 text-primary-600 font-medium shadow group transition">
+            <label htmlFor="image-upload-sell" className="flex flex-col items-center justify-center h-24 sm:h-28 rounded-lg border-2 border-dashed border-primary-300 cursor-pointer hover:border-primary-500 bg-primary-50 text-primary-600 font-medium shadow group transition">
               <Camera className="h-7 w-7 mb-1 group-hover:text-primary-700" />
               <span className="text-xs">Add Photo</span>
-              <input id="image-upload" type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
+              <input id="image-upload-sell" type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
             </label>
           )}
         </div>
@@ -1646,30 +1487,8 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         </div>
         <div className="text-xs text-gray-400 mt-1">Tip: Add clear, well-lit photos for better responses.</div>
       </section>
-      {/* 13. Mobile Number at the bottom */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
-              <input
-          type="tel"
-          className={`input${errors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
-          placeholder="Enter your 10-digit mobile number"
-          value={formData.contactNumber || ''}
-          onChange={e => setFormData({
-                    ...formData,
-            contactNumber: e.target.value
-          })}
-          pattern="[0-9]{10}"
-          maxLength={10}
-          required
-          spellCheck={false}
-          autoCorrect="off"
-        />
-        {errors.contactNumber && <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-          <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-          {errors.contactNumber}
-        </p>}
-        <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
-        </div>
-    </form>
+      {/* Only one submit button at the bottom */}
+      <button type="submit" className="btn btn-primary">Submit</button>
+    </>
   );
 };

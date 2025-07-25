@@ -14,9 +14,9 @@ interface OnboardingModalProps {
 const PREFERENCES = [
   { id: 'vegetarian', label: 'Vegetarian' },
   { id: 'nonSmoker', label: 'Non-smoker' },
-  { id: 'nonAlcoholic', label: 'Non-alcoholic' },
-  { id: 'partyFriendly', label: 'Party friendly' },
-  { id: 'coupleFriendly', label: 'Couple friendly' },
+  { id: 'nonDrinker', label: 'Non-drinker' },
+  { id: 'morningPerson', label: 'Morning person' },
+  { id: 'partyOwl', label: 'Party owl' },
 ];
 
 const LOOKING_FOR = [
@@ -48,6 +48,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
   const [localities, setLocalities] = useState<Market[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
   const [mobileError, setMobileError] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
   React.useEffect(() => {
     getMarkets().then((data) => {
@@ -71,6 +72,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitted(true);
     // Validate with Yup
     try {
       await onboardingSchema.validate({
@@ -132,13 +134,13 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             required
             value={mobile}
             onChange={e => setMobile(e.target.value)}
-            className={`input w-full${mobileError ? ' border-red-500 bg-red-50' : ''}`}
+            className={`input w-full${submitted && mobileError ? ' border-red-500 bg-red-50' : ''}`}
             placeholder="Enter your mobile number"
             title="Mobile Number"
             spellCheck={false}
             autoCorrect="off"
           />
-          {mobileError && (
+          {submitted && mobileError && (
             <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
               {mobileError}
@@ -152,7 +154,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             required
             value={gender}
             onChange={e => setGender(e.target.value)}
-            className={`input w-full${gender === '' ? ' border-red-500 bg-red-50' : ''}`}
+            className={`input w-full${submitted && gender === '' ? ' border-red-500 bg-red-50' : ''}`}
             title="Gender"
             spellCheck={true}
             autoCorrect="on"
@@ -160,7 +162,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             <option value="">Select</option>
             {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
           </select>
-          {gender === '' && (
+          {submitted && gender === '' && (
             <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
               Gender is required.
@@ -174,7 +176,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             required
             value={lookingFor}
             onChange={e => setLookingFor(e.target.value)}
-            className={`input w-full${lookingFor === '' ? ' border-red-500 bg-red-50' : ''}`}
+            className={`input w-full${submitted && lookingFor === '' ? ' border-red-500 bg-red-50' : ''}`}
             title="Looking for"
             spellCheck={true}
             autoCorrect="on"
@@ -182,7 +184,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             <option value="">Select</option>
             {LOOKING_FOR.map(l => <option key={l} value={l}>{l}</option>)}
           </select>
-          {lookingFor === '' && (
+          {submitted && lookingFor === '' && (
             <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
               Looking for is required.
@@ -197,7 +199,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             required
             value={city}
             onChange={e => { setCity(e.target.value); setLocality(''); }}
-            className={`input w-full${city === '' ? ' border-red-500 bg-red-50' : ''}`}
+            className={`input w-full${submitted && city === '' ? ' border-red-500 bg-red-50' : ''}`}
             disabled={marketsLoading}
             title="City"
             spellCheck={true}
@@ -206,7 +208,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             <option value="">Select City</option>
             {cities.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          {city === '' && (
+          {submitted && city === '' && (
             <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
               City is required.
@@ -221,7 +223,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             required
             value={locality}
             onChange={e => setLocality(e.target.value)}
-            className={`input w-full${locality === '' ? ' border-red-500 bg-red-50' : ''}`}
+            className={`input w-full${submitted && locality === '' ? ' border-red-500 bg-red-50' : ''}`}
             disabled={!city || marketsLoading}
             title="Locality"
             spellCheck={true}
@@ -232,7 +234,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
               <option key={market.id} value={market.market}>{market.market}</option>
             ))}
           </select>
-          {locality === '' && (
+          {submitted && locality === '' && (
             <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
               Locality is required.

@@ -767,8 +767,8 @@ const AddListingPage = () => {
   );
 
   return (
-    <div className="py-8 bg-white">
-      <div className="container">
+    <div className="py-8 bg-white min-h-screen flex flex-col">
+      <div className="container flex flex-col flex-1">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-4">Add New Listing</h1>
           
@@ -797,7 +797,7 @@ const AddListingPage = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 flex flex-col flex-1">
           {listingType === 'rent' ? (
             <RentForm
               listingType={listingType}
@@ -825,29 +825,7 @@ const AddListingPage = () => {
               onSubmit={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)}
             />
           )}
-
-          {/* Only one button, label changes based on listingType */}
-          <button 
-            type="submit"
-            className="bg-primary-600 text-white px-6 py-2 rounded-lg hover:bg-primary-700 transition disabled:opacity-50"
-            disabled={isSubmitting}
-            onClick={() => {
-              // Track submit/post button click
-              import('../utils/analytics').then(({ trackEvent }) => {
-                trackEvent({
-                  action: 'submit_listing',
-                  category: 'Button',
-                  label: listingType === 'sell' ? 'Full Home Submit' : 'Shared Home Post',
-                });
-              });
-            }}
-          >
-            {isSubmitting
-              ? 'Submitting...'
-              : listingType === 'sell'
-              ? 'Submit'
-              : 'Post'}
-          </button>
+          {/* No extra submit button here. Only the form component renders the button. */}
         </form>
       </div>
     </div>
