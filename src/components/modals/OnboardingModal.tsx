@@ -48,7 +48,14 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
   const [localities, setLocalities] = useState<Market[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
   const [mobileError, setMobileError] = useState('');
+<<<<<<< HEAD
   const [submitted, setSubmitted] = useState(false);
+=======
+  const [genderError, setGenderError] = useState('');
+  const [lookingForError, setLookingForError] = useState('');
+  const [cityError, setCityError] = useState('');
+  const [localityError, setLocalityError] = useState('');
+>>>>>>> 66eaf79b08f365c230cd24560e42d8f69110ac45
 
   React.useEffect(() => {
     getMarkets().then((data) => {
@@ -83,14 +90,21 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
         locality,
       }, { abortEarly: false });
       setMobileError('');
+      setGenderError('');
+      setLookingForError('');
+      setCityError('');
+      setLocalityError('');
     } catch (err: any) {
       if (err.inner && err.inner.length > 0) {
         const errorMap: any = {};
         err.inner.forEach((e: any) => {
           if (e.path && e.message) errorMap[e.path] = e.message;
         });
-        if (errorMap.mobile) setMobileError(errorMap.mobile);
-        // Add similar error state for other fields if needed
+        setMobileError(errorMap.mobile || '');
+        setGenderError(errorMap.gender || '');
+        setLookingForError(errorMap.lookingFor || '');
+        setCityError(errorMap.city || '');
+        setLocalityError(errorMap.locality || '');
       } else if (err.message) {
         setMobileError(err.message);
       }
@@ -133,8 +147,13 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             type="tel"
             required
             value={mobile}
+<<<<<<< HEAD
             onChange={e => setMobile(e.target.value)}
             className={`input w-full${submitted && mobileError ? ' border-red-500 bg-red-50' : ''}`}
+=======
+            onChange={e => { setMobile(e.target.value); if (mobileError) setMobileError(''); }}
+            className={`input w-full${mobileError ? ' border-red-500 bg-red-50' : ''}`}
+>>>>>>> 66eaf79b08f365c230cd24560e42d8f69110ac45
             placeholder="Enter your mobile number"
             title="Mobile Number"
             spellCheck={false}
@@ -153,8 +172,13 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             id="onboard-gender"
             required
             value={gender}
+<<<<<<< HEAD
             onChange={e => setGender(e.target.value)}
             className={`input w-full${submitted && gender === '' ? ' border-red-500 bg-red-50' : ''}`}
+=======
+            onChange={e => { setGender(e.target.value); if (genderError) setGenderError(''); }}
+            className={`input w-full${genderError ? ' border-red-500 bg-red-50' : ''}`}
+>>>>>>> 66eaf79b08f365c230cd24560e42d8f69110ac45
             title="Gender"
             spellCheck={true}
             autoCorrect="on"
@@ -162,10 +186,14 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             <option value="">Select</option>
             {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
           </select>
+<<<<<<< HEAD
           {submitted && gender === '' && (
+=======
+          {genderError && (
+>>>>>>> 66eaf79b08f365c230cd24560e42d8f69110ac45
             <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              Gender is required.
+              {genderError}
             </p>
           )}
         </div>
@@ -175,8 +203,13 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             id="onboard-lookingfor"
             required
             value={lookingFor}
+<<<<<<< HEAD
             onChange={e => setLookingFor(e.target.value)}
             className={`input w-full${submitted && lookingFor === '' ? ' border-red-500 bg-red-50' : ''}`}
+=======
+            onChange={e => { setLookingFor(e.target.value); if (lookingForError) setLookingForError(''); }}
+            className={`input w-full${lookingForError ? ' border-red-500 bg-red-50' : ''}`}
+>>>>>>> 66eaf79b08f365c230cd24560e42d8f69110ac45
             title="Looking for"
             spellCheck={true}
             autoCorrect="on"
@@ -184,10 +217,14 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             <option value="">Select</option>
             {LOOKING_FOR.map(l => <option key={l} value={l}>{l}</option>)}
           </select>
+<<<<<<< HEAD
           {submitted && lookingFor === '' && (
+=======
+          {lookingForError && (
+>>>>>>> 66eaf79b08f365c230cd24560e42d8f69110ac45
             <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              Looking for is required.
+              {lookingForError}
             </p>
           )}
         </div>
@@ -198,8 +235,13 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             id="onboard-city"
             required
             value={city}
+<<<<<<< HEAD
             onChange={e => { setCity(e.target.value); setLocality(''); }}
             className={`input w-full${submitted && city === '' ? ' border-red-500 bg-red-50' : ''}`}
+=======
+            onChange={e => { setCity(e.target.value); setLocality(''); if (cityError) setCityError(''); }}
+            className={`input w-full${cityError ? ' border-red-500 bg-red-50' : ''}`}
+>>>>>>> 66eaf79b08f365c230cd24560e42d8f69110ac45
             disabled={marketsLoading}
             title="City"
             spellCheck={true}
@@ -208,10 +250,14 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             <option value="">Select City</option>
             {cities.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
+<<<<<<< HEAD
           {submitted && city === '' && (
+=======
+          {cityError && (
+>>>>>>> 66eaf79b08f365c230cd24560e42d8f69110ac45
             <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              City is required.
+              {cityError}
             </p>
           )}
         </div>
@@ -222,8 +268,13 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             id="onboard-locality"
             required
             value={locality}
+<<<<<<< HEAD
             onChange={e => setLocality(e.target.value)}
             className={`input w-full${submitted && locality === '' ? ' border-red-500 bg-red-50' : ''}`}
+=======
+            onChange={e => { setLocality(e.target.value); if (localityError) setLocalityError(''); }}
+            className={`input w-full${localityError ? ' border-red-500 bg-red-50' : ''}`}
+>>>>>>> 66eaf79b08f365c230cd24560e42d8f69110ac45
             disabled={!city || marketsLoading}
             title="Locality"
             spellCheck={true}
@@ -234,10 +285,14 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
               <option key={market.id} value={market.market}>{market.market}</option>
             ))}
           </select>
+<<<<<<< HEAD
           {submitted && locality === '' && (
+=======
+          {localityError && (
+>>>>>>> 66eaf79b08f365c230cd24560e42d8f69110ac45
             <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
               <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
-              Locality is required.
+              {localityError}
             </p>
           )}
         </div>
