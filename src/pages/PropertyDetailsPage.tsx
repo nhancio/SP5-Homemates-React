@@ -173,7 +173,11 @@ const PropertyDetailsPage = () => {
       const shareText = 
 `Hey, check this property on Homemates!
 Name: ${property.address?.buildingName || 'Property'}
-${listingType === 'rent' ? 'Rent' : 'Price'}: ₹${formatCurrency(listingType === 'rent' ? property.rentDetails?.costs?.rent : property.sellDetails?.price || 0)}
+${listingType === 'rent' ? 'Rent' : 'Price'}: ₹${formatCurrency(
+  listingType === 'rent' 
+    ? (property.rentDetails?.costs?.rent || 0) 
+    : (property.sellDetails?.price || property.price || 0)
+)}
 Type: ${property.propertyType || '-'}
 Location: ${property.address?.locality}, ${property.address?.city}
 Link: ${url}`;
@@ -247,6 +251,12 @@ Link: ${url}`;
       </div>
     );
   }
+
+  // Debug: Log the property data to see its structure
+  console.log('PropertyDetailsPage - Property data:', property);
+  console.log('PropertyDetailsPage - Listing type:', listingType);
+  console.log('PropertyDetailsPage - Rent details:', property?.rentDetails);
+  console.log('PropertyDetailsPage - Sell details:', property?.sellDetails);
 
   if (error || !property) {
     return (
@@ -372,7 +382,11 @@ Link: ${url}`;
               {/* Basic Info */}
               <div className="p-6 border-b">
                 <div className="flex items-center text-2xl font-bold text-primary-600 mb-2">
-                  ₹{formatCurrency(listingType === 'rent' ? property.rentDetails?.costs?.rent : property.sellDetails?.price)}
+                  ₹{formatCurrency(
+                    listingType === 'rent' 
+                      ? (property.rentDetails?.costs?.rent || 0) 
+                      : (property.sellDetails?.price || property.price || 0)
+                  )}
                   {listingType === 'rent' && <span className="text-sm text-gray-500 ml-1">/month</span>}
                 </div>
                 <h1 className="text-2xl font-bold mb-2">
@@ -465,23 +479,23 @@ Link: ${url}`;
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     <div>
                       <span className="text-gray-600">Monthly Rent</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.rent)} <span className="text-xs text-gray-500">/month</span></p>
+                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.rent || 0)} <span className="text-xs text-gray-500">/month</span></p>
                     </div>
                     <div>
                       <span className="text-gray-600">Maintenance</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.maintenance)} <span className="text-xs text-gray-500">/month</span></p>
+                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
                     </div>
                     <div>
                       <span className="text-gray-600">Security Deposit</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.securityDeposit)}</p>
+                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.securityDeposit || 0)}</p>
                     </div>
                     <div>
                       <span className="text-gray-600">Setup Cost</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.setupCost)}</p>
+                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.setupCost || 0)}</p>
                     </div>
                     <div>
                       <span className="text-gray-600">Brokerage</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.brokerage)}</p>
+                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.brokerage || 0)}</p>
                     </div>
                   </div>
                 </div>

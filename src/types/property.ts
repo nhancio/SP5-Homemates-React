@@ -39,6 +39,26 @@ export interface RentDetailsFull {
   preferredTenant: PreferredTenant;
 }
 
+export interface SellDetails {
+  price: number;
+  gst: number;
+  isNegotiable: boolean;
+  propertyType: string;
+  sqft: number;
+  direction: string;
+  ownership: string;
+  ageOfProperty: string;
+  totalFloors: string;
+  floorNumber: string;
+  waterSupply: string;
+  approvals: string[];
+  amenities: string[];
+  highlights: string[];
+  description: string;
+  propertyId: string;
+  loanOnProperty: boolean;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -60,6 +80,7 @@ export interface Property {
   };
   address?: PropertyAddress;
   rentDetails?: RentDetailsFull;
+  sellDetails?: SellDetails;
 }
 
 export interface PropertyAmenities {

@@ -348,7 +348,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                 : (property.address?.buildingName || 'Property')}
             </h3>
             <span className="text-lg font-extrabold text-primary-600">
-              ₹{formatCurrency(property.rentDetails?.costs?.rent || property.price || 0)}
+              ₹{formatCurrency(
+                listingType === 'rent' 
+                  ? (property.rentDetails?.costs?.rent || 0)
+                  : (property.sellDetails?.price || property.price || 0)
+              )}
             </span>
           </div>
           <div className="text-xs text-primary-600 font-semibold mb-1 flex items-center">
