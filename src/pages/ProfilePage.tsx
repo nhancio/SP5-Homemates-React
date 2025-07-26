@@ -642,41 +642,64 @@ const ProfilePage = () => {
                 <div className="flex flex-col md:flex-row gap-6 mt-6">
                   {/* Upgrade to Premium */}
                   <div className="flex-1 bg-primary-50 border border-primary-200 rounded-lg p-6">
-                    <p className="plan-status text-lg mb-2">Plan: <span className="free-tag bg-gray-200 text-primary-700 px-2 py-1 rounded">Free</span></p>
-                    <div className="premium-box">
-                      <h3 className="text-xl font-bold mb-2">Upgrade to Premium</h3>
-                      <ul className="benefits-list list-disc pl-6 mb-4 text-primary-700">
-                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> <span className="font-semibold">Unlimited Calls</span> to property owners</li>
-                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> <span className="font-semibold">Unlimited Chats</span> with potential flatmates</li>
-                        <li className="flex items-center gap-2 mb-1"><span className="text-green-600">✔</span> <span className="font-semibold">Advanced AI-based Matching</span> for best results</li>
+                    <div className="text-center mb-4">
+                      <p className="text-lg mb-2">Plan: <span className="bg-gray-200 text-primary-700 px-3 py-1 rounded-full text-sm font-medium">Free</span></p>
+                    </div>
+                    <div className="text-center">
+                      <h3 className="text-xl font-bold mb-4">Upgrade to Premium</h3>
+                      <ul className="text-left mb-6 space-y-2">
+                        <li className="flex items-start gap-3">
+                          <span className="text-green-600 text-lg mt-0.5">✔</span>
+                          <span><span className="font-semibold">Unlimited Calls</span> to property owners</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="text-green-600 text-lg mt-0.5">✔</span>
+                          <span><span className="font-semibold">Unlimited Chats</span> with potential flatmates</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="text-green-600 text-lg mt-0.5">✔</span>
+                          <span><span className="font-semibold">Advanced AI-based Matching</span> for best results</span>
+                        </li>
                       </ul>
-                      <div className="flex items-center gap-4 mb-4">
-                        <span className="flex items-center gap-2">
-                          <span className="line-through text-gray-400 text-xl">₹499</span>
-                          <span className="text-2xl font-bold text-primary-700">₹99/month</span>
-                        </span>
+                      <div className="flex flex-col items-center gap-2 mb-6">
+                        <div className="flex items-center gap-3">
+                          <span className="line-through text-gray-400 text-lg">₹499</span>
+                          <span className="text-3xl font-bold text-primary-700">₹99/month</span>
+                        </div>
                       </div>
-                      <button className="upgrade-btn btn btn-primary px-6 py-2 text-lg font-semibold" onClick={handleUpgradeClick}>Upgrade to Premium</button>
-                      <div className="text-xs text-gray-600 mt-2">Get exclusive benefits and features with a Premium membership.</div>
-                      <div className="text-xs text-gray-400 mt-2 flex items-center gap-1"><span role="img" aria-label="secure">🔒</span> Secure Payment</div>
+                      <button 
+                        className="w-full bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 text-lg font-semibold rounded-lg transition-colors mb-4" 
+                        onClick={handleUpgradeClick}
+                      >
+                        Upgrade to Premium
+                      </button>
+                      <div className="text-sm text-gray-600 mb-3">
+                        Get exclusive benefits and features with a Premium membership.
+                      </div>
+                      <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                        <span role="img" aria-label="secure">🔒</span>
+                        <span>Secure Payment</span>
+                      </div>
                     </div>
                   </div>
                   {/* Your Credits */}
                   <div className="flex-1 bg-primary-50 border border-primary-200 rounded-lg p-6">
-                    <h3 className="text-lg font-semibold mb-4 flex items-center">
-                      <CreditCard className="w-5 h-5 mr-2 text-primary-600" />
-                      Your Credits
-                    </h3>
-                    <div>
-                      <div className="text-3xl font-bold text-primary-600 mb-1">{Math.max(0, userCredits)}</div>
-                      <div className="text-sm text-gray-600 mb-1">Credits remaining</div>
-                      <div className="text-xs text-gray-500 mb-4">Use credits to contact property owners via call or WhatsApp.</div>
-                      <button
-                        onClick={() => window.location.href = '/payment'}
-                        className="upgrade-btn btn btn-primary px-6 py-2 text-lg font-semibold"
-                      >
-                        Buy Contact Credits
-                      </button>
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold mb-4 flex items-center justify-center">
+                        <CreditCard className="w-5 h-5 mr-2 text-primary-600" />
+                        Your Credits
+                      </h3>
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-primary-600 mb-2">{Math.max(0, userCredits)}</div>
+                        <div className="text-sm text-gray-600 mb-2">Credits remaining</div>
+                        <div className="text-xs text-gray-500 mb-6">Use credits to contact property owners via call or WhatsApp.</div>
+                        <button
+                          onClick={() => window.location.href = '/payment'}
+                          className="w-full bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 text-lg font-semibold rounded-lg transition-colors"
+                        >
+                          Buy Contact Credits
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -1,3 +1,115 @@
+/* Custom Scrollbar Styling - Must be at the top */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: #fdf2f8 !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C2185B !important;
+  border-radius: 4px !important;
+  transition: background 0.2s ease !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9c1454 !important;
+}
+
+::-webkit-scrollbar-corner {
+  background: #fdf2f8 !important;
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: #C2185B #fdf2f8 !important;
+}
+
+html {
+  scrollbar-width: thin !important;
+  scrollbar-color: #C2185B #fdf2f8 !important;
+}
+
+body {
+  scrollbar-width: thin !important;
+  scrollbar-color: #C2185B #fdf2f8 !important;
+}
+
+/* Force Price Range Slider Colors - Global Override */
+.rc-slider-track {
+  background-color: #C2185B !important;
+}
+
+.rc-slider-rail {
+  background-color: #fdf2f8 !important;
+}
+
+/* Override any inline styles */
+.rc-slider-track[style*="background"] {
+  background-color: #C2185B !important;
+}
+
+.rc-slider-rail[style*="background"] {
+  background-color: #fdf2f8 !important;
+}
+
+/* Override rc-slider default CSS */
+.rc-slider .rc-slider-track {
+  background-color: #C2185B !important;
+}
+
+.rc-slider .rc-slider-rail {
+  background-color: #fdf2f8 !important;
+}
+
+/* Override any rc-slider imported CSS */
+.rc-slider-track {
+  background-color: #C2185B !important;
+}
+
+.rc-slider-rail {
+  background-color: #fdf2f8 !important;
+}
+
+/* Force override with maximum specificity */
+.rc-slider .rc-slider-track,
+.rc-slider-track,
+div[class*="rc-slider-track"] {
+  background-color: #C2185B !important;
+}
+
+.rc-slider .rc-slider-rail,
+.rc-slider-rail,
+div[class*="rc-slider-rail"] {
+  background-color: #fdf2f8 !important;
+}
+
+/* Override rc-slider imported CSS with !important */
+.rc-slider-track {
+  background-color: #C2185B !important;
+  background: #C2185B !important;
+}
+
+.rc-slider-rail {
+  background-color: #fdf2f8 !important;
+  background: #fdf2f8 !important;
+}
+
+/* Override any background styles */
+[class*="rc-slider-track"] {
+  background-color: #C2185B !important;
+  background: #C2185B !important;
+}
+
+[class*="rc-slider-rail"] {
+  background-color: #fdf2f8 !important;
+  background: #fdf2f8 !important;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,6 +121,8 @@
   
   body {
     background-color: #fff;
+    /* Improve touch scrolling on mobile */
+    -webkit-overflow-scrolling: touch;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -16,19 +130,45 @@
   }
   
   h1 {
-    @apply text-3xl md:text-4xl;
+    @apply text-2xl md:text-3xl lg:text-4xl;
   }
   
   h2 {
-    @apply text-2xl md:text-3xl;
+    @apply text-xl md:text-2xl lg:text-3xl;
   }
   
   h3 {
-    @apply text-xl md:text-2xl;
+    @apply text-lg md:text-xl lg:text-2xl;
   }
   
   p {
     @apply leading-relaxed;
+  }
+
+  /* Improve touch targets on mobile */
+  button, a {
+    @apply touch-manipulation;
+  }
+
+  /* Prevent zoom on input focus on iOS */
+  input, textarea, select {
+    font-size: 16px;
+  }
+}
+
+/* Mobile scrollbar adjustments */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #C2185B !important;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9c1454 !important;
   }
 }
 
@@ -39,6 +179,8 @@
   
   .btn {
     @apply px-4 py-2 text-sm font-medium transition-colors rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2;
+    /* Ensure minimum touch target size */
+    min-height: 44px;
   }
   
   .btn-primary {
@@ -48,9 +190,146 @@
   .btn-secondary {
     @apply text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-primary-500;
   }
+
+  .btn-outline {
+    @apply text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:ring-primary-500;
+  }
   
   .input {
     @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
+  }
+
+  /* Mobile-specific improvements */
+  .mobile-optimized {
+    @apply touch-manipulation;
+  }
+
+  /* Better mobile spacing */
+  .mobile-padding {
+    @apply px-4 py-3 md:px-6 md:py-4;
+  }
+
+  /* Mobile-friendly text sizes */
+  .mobile-text {
+    @apply text-sm md:text-base;
+  }
+
+  .mobile-text-sm {
+    @apply text-xs md:text-sm;
+  }
+
+  .mobile-text-lg {
+    @apply text-base md:text-lg;
+  }
+
+  .mobile-text-xl {
+    @apply text-lg md:text-xl;
+  }
+
+  /* Mobile-friendly grid layouts */
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+  }
+
+  /* Mobile-friendly flex layouts */
+  .mobile-flex {
+    @apply flex flex-col sm:flex-row;
+  }
+
+  /* Mobile-friendly spacing */
+  .mobile-gap {
+    @apply gap-3 md:gap-4;
+  }
+
+  .mobile-margin {
+    @apply mb-4 md:mb-6;
+  }
+
+  /* Price Range Slider Mobile Optimizations */
+  .rc-slider {
+    @apply touch-manipulation;
+  }
+
+  .rc-slider-handle {
+    @apply touch-manipulation;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border: 3px solid #C2185B !important;
+    background-color: #fff !important;
+    box-shadow: 0 2px 8px rgba(194,24,91,0.15) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .rc-slider-handle:hover {
+    transform: scale(1.1) !important;
+    box-shadow: 0 4px 12px rgba(194,24,91,0.25) !important;
+  }
+
+  .rc-slider-handle:active {
+    transform: scale(1.05) !important;
+  }
+
+  .rc-slider-track {
+    background-color: #C2185B !important;
+    height: 8px !important;
+    border-radius: 4px !important;
+  }
+
+  .rc-slider-rail {
+    background-color: #fdf2f8 !important;
+    height: 8px !important;
+    border-radius: 4px !important;
+  }
+
+  /* Force override any conflicting styles */
+  .rc-slider .rc-slider-track {
+    background-color: #C2185B !important;
+  }
+
+  .rc-slider .rc-slider-rail {
+    background-color: #fdf2f8 !important;
+  }
+
+  /* Additional specificity for any inline styles */
+  .rc-slider .rc-slider-track[style*="background"] {
+    background-color: #C2185B !important;
+  }
+
+  .rc-slider .rc-slider-rail[style*="background"] {
+    background-color: #fdf2f8 !important;
+  }
+
+  .rc-slider-mark {
+    @apply text-xs font-medium text-gray-600;
+  }
+
+  .rc-slider-mark-text {
+    @apply text-xs font-medium text-gray-600;
+    margin-top: 8px !important;
+  }
+
+  .rc-slider-tooltip {
+    @apply bg-gray-900 text-white text-xs font-medium px-2 py-1 rounded;
+    z-index: 1000 !important;
+  }
+
+  /* Mobile-specific slider improvements */
+  @media (max-width: 768px) {
+    .rc-slider-handle {
+      min-width: 48px !important;
+      min-height: 48px !important;
+      border-width: 4px !important;
+    }
+
+    .rc-slider-track,
+    .rc-slider-rail {
+      height: 10px !important;
+    }
+
+    .rc-slider-mark-text {
+      font-size: 11px !important;
+      margin-top: 12px !important;
+    }
   }
 }
 
@@ -72,4 +351,48 @@ html, body {
 
 html {
   overflow-y: scroll;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  /* Improve touch targets */
+  button, a, input, textarea, select {
+    min-height: 44px;
+  }
+
+  /* Better mobile typography */
+  body {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  /* Improve mobile scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Mobile-friendly shadows */
+  .mobile-shadow {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Mobile-friendly borders */
+  .mobile-border {
+    border-radius: 12px;
+  }
+}
+
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* Improve mobile performance */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 }

@@ -370,16 +370,16 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
       {listingType === 'rent' && (
         <div className="mb-4">
           <label className="block text-sm font-bold text-primary-700 mb-2">Rent Range (₹/month)</label>
-          <div className="bg-white rounded-xl shadow p-6 border border-primary-100 flex flex-col gap-2">
-            {/* Inputs Row with labels */}
-            <div className="flex flex-row items-end gap-2 w-full mb-4">
-              <div className="flex flex-col items-start">
+          <div className="bg-white rounded-xl shadow p-4 md:p-6 border border-primary-100 flex flex-col gap-3 md:gap-2">
+            {/* Inputs Row with labels - Mobile Optimized */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-3 sm:gap-2 w-full mb-4">
+              <div className="flex flex-col items-start w-full sm:w-auto">
                 <span className="text-xs text-primary-500 font-medium mb-1">Min</span>
-                <div className="relative w-32">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                <div className="relative w-full sm:w-32">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                   <input
                     type="number"
-                    className={`input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border rounded-md text-left ${minRentError ? 'border-red-400' : 'border-primary-100'}`}
+                    className={`input w-full sm:w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-12 sm:h-10 pl-8 pr-2 bg-gray-50 border rounded-md text-left min-h-[44px] ${minRentError ? 'border-red-400' : 'border-primary-100'}`}
                     min={0}
                     max={100000}
                     maxLength={6}
@@ -393,14 +393,14 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                   {minRentError && <div className="text-xs text-red-500 mt-1">{minRentError}</div>}
                 </div>
               </div>
-              <span className="text-gray-400 font-bold mb-1">-</span>
-              <div className="flex flex-col items-start">
+              <span className="text-gray-400 font-bold mb-1 self-center">-</span>
+              <div className="flex flex-col items-start w-full sm:w-auto">
                 <span className="text-xs text-primary-500 font-medium mb-1">Max</span>
-                <div className="relative w-32">
-                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                <div className="relative w-full sm:w-32">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
                   <input
                     type="number"
-                    className={`input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border rounded-md text-left ${maxRentError ? 'border-red-400' : 'border-primary-100'}`}
+                    className={`input w-full sm:w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-12 sm:h-10 pl-8 pr-2 bg-gray-50 border rounded-md text-left min-h-[44px] ${maxRentError ? 'border-red-400' : 'border-primary-100'}`}
                     min={0}
                     max={100000}
                     maxLength={6}
@@ -414,11 +414,11 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                   {maxRentError && <div className="text-xs text-red-500 mt-1">{maxRentError}</div>}
                 </div>
               </div>
-              <span className="text-sm text-primary-700 font-semibold mb-1 ml-2">per month</span>
+              <span className="text-sm text-primary-700 font-semibold mb-1 ml-0 sm:ml-2 self-center">per month</span>
             </div>
-            {/* Slider Row */}
+            {/* Slider Row - Mobile Optimized */}
             <div className="flex flex-col justify-center w-full">
-              <div className="relative w-full flex items-center" style={{ minHeight: 48 }}>
+              <div className="relative w-full flex items-center" style={{ minHeight: 60 }}>
                 {/* Slider */}
                 <div className="w-full px-2 flex items-center justify-center">
                   {(() => {
@@ -434,7 +434,6 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                           <Tooltip
                             prefixCls="rc-slider-tooltip"
                             overlay={`₹${handleProps.value.toLocaleString()}`}
-                            visible={handleProps.dragging}
                             placement="top"
                             key={handleProps.index}
                           >
@@ -465,19 +464,18 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                             setFilters({ ...filters, [listingType]: { ...filters[listingType], minRent: min, maxRent: max, }, });
                           }
                         }}
-                        allowCross={false}
-                        trackStyle={[{ backgroundColor: '#C2185B', height: 10 }]}
-                        handleStyle={[
-                          { borderColor: '#C2185B', backgroundColor: '#fff', borderWidth: 3, width: 28, height: 28, marginTop: -10, boxShadow: '0 2px 8px rgba(194,24,91,0.10)' },
-                          { borderColor: '#C2185B', backgroundColor: '#fff', borderWidth: 3, width: 28, height: 28, marginTop: -10, boxShadow: '0 2px 8px rgba(194,24,91,0.10)' }
-                        ]}
-                        railStyle={{ backgroundColor: '#f3e8ee', height: 10, borderRadius: 5 }}
+                        className="w-full"
+                        style={{
+                          // Mobile-specific slider styling
+                          '--rc-slider-handle-size': '24px',
+                          '--rc-slider-track-height': '8px',
+                        } as React.CSSProperties}
                       />
                     );
                   })()}
-          </div>
-        </div>
-          </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -279,7 +279,7 @@ Link: ${url}`;
   }
 
   return (
-    <div className="py-8">
+    <div className="py-4 md:py-8">
       <div className="container">
         {/* Add a CTA banner for non-authenticated users */}
         {!isAuthenticated && (
@@ -291,7 +291,7 @@ Link: ${url}`;
             <div className="relative">
               <button 
                 onClick={handleLogin}
-                className="btn btn-primary"
+                className="btn btn-primary w-full sm:w-auto"
               >
                 Sign in with Google
               </button>
@@ -309,13 +309,12 @@ Link: ${url}`;
         {/* Back Button */}
         <button 
           onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+          className="flex items-center text-gray-600 hover:text-gray-900 mb-4 text-sm md:text-base"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
-          Back to {listingType === 'rent' ? 'Rental' : 'Sale'} Properties
+          <span className="hidden sm:inline">Back to {listingType === 'rent' ? 'Rental' : 'Sale'} Properties</span>
+          <span className="sm:hidden">Back</span>
         </button>
-
-        {/* No applied filters row rendered */}
 
         {/* Property Type Badge */}
         <div className="mb-4">
@@ -325,7 +324,7 @@ Link: ${url}`;
         </div>
 
         {/* Image Gallery */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <div className="aspect-[16/9] w-full rounded-lg overflow-hidden bg-gray-100">
             <Swiper
               modules={[Navigation, Pagination]}
@@ -374,14 +373,14 @@ Link: ${url}`;
           </div>
         </div>
 
-        {/* Property Details Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Property Details Grid - Mobile Optimized */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
               {/* Basic Info */}
-              <div className="p-6 border-b">
-                <div className="flex items-center text-2xl font-bold text-primary-600 mb-2">
+              <div className="p-4 md:p-6 border-b">
+                <div className="flex items-center text-xl md:text-2xl font-bold text-primary-600 mb-2">
                   ₹{formatCurrency(
                     listingType === 'rent' 
                       ? (property.rentDetails?.costs?.rent || 0) 
@@ -389,10 +388,10 @@ Link: ${url}`;
                   )}
                   {listingType === 'rent' && <span className="text-sm text-gray-500 ml-1">/month</span>}
                 </div>
-                <h1 className="text-2xl font-bold mb-2">
+                <h1 className="text-xl md:text-2xl font-bold mb-2">
                   {property.address?.buildingName}
                 </h1>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-4 text-sm md:text-base">
                   {property.address?.locality}, {property.address?.city}
                 </p>
                 {property.address?.googleMapsLink && property.address.googleMapsLink.startsWith('https://maps.google.') && (
@@ -401,7 +400,7 @@ Link: ${url}`;
                       href={property.address.googleMapsLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 mt-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-full font-medium border border-primary-200 hover:bg-primary-100 transition"
+                      className="inline-flex items-center gap-2 mt-2 px-4 py-2 bg-primary-50 text-primary-700 rounded-full font-medium border border-primary-200 hover:bg-primary-100 transition text-sm"
                     >
                       <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10.5V6a2 2 0 0 0-2-2h-4.5" /><path d="M3 14.5V18a2 2 0 0 0 2 2h4.5" /><path d="M21 3l-9 9-9-9" /></svg>
                       View on Google Maps
@@ -425,47 +424,47 @@ Link: ${url}`;
               </div>
 
               {/* Property Details */}
-              <div className="p-6 border-b">
+              <div className="p-4 md:p-6 border-b">
                 <h2 className="text-lg font-semibold mb-4">Property Details</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   <div>
-                    <span className="text-gray-600">Type</span>
-                    <p className="font-semibold">{property.propertyType}</p>
+                    <span className="text-gray-600 text-sm">Type</span>
+                    <p className="font-semibold text-sm md:text-base">{property.propertyType}</p>
                   </div>
                   {listingType === 'sell' ? (
                     <>
                       <div>
-                        <span className="text-gray-600">Built Up Area</span>
-                        <p className="font-semibold">{property.sellDetails?.sqft || '-'} Sq.ft</p>
+                        <span className="text-gray-600 text-sm">Built Up Area</span>
+                        <p className="font-semibold text-sm md:text-base">{property.sellDetails?.sqft || '-'} Sq.ft</p>
                       </div>
                       <div>
-                        <span className="text-gray-600">Direction</span>
-                        <p className="font-semibold">{property.sellDetails?.direction || '-'}</p>
+                        <span className="text-gray-600 text-sm">Direction</span>
+                        <p className="font-semibold text-sm md:text-base">{property.sellDetails?.direction || '-'}</p>
                       </div>
                     </>
                   ) : (
                     <>
                       <div>
-                        <span className="text-gray-600">Room Type</span>
-                        <p className="font-semibold">{property.rentDetails?.roomDetails?.availability || '-'}</p>
+                        <span className="text-gray-600 text-sm">Room Type</span>
+                        <p className="font-semibold text-sm md:text-base">{property.rentDetails?.roomDetails?.availability || '-'}</p>
                       </div>
                       <div>
-                        <span className="text-gray-600">Bathroom Type</span>
-                        <p className="font-semibold">{property.rentDetails?.roomDetails?.bathroomType || '-'}</p>
+                        <span className="text-gray-600 text-sm">Bathroom Type</span>
+                        <p className="font-semibold text-sm md:text-base">{property.rentDetails?.roomDetails?.bathroomType || '-'}</p>
                       </div>
                     </>
                   )}
                   <div>
-                    <span className="text-gray-600">Furnishing</span>
-                    <p className="font-semibold">{property.furnishingType}</p>
+                    <span className="text-gray-600 text-sm">Furnishing</span>
+                    <p className="font-semibold text-sm md:text-base">{property.furnishingType}</p>
                   </div>
                   <div>
-                    <span className="text-gray-600">Building Type</span>
-                    <p className="font-semibold">{property.buildingType}</p>
+                    <span className="text-gray-600 text-sm">Building Type</span>
+                    <p className="font-semibold text-sm md:text-base">{property.buildingType}</p>
                   </div>
                   <div>
-                    <span className="text-gray-600">Available From</span>
-                    <p className="font-semibold">
+                    <span className="text-gray-600 text-sm">Available From</span>
+                    <p className="font-semibold text-sm md:text-base">
                       {property.isImmediate ? 'Immediate' : property.handoverDate}
                     </p>
                   </div>
@@ -474,55 +473,50 @@ Link: ${url}`;
 
               {/* Cost Details - Only for Rent */}
               {listingType === 'rent' && (
-                <div className="p-6 border-b">
+                <div className="p-4 md:p-6 border-b">
                   <h2 className="text-lg font-semibold mb-4">Rent Details</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <div>
-                      <span className="text-gray-600">Monthly Rent</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.rent || 0)} <span className="text-xs text-gray-500">/month</span></p>
+                      <span className="text-gray-600 text-sm">Monthly Rent</span>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.rentDetails?.costs?.rent || 0)} <span className="text-xs text-gray-500">/month</span></p>
                     </div>
                     <div>
-                      <span className="text-gray-600">Maintenance</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
+                      <span className="text-gray-600 text-sm">Maintenance</span>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.rentDetails?.costs?.maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
                     </div>
                     <div>
-                      <span className="text-gray-600">Security Deposit</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.securityDeposit || 0)}</p>
+                      <span className="text-gray-600 text-sm">Security Deposit</span>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.rentDetails?.costs?.securityDeposit || 0)}</p>
                     </div>
                     <div>
-                      <span className="text-gray-600">Setup Cost</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.setupCost || 0)}</p>
+                      <span className="text-gray-600 text-sm">Setup Cost</span>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.rentDetails?.costs?.setupCost || 0)}</p>
                     </div>
                     <div>
-                      <span className="text-gray-600">Brokerage</span>
-                      <p className="font-semibold">₹{formatCurrency(property.rentDetails?.costs?.brokerage || 0)}</p>
+                      <span className="text-gray-600 text-sm">Brokerage</span>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.rentDetails?.costs?.brokerage || 0)}</p>
                     </div>
                   </div>
                 </div>
               )}
               {/* Contact Number - Show if available */}
-              {property.contactNumber && (
-                <div className="p-6 border-b">
-                  <h2 className="text-lg font-semibold mb-4">Contact Number</h2>
-                  <p className="font-semibold text-primary-700 text-lg">{property.contactNumber}</p>
-                </div>
-              )}
+              {/* Removed contact number display for privacy */}
 
               {/* Additional Bills - Only for Rent */}
               {listingType === 'rent' && property.rentDetails?.additionalBills && (
-                <div className="p-6 border-b">
+                <div className="p-4 md:p-6 border-b">
                   <h2 className="text-lg font-semibold mb-4">Additional Bills</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     {Object.entries(property.rentDetails.additionalBills).map(([key, value]) => (
                       value ? (
                         <div key={key}>
-                          <span className="text-gray-600">{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-                          <p className="font-semibold">₹{formatCurrency(Number(value))}</p>
+                          <span className="text-gray-600 text-sm">{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                          <p className="font-semibold text-sm md:text-base">₹{formatCurrency(Number(value))}</p>
                         </div>
                       ) : null
                     ))}
                     <div className="col-span-full mt-4 pt-4 border-t">
-                      <span className="text-gray-600">Total Additional Bills</span>
+                      <span className="text-gray-600 text-sm">Total Additional Bills</span>
                       <p className="font-semibold text-lg text-primary-600">
                         ₹{formatCurrency(
                           Object.values(property.rentDetails.additionalBills)
@@ -536,19 +530,19 @@ Link: ${url}`;
 
               {/* Tenant Preferences - Only for Rent */}
               {listingType === 'rent' && property.rentDetails?.preferredTenant && (
-                <div className="p-6 border-b">
+                <div className="p-4 md:p-6 border-b">
                   <h2 className="text-lg font-semibold mb-4">Tenant Preferences</h2>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <span className="text-gray-600">Looking for</span>
-                      <p className="font-semibold">{property.rentDetails.preferredTenant.lookingFor || 'Any'}</p>
+                      <span className="text-gray-600 text-sm">Looking for</span>
+                      <p className="font-semibold text-sm md:text-base">{property.rentDetails.preferredTenant.lookingFor || 'Any'}</p>
                     </div>
                     {property.rentDetails.preferredTenant.preferences?.length > 0 && (
                       <div>
-                        <span className="text-gray-600">Preferences</span>
+                        <span className="text-gray-600 text-sm">Preferences</span>
                         <div className="flex flex-wrap gap-2 mt-1">
                           {property.rentDetails.preferredTenant.preferences.map((pref: string) => (
-                            <span key={pref} className="px-2 py-1 bg-gray-100 rounded-full text-sm">
+                            <span key={pref} className="px-2 py-1 bg-gray-100 rounded-full text-xs">
                               {pref}
                             </span>
                           ))}
@@ -560,13 +554,13 @@ Link: ${url}`;
               )}
 
               {/* Amenities Section */}
-              <div className="p-6 border-b">
+              <div className="p-4 md:p-6 border-b">
                 <h2 className="text-lg font-semibold mb-4">Amenities</h2>
                 {listingType === 'rent' && property.amenities && (
                   <div className="space-y-2">
                     {property.amenities.appliances?.length > 0 && (
                       <div>
-                        <span className="text-gray-600 font-medium">Appliances:</span>
+                        <span className="text-gray-600 font-medium text-sm">Appliances:</span>
                         <div className="flex flex-wrap gap-2 mt-1">
                           {property.amenities.appliances.map((amenity: string) => (
                             <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
@@ -579,7 +573,7 @@ Link: ${url}`;
                     )}
                     {property.amenities.furniture?.length > 0 && (
                       <div>
-                        <span className="text-gray-600 font-medium">Furniture:</span>
+                        <span className="text-gray-600 font-medium text-sm">Furniture:</span>
                         <div className="flex flex-wrap gap-2 mt-1">
                           {property.amenities.furniture.map((amenity: string) => (
                             <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
@@ -592,7 +586,7 @@ Link: ${url}`;
                     )}
                     {property.amenities.building?.length > 0 && (
                       <div>
-                        <span className="text-gray-600 font-medium">Building:</span>
+                        <span className="text-gray-600 font-medium text-sm">Building:</span>
                         <div className="flex flex-wrap gap-2 mt-1">
                           {property.amenities.building.map((amenity: string) => (
                             <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
@@ -624,44 +618,44 @@ Link: ${url}`;
               </div>
 
               {/* Description */}
-              <div className="p-6">
+              <div className="p-4 md:p-6">
                 <h2 className="text-lg font-semibold mb-4">Description</h2>
                 <div className="mb-4">
-                  <h3 className="font-bold mb-1">Location</h3>
-                  <div>City: {property.address?.city}</div>
-                  <div>Locality: {property.address?.locality}</div>
-                  {property.address?.buildingName && <div>Address: {property.address.buildingName}</div>}
+                  <h3 className="font-bold mb-1 text-sm md:text-base">Location</h3>
+                  <div className="text-sm md:text-base">City: {property.address?.city}</div>
+                  <div className="text-sm md:text-base">Locality: {property.address?.locality}</div>
+                  {property.address?.buildingName && <div className="text-sm md:text-base">Address: {property.address.buildingName}</div>}
                 </div>
                 <div className="mb-4">
-                  <h3 className="font-bold mb-1">Services</h3>
-                  <div>{property.services?.length ? property.services.map((s: string) => SERVICES.find(x => x.key === s)?.label).join(', ') : 'None'}</div>
+                  <h3 className="font-bold mb-1 text-sm md:text-base">Services</h3>
+                  <div className="text-sm md:text-base">{property.services?.length ? property.services.map((s: string) => SERVICES.find(x => x.key === s)?.label).join(', ') : 'None'}</div>
                 </div>
-                <p className="text-gray-700 whitespace-pre-line">{property.description}</p>
+                <p className="text-gray-700 whitespace-pre-line text-sm md:text-base">{property.description}</p>
               </div>
             </div>
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar - Mobile Optimized */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
-              <div className="flex flex-col gap-4">
+            <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 sticky top-4">
+              <div className="flex flex-col gap-3 md:gap-4">
                 <button
                   onClick={handleCall}
-                  className="btn btn-primary flex items-center justify-center gap-2"
+                  className="btn btn-primary flex items-center justify-center gap-2 py-3 md:py-2 text-sm md:text-base"
                 >
                   <Phone className="w-5 h-5" />
                   Contact Owner
                 </button>
                 <button
                   onClick={handleFavoriteClick}
-                  className="btn btn-secondary flex items-center justify-center gap-2"
+                  className="btn btn-secondary flex items-center justify-center gap-2 py-3 md:py-2 text-sm md:text-base"
                 >
                   <Heart className={isAuthenticated && favoriteProperties.includes(property.id) ? 'fill-red-500' : ''} />
                   {isAuthenticated && favoriteProperties.includes(property.id) ? 'Saved' : 'Save'}
                 </button>
                 <button
                   onClick={handleShare}
-                  className="btn btn-outline flex items-center justify-center gap-2"
+                  className="btn btn-outline flex items-center justify-center gap-2 py-3 md:py-2 text-sm md:text-base"
                 >
                   <Share2 className="w-5 h-5" />
                   Share

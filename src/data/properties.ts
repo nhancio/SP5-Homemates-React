@@ -162,7 +162,172 @@ const mockProperties: Property[] = [
       }
     }
   },
-  // Add more properties with Indian locations and contact details...
+  // Add rent properties
+  {
+    id: 'rent-prop-1',
+    title: 'Cozy 1BHK for Rent',
+    description: 'Fully furnished 1BHK apartment perfect for students or working professionals. Located in a prime area with all amenities.',
+    price: 0, // Not applicable for rent
+    location: 'Indiranagar, Bangalore',
+    type: 'Flat',
+    bedrooms: 1,
+    bathrooms: 1,
+    area: 800,
+    images: [
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      'https://images.pexels.com/photos/1571463/pexels-photo-1571463.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=1600'
+    ],
+    features: ['Fully Furnished', 'Parking', 'Security', '24/7 Water Supply'],
+    listingType: 'rent',
+    listedAt: '2024-01-15',
+    contactInfo: {
+      name: 'Sneha Reddy',
+      phone: '+91 98765 43212',
+      email: 'sneha.reddy@example.com'
+    },
+    address: {
+      buildingName: 'Indiranagar Heights',
+      locality: 'Indiranagar',
+      city: 'Bangalore'
+    },
+    rentDetails: {
+      roomDetails: {
+        availableRooms: 1,
+        availability: 'Immediate',
+        bathroomType: 'Attached'
+      },
+      costs: {
+        rent: 25000,
+        maintenance: 2000,
+        securityDeposit: 50000,
+        setupCost: 3000,
+        brokerage: 0
+      },
+      additionalBills: {
+        wifi: 800,
+        water: 400,
+        gas: 500,
+        cook: 1500,
+        maid: 1200,
+        others: 0
+      },
+      preferredTenant: {
+        lookingFor: 'Any',
+        preferences: []
+      }
+    }
+  },
+  {
+    id: 'rent-prop-2',
+    title: 'Premium 2BHK Shared Home',
+    description: 'Beautiful 2BHK apartment in a gated community. Perfect for roommates or small families. All modern amenities included.',
+    price: 0,
+    location: 'Electronic City, Bangalore',
+    type: 'Flat',
+    bedrooms: 2,
+    bathrooms: 2,
+    area: 1100,
+    images: [
+      'https://images.pexels.com/photos/1396132/pexels-photo-1396132.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      'https://images.pexels.com/photos/32870/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1600'
+    ],
+    features: ['Gym', 'Swimming Pool', 'Garden', 'Security', 'Power Backup'],
+    listingType: 'rent',
+    listedAt: '2024-02-20',
+    contactInfo: {
+      name: 'Rajesh Kumar',
+      phone: '+91 87654 32113',
+      email: 'rajesh.kumar@example.com'
+    },
+    address: {
+      buildingName: 'Electronic City Greens',
+      locality: 'Electronic City',
+      city: 'Bangalore'
+    },
+    rentDetails: {
+      roomDetails: {
+        availableRooms: 2,
+        availability: 'Immediate',
+        bathroomType: 'Attached'
+      },
+      costs: {
+        rent: 35000,
+        maintenance: 3000,
+        securityDeposit: 70000,
+        setupCost: 5000,
+        brokerage: 0
+      },
+      additionalBills: {
+        wifi: 1000,
+        water: 500,
+        gas: 600,
+        cook: 2000,
+        maid: 1500,
+        others: 0
+      },
+      preferredTenant: {
+        lookingFor: 'Any',
+        preferences: []
+      }
+    }
+  },
+  {
+    id: 'rent-prop-3',
+    title: 'Luxury 3BHK Villa for Rent',
+    description: 'Spacious 3BHK villa with private garden and modern amenities. Ideal for families looking for luxury living.',
+    price: 0,
+    location: 'Sarjapur Road, Bangalore',
+    type: 'Villa',
+    bedrooms: 3,
+    bathrooms: 3,
+    area: 2500,
+    images: [
+      'https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      'https://images.pexels.com/photos/32870/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1600'
+    ],
+    features: ['Private Garden', 'Swimming Pool', 'Gym', 'Security System', 'Smart Home'],
+    listingType: 'rent',
+    listedAt: '2024-03-01',
+    contactInfo: {
+      name: 'Anjali Sharma',
+      phone: '+91 98765 43214',
+      email: 'anjali.sharma@example.com'
+    },
+    address: {
+      buildingName: 'Sarjapur Luxury Villas',
+      locality: 'Sarjapur Road',
+      city: 'Bangalore'
+    },
+    rentDetails: {
+      roomDetails: {
+        availableRooms: 3,
+        availability: 'Immediate',
+        bathroomType: 'Attached'
+      },
+      costs: {
+        rent: 75000,
+        maintenance: 6000,
+        securityDeposit: 150000,
+        setupCost: 8000,
+        brokerage: 0
+      },
+      additionalBills: {
+        wifi: 1500,
+        water: 800,
+        gas: 900,
+        cook: 3000,
+        maid: 2000,
+        others: 0
+      },
+      preferredTenant: {
+        lookingFor: 'Family',
+        preferences: []
+      }
+    }
+  }
 ];
 
 // Add these export functions

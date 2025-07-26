@@ -37,32 +37,32 @@ const HomePage: React.FC = () => {
       <div className="h-screen flex flex-col relative -mt-16"> {/* Remove top margin to account for fixed navbar */}
         <HeroBanner />
         
-        {/* Visually Interesting Scroll button */}
-        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20">
+        {/* Visually Interesting Scroll button - Mobile Optimized */}
+        <div className="absolute bottom-8 md:bottom-12 left-1/2 transform -translate-x-1/2 z-20">
           <button
             onClick={handleScrollToContent}
-            className="group px-8 py-4 rounded-full bg-gradient-to-r from-purple-400 via-pink-300 to-blue-400 flex items-center gap-3 font-semibold text-gray-900 text-base transition-all duration-300 focus:outline-none border-none"
+            className="group px-6 md:px-8 py-3 md:py-4 rounded-full bg-gradient-to-r from-purple-400 via-pink-300 to-blue-400 flex items-center gap-2 md:gap-3 font-semibold text-gray-900 text-sm md:text-base transition-all duration-300 focus:outline-none border-none shadow-lg hover:shadow-xl min-h-[44px]"
           >
-            <span className="flex items-center gap-2">
-              <span className="text-base font-semibold tracking-wide">What's inside?</span>
+            <span className="flex items-center gap-1 md:gap-2">
+              <span className="text-sm md:text-base font-semibold tracking-wide">What's inside?</span>
               <span className="relative">
-                <ChevronDown className="w-7 h-7 text-white transition-all duration-300 group-hover:scale-110 group-hover:text-pink-100 group-hover:filter group-hover:brightness-110" />
+                <ChevronDown className="w-5 h-5 md:w-7 md:h-7 text-white transition-all duration-300 group-hover:scale-110 group-hover:text-pink-100 group-hover:filter group-hover:brightness-110" />
               </span>
             </span>
           </button>
         </div>
       </div>
       {showContent && (
-        <div id="home-content" className="bg-gray-50 mt-48">
+        <div id="home-content" className="bg-gray-50 mt-24 md:mt-48">
           {/* --- Smart Matching Algorithm heading and description --- */}
-          <div className="container py-16 flex flex-col items-center justify-center">
-            <h1 className="text-3xl font-extrabold mb-1 text-primary-700">Smart Matching Algorithm 🎯</h1>
-            <p className="text-lg text-gray-600">Find your perfect flatmate using our advanced preference matching system.</p>
+          <div className="container py-8 md:py-16 flex flex-col items-center justify-center">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 md:mb-1 text-primary-700 text-center px-4">Smart Matching Algorithm 🎯</h1>
+            <p className="text-base md:text-lg text-gray-600 text-center px-4">Find your perfect flatmate using our advanced preference matching system.</p>
           </div>
           {/* --- Other homepage sections --- */}
           {/* Show matching dashboard for logged-in users */}
           {user && (
-            <div className="container py-8">
+            <div className="container py-4 md:py-8">
               <MatchingDashboard onViewMatches={() => window.location.href = '/find-friends'} />
             </div>
           )}

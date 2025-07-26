@@ -188,8 +188,13 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   };
 
   const handleCardClick = () => {
+    // Force scroll to top immediately
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    
+    // Navigate after ensuring scroll position
     navigate(`/${listingType}/${property.id}`);
-    window.scrollTo({ top: 0, behavior: 'auto' });
   };
 
   const formatAvailabilityDate = (date: string | undefined) => {
@@ -231,6 +236,12 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     }
   };
   const handleView = () => {
+    // Force scroll to top immediately
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    
+    // Navigate after ensuring scroll position
     navigate(listingType === 'rent' ? `/rent/${property.id}` : `/buy/${property.id}`);
   };
 
@@ -313,7 +324,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           <>
             {/* Left Arrow */}
             <div
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
               onClick={e => {
                 e.stopPropagation();
                 swiperRef.current?.slidePrev();
@@ -325,7 +336,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </div>
             {/* Right Arrow */}
             <div
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
               onClick={e => {
                 e.stopPropagation();
                 swiperRef.current?.slideNext();
@@ -339,15 +350,15 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         )}
       </div>
       {/* Main Info */}
-      <div className="p-4 flex-1 flex flex-col justify-between">
+      <div className="p-3 md:p-4 flex-1 flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <h3 className="text-base font-bold line-clamp-1 text-gray-900">
+            <h3 className="text-sm md:text-base font-bold line-clamp-1 text-gray-900">
               {listingType === 'buy'
                 ? (property.address?.buildingName || 'No Building Name')
                 : (property.address?.buildingName || 'Property')}
             </h3>
-            <span className="text-lg font-extrabold text-primary-600">
+            <span className="text-base md:text-lg font-extrabold text-primary-600">
               ₹{formatCurrency(
                 listingType === 'rent' 
                   ? (property.rentDetails?.costs?.rent || 0)
@@ -356,8 +367,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </span>
           </div>
           <div className="text-xs text-primary-600 font-semibold mb-1 flex items-center">
-            <MapPin className="w-4 h-4 mr-1 text-primary-600" />
-            <span className="line-clamp-1">
+            <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-1 text-primary-600" />
+            <span className="line-clamp-1 text-xs">
               {listingType === 'rent'
                 ? `${property.rentDetails?.roomDetails?.availableRooms ?? '-'} room(s) available in ${property.address?.locality}, ${property.address?.city}`
                 : `${property.address?.locality}, ${property.address?.city}`}
@@ -365,51 +376,42 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           </div>
           {/* Match Score Badge */}
           {matchScore && (
-            <div className="inline-block bg-green-50 text-green-700 text-xs font-semibold rounded-full px-3 py-1 mb-1 mt-1">
+            <div className="inline-block bg-green-50 text-green-700 text-xs font-semibold rounded-full px-2 py-1 mb-1 mt-1">
               {matchScore.matches}/{matchScore.total} match ({matchScore.percent}%)
             </div>
           )}
           {/* Amenity Icons Row */}
-          <div className="flex gap-2 mt-2 mb-2">
+          <div className="flex gap-1 md:gap-2 mt-2 mb-2">
             {Object.entries(AMENITY_ICONS).map(([key, icon]) => (
               <span key={key} className={`rounded-full p-1 bg-gray-100 ${property.features?.includes(key) ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
             ))}
           </div>
         </div>
-        {/* Action Buttons */}
-        <div className="flex border-t border-gray-200 pt-2 mt-2">
+        {/* Action Buttons - Icon Only */}
+        <div className="flex border border-gray-200 rounded-lg overflow-hidden">
           <button
             onClick={handleFavoriteClick}
-            className="flex-1 flex items-center justify-center py-2 hover:bg-gray-50 transition rounded-l-lg"
+            className="flex-1 flex items-center justify-center py-3 text-gray-600 hover:bg-gray-50 transition min-h-[44px]"
           >
-            <Heart className={`w-4 h-4 mr-1 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
-            <span className="text-xs text-black">{isFavorite ? 'Saved' : 'Save'}</span>
-            {showSavedAnimation && (
-              <span className="ml-2 animate-fade-in-out text-green-600">
-                <Check className="w-4 h-4" />
-              </span>
-            )}
+            <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
           </button>
           <button
             onClick={handleCall}
-            className="flex-1 flex items-center justify-center py-2 text-primary-600 hover:bg-primary-50 transition border-l border-r border-gray-200"
+            className="flex-1 flex items-center justify-center py-3 text-primary-600 hover:bg-primary-50 transition border-l border-r border-gray-200 min-h-[44px]"
           >
-            <Phone className="w-4 h-4 mr-1" />
-            <span className="text-xs text-black">Call</span>
+            <Phone className="w-5 h-5" />
           </button>
           <button
             onClick={handleWhatsApp}
-            className="flex-1 flex items-center justify-center py-2 text-green-600 hover:bg-green-50 transition border-l border-r border-gray-200"
+            className="flex-1 flex items-center justify-center py-3 text-green-600 hover:bg-green-50 transition border-l border-r border-gray-200 min-h-[44px]"
           >
-            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5 mr-1" />
-            <span className="text-xs text-black">WhatsApp</span>
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5" />
           </button>
           <button
             onClick={handleShare}
-            className="flex-1 flex items-center justify-center py-2 text-gray-600 hover:bg-gray-50 transition rounded-r-lg"
+            className="flex-1 flex items-center justify-center py-3 text-gray-600 hover:bg-gray-50 transition min-h-[44px]"
           >
-            <Share2 className="w-4 h-4 mr-1" />
-            <span className="text-xs text-black">Share</span>
+            <Share2 className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -520,11 +522,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         </button>
       </div>
       {/* Main Info */}
-      <div className="p-6 flex-1 flex flex-col justify-between">
+      <div className="p-4 md:p-6 flex-1 flex flex-col justify-between">
         <div>
           <div className="flex justify-between items-start mb-3">
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-gray-900 mb-1">
+              <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-1">
                 {property.address?.buildingName || 'Property'}
               </h3>
               <div className="flex items-center text-primary-600 mb-2 text-sm font-semibold">
@@ -543,7 +545,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               )}
             </div>
             <div className="text-right">
-              <div className="text-2xl font-extrabold text-primary-600">
+              <div className="text-xl md:text-2xl font-extrabold text-primary-600">
                 ₹{formatCurrency(property.rentDetails?.costs?.rent || property.price || 0)}
               </div>
               <div className="text-sm text-gray-500">
@@ -558,27 +560,25 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             ))}
           </div>
         </div>
-        {/* Action Buttons */}
+        {/* Action Buttons - Icon Only */}
         <div className="flex gap-3 mt-auto">
           <button
             onClick={handleCall}
-            className="flex-1 bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-700 transition flex items-center justify-center"
+            className="flex-1 bg-primary-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-primary-700 transition flex items-center justify-center min-h-[44px]"
           >
-            <Phone className="w-4 h-4 mr-2" />
-            Contact Owner
+            <Phone className="w-5 h-5" />
           </button>
           <button
             onClick={handleWhatsApp}
-            className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center"
+            className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition flex items-center justify-center min-h-[44px]"
           >
-            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-4 h-4 mr-2" />
-            WhatsApp
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" className="w-5 h-5" />
           </button>
           <button
             onClick={handleShare}
-            className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition flex items-center justify-center"
+            className="px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition flex items-center justify-center min-h-[44px]"
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 className="w-5 h-5" />
           </button>
         </div>
       </div>

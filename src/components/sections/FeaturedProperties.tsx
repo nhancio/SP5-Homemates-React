@@ -55,7 +55,7 @@ const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
         
         {properties.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No properties found.</p>
+            <p className="text-gray-500">No properties available at the moment. Check back later!</p>
           </div>
         )}
       </div>

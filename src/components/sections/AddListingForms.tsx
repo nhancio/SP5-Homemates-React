@@ -112,7 +112,7 @@ export const AddressFields = ({ formData, setFormData, errors = {}, listingType,
       <h2 className="text-lg font-semibold mb-4">Address</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Building Name first, full width */}
-        <div className="col-span-3">
+        <div className="col-span-1 md:col-span-3">
           <label className="block text-sm font-medium text-gray-700 mb-2">Building Name</label>
           <input
             type="text"
@@ -135,8 +135,8 @@ export const AddressFields = ({ formData, setFormData, errors = {}, listingType,
             </p>
           )}
         </div>
-        {/* City and Locality side by side */}
-        <div>
+        {/* City and Locality side by side on desktop, stacked on mobile */}
+        <div className="col-span-1 md:col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
           <select
             className={`input w-full${errors['address.city'] ? ' border-red-500 bg-red-50' : ''}`}
@@ -164,7 +164,7 @@ export const AddressFields = ({ formData, setFormData, errors = {}, listingType,
             </p>
           )}
         </div>
-        <div>
+        <div className="col-span-1 md:col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
           <select
             className={`input w-full${errors['address.locality'] ? ' border-red-500 bg-red-50' : ''}`}
@@ -195,7 +195,7 @@ export const AddressFields = ({ formData, setFormData, errors = {}, listingType,
           )}
         </div>
         {/* Google Maps Link (optional) */}
-        <div>
+        <div className="col-span-1 md:col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-2">Google Maps Link</label>
           <input
             type="text"

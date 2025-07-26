@@ -145,49 +145,67 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
     console.log('=== GETLISTINGS DEBUG START ===');
     console.log('Fetching listings...');
     console.log('Getting listings for type:', type, 'with filters:', filters);
-    // Use r for rent and s for sell collections
-    const collectionRef = collection(db, type === 'rent' ? 'r' : 's');
+    
+    // Try to get listings from Firebase first
+    let listings: any[] = [];
+    try {
+      // Use r for rent and s for sell collections
+      const collectionRef = collection(db, type === 'rent' ? 'r' : 's');
 
-    // Start with base query
-    let baseQuery = query(collectionRef);
+      // Start with base query
+      let baseQuery = query(collectionRef);
 
-    // Add status filter
-    baseQuery = query(baseQuery, where('status', '==', 'active'));
+      // Add status filter
+      baseQuery = query(baseQuery, where('status', '==', 'active'));
 
-    // Add other filters if they exist
-    if (filters) {
-      if (filters.propertyType) {
-        baseQuery = query(baseQuery, where('propertyType', '==', filters.propertyType));
+      // Add other filters if they exist
+      if (filters) {
+        if (filters.propertyType) {
+          baseQuery = query(baseQuery, where('propertyType', '==', filters.propertyType));
+        }
       }
 
-      // Add other filters as needed...
+      console.log('Executing Firestore query...');
+      // Execute query
+      const snapshot = await getDocs(baseQuery);
+      console.log('Query returned:', snapshot.size, 'documents');
+      
+      // Transform and filter results
+      listings = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          contactNumber: data.contactNumber || '',
+          rentDetails: data.rentDetails,
+          sellDetails: data.sellDetails,
+          address: data.address,
+          propertyType: data.propertyType,
+          bathrooms: data.bathrooms,
+          amenities: data.amenities
+        };
+      });
+    } catch (firebaseError) {
+      console.log('Firebase query failed, using mock data:', firebaseError);
     }
 
-    console.log('Executing Firestore query...');
-    // Execute query
-    const snapshot = await getDocs(baseQuery);
-    console.log('Query returned:', snapshot.size, 'documents');
-    console.log('Raw Firestore documents:', snapshot.docs.map(doc => ({
-      id: doc.id,
-      data: doc.data()
-    })));
-
-    // Transform and filter results
-    const listings = snapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        contactNumber: data.contactNumber || '',
-        // For type safety, ensure rentDetails and sellDetails are present if expected
-        rentDetails: data.rentDetails,
-        sellDetails: data.sellDetails,
-        address: data.address,
-        propertyType: data.propertyType,
-        bathrooms: data.bathrooms,
-        amenities: data.amenities
-      };
-    });
+    // If no listings from Firebase, use mock data
+    if (listings.length === 0) {
+      console.log('No Firebase listings found, using mock data...');
+      const { getMockProperties } = await import('../data/properties');
+      const mockProperties = getMockProperties();
+      
+      // Filter mock properties by type
+      listings = mockProperties.filter(property => {
+        if (type === 'rent') {
+          return property.listingType === 'rent';
+        } else {
+          return property.listingType === 'buy' || property.listingType === 'sell';
+        }
+      });
+      
+      console.log('Mock properties found:', listings.length);
+    }
 
     console.log('Transformed listings before client-side filtering:', listings);
 
@@ -196,11 +214,12 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
 
     if (filters) {
       console.log('Applying client-side filters:', filters);
+      
       // Price (for buy)
       if (type === 'sell' && (filters.priceMin || filters.priceMax)) {
         console.log('Filtering by priceMin:', filters.priceMin, 'priceMax:', filters.priceMax);
         filteredListings = filteredListings.filter(listing => {
-          const price = listing.sellDetails?.price;
+          const price = listing.price || listing.sellDetails?.price;
           if (price === undefined) return false;
           console.log('Listing price:', price, 'Filter min:', filters.priceMin, 'Filter max:', filters.priceMax);
           if (filters.priceMin && price < Number(filters.priceMin)) return false;
@@ -208,6 +227,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
           return true;
         });
       }
+      
       // Rent (for rent)
       if (type === 'rent' && (filters.minRent || filters.maxRent)) {
         console.log('Filtering by minRent:', filters.minRent, 'maxRent:', filters.maxRent);
@@ -241,7 +261,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
       if (filters.bhk && filters.bhk !== '') {
         console.log('Filtering by BHK:', filters.bhk);
         filteredListings = filteredListings.filter(listing =>
-          String(listing.propertyType).toLowerCase().includes(String(filters.bhk).toLowerCase())
+          String(listing.bedrooms || listing.propertyType).toLowerCase().includes(String(filters.bhk).toLowerCase())
         );
       }
 
@@ -249,10 +269,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
       if (filters.bathrooms && filters.bathrooms !== '') {
         console.log('Filtering by bathrooms:', filters.bathrooms);
         filteredListings = filteredListings.filter(listing => {
-          const bathrooms =
-            listing.rentDetails?.roomDetails?.bathrooms ??
-            listing.sellDetails?.bathrooms ??
-            listing.bathrooms;
+          const bathrooms = listing.bathrooms || listing.rentDetails?.roomDetails?.bathrooms;
           return String(bathrooms).toLowerCase().includes(String(filters.bathrooms).toLowerCase());
         });
       }
@@ -261,7 +278,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
       if (filters.propertyType && filters.propertyType !== '') {
         console.log('Filtering by property type:', filters.propertyType);
         filteredListings = filteredListings.filter(listing =>
-          String(listing.propertyType).toLowerCase().includes(String(filters.propertyType).toLowerCase())
+          String(listing.type || listing.propertyType).toLowerCase().includes(String(filters.propertyType).toLowerCase())
         );
       }
 
@@ -269,13 +286,53 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
       if (filters.amenities && filters.amenities !== '') {
         console.log('Filtering by amenities:', filters.amenities);
         const amenityList = filters.amenities.split(',').map((a: string) => a.trim().toLowerCase());
+        console.log('Amenity list to filter by:', amenityList);
         filteredListings = filteredListings.filter(listing => {
+          // Check both amenities and features arrays
           const listingAmenities = listing.amenities || [];
-          return amenityList.some((amenity: string) =>
-            listingAmenities.some((listingAmenity: string) =>
-              listingAmenity.toLowerCase().includes(amenity)
-            )
-          );
+          const listingFeatures = listing.features || [];
+          
+          console.log('Listing features:', listingFeatures);
+          console.log('Listing amenities:', listingAmenities);
+          
+          // Map amenity keys to actual feature names
+          const amenityKeyMap: { [key: string]: string[] } = {
+            'parking': ['Parking', 'Car Parking', '2 Car Parking'],
+            'security': ['Security', 'Security System'],
+            'fridge': ['Fridge', 'Refrigerator'],
+            'washing': ['Washing Machine', 'Washing'],
+            'bed': ['Bed', 'Fully Furnished'],
+            'roommate': ['Shared Room', 'Roommate'],
+            'key': ['Private Room', 'Private'],
+            'power': ['Power Backup', 'Generator'],
+            'car': ['Parking', 'Car Parking'],
+            'bike': ['Bike Parking', 'Parking'],
+            'house': ['Gated Community', 'Gated Society']
+          };
+          
+          const matchFound = amenityList.some((amenityKey: string) => {
+            const mappedFeatures = amenityKeyMap[amenityKey] || [amenityKey];
+            console.log(`Checking amenity key "${amenityKey}" with mapped features:`, mappedFeatures);
+            
+            const hasMatch = mappedFeatures.some(feature => 
+              listingFeatures.some((listingFeature: string) => {
+                const featureMatch = listingFeature.toLowerCase().includes(feature.toLowerCase());
+                console.log(`Comparing "${listingFeature}" with "${feature}": ${featureMatch}`);
+                return featureMatch;
+              }) ||
+              listingAmenities.some((listingAmenity: string) => {
+                const amenityMatch = listingAmenity.toLowerCase().includes(feature.toLowerCase());
+                console.log(`Comparing amenity "${listingAmenity}" with "${feature}": ${amenityMatch}`);
+                return amenityMatch;
+              })
+            );
+            
+            console.log(`Match found for amenity key "${amenityKey}": ${hasMatch}`);
+            return hasMatch;
+          });
+          
+          console.log(`Final match for listing "${listing.title}": ${matchFound}`);
+          return matchFound;
         });
       }
     }
