@@ -39,7 +39,7 @@ const creditPackages: CreditPackage[] = [
 
 const PaymentPage = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, login } = useAppContext();
+  const { user, isAuthenticated, login, loginError, clearLoginError } = useAppContext();
   const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
   const [userCredits, setUserCredits] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -111,6 +111,11 @@ const PaymentPage = () => {
     }
   };
 
+  const handleLogin = async () => {
+    clearLoginError(); // Clear any previous errors
+    await login();
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="py-20">
@@ -121,12 +126,21 @@ const PaymentPage = () => {
             <p className="text-gray-600 mb-6">
               Please sign in to purchase credits
             </p>
-            <button 
-              onClick={() => login()}
-              className="flex items-center justify-center w-full btn btn-primary"
-            >
-              Sign in with Google
-            </button>
+            <div className="relative">
+              <button 
+                onClick={handleLogin}
+                className="flex items-center justify-center w-full btn btn-primary"
+              >
+                Sign in with Google
+              </button>
+              {loginError && (
+                <div className="mt-2">
+                  <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 w-full" aria-live="polite">
+                    {loginError}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

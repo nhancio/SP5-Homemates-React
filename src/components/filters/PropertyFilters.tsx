@@ -10,10 +10,11 @@ import { useAppContext } from '../../context/AppContext';
 import {
   Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home
 } from 'lucide-react';
-import { getMarkets, Market, getLocalitiesByCity } from '../../services/markets';
+import { getMarkets, getLocalitiesByCity } from '../../services/markets';
 
 interface PropertyFiltersProps {
   propertyTypes: string[];
+  bhkTypes?: string[];
   listingType: 'buy' | 'rent';
 }
 
@@ -27,12 +28,12 @@ const SLIDER_MARKS = {
   30000: '₹30k',
 };
 
-const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listingType }) => {
+const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTypes, listingType }) => {
   const { filters, setFilters } = useAppContext();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const drawerRef = React.useRef<HTMLDivElement>(null);
-  const [markets, setMarkets] = useState<Market[]>([]);
+  const [markets, setMarkets] = useState<any[]>([]); // Changed type to any[] as Market type is removed
   const [cities, setCities] = useState<string[]>([]);
   const [localities, setLocalities] = useState<string[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
@@ -356,7 +357,9 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, listin
           <label className="block text-xs font-semibold text-primary-700 mb-1 flex items-center gap-1">BHK <span className="relative group cursor-pointer"><svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /><text x="12" y="16" textAnchor="middle" fontSize="12" fill="currentColor">i</text></svg><span className="absolute left-1/2 -translate-x-1/2 mt-1 w-48 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">BHK stands for Bedrooms, Hall, Kitchen. 1BHK = 1 Bedroom, 2BHK = 2 Bedrooms, etc.</span></span></label>
           <select className="input w-full" value={currentFilters.bhk || ''} onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } })} disabled={marketsLoading}>
             <option value="">Select BHK</option>
-            {Array.from({ length: 10 }, (_, i) => i + 1).map(bhk => <option key={bhk} value={bhk}>{bhk} BHK</option>)}
+            {bhkTypes
+              ? bhkTypes.map((type: string) => <option key={type} value={type}>{type}</option>)
+              : Array.from({ length: 10 }, (_, i) => i + 1).map((bhk: number) => <option key={bhk} value={bhk}>{bhk} BHK</option>)}
           </select>
         </div>
       </div>

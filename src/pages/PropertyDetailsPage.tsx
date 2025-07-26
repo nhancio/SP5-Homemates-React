@@ -23,7 +23,7 @@ const PropertyDetailsPage = () => {
   const [property, setProperty] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { favoriteProperties, toggleFavorite, isAuthenticated, login, user, filters } = useAppContext();
+  const { favoriteProperties, toggleFavorite, isAuthenticated, login, loginError, clearLoginError, user, filters } = useAppContext();
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImage, setModalImage] = useState<string | null>(null);
   const [modalImageIndex, setModalImageIndex] = useState<number>(0);
@@ -235,6 +235,11 @@ Link: ${url}`;
     // Add more mappings as needed
   };
 
+  const handleLogin = async () => {
+    clearLoginError(); // Clear any previous errors
+    await login();
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -273,12 +278,21 @@ Link: ${url}`;
               <h2 className="text-lg font-semibold text-primary-700">Sign in to contact property owners</h2>
               <p className="text-primary-600">Create an account to get full access to all features</p>
             </div>
-            <button 
-              onClick={() => login()}
-              className="btn btn-primary"
-            >
-              Sign in with Google
-            </button>
+            <div className="relative">
+              <button 
+                onClick={handleLogin}
+                className="btn btn-primary"
+              >
+                Sign in with Google
+              </button>
+              {loginError && (
+                <div className="absolute top-full left-0 right-0 mt-1 px-2 z-50">
+                  <p className="text-red-600 text-xs font-bold bg-red-100 border border-red-200 rounded px-2 py-1 w-full" aria-live="polite">
+                    {loginError}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

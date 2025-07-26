@@ -33,6 +33,7 @@ const onboardingSchema = Yup.object().shape({
   lookingFor: Yup.string().required('Looking for is required'),
   city: Yup.string().required('City is required'),
   locality: Yup.string().required('Locality is required'),
+  preferences: Yup.array().min(1, 'Please select at least one preference').required('Preferences are required'),
 });
 
 const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, onClose }) => {
@@ -48,11 +49,12 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
   const [localities, setLocalities] = useState<Market[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
   const [mobileError, setMobileError] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState(false); // Set to false initially - only show errors on submit
   const [genderError, setGenderError] = useState('');
   const [lookingForError, setLookingForError] = useState('');
   const [cityError, setCityError] = useState('');
   const [localityError, setLocalityError] = useState('');
+  const [preferencesError, setPreferencesError] = useState('');
 
   React.useEffect(() => {
     getMarkets().then((data) => {
@@ -85,12 +87,14 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
         lookingFor,
         city,
         locality,
+        preferences,
       }, { abortEarly: false });
       setMobileError('');
       setGenderError('');
       setLookingForError('');
       setCityError('');
       setLocalityError('');
+      setPreferencesError('');
     } catch (err: any) {
       if (err.inner && err.inner.length > 0) {
         const errorMap: any = {};
@@ -102,6 +106,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
         setLookingForError(errorMap.lookingFor || '');
         setCityError(errorMap.city || '');
         setLocalityError(errorMap.locality || '');
+        setPreferencesError(errorMap.preferences || '');
       } else if (err.message) {
         setMobileError(err.message);
       }
@@ -142,7 +147,6 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
           <input
             id="onboard-mobile"
             type="tel"
-            required
             value={mobile}
             onChange={e => { setMobile(e.target.value); if (mobileError) setMobileError(''); }}
             className={`input w-full${mobileError ? ' border-red-500 bg-red-50' : ''}`}
@@ -152,8 +156,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             autoCorrect="off"
           />
           {submitted && mobileError && (
-            <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+            <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {mobileError}
             </p>
           )}
@@ -162,7 +165,6 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
           <label className="block text-sm font-medium mb-1" htmlFor="onboard-gender">Gender</label>
           <select
             id="onboard-gender"
-            required
             value={gender}
             onChange={e => { setGender(e.target.value); if (genderError) setGenderError(''); }}
             className={`input w-full${genderError ? ' border-red-500 bg-red-50' : ''}`}
@@ -173,9 +175,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             <option value="">Select</option>
             {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
           </select>
-          {genderError && (
-            <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+          {submitted && genderError && (
+            <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {genderError}
             </p>
           )}
@@ -184,7 +185,6 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
           <label className="block text-sm font-medium mb-1" htmlFor="onboard-lookingfor">Looking for</label>
           <select
             id="onboard-lookingfor"
-            required
             value={lookingFor}
             onChange={e => { setLookingFor(e.target.value); if (lookingForError) setLookingForError(''); }}
             className={`input w-full${lookingForError ? ' border-red-500 bg-red-50' : ''}`}
@@ -195,9 +195,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             <option value="">Select</option>
             {LOOKING_FOR.map(l => <option key={l} value={l}>{l}</option>)}
           </select>
-          {lookingForError && (
-            <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+          {submitted && lookingForError && (
+            <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {lookingForError}
             </p>
           )}
@@ -207,7 +206,6 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
           <label className="block text-sm font-medium mb-1" htmlFor="onboard-city">City</label>
           <select
             id="onboard-city"
-            required
             value={city}
             onChange={e => { setCity(e.target.value); setLocality(''); if (cityError) setCityError(''); }}
             className={`input w-full${cityError ? ' border-red-500 bg-red-50' : ''}`}
@@ -219,9 +217,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             <option value="">Select City</option>
             {cities.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          {cityError && (
-            <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+          {submitted && cityError && (
+            <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {cityError}
             </p>
           )}
@@ -231,7 +228,6 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
           <label className="block text-sm font-medium mb-1" htmlFor="onboard-locality">Locality</label>
           <select
             id="onboard-locality"
-            required
             value={locality}
             onChange={e => { setLocality(e.target.value); if (localityError) setLocalityError(''); }}
             className={`input w-full${localityError ? ' border-red-500 bg-red-50' : ''}`}
@@ -245,9 +241,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
               <option key={market.id} value={market.market}>{market.market}</option>
             ))}
           </select>
-          {localityError && (
-            <p className="text-red-600 text-sm font-semibold bg-red-50 border border-red-200 rounded px-2 py-1 mt-1 flex items-center" aria-live="polite">
-              <svg className="w-4 h-4 mr-1 text-red-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /></svg>
+          {submitted && localityError && (
+            <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {localityError}
             </p>
           )}
@@ -264,6 +259,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
                     setPreferences(prev => prev.includes(pref.id)
                       ? prev.filter(p => p !== pref.id)
                       : [...prev, pref.id]);
+                    if (preferencesError) setPreferencesError('');
                   }}
                   className="form-checkbox h-4 w-4 text-primary-600"
                   spellCheck={true}
@@ -273,6 +269,11 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
               </label>
             ))}
           </div>
+          {submitted && preferencesError && (
+            <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {preferencesError}
+            </p>
+          )}
         </div>
         <div className="flex justify-end space-x-4">
           {/* Remove Skip button, only show Submit */}

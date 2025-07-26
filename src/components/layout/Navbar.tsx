@@ -5,10 +5,15 @@ import { useAppContext } from '../../context/AppContext';
 
 const Navbar = () => {
   const location = useLocation();
-  const { isAuthenticated, login } = useAppContext();
+  const { isAuthenticated, login, loginError, clearLoginError } = useAppContext();
 
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleLogin = async () => {
+    clearLoginError(); // Clear any previous errors
+    await login();
   };
 
   return (
@@ -31,13 +36,22 @@ const Navbar = () => {
           <div className="flex items-center">
             {/* Mobile Login Button */}
             {!isAuthenticated && (
-              <button 
-                onClick={() => login()}
-                className="md:hidden flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-lg text-sm"
-              >
-                <User className="w-4 h-4" />
-                <span>Login</span>
-              </button>
+              <div className="md:hidden">
+                <button 
+                  onClick={handleLogin}
+                  className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-3 py-1.5 rounded-lg text-sm"
+                >
+                  <User className="w-4 h-4" />
+                  <span>Login</span>
+                </button>
+                {loginError && (
+                  <div className="absolute top-full left-0 right-0 mt-1 px-2">
+                    <p className="text-red-600 text-xs font-bold bg-red-100 border border-red-200 rounded px-2 py-1 w-full" aria-live="polite">
+                      {loginError}
+                    </p>
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Desktop Navigation */}
@@ -79,13 +93,22 @@ const Navbar = () => {
                   <span>Profile</span>
                 </Link>
               ) : (
-                <button 
-                  onClick={() => login()}
-                  className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition"
-                >
-                  <User className="w-5 h-5" />
-                  <span className="font-medium">Login</span>
-                </button>
+                <div className="relative">
+                  <button 
+                    onClick={handleLogin}
+                    className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition"
+                  >
+                    <User className="w-5 h-5" />
+                    <span className="font-medium">Login</span>
+                  </button>
+                  {loginError && (
+                    <div className="absolute top-full left-0 right-0 mt-1 px-2 z-50">
+                      <p className="text-red-600 text-xs font-bold bg-red-100 border border-red-200 rounded px-2 py-1 w-full" aria-live="polite">
+                        {loginError}
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>

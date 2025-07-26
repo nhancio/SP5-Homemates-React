@@ -47,7 +47,7 @@ const profileSchema = Yup.object().shape({
 
 const ProfilePage = () => {
 
-  const { user, isAuthenticated, login, logout } = useAppContext();
+  const { user, isAuthenticated, login, logout, loginError, clearLoginError } = useAppContext();
   const navigate = useNavigate();
   const [showUpgradePopup, setShowUpgradePopup] = useState(false);
   const [profileUser, setProfileUser] = useState<any>(null);
@@ -372,6 +372,11 @@ const ProfilePage = () => {
     }
   };
 
+  const handleLogin = async () => {
+    clearLoginError(); // Clear any previous errors
+    await login();
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="py-20">
@@ -382,12 +387,21 @@ const ProfilePage = () => {
             <p className="text-gray-600 mb-6">
               Please sign in to view your profile and saved properties
             </p>
-            <button 
-              onClick={() => login()}
-              className="flex items-center justify-center w-full btn btn-primary"
-            >
-              Sign in with Google
-            </button>
+            <div className="relative">
+              <button 
+                onClick={handleLogin}
+                className="flex items-center justify-center w-full btn btn-primary"
+              >
+                Sign in with Google
+              </button>
+              {loginError && (
+                <div className="mt-2">
+                  <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 w-full" aria-live="polite">
+                    {loginError}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

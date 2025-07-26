@@ -83,6 +83,57 @@ export type Filters = {
   activeType: 'fullHome' | 'rent' | 'buy';
 };
 
+const defaultFilters: Filters = {
+  fullHome: {
+    city: '',
+    locality: '',
+    propertyType: '',
+    furnishingType: '',
+    bhk: '',
+    bathrooms: '',
+    minPrice: 0,
+    maxPrice: 10000000,
+    minSqft: 0,
+    maxSqft: 10000,
+    amenities: '',
+    availability: '',
+    availableFrom: '',
+    ageOfProperty: '',
+    possessionStatus: '',
+  },
+  rent: {
+    city: '',
+    locality: '',
+    propertyType: '',
+    furnishingType: '',
+    bhk: '',
+    bathrooms: '',
+    minRent: 0,
+    maxRent: 100000,
+    minSqft: 0,
+    maxSqft: 10000,
+    amenities: '',
+    availability: '',
+    availableFrom: '',
+    ageOfProperty: '',
+    possessionStatus: '',
+  },
+  buy: {
+    city: '',
+    locality: '',
+    propertyType: '',
+    bhk: '',
+    bathrooms: '',
+    minPrice: 0,
+    maxPrice: 10000000,
+    minSqft: 0,
+    maxSqft: 10000,
+    ageOfProperty: '',
+    possessionStatus: '',
+  },
+  activeType: 'rent',
+};
+
 type User = {
   id: string;
   name: string;
@@ -103,75 +154,34 @@ interface AppContextType {
   toggleFavorite: (propertyId: string) => void;
   showPreferences: boolean;
   setShowPreferences: (show: boolean) => void;
+  loginError: string | null;
+  clearLoginError: () => void;
 }
 
-const defaultFilters: Filters = {
-  activeType: 'fullHome',
-  fullHome: {
-    city: '',
-    locality: '',
-    propertyType: '',
-    furnishingType: '',
-    bhk: '',
-    bathrooms: '',
-    minPrice: 1000,
-    maxPrice: 30000,
-    minSqft: 0,
-    maxSqft: 0,
-    amenities: '',
-    availability: '',
-    availableFrom: '',
-    ageOfProperty: '',
-    possessionStatus: '',
-  },
-  rent: {
-    city: '',
-    locality: '',
-    propertyType: '',
-    furnishingType: '',
-    bhk: '',
-    bathrooms: '',
-    minRent: 1000,
-    maxRent: 30000,
-    minSqft: 0,
-    maxSqft: 0,
-    amenities: '',
-    availability: '',
-    availableFrom: '',
-    ageOfProperty: '',
-    possessionStatus: '',
-  },
-  buy: {
-    city: '',
-    locality: '',
-    propertyType: '',
-    minPrice: 1000,
-    maxPrice: 30000,
-    minSqft: 0,
-    maxSqft: 0,
-    ageOfProperty: '',
-    possessionStatus: '',
-  }
-};
+const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const AppContext = React.createContext<AppContextType | undefined>(undefined);
-
-// Add setUserOnline and setUserOffline
 async function setUserOnline(userId: string) {
   try {
-    await updateDoc(doc(db, 'u', userId), {
-      online: true,
-      lastActive: Date.now(),
+    const userRef = doc(db, 'u', userId);
+    await updateDoc(userRef, {
+      isOnline: true,
+      lastActive: new Date().toISOString(),
     });
-  } catch (e) { /* ignore */ }
+  } catch (error) {
+    console.error('Error setting user online:', error);
+  }
 }
+
 async function setUserOffline(userId: string) {
   try {
-    await updateDoc(doc(db, 'u', userId), {
-      online: false,
-      lastActive: Date.now(),
+    const userRef = doc(db, 'u', userId);
+    await updateDoc(userRef, {
+      isOnline: false,
+      lastActive: new Date().toISOString(),
     });
-  } catch (e) { /* ignore */ }
+  } catch (error) {
+    console.error('Error setting user offline:', error);
+  }
 }
 
 export function AppContextProvider({ children }: { children: React.ReactNode }) {
@@ -184,9 +194,15 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   const [favoriteProperties, setFavoriteProperties] = React.useState<string[]>([]);
   const [showPreferences, setShowPreferences] = React.useState(false);
   const [showOnboarding, setShowOnboarding] = React.useState(false);
+  const [loginError, setLoginError] = React.useState<string | null>(null);
+
+  const clearLoginError = () => {
+    setLoginError(null);
+  };
 
   const login = async () => {
     try {
+      clearLoginError(); // Clear any previous errors
       const result = await signInWithGoogle();
       console.log('Login result:', result); // DEBUG LOG
       if (result.success && 'user' in result && result.user) {
@@ -199,9 +215,34 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
         }
       } else {
         console.error('Login failed:', result);
+        setLoginError('Login failed. Please try again.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+      // Handle specific Firebase auth errors
+      let errorMessage = 'Login failed. Please try again.';
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/popup-closed-by-user':
+            errorMessage = 'Login was cancelled. Please try again.';
+            break;
+          case 'auth/popup-blocked':
+            errorMessage = 'Login popup was blocked. Please allow popups and try again.';
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = 'Network error. Please check your connection and try again.';
+            break;
+          case 'auth/too-many-requests':
+            errorMessage = 'Too many login attempts. Please try again later.';
+            break;
+          case 'auth/user-disabled':
+            errorMessage = 'This account has been disabled. Please contact support.';
+            break;
+          default:
+            errorMessage = `Login error: ${error.message || 'Please try again.'}`;
+        }
+      }
+      setLoginError(errorMessage);
     }
   };
 
@@ -213,6 +254,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
     if (result.success) {
       setUser(null);
       localStorage.removeItem('user');
+      clearLoginError(); // Clear any login errors on logout
     }
   };
 
@@ -272,6 +314,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
         localStorage.setItem('user', JSON.stringify(userData));
         setShowOnboarding(needsOnboarding);
         await setUserOnline(firebaseUser.uid);
+        clearLoginError(); // Clear any login errors on successful auth
       } else {
         setUser(null);
         localStorage.removeItem('user');
@@ -300,7 +343,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const loadFavorites = async () => {
       if (user) {
-        const favorites = await getUserFavorites(user.id);
+        const favorites = await getUserFavorites();
         setFavoriteProperties(favorites);
       }
     };
@@ -319,6 +362,8 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
     toggleFavorite,
     showPreferences,
     setShowPreferences,
+    loginError,
+    clearLoginError,
   };
 
   // Block app features if onboarding is required
@@ -342,8 +387,8 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
 }
 
 export function useAppContext() {
-  const context = React.useContext(AppContext);
-  if (!context) {
+  const context = useContext(AppContext);
+  if (context === undefined) {
     throw new Error('useAppContext must be used within an AppContextProvider');
   }
   return context;

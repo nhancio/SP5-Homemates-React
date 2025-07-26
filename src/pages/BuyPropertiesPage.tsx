@@ -7,13 +7,20 @@ import { getListings } from '../services/listings';
 import { useAppContext } from '../context/AppContext';
 
 const propertyTypes = ['Flat', 'Gated Community', 'Independent House', 'Villa'];
+const bhkTypes = [
+  '1RK',
+  '2BHK',
+  '3BHK',
+  '4BHK',
+  '4BHK+'
+];
 
 const BuyPropertiesPage = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { filters, isAuthenticated, login } = useAppContext();
+  const { filters, isAuthenticated, login, loginError, clearLoginError } = useAppContext();
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -39,6 +46,11 @@ const BuyPropertiesPage = () => {
     } else {
       navigate(`/buy/${property.id}`);
     }
+  };
+
+  const handleLogin = async () => {
+    clearLoginError(); // Clear any previous errors
+    await login();
   };
 
   useEffect(() => {
@@ -84,15 +96,33 @@ const BuyPropertiesPage = () => {
                 <h2 className="text-lg font-semibold text-primary-700">Sign in to unlock more features</h2>
                 <p className="text-primary-600">Save properties, contact owners, and more!</p>
               </div>
-              <button 
-                onClick={() => login()}
-                className="btn btn-primary"
-              >
-                Sign in with Google
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={handleLogin}
+                  className="btn btn-primary"
+                >
+                  Sign in with Google
+                </button>
+                {loginError && (
+                  <div className="absolute top-full left-0 right-0 mt-1 px-2 z-50">
+                    <p className="text-red-600 text-xs font-bold bg-red-100 border border-red-200 rounded px-2 py-1 w-full" aria-live="polite">
+                      {loginError}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
+
+        {/* Page Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">Full Homes for Rent</h1>
+          <p className="text-gray-600">
+            Find full homes which are ready to be designed by you.
+          </p>
+          <h2 className="text-xl font-bold text-primary-700 mt-2 mb-2">Showing {filteredProperties.length} flats in full homes</h2>
+        </div>
 
         {/* Search Bar */}
         <div className="mb-6 flex items-center gap-2">
@@ -120,6 +150,7 @@ const BuyPropertiesPage = () => {
         {/* Property Filters */}
         <PropertyFilters 
           propertyTypes={propertyTypes} 
+          bhkTypes={bhkTypes}
           listingType="buy"
         />
             
@@ -135,14 +166,6 @@ const BuyPropertiesPage = () => {
           </div>
         ) : (
           <>
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold mb-2">Full Homes for Rent</h1>
-              <p className="text-gray-600">
-                Find full homes which are ready to be designed by you.
-              </p>
-              <h2 className="text-xl font-bold text-primary-700 mt-2 mb-2">Showing {filteredProperties.length} flats in full homes</h2>
-            </div>
-            
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProperties.map(property => (
                 <PropertyCard 

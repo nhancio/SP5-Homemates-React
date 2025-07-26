@@ -10,7 +10,6 @@ import * as Yup from 'yup';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import InputMask from 'react-input-mask';
-import type { InputMaskProps } from 'react-input-mask';
 
 // Amenity/feature options with icon and label (same as PropertyFilters)
 const AMENITY_OPTIONS = [
@@ -508,6 +507,21 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
     }
   }
 
+  // Define property type and BHK options for Shared Homes
+  const propertyTypes = [
+    'Flat',
+    'Gated Community',
+    'Independent House',
+    'Villa'
+  ];
+  const bhkTypes = [
+    'Single Room',
+    '1RK',
+    '2BHK',
+    '3BHK',
+    '4BHK'
+  ];
+
   return (
     <>
       {/* Address: Building Name, City, Locality in one row */}
@@ -522,7 +536,39 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         removeImage={removeImage}
         submitted={submitted}
       />
-      {/* 2-column, 3-row grid for main fields */}
+      {/* Property Type & BHK section (single source of truth) */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4">Property Type & BHK</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+            <select
+              className={`input w-full${displayErrors.propertyType ? ' border-red-500 bg-red-50' : ''}`}
+              value={formData.propertyType || ''}
+              onChange={e => setFormData({ ...formData, propertyType: e.target.value })}
+              onBlur={() => markTouched('propertyType')}
+            >
+              <option value="">Select Property Type</option>
+              {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+            {displayErrors.propertyType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.propertyType}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
+            <select
+              className={`input w-full${displayErrors.bhk ? ' border-red-500 bg-red-50' : ''}`}
+              value={formData.bhk || ''}
+              onChange={e => setFormData({ ...formData, bhk: e.target.value })}
+              onBlur={() => markTouched('bhk')}
+            >
+              <option value="">Select BHK</option>
+              {bhkTypes.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+            {displayErrors.bhk && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.bhk}</p>}
+          </div>
+        </div>
+      </section>
+      {/* Home Details section (remove Property Type dropdown from here) */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Home Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
@@ -546,11 +592,11 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               onBlur={() => markTouched('flatType')}
             >
               <option value="">Select Flat Type</option>
-              <option value="1BHK">1BHK</option>
+              <option value="Single Room">Single Room</option>
+              <option value="1RK">1RK</option>
               <option value="2BHK">2BHK</option>
               <option value="3BHK">3BHK</option>
               <option value="4BHK">4BHK</option>
-              <option value="4BHK+">4BHK+</option>
             </select>
             {displayErrors.flatType && (
               <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
@@ -638,31 +684,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               {displayErrors.bathroomType}
             </p>}
           </div>
-          {/* Row 3 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
-            <select
-              ref={fieldRefs['propertyType']}
-              className={`input w-full${displayErrors.propertyType ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.propertyType}
-              onChange={e => setFormData({
-                ...formData,
-                propertyType: e.target.value
-              })}
-              onBlur={() => markTouched('propertyType')}
-            >
-              <option value="">Select Property Type</option>
-              <option value="standalone">Standalone Apartment</option>
-              <option value="gated">Gated Community</option>
-              <option value="individual">Individual House</option>
-              <option value="villa">Villa</option>
-            </select>
-            {displayErrors.propertyType && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-                {displayErrors.propertyType}
-              </p>
-            )}
-          </div>
+          {/* Remove Property Type dropdown from here */}
+          {/* <div> ...Property Type... </div> */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
             <select
@@ -1122,8 +1145,14 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
   const [isImmediate, setIsImmediate] = useState(formData.isImmediate ?? true);
   const [localErrors, setLocalErrors] = useState<any>({});
 
-  // Property type options
-  const propertyTypes = ['1RK', '1 BHK', '2 BHK', '3 BHK', '4 BHK', '4+ BHK'];
+  // Property type options - same as BuyPropertiesPage (Full Homes)
+  const propertyTypes = [
+    'Flat',
+    'Gated Community',
+    'Independent House',
+    'Villa'
+  ];
+  const bhkTypes = ['1BHK', '2BHK', '3BHK', '4BHK', '4BHK+'];
   const furnishingTypes = ['Fully Furnished', 'Semi Furnished', 'Unfurnished'];
   const parkingTypes = ['Both', 'Car Parking', 'Bike Parking'];
 
@@ -1154,6 +1183,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
     if (!formData.address?.buildingName) errs.buildingName = 'Building name is required';
     if (!formData.contactNumber || !/^[6-9][0-9]{9}$/.test(formData.contactNumber)) errs.contactNumber = 'Enter a valid 10-digit mobile number';
     if (!formData.propertyType) errs.propertyType = 'Property type is required';
+    if (!formData.bhk) errs.bhk = 'BHK is required';
     if (!formData.furnishingType) errs.furnishingType = 'Furnishing type is required';
     if (!formData.description || formData.description.length < 10) errs.description = 'Description must be at least 10 characters.';
     // Rent validation
@@ -1183,6 +1213,9 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       if (onSubmit) onSubmit();
     }
   };
+
+  // Mark field as touched for validation
+  const markTouched = (field: string) => setTouched(prev => ({ ...prev, [field]: true }));
 
   // Use localErrors for error display
   const displayErrors = { ...errors, ...localErrors };
@@ -1226,25 +1259,41 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           {displayErrors.contactNumber}
         </p>}
       </section>
-      {/* Property Type */}
+      {/* Property Type & BHK */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-semibold mb-4">Property Type</h2>
-        <div className="flex flex-wrap gap-2">
-          {propertyTypes.map(type => (
-            <button
-              key={type}
-              type="button"
-              className={`px-4 py-2 rounded-full border ${formData.propertyType === type ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-primary-600 border-primary-200'}`}
-              onClick={() => setFormData({ ...formData, propertyType: type })}
-              onBlur={() => markTouched('propertyType')}
+        <h2 className="text-lg font-semibold mb-4">Property Type & BHK</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+                            <select
+                  className={`input w-full${displayErrors.propertyType ? ' border-red-500 bg-red-50' : ''}`}
+                  value={formData.propertyType || ''}
+                  onChange={e => setFormData({ ...formData, propertyType: e.target.value })}
+                  onBlur={() => markTouched('propertyType')}
+                >
+                  <option value="">Select Property Type</option>
+                  {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                </select>
+            {displayErrors.propertyType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.propertyType}
+            </p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
+            <select
+              className={`input w-full${displayErrors.bhk ? ' border-red-500 bg-red-50' : ''}`}
+              value={formData.bhk || ''}
+              onChange={e => setFormData({ ...formData, bhk: e.target.value })}
+              onBlur={() => markTouched('bhk')}
             >
-              {type}
-            </button>
-          ))}
+              <option value="">Select BHK</option>
+              {bhkTypes.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+            {displayErrors.bhk && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.bhk}
+            </p>}
+          </div>
         </div>
-        {displayErrors.propertyType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-          {displayErrors.propertyType}
-        </p>}
       </section>
       {/* Details */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">

@@ -9,11 +9,18 @@ import { getDoc, doc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
 const propertyTypes = [
+  'Flat',
+  'Gated Community',
+  'Independent House',
+  'Villa'
+];
+const bhkTypes = [
   'Single Room',
   '1RK',
   '2BHK',
   '3BHK',
-  '4BHK'
+  '4BHK',
+  '4BHK+'
 ];
 
 const PROPERTIES_PER_PAGE = 9;
@@ -23,7 +30,7 @@ const RentPropertiesPage = () => {
   const [properties, setProperties] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { filters, isAuthenticated, login, user } = useAppContext();
+  const { filters, isAuthenticated, login, loginError, clearLoginError, user } = useAppContext();
   const [userGender, setUserGender] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -98,6 +105,11 @@ const RentPropertiesPage = () => {
     document.title = 'Shared Home Listings | Homemates';
   }, []);
 
+  const handleLogin = async () => {
+    clearLoginError(); // Clear any previous errors
+    await login();
+  };
+
   // Pagination logic
   const totalPages = Math.ceil(filteredProperties.length / PROPERTIES_PER_PAGE);
   const paginatedProperties = filteredProperties.slice(
@@ -122,12 +134,21 @@ const RentPropertiesPage = () => {
                 <h2 className="text-lg font-semibold text-primary-700">Sign in to unlock more features</h2>
                 <p className="text-primary-600">Save properties, contact owners, and more!</p>
               </div>
-              <button 
-                onClick={() => login()}
-                className="btn btn-primary"
-              >
-                Sign in with Google
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={handleLogin}
+                  className="btn btn-primary"
+                >
+                  Sign in with Google
+                </button>
+                {loginError && (
+                  <div className="absolute top-full left-0 right-0 mt-1 px-2 z-50">
+                    <p className="text-red-600 text-xs font-bold bg-red-100 border border-red-200 rounded px-2 py-1 w-full" aria-live="polite">
+                      {loginError}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -167,6 +188,7 @@ const RentPropertiesPage = () => {
         <div ref={filterSectionRef}>
           <PropertyFilters 
             propertyTypes={propertyTypes} 
+            bhkTypes={bhkTypes}
             listingType="rent"
           />
         </div>
@@ -196,6 +218,7 @@ const RentPropertiesPage = () => {
               </button>
               <PropertyFilters 
                 propertyTypes={propertyTypes} 
+                bhkTypes={bhkTypes}
                 listingType="rent"
               />
             </div>

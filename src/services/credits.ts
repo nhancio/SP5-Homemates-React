@@ -25,3 +25,19 @@
 //   }
 //   return { credits: 0 };
 // } 
+
+// Dummy exports for compatibility
+export const useCredits = async (userId: string, action: string): Promise<boolean> => {
+  // Dummy implementation - always returns false (no credits)
+  return false;
+};
+
+export const getUserCredits = async (userId: string): Promise<{ credits: number }> => {
+  // Dummy implementation - always returns 0 credits
+  return { credits: 0 };
+};
+
+export const addCredits = async (userId: string, amount: number): Promise<boolean> => {
+  // Dummy implementation - always returns true
+  return true;
+}; 
