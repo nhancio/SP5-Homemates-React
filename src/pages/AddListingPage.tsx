@@ -69,6 +69,10 @@ const initialFormData = {
   isImmediate: false,
   description: '',
   contactNumber: '',
+  price: '', // Add price field for sell listings
+  homeType: '', // Add homeType for SellForm
+  roomType: '', // Add roomType for SellForm
+  furnishType: '', // Add furnishType for SellForm
 
   // Rent specific fields
   rentDetails: {
@@ -205,7 +209,7 @@ const AddListingPage = () => {
     }
     // Price validation
     if (listingType === 'sell') {
-      const price = Number(formData.sellDetails?.price);
+      const price = Number(formData.price);
       if (!price || price < 1000) {
         newErrors.price = 'Price must be at least ₹1,000.';
       }
@@ -246,17 +250,49 @@ const AddListingPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      alert('Please login to create a listing');
-      return;
-    }
-    if (!validate()) {
-      setIsSubmitting(false);
-      return;
-    }
+    console.log('AddListingPage handleSubmit called');
+    console.log('Listing type:', listingType);
+    console.log('Form data:', formData);
+    
     setIsSubmitting(true);
+    setErrors({});
+
     try {
-      // No validation checks, allow any data
+      // Validate form data
+      const newErrors: any = {};
+      if (!formData.address?.city) newErrors.city = 'City is required.';
+      if (!formData.address?.locality) newErrors.locality = 'Locality is required.';
+      if (!formData.address?.buildingName) newErrors.buildingName = 'Building name is required.';
+      if (!formData.contactNumber || !/^[6-9][0-9]{9}$/.test(formData.contactNumber)) {
+        newErrors.contactNumber = 'Enter a valid 10-digit mobile number.';
+      }
+      if (!formData.propertyType) newErrors.propertyType = 'Property type is required.';
+      if (!formData.description || formData.description.length < 10) {
+        newErrors.description = 'Description must be at least 10 characters.';
+      }
+
+      // Price validation
+      if (listingType === 'sell') {
+        const price = Number(formData.price);
+        if (!price || price < 1000) {
+          newErrors.price = 'Price must be at least ₹1,000.';
+        }
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log('Validation passed, creating listing...');
+      
+      if (!user) {
+        alert('Please login to create a listing');
+        setIsSubmitting(false);
+        return;
+      }
+
       if (listingType === 'rent') {
         // Prepare rent listing data with only filled fields
         const rentListingData = {
@@ -334,24 +370,24 @@ const AddListingPage = () => {
           createdByUser: user.id,
           listingType: 'sell',
           sellDetails: cleanFormData({
-            price: formData.sellDetails.price,
-            gst: formData.sellDetails.gst,
-            isNegotiable: formData.sellDetails.isNegotiable,
-            propertyType: formData.sellDetails.propertyType,
-            sqft: formData.sellDetails.sqft,
-            direction: formData.sellDetails.direction,
-            ownership: formData.sellDetails.ownership,
-            ageOfProperty: formData.sellDetails.ageOfProperty,
-            totalFloors: formData.sellDetails.totalFloors,
-            floorNumber: formData.sellDetails.floorNumber,
-            waterSupply: formData.sellDetails.waterSupply,
-            approvals: formData.sellDetails.approvals,
-            amenities: formData.sellDetails.amenities,
-            highlights: formData.sellDetails.highlights,
-            description: formData.sellDetails.description,
-            propertyId: formData.sellDetails.propertyId,
-            loanOnProperty: formData.sellDetails.loanOnProperty,
-            lookingFor: formData.sellDetails.lookingFor,
+            price: formData.price,
+            gst: formData.sellDetails?.gst || 0,
+            isNegotiable: formData.sellDetails?.isNegotiable || false,
+            propertyType: formData.sellDetails?.propertyType || formData.propertyType,
+            sqft: formData.sellDetails?.sqft || 0,
+            direction: formData.sellDetails?.direction || '',
+            ownership: formData.sellDetails?.ownership || '',
+            ageOfProperty: formData.sellDetails?.ageOfProperty || '',
+            totalFloors: formData.sellDetails?.totalFloors || '',
+            floorNumber: formData.sellDetails?.floorNumber || '',
+            waterSupply: formData.sellDetails?.waterSupply || '',
+            approvals: formData.sellDetails?.approvals || [],
+            amenities: formData.sellDetails?.amenities || [],
+            highlights: formData.sellDetails?.highlights || [],
+            description: formData.sellDetails?.description || formData.description,
+            propertyId: formData.sellDetails?.propertyId || '',
+            loanOnProperty: formData.sellDetails?.loanOnProperty || false,
+            lookingFor: formData.sellDetails?.lookingFor || '',
           }),
           builtUpArea: formData.builtUpArea,
           ageOfProperty: formData.ageOfProperty,

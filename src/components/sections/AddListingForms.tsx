@@ -359,6 +359,33 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         const flatKey = path[path.length - 1];
         errors[flatKey] = err.message;
       }
+      
+      // Add additional validation for fields not covered by Yup schema
+      if (!formData.amenities || formData.amenities.length === 0) {
+        errors.amenities = 'Please select at least one amenity.';
+      }
+      if (!formData.rentDetails?.preferredTenant?.lookingFor) {
+        errors.lookingFor = 'Please select a preferred tenant.';
+      }
+      if (!formData.handoverDate && formData.isImmediate === false) {
+        errors.handoverDate = 'Please select a move-in date.';
+      }
+      if (!formData.rentDetails?.costs?.rent) {
+        errors.rent = 'Rent is required.';
+      }
+      if (!formData.rentDetails?.costs?.maintenance) {
+        errors.maintenance = 'Maintenance is required.';
+      }
+      if (!formData.rentDetails?.costs?.securityDeposit) {
+        errors.securityDeposit = 'Security deposit is required.';
+      }
+      if (!formData.rentDetails?.costs?.setupCost) {
+        errors.setupCost = 'Setup cost is required.';
+      }
+      if (!formData.rentDetails?.costs?.brokerage) {
+        errors.brokerage = 'Brokerage is required.';
+      }
+      
       setErrors(errors);
       // Scroll to first error field
       setTimeout(() => {
@@ -514,13 +541,19 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
     'Independent House',
     'Villa'
   ];
-  const bhkTypes = [
+  const flatTypes = [
     'Single Room',
     '1RK',
     '2BHK',
     '3BHK',
-    '4BHK'
+    '4BHK',
+    '4BHK+'
   ];
+
+  useEffect(() => {
+    validate();
+    // eslint-disable-next-line
+  }, [formData]);
 
   return (
     <>
@@ -538,7 +571,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       />
       {/* Property Type & BHK section (single source of truth) */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-semibold mb-4">Property Type & BHK</h2>
+        <h2 className="text-lg font-semibold mb-4">Property Type</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
@@ -553,28 +586,23 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             </select>
             {displayErrors.propertyType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.propertyType}</p>}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
-            <select
-              className={`input w-full${displayErrors.bhk ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.bhk || ''}
-              onChange={e => setFormData({ ...formData, bhk: e.target.value })}
-              onBlur={() => markTouched('bhk')}
-            >
-              <option value="">Select BHK</option>
-              {bhkTypes.map(type => <option key={type} value={type}>{type}</option>)}
-            </select>
-            {displayErrors.bhk && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.bhk}</p>}
-          </div>
         </div>
       </section>
       {/* Home Details section (remove Property Type dropdown from here) */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Home Details</h2>
+        {/* Section-level error for Home Details (always show if any error) */}
+        {(errors.flatType || errors.availableRooms || errors.roomType || errors.bathroomType || errors.furnishingType || errors.parking) && (
+          <div className="mb-4">
+            <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
+              Please complete all Home Details fields marked in red.
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
-          {/* Row 1 - Flat Type (NEW for Shared Listing) */}
+          {/* Row 1 - Home Type (NEW for Shared Listing) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Home Type</label>
             <select
               ref={fieldRefs['rentDetails.roomDetails.flatType']}
               className={`input w-full${displayErrors.flatType ? ' border-red-500 bg-red-50' : ''}`}
@@ -591,12 +619,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               })}
               onBlur={() => markTouched('flatType')}
             >
-              <option value="">Select Flat Type</option>
-              <option value="Single Room">Single Room</option>
-              <option value="1RK">1RK</option>
-              <option value="2BHK">2BHK</option>
-              <option value="3BHK">3BHK</option>
-              <option value="4BHK">4BHK</option>
+              <option value="">Select Home Type</option>
+              {flatTypes.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
             {displayErrors.flatType && (
               <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
@@ -734,6 +758,14 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       {/* 7. Amenities */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-4">
         <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Amenities</h2>
+        {/* Section-level error for Amenities (always show if any error) */}
+        {errors.amenities && (
+          <div className="mb-4">
+            <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
+              Please select at least one amenity.
+            </div>
+          </div>
+        )}
         <div className="flex flex-wrap gap-3">
           {AMENITY_OPTIONS.map(opt => {
             const Icon = opt.icon;
@@ -766,7 +798,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           })}
           </div>
         {displayErrors.amenities && (
-          <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
             {displayErrors.amenities}
           </p>
         )}
@@ -774,11 +806,19 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       {/* 8. Preferred Tenant */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-4">
         <h2 className="text-lg font-semibold mb-4">Preferred Tenant</h2>
+        {/* Section-level error for Preferred Tenant (always show if any error) */}
+        {errors.lookingFor && (
+          <div className="mb-4">
+            <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
+              Please select a preferred tenant.
+            </div>
+          </div>
+        )}
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
             <select 
-              className={`input w-full${displayErrors.gender ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.lookingFor ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.rentDetails.preferredTenant.lookingFor}
               onChange={e => setFormData({
                 ...formData,
@@ -790,16 +830,16 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                   }
                 }
               })}
-              onBlur={() => markTouched('gender')}
+              onBlur={() => markTouched('lookingFor')}
             >
               <option value="">Select Gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
+              <option value="Anyone">Anyone</option>
+              <option value="Family">Family</option>
+              <option value="Bachelors">Bachelors</option>
             </select>
-            {displayErrors.gender && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-                {displayErrors.gender}
+            {displayErrors.lookingFor && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+                {displayErrors.lookingFor}
               </p>
             )}
           </div>
@@ -849,6 +889,14 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       {/* Move In Section */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-4">
         <h2 className="text-lg font-semibold mb-4">Move In</h2>
+        {/* Section-level error for Move In (always show if any error) */}
+        {errors.handoverDate && (
+          <div className="mb-4">
+            <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
+              Please select a move-in date.
+            </div>
+          </div>
+        )}
         <div className="flex items-center gap-8 mb-2">
           <label className="flex items-center gap-2">
             <input
@@ -881,23 +929,25 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               onBlur={() => markTouched('handoverDate')}
             />
             <span className="block text-xs text-gray-500 mt-1">Select your move-in date.</span>
-            {displayErrors.handoverDate && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.handoverDate}
-            </p>}
+            {displayErrors.handoverDate && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+                {displayErrors.handoverDate}
+              </p>
+            )}
           </div>
-        )}
-        {displayErrors.isImmediate && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-          {displayErrors.isImmediate}
-        </p>}
-        {displayErrors.moveIn && (
-          <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-            {displayErrors.moveIn}
-          </p>
         )}
       </section>
       {/* 10. Rental Details */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Rental Details</h2>
+        {/* Section-level error for Rental Details (always show if any error) */}
+        {(errors.rent || errors.maintenance || errors.securityDeposit || errors.setupCost || errors.brokerage) && (
+          <div className="mb-4">
+            <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
+              Please complete all Rental Details fields marked in red.
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Rent (₹/month)</label>
@@ -925,9 +975,11 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               autoCorrect="off"
               onBlur={() => markTouched('rent')}
             />
-            {displayErrors.rent && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.rent}
-            </p>}
+            {displayErrors.rent && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+                {displayErrors.rent}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance (₹/month)</label>
@@ -950,9 +1002,11 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               autoCorrect="off"
               onBlur={() => markTouched('maintenance')}
             />
-            {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.maintenance}
-            </p>}
+            {displayErrors.maintenance && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+                {displayErrors.maintenance}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (₹)</label>
@@ -975,9 +1029,11 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               autoCorrect="off"
               onBlur={() => markTouched('securityDeposit')}
             />
-            {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.securityDeposit}
-            </p>}
+            {displayErrors.securityDeposit && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+                {displayErrors.securityDeposit}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Setup Cost (₹)</label>
@@ -1000,9 +1056,11 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               autoCorrect="off"
               onBlur={() => markTouched('setupCost')}
             />
-            {displayErrors.setupCost && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.setupCost}
-            </p>}
+            {displayErrors.setupCost && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+                {displayErrors.setupCost}
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage (₹)</label>
@@ -1025,9 +1083,11 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               autoCorrect="off"
               onBlur={() => markTouched('brokerage')}
             />
-            {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.brokerage}
-            </p>}
+            {displayErrors.brokerage && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+                {displayErrors.brokerage}
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -1051,7 +1111,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         <p className="text-xs text-gray-500 mt-1">
           Tip: Use this box to share unique details about your property, such as house rules, vibe, or anything not covered above. Avoid repeating amenities, phone number, or location.
         </p>
-        {displayErrors.description && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+        {displayErrors.description && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
           {displayErrors.description}
         </p>}
       </section>
@@ -1133,7 +1193,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
         </div>
       {/* Only one submit button at the bottom */}
-      <button type="submit" className="btn btn-primary">Submit</button>
+      <button type="submit" className="btn btn-primary max-w-xs mx-auto block">Submit</button>
     </>
   );
 };
@@ -1185,15 +1245,15 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
     if (!formData.propertyType) errs.propertyType = 'Property type is required';
     if (!formData.bhk) errs.bhk = 'BHK is required';
     if (!formData.furnishingType) errs.furnishingType = 'Furnishing type is required';
+    if (!formData.homeType) errs.homeType = 'Home type is required';
+    if (!formData.roomType) errs.roomType = 'Room type is required';
+    if (!formData.furnishType) errs.furnishType = 'Furnish type is required';
     if (!formData.description || formData.description.length < 10) errs.description = 'Description must be at least 10 characters.';
-    // Rent validation
-    if (!formData.rent || formData.rent === '') {
-      errs.rent = 'Rent is required';
-    } else if (Number(formData.rent) < 1000 || Number(formData.rent) > 30000) {
-      errs.rent = 'Rent must be between ₹1,000 and ₹30,000';
+    if (!formData.price || formData.price === '') {
+      errs.price = 'Price is required';
+    } else if (Number(formData.price) < 1000 || Number(formData.price) > 100000) {
+      errs.price = 'Price must be between ₹1,000 and ₹100,000';
     }
-    if (!formData.sellDetails?.price) errs.price = 'Price is required';
-    // Move-in date validation (string compare)
     if (!isImmediate) {
       const handoverDate = formData.handoverDate || '';
       if (!handoverDate) {
@@ -1209,8 +1269,15 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) {
-      if (onSubmit) onSubmit();
+    console.log('SellForm handleSubmit called');
+    console.log('Form data:', formData);
+    const isValid = validate();
+    console.log('Validation result:', isValid);
+    if (isValid) {
+      console.log('Calling props.onSubmit');
+      if (props.onSubmit) props.onSubmit();
+    } else {
+      console.log('Validation failed, errors:', localErrors);
     }
   };
 
@@ -1224,8 +1291,13 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
   const [submitted, setSubmitted] = useState(true);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
+  useEffect(() => {
+    validate();
+    // eslint-disable-next-line
+  }, [formData]);
+
   return (
-    <>
+    <form onSubmit={handleSubmit}>
       {/* Address Section */}
       <AddressFields
         formData={formData}
@@ -1292,6 +1364,51 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             {displayErrors.bhk && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {displayErrors.bhk}
             </p>}
+          </div>
+        </div>
+      </section>
+      {/* Home Details Section */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4">Home Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Home Type</label>
+            <select
+              className={`input w-full${displayErrors.homeType ? ' border-red-500 bg-red-50' : ''}`}
+              value={formData.homeType || ''}
+              onChange={e => setFormData({ ...formData, homeType: e.target.value })}
+              onBlur={() => markTouched('homeType')}
+            >
+              <option value="">Select Home Type</option>
+              {/* Add your home type options here */}
+            </select>
+            {displayErrors.homeType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.homeType}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
+            <select
+              className={`input w-full${displayErrors.roomType ? ' border-red-500 bg-red-50' : ''}`}
+              value={formData.roomType || ''}
+              onChange={e => setFormData({ ...formData, roomType: e.target.value })}
+              onBlur={() => markTouched('roomType')}
+            >
+              <option value="">Select Room Type</option>
+              {/* Add your room type options here */}
+            </select>
+            {displayErrors.roomType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomType}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
+            <select
+              className={`input w-full${displayErrors.furnishType ? ' border-red-500 bg-red-50' : ''}`}
+              value={formData.furnishType || ''}
+              onChange={e => setFormData({ ...formData, furnishType: e.target.value })}
+              onBlur={() => markTouched('furnishType')}
+            >
+              <option value="">Select Furnishing</option>
+              {/* Add your furnish type options here */}
+            </select>
+            {displayErrors.furnishType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.furnishType}</p>}
           </div>
         </div>
       </section>
@@ -1383,6 +1500,14 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       {/* Move In */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4">Move In</h2>
+        {/* Section-level error for Move In (always show if any error) */}
+        {errors.handoverDate && (
+          <div className="mb-4">
+            <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
+              Please select a move-in date.
+            </div>
+          </div>
+        )}
         <div className="flex items-center gap-8 mb-2">
           <label className="flex items-center gap-2">
             <input
@@ -1415,9 +1540,11 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               onBlur={() => markTouched('handoverDate')}
             />
             <span className="block text-xs text-gray-500 mt-1">Select your move-in date.</span>
-            {displayErrors.handoverDate && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.handoverDate}
-            </p>}
+            {displayErrors.handoverDate && (
+              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+                {displayErrors.handoverDate}
+              </p>
+            )}
           </div>
         )}
       </section>
@@ -1426,18 +1553,18 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         <h2 className="text-lg font-semibold mb-4">Price Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Rent</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
             <input
               type="number"
-              className={`input w-full${displayErrors.rent ? ' border-red-500 bg-red-50' : ''}`}
-              placeholder="Enter rent"
-              value={formData.rent || ''}
-              onChange={e => setFormData({ ...formData, rent: e.target.value })}
+              className={`input w-full${displayErrors.price ? ' border-red-500 bg-red-50' : ''}`}
+              placeholder="Enter price"
+              value={formData.price || ''}
+              onChange={e => setFormData({ ...formData, price: e.target.value })}
               min={0}
-              onBlur={() => markTouched('rent')}
+              onBlur={() => markTouched('price')}
             />
-            {displayErrors.rent && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.rent}
+            {displayErrors.price && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+              {displayErrors.price}
             </p>}
           </div>
           <div>
@@ -1451,7 +1578,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               min={0}
               onBlur={() => markTouched('maintenance')}
             />
-            {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
               {displayErrors.maintenance}
             </p>}
           </div>
@@ -1466,7 +1593,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               min={0}
               onBlur={() => markTouched('securityDeposit')}
             />
-            {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
               {displayErrors.securityDeposit}
             </p>}
           </div>
@@ -1481,7 +1608,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               min={0}
               onBlur={() => markTouched('brokerage')}
             />
-            {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
               {displayErrors.brokerage}
             </p>}
           </div>
@@ -1500,7 +1627,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           onBlur={() => markTouched('description')}
         />
         <p className="text-xs text-gray-500 mt-1">Tip: Add clear, well-lit photos for better responses.</p>
-        {displayErrors.description && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+        {displayErrors.description && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
           {displayErrors.description}
         </p>}
       </section>
@@ -1536,7 +1663,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         <div className="text-xs text-gray-400 mt-1">Tip: Add clear, well-lit photos for better responses.</div>
       </section>
       {/* Only one submit button at the bottom */}
-      <button type="submit" className="btn btn-primary">Submit</button>
-    </>
+      <button type="submit" className="btn btn-primary max-w-xs mx-auto block">Submit</button>
+    </form>
   );
 };

@@ -1,12 +1,12 @@
 // Coming soon
 
-// import { collection, addDoc, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
-// import { db } from '../config/firebase';
-// import { getAuth } from 'firebase/auth';
+import { collection, addDoc, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { db } from '../config/firebase';
+import { getAuth } from 'firebase/auth';
 
 // Collection references
-// const rentCollection = collection(db, 'r');
-// const sellCollection = collection(db, 's');
+const rentCollection = collection(db, 'r');
+const sellCollection = collection(db, 's');
 
 export interface ListingData {
   address: {
@@ -88,33 +88,33 @@ export interface SellListing extends ListingData {
 export async function createListing(type: 'rent' | 'sell', data: RentListing | SellListing) {
   try {
     // Validate user is authenticated
-    // const auth = getAuth();
-    // const user = auth.currentUser;
-    // if (!user) {
-    //   throw new Error('User must be authenticated to create a listing');
-    // }
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('User must be authenticated to create a listing');
+    }
 
     // Ensure we're using the correct collection
-    // const collectionRef = collection(db, type === 'rent' ? 'r' : 's');
+    const collectionRef = collection(db, type === 'rent' ? 'r' : 's');
 
     // Clean data before saving
-    // const cleanData = {
-    //   ...data,
-    //   createdAt: Date.now(),
-    //   status: 'active' as const,
-    //   userId: user.uid, // Ensure userId is set from authenticated user
-    //   createdByUser: user.uid, // Add createdByUser field
-    //   listingType: type // Add this to help with frontend routing
-    // };
+    const cleanData = {
+      ...data,
+      createdAt: Date.now(),
+      status: 'active' as const,
+      userId: user.uid, // Ensure userId is set from authenticated user
+      createdByUser: user.uid, // Add createdByUser field
+      listingType: type // Add this to help with frontend routing
+    };
 
-    // console.log('Creating listing with data:', cleanData);
-    // console.log('Collection:', type === 'rent' ? 'r' : 's');
+    console.log('Creating listing with data:', cleanData);
+    console.log('Collection:', type === 'rent' ? 'r' : 's');
 
-    // const docRef = await addDoc(collectionRef, cleanData);
+    const docRef = await addDoc(collectionRef, cleanData);
 
-    // console.log('Document written with ID:', docRef.id);
-    return { success: true, id: 'mock_id' }; // Mock response
-  } catch (error) {
+    console.log('Document written with ID:', docRef.id);
+    return { success: true, id: docRef.id };
+  } catch (error: any) {
     console.error('Error creating listing:', error);
     if (error.code === 'permission-denied') {
       throw new Error('You do not have permission to create listings');
@@ -128,44 +128,43 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
     console.log('Fetching listings...');
     console.log('Getting listings for type:', type, 'with filters:', filters);
     // Use r for rent and s for sell collections
-    // const collectionRef = collection(db, type === 'rent' ? 'r' : 's');
+    const collectionRef = collection(db, type === 'rent' ? 'r' : 's');
 
     // Start with base query
-    // let baseQuery = query(collectionRef);
+    let baseQuery = query(collectionRef);
 
     // Add status filter
-    // baseQuery = query(baseQuery, where('status', '==', 'active'));
+    baseQuery = query(baseQuery, where('status', '==', 'active'));
 
     // Add other filters if they exist
-    // if (filters) {
-    //   if (filters.propertyType) {
-    //     baseQuery = query(baseQuery, where('propertyType', '==', filters.propertyType));
-    //   }
+    if (filters) {
+      if (filters.propertyType) {
+        baseQuery = query(baseQuery, where('propertyType', '==', filters.propertyType));
+      }
 
-    //   // Add other filters as needed...
-    // }
+      // Add other filters as needed...
+    }
 
     // Execute query
-    // const snapshot = await getDocs(baseQuery);
-    // console.log('Query returned:', snapshot.size, 'documents');
-
+    const snapshot = await getDocs(baseQuery);
+    console.log('Query returned:', snapshot.size, 'documents');
 
     // Transform and filter results
-    const listings: any[] = []; // Mock data
-    // const listings = snapshot.docs.map(doc => {
-    //   const data = doc.data();
-    //   return {
-    //     id: doc.id,
-    //     ...data,
-    //     contactNumber: data.contactNumber || '',
-    //     // For type safety, ensure rentDetails and sellDetails are present if expected
-    //     rentDetails: data.rentDetails,
-    //     sellDetails: data.sellDetails,
-    //     address: data.address,
-    //     propertyType: data.propertyType
-    //   };
-    // });
-
+    const listings = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        contactNumber: data.contactNumber || '',
+        // For type safety, ensure rentDetails and sellDetails are present if expected
+        rentDetails: data.rentDetails,
+        sellDetails: data.sellDetails,
+        address: data.address,
+        propertyType: data.propertyType,
+        bathrooms: data.bathrooms,
+        amenities: data.amenities
+      };
+    });
 
     // Apply all client-side filters
     let filteredListings = listings;
@@ -223,161 +222,35 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
           const bathrooms =
             listing.rentDetails?.roomDetails?.bathrooms ??
             listing.sellDetails?.bathrooms ??
-            '';
-          if (!bathrooms && (filters.bathrooms === 'Any' || filters.bathrooms === '')) return true;
-          // Allow partial and case-insensitive match
+            listing.bathrooms;
           return String(bathrooms).toLowerCase().includes(String(filters.bathrooms).toLowerCase());
         });
       }
 
-      // Furnishing Type filter
-      if (filters.furnishingType && filters.furnishingType !== '') {
-        filteredListings = filteredListings.filter(listing => {
-          const furnishingType =
-            listing.rentDetails?.furnishingType ??
-            listing.sellDetails?.furnishingType ??
-            '';
-          if (!furnishingType && (filters.furnishingType === 'All' || filters.furnishingType === '')) return true;
-          // Allow partial and case-insensitive match
-          return (furnishingType || '').toLowerCase().includes(filters.furnishingType.toLowerCase());
-        });
-      }
-
-      // Area (sqft) filter
-      if (filters.minSqft) {
-        filteredListings = filteredListings.filter(listing => {
-          const area = listing.sellDetails?.sqft
-            || listing.rentDetails?.roomDetails?.area
-            || 0;
-          // If area is missing, treat as match
-          if (!area) return true;
-          return area >= Number(filters.minSqft);
-        });
-      }
-      if (filters.maxSqft) {
-        filteredListings = filteredListings.filter(listing => {
-          const area = listing.sellDetails?.sqft
-            || listing.rentDetails?.roomDetails?.area
-            || 0;
-          // If area is missing, treat as match
-          if (!area) return true;
-          return area <= Number(filters.maxSqft);
-        });
-      }
-
-      // Availability filter
-      if (filters.availability && filters.availability !== '') {
-        filteredListings = filteredListings.filter(listing => {
-          const avail = (listing.rentDetails?.roomDetails?.availability || '').toLowerCase();
-          if (!avail && (filters.availability === 'Any' || filters.availability === '')) return true;
-          return avail.includes(filters.availability.toLowerCase());
-        });
-      }
-
-      // Age of Property filter
-      if (filters.ageOfProperty && filters.ageOfProperty !== '') {
-        filteredListings = filteredListings.filter(listing => {
-          const age = listing.sellDetails?.ageOfProperty
-            || listing.rentDetails?.ageOfProperty;
-          if (!age && (filters.ageOfProperty === 'All' || filters.ageOfProperty === '')) return true;
-          return (age || '').toLowerCase().includes(filters.ageOfProperty.toLowerCase());
-        });
-      }
-
-      // Possession Status filter
-      if (filters.possessionStatus && filters.possessionStatus !== '') {
-        filteredListings = filteredListings.filter(listing => {
-          const status = listing.sellDetails?.possessionStatus
-            || listing.rentDetails?.possessionStatus;
-          if (!status && (filters.possessionStatus === 'All' || filters.possessionStatus === '')) return true;
-          return (status || '').toLowerCase().includes(filters.possessionStatus.toLowerCase());
-        });
-      }
-
-      // Property Type filter
+      // Property type filter
       if (filters.propertyType && filters.propertyType !== '') {
         filteredListings = filteredListings.filter(listing =>
-          (listing.propertyType || '').toLowerCase().includes(filters.propertyType.toLowerCase())
+          String(listing.propertyType).toLowerCase().includes(String(filters.propertyType).toLowerCase())
         );
       }
 
       // Amenities filter
-      if (filters.amenities && filters.amenities.trim() !== '') {
-        const selectedAmenities = filters.amenities.split(',').map((a: string) => a.trim()).filter(Boolean);
-        if (selectedAmenities.length > 0) {
-          filteredListings = filteredListings.filter(listing => {
-            if (type === 'rent') {
-              const rentListing = listing as unknown as import('./listings').RentListing;
-              const allAmenities = [
-                ...(rentListing.amenities?.appliances || []),
-                ...(rentListing.amenities?.furniture || []),
-                ...(rentListing.amenities?.building || [])
-              ].map((a: string) => a.toLowerCase());
-              return selectedAmenities.every((a: string) => allAmenities.includes(a.toLowerCase()));
-            } else if (type === 'sell') {
-              const sellListing = listing as unknown as import('./listings').SellListing;
-              const allAmenities = (sellListing.sellDetails?.amenities || []).map((a: string) => a.toLowerCase());
-              return selectedAmenities.every((a: string) => allAmenities.includes(a.toLowerCase()));
-            }
-            return true;
-          });
-        }
-      }
-
-      if (type === 'rent') {
-        // Max Rent
-        if (filters.maxRent) {
-          filteredListings = filteredListings.filter(
-            listing => listing.rentDetails?.costs?.rent <= Number(filters.maxRent)
+      if (filters.amenities && filters.amenities !== '') {
+        const amenityList = filters.amenities.split(',').map((a: string) => a.trim().toLowerCase());
+        filteredListings = filteredListings.filter(listing => {
+          const listingAmenities = listing.amenities || [];
+          return amenityList.some((amenity: string) =>
+            listingAmenities.some((listingAmenity: string) =>
+              listingAmenity.toLowerCase().includes(amenity)
+            )
           );
-        }
-        // Min Rent
-        if (filters.minRent) {
-          filteredListings = filteredListings.filter(
-            listing => listing.rentDetails?.costs?.rent >= Number(filters.minRent)
-          );
-        }
-        // Room Type
-        if (filters.roomType && filters.roomType !== '') {
-          filteredListings = filteredListings.filter(listing => listing.rentDetails?.roomDetails?.roomType === filters.roomType);
-        }
-        // Tenant Type
-        if (filters.tenantType && filters.tenantType !== '') {
-          filteredListings = filteredListings.filter(listing => listing.rentDetails?.preferredTenant?.lookingFor === filters.tenantType);
-        }
-        // Bathroom Type
-        if (filters.bathroomType && filters.bathroomType !== '') {
-          filteredListings = filteredListings.filter(listing => listing.rentDetails?.roomDetails?.bathroomType === filters.bathroomType);
-        }
-      } else if (type === 'sell') {
-        // Built Up Area
-        if (filters.builtUpArea && Number(filters.builtUpArea) > 0) {
-          filteredListings = filteredListings.filter(listing => Number(listing.sellDetails?.sqft) >= Number(filters.builtUpArea));
-        }
-        // Age of Property
-        if (filters.ageOfProperty && filters.ageOfProperty !== '') {
-          filteredListings = filteredListings.filter(listing => {
-            const age = listing.sellDetails?.ageOfProperty;
-            if (!age) return false;
-            if (filters.ageOfProperty === '0-2') return age === '0-2';
-            if (filters.ageOfProperty === '2-5') return age === '2-5';
-            if (filters.ageOfProperty === '5-10') return age === '5-10';
-            if (filters.ageOfProperty === '10+') return age === '10+';
-            return false;
-          });
-        }
-        // Possession Status
-        if (filters.possessionStatus && filters.possessionStatus !== '') {
-          filteredListings = filteredListings.filter(listing => listing.sellDetails?.possessionStatus === filters.possessionStatus);
-        }
+        });
       }
     }
 
-    console.log('Returning listings:', filteredListings.length);
-    console.log('Final filtered listings:', filteredListings.map(l => ({ id: l.id, rent: l.rentDetails?.costs?.rent, price: l.sellDetails?.price })));
+    console.log('Final filtered listings count:', filteredListings.length);
     return filteredListings;
-
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching listings:', error);
     throw error;
   }
@@ -472,28 +345,26 @@ export async function getListingsByIds(ids: string[]) {
 export async function getListingsByUser(userId: string) {
   try {
     // Query rent listings
-    // const rentQuery = query(collection(db, 'r'), where('userId', '==', userId));
-    // const rentSnapshot = await getDocs(rentQuery);
-    // const rentListings = rentSnapshot.docs.map(doc => ({
-    //   id: doc.id,
-    //   ...doc.data(),
-    //   listingType: 'rent',
-    // }));
+    const rentQuery = query(collection(db, 'r'), where('userId', '==', userId));
+    const rentSnapshot = await getDocs(rentQuery);
+    const rentListings = rentSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      listingType: 'rent',
+    }));
 
-    // // Query sell listings
-    // const sellQuery = query(collection(db, 's'), where('userId', '==', userId));
-    // const sellSnapshot = await getDocs(sellQuery);
-    // const sellListings = sellSnapshot.docs.map(doc => ({
-    //   id: doc.id,
-    //   ...doc.data(),
-    //   listingType: 'sell',
-    // }));
+    // Query sell listings
+    const sellQuery = query(collection(db, 's'), where('userId', '==', userId));
+    const sellSnapshot = await getDocs(sellQuery);
+    const sellListings = sellSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      listingType: 'sell',
+    }));
 
-    // // Combine and return
-    // return [...rentListings, ...sellListings];
-    const mockListings: any[] = []; // Mock data
-    return mockListings;
-  } catch (error) {
+    // Combine and return
+    return [...rentListings, ...sellListings];
+  } catch (error: any) {
     console.error('Error fetching user listings:', error);
     throw error;
   }
