@@ -15,7 +15,6 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
 import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
 import CardDemoPage from './pages/CardDemoPage';
-import { AppContextProvider } from './context/AppContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
 const router = createBrowserRouter([
@@ -60,7 +59,7 @@ function App() {
         const currentVersion = localStorage.getItem('appVersion');
         if (currentVersion && currentVersion !== data.version) {
           localStorage.setItem('appVersion', data.version);
-          window.location.reload(true);
+          window.location.reload();
         } else {
           localStorage.setItem('appVersion', data.version);
         }
@@ -68,9 +67,7 @@ function App() {
   }, []);
   return (
     <ErrorBoundary>
-      <AppContextProvider>
-        <RouterProvider router={router} />
-      </AppContextProvider>
+      <RouterProvider router={router} />
     </ErrorBoundary>
   );
 }

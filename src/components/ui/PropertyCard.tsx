@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug, X, Check, ChevronLeft, ChevronRight, Pencil, Trash, Eye } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
@@ -18,6 +18,8 @@ interface PropertyCardProps {
   variant?: 'small' | 'large';
   onClick?: () => void;
   showBadge?: boolean;
+  showManageActions?: boolean; // NEW PROP
+  onDelete?: (id: string) => void; // NEW PROP: callback after delete
 }
 
 // Key amenities to show as icons
@@ -48,7 +50,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   listingType = 'rent',
   variant = 'small',
   onClick,
-  showBadge = true
+  showBadge = true,
+  showManageActions = false, // NEW PROP
+  onDelete, // NEW PROP: callback after delete
 }) => {
   console.log('PropertyCard property:', property);
   console.log('Rendering PropertyCard for property:', property?.id, property?.address?.buildingName);
@@ -210,6 +214,26 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     return getMatchScore(user.preferences, propertyPrefs);
   }, [user, property, listingType]);
 
+  // --- Management Actions ---
+  const handleEdit = () => {
+    navigate(`/edit-listing/${listingType}/${property.id}`);
+  };
+  const handleDelete = async () => {
+    if (!window.confirm('Are you sure you want to delete this listing?')) return;
+    try {
+      const { deleteListing } = await import('../../services/listings');
+      const apiType = listingType === 'buy' ? 'sell' : 'rent';
+      await deleteListing(apiType, property.id);
+      alert('Listing deleted successfully!');
+      if (onDelete) onDelete(property.id);
+    } catch (err) {
+      alert('Failed to delete listing. Please try again.');
+    }
+  };
+  const handleView = () => {
+    navigate(listingType === 'rent' ? `/rent/${property.id}` : `/buy/${property.id}`);
+  };
+
   // --- Small Card Variant ---
   const renderSmallCard = () => (
     <div
@@ -249,7 +273,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           ))}
         </Swiper>
         {/* Property Type Badge */}
-        <div className="absolute top-3 right-3 z-10">
+        <div className="absolute top-3 left-3 z-10">
           <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
             {(() => {
               // 1. Try bedrooms
@@ -261,7 +285,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               const candidates = [
                 property.rentDetails && property.rentDetails.roomDetails && (property.rentDetails.roomDetails as any).flatType,
                 (property as any).flatType,
-                property.propertyType,
+                property.type,
                 property.type,
                 property.title,
                 property.description,
@@ -276,6 +300,14 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             })()}
           </span>
         </div>
+        {/* Management Actions (Edit/Delete/View) */}
+        {showManageActions && (
+          <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+            <button onClick={handleEdit} title="Edit" className="bg-white border border-gray-200 rounded-full p-1 shadow hover:bg-gray-100 transition"><Pencil className="w-4 h-4 text-primary-600" /></button>
+            <button onClick={handleDelete} title="Delete" className="bg-white border border-gray-200 rounded-full p-1 shadow hover:bg-gray-100 transition"><Trash className="w-4 h-4 text-red-500" /></button>
+            <button onClick={handleView} title="View" className="bg-white border border-gray-200 rounded-full p-1 shadow hover:bg-gray-100 transition"><Eye className="w-4 h-4 text-gray-600" /></button>
+          </div>
+        )}
         {/* Left Arrow */}
         <div
           className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"

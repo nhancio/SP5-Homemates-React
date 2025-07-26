@@ -157,15 +157,26 @@ const ProfilePage = () => {
     // Fetch user listings
     const fetchUserListings = async () => {
       if (!user) {
+        console.log('No user found in ProfilePage');
         setUserListings([]);
         return;
       }
       setListingsLoading(true);
       setListingsError(null);
       try {
+        console.log('=== PROFILE PAGE DEBUG START ===');
+        console.log('Fetching user listings for user:', user);
+        console.log('User ID:', user.id);
+        console.log('User object:', user);
+        console.log('Is user authenticated?', !!user);
         const listings = await getListingsByUser(user.id);
+        console.log('Listings returned from getListingsByUser:', listings);
+        console.log('Number of listings:', listings.length);
         setUserListings(listings);
+        console.log('=== PROFILE PAGE DEBUG END ===');
       } catch (err) {
+        console.error('=== PROFILE PAGE ERROR ===');
+        console.error('Error fetching user listings:', err);
         setListingsError('Failed to load your listings.');
       } finally {
         setListingsLoading(false);
@@ -802,6 +813,8 @@ const ProfilePage = () => {
           </div>
         </div>
 
+
+
         {/* Manage Listings Section */}
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">Manage Listings</h2>
@@ -814,35 +827,15 @@ const ProfilePage = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {userListings.map(listing => (
-                <div key={listing.id} className="relative">
-                  {/* More options dropdown */}
-                  <div className="absolute top-2 right-2 z-10">
-                    <div className="relative">
-                      <button
-                        className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-gray-200 shadow hover:bg-gray-50 transition"
-                        onClick={() => setShowOptionsFor(showOptionsFor === listing.id ? null : listing.id)}
-                        title="More Options"
-                        aria-label="More Options"
-                      >
-                        <MoreVertical className="w-5 h-5 text-gray-600" />
-                      </button>
-                      {showOptionsFor === listing.id && (
-                        <div className="absolute right-0 mt-2 w-44 bg-white border rounded z-20">
-                          <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-sm gap-2" onClick={() => { setShowOptionsFor(null); handleEditListing(listing); }}>
-                            <Pencil className="w-4 h-4 text-primary-600" /> Edit
-                          </button>
-                          <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-sm gap-2" onClick={() => { setShowOptionsFor(null); handleDeleteListing(listing); }} disabled={deletingListing === listing.id}>
-                            <Trash className="w-4 h-4 text-red-500" /> Delete
-                          </button>
-                          <button className="flex items-center w-full text-left px-4 py-2 hover:bg-gray-100 text-sm gap-2" onClick={() => { setShowOptionsFor(null); navigate(listing.listingType === 'rent' ? `/rent/${listing.id}` : `/buy/${listing.id}`); }}>
-                            <Eye className="w-4 h-4 text-gray-600" /> View
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <PropertyCard property={listing} listingType={listing.listingType === 'sell' ? 'buy' : 'rent'} />
-                </div>
+                <PropertyCard 
+                  key={listing.id}
+                  property={listing} 
+                  listingType={listing.listingType === 'sell' ? 'buy' : 'rent'}
+                  showManageActions={true}
+                  onDelete={(id) => {
+                    setUserListings(prev => prev.filter(l => l.id !== id));
+                  }}
+                />
               ))}
             </div>
           )}

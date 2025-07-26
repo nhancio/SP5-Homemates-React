@@ -27,12 +27,28 @@ const BuyPropertiesPage = () => {
 
   const fetchProperties = async () => {
     try {
+      console.log('=== BUY PROPERTIES DEBUG START ===');
+      console.log('Fetching buy properties...');
+      console.log('Current filters:', filters.buy);
       setIsLoading(true);
       setError(null);
       const listings = await getListings('sell', filters.buy);
+      console.log('Raw listings returned from getListings:', listings);
+      console.log('Number of listings:', listings.length);
+      console.log('Listings details:', listings.map(l => ({
+        id: l.id,
+        address: l.address,
+        propertyType: l.propertyType,
+        status: (l as any).status,
+        createdAt: (l as any).createdAt,
+        userId: (l as any).userId,
+        listingType: (l as any).listingType
+      })));
       setProperties(listings);
+      console.log('=== BUY PROPERTIES DEBUG END ===');
     } catch (err) {
-      console.error('Error fetching properties:', err);
+      console.error('=== BUY PROPERTIES ERROR ===');
+      console.error('Error fetching buy properties:', err);
       setError(err instanceof Error ? err.message : 'Failed to load properties. Please try again later.');
     } finally {
       setIsLoading(false);
@@ -166,26 +182,41 @@ const BuyPropertiesPage = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProperties.map(property => (
-                <PropertyCard 
-                  key={property.id} 
-                  property={property}
-                  listingType={property.rentDetails ? 'rent' : 'buy'}
-                  variant="small"
-                  onClick={() => handlePropertyClick(property)}
-                  showBadge={false}
-                />
-              ))}
-            </div>
+            {/* Debug Section - Only show in development */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <h3 className="font-semibold text-yellow-800 mb-2">Debug Info (Development Only)</h3>
+                <p className="text-sm text-yellow-700 mb-2">Total listings: {properties.length}</p>
+                <p className="text-sm text-yellow-700 mb-2">Filtered listings: {filteredProperties.length}</p>
+                <details className="mt-2">
+                  <summary className="text-sm text-yellow-700 cursor-pointer">Raw Properties Data</summary>
+                  <pre className="text-xs text-yellow-700 mt-2 bg-yellow-100 p-2 rounded overflow-auto max-h-40">
+                    {JSON.stringify(properties, null, 2)}
+                  </pre>
+                </details>
+              </div>
+            )}
             
-            {filteredProperties.length === 0 && !isLoading && (
+            {filteredProperties.length === 0 ? (
               <div className="text-center py-16 bg-gray-50 rounded-lg">
                 <Building className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                 <h3 className="text-xl font-semibold mb-2">No properties found</h3>
                 <p className="text-gray-600">
                   Try adjusting your filters or check back later for new listings
                 </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredProperties.map(property => (
+                  <PropertyCard 
+                    key={property.id} 
+                    property={property}
+                    listingType={property.rentDetails ? 'rent' : 'buy'}
+                    variant="small"
+                    onClick={() => handlePropertyClick(property)}
+                    showBadge={false}
+                  />
+                ))}
               </div>
             )}
           </>

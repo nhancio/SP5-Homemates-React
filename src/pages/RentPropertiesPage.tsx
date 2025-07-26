@@ -84,12 +84,29 @@ const RentPropertiesPage = () => {
 
   const fetchProperties = async () => {
     try {
+      console.log('=== RENT PROPERTIES DEBUG START ===');
+      console.log('Fetching rent properties...');
+      console.log('Current filters:', filters.rent);
       setIsLoading(true);
       setError(null);
       const listings = await getListings('rent', filters.rent);
+      console.log('Raw listings returned from getListings:', listings);
+      console.log('Number of listings:', listings.length);
+      console.log('Listings details:', listings.map(l => ({
+        id: l.id,
+        address: l.address,
+        propertyType: l.propertyType,
+        status: (l as any).status,
+        createdAt: (l as any).createdAt,
+        userId: (l as any).userId,
+        listingType: (l as any).listingType
+      })));
       setProperties(listings);
       setCurrentPage(1); // Reset to first page on new fetch
+      console.log('=== RENT PROPERTIES DEBUG END ===');
     } catch (err) {
+      console.error('=== RENT PROPERTIES ERROR ===');
+      console.error('Error fetching rent properties:', err);
       setError('Failed to load properties. Please try again later.');
     } finally {
       setIsLoading(false);
@@ -237,56 +254,60 @@ const RentPropertiesPage = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {paginatedProperties.map(property => (
-                <PropertyCard 
-                  key={property.id} 
-                  property={property}
-                  listingType="rent"
-                  variant="small"
-                  onClick={() => handlePropertyClick(property.id)}
-                />
-              ))}
-            </div>
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mt-8">
-                <button
-                  className="px-3 py-1 rounded border bg-white text-primary-600 hover:bg-primary-50 disabled:opacity-50"
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                >
-                  Previous
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    className={`px-3 py-1 rounded border ${page === currentPage ? 'bg-primary-600 text-white' : 'bg-white text-primary-600 hover:bg-primary-50'}`}
-                    onClick={() => handlePageChange(page)}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  className="px-3 py-1 rounded border bg-white text-primary-600 hover:bg-primary-50 disabled:opacity-50"
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                </button>
+
+            
+            {filteredProperties.length === 0 ? (
+              <div className="text-center py-16 bg-gray-50 rounded-lg">
+                <Building className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No properties found</h3>
+                <p className="text-gray-600">
+                  No properties available for your profile at this time due to privacy settings.
+                </p>
               </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {paginatedProperties.map(property => (
+                    <PropertyCard 
+                      key={property.id} 
+                      property={property}
+                      listingType="rent"
+                      variant="small"
+                      onClick={() => handlePropertyClick(property.id)}
+                    />
+                  ))}
+                </div>
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="flex justify-center items-center gap-2 mt-8">
+                    <button
+                      className="px-3 py-1 rounded border bg-white text-primary-600 hover:bg-primary-50 disabled:opacity-50"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        className={`px-3 py-1 rounded border ${page === currentPage ? 'bg-primary-600 text-white' : 'bg-white text-primary-600 hover:bg-primary-50'}`}
+                        onClick={() => handlePageChange(page)}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      className="px-3 py-1 rounded border bg-white text-primary-600 hover:bg-primary-50 disabled:opacity-50"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
-        )}
-        
-        {filteredProperties.length === 0 && !isLoading && !error && (
-          <div className="text-center py-16 bg-gray-50 rounded-lg">
-            <Building className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-xl font-semibold mb-2">No properties found</h3>
-            <p className="text-gray-600">
-              No properties available for your profile at this time due to privacy settings.
-            </p>
-          </div>
         )}
       </div>
     </div>

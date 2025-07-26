@@ -250,50 +250,32 @@ const AddListingPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('=== ADD LISTING DEBUG START ===');
     console.log('AddListingPage handleSubmit called');
     console.log('Listing type:', listingType);
     console.log('Form data:', formData);
+    console.log('Images count:', images.length);
+    console.log('User:', user);
     
     setIsSubmitting(true);
     setErrors({});
 
     try {
-      // Validate form data
-      const newErrors: any = {};
-      if (!formData.address?.city) newErrors.city = 'City is required.';
-      if (!formData.address?.locality) newErrors.locality = 'Locality is required.';
-      if (!formData.address?.buildingName) newErrors.buildingName = 'Building name is required.';
-      if (!formData.contactNumber || !/^[6-9][0-9]{9}$/.test(formData.contactNumber)) {
-        newErrors.contactNumber = 'Enter a valid 10-digit mobile number.';
-      }
-      if (!formData.propertyType) newErrors.propertyType = 'Property type is required.';
-      if (!formData.description || formData.description.length < 10) {
-        newErrors.description = 'Description must be at least 10 characters.';
-      }
-
-      // Price validation
-      if (listingType === 'sell') {
-        const price = Number(formData.price);
-        if (!price || price < 1000) {
-          newErrors.price = 'Price must be at least ₹1,000.';
-        }
-      }
-
-      if (Object.keys(newErrors).length > 0) {
-        setErrors(newErrors);
-        setIsSubmitting(false);
-        return;
-      }
+      // The validation will be handled by the child forms (RentForm/SellForm)
+      // They will set the errors and call this function back if validation passes
+      console.log('Validation passed, creating listing...');
 
       console.log('Validation passed, creating listing...');
       
       if (!user) {
+        console.error('No user found - cannot create listing');
         alert('Please login to create a listing');
         setIsSubmitting(false);
         return;
       }
 
       if (listingType === 'rent') {
+        console.log('Creating RENT listing...');
         // Prepare rent listing data with only filled fields
         const rentListingData = {
           address: cleanFormData({
@@ -312,8 +294,6 @@ const AddListingPage = () => {
           images,
           createdAt: Date.now(),
           status: 'active' as const,
-          userId: user.id,
-          createdByUser: user.id,
           listingType: 'rent',
           rentDetails: cleanFormData({
             preferredTenant: {
@@ -329,7 +309,6 @@ const AddListingPage = () => {
             costs: {
               rent: formData.rentDetails.costs.rent,
               maintenance: formData.rentDetails.costs.maintenance,
-              securityDeposit: formData.rentDetails.costs.securityDeposit,
               setupCost: formData.rentDetails.costs.setupCost,
               brokerage: formData.rentDetails.costs.brokerage,
             },
@@ -344,10 +323,14 @@ const AddListingPage = () => {
             amenities: formData.rentDetails.amenities,
           }),
         };
+        console.log('Rent listing data before cleaning:', rentListingData);
         const cleanedRentListingData = cleanFormData(rentListingData);
+        console.log('Rent listing data after cleaning:', cleanedRentListingData);
+        console.log('Calling createListing for rent...');
         const result = await createListing('rent', cleanedRentListingData);
-        console.log('Rent listing created:', result);
+        console.log('Rent listing created successfully:', result);
       } else {
+        console.log('Creating SELL listing...');
         // Prepare sell listing data with only filled fields
         const sellListingData = {
           address: cleanFormData({
@@ -366,43 +349,48 @@ const AddListingPage = () => {
           images,
           createdAt: Date.now(),
           status: 'active' as const,
-          userId: user.id,
-          createdByUser: user.id,
           listingType: 'sell',
-          sellDetails: cleanFormData({
-            price: formData.price,
-            gst: formData.sellDetails?.gst || 0,
-            isNegotiable: formData.sellDetails?.isNegotiable || false,
-            propertyType: formData.sellDetails?.propertyType || formData.propertyType,
-            sqft: formData.sellDetails?.sqft || 0,
-            direction: formData.sellDetails?.direction || '',
-            ownership: formData.sellDetails?.ownership || '',
-            ageOfProperty: formData.sellDetails?.ageOfProperty || '',
-            totalFloors: formData.sellDetails?.totalFloors || '',
-            floorNumber: formData.sellDetails?.floorNumber || '',
-            waterSupply: formData.sellDetails?.waterSupply || '',
-            approvals: formData.sellDetails?.approvals || [],
-            amenities: formData.sellDetails?.amenities || [],
-            highlights: formData.sellDetails?.highlights || [],
-            description: formData.sellDetails?.description || formData.description,
-            propertyId: formData.sellDetails?.propertyId || '',
-            loanOnProperty: formData.sellDetails?.loanOnProperty || false,
-            lookingFor: formData.sellDetails?.lookingFor || '',
-          }),
-          builtUpArea: formData.builtUpArea,
-          ageOfProperty: formData.ageOfProperty,
+          price: formData.price,
+          gst: formData.sellDetails?.gst || 0,
+          isNegotiable: formData.sellDetails?.isNegotiable || false,
+          sqft: formData.sellDetails?.sqft || 0,
+          direction: formData.sellDetails?.direction || '',
+          ownership: formData.sellDetails?.ownership || '',
+          ageOfProperty: formData.sellDetails?.ageOfProperty || '',
+          totalFloors: formData.sellDetails?.totalFloors || '',
+          floorNumber: formData.sellDetails?.floorNumber || '',
+          waterSupply: formData.sellDetails?.waterSupply || '',
+          approvals: formData.sellDetails?.approvals || [],
+          amenities: formData.sellDetails?.amenities || [],
+          highlights: formData.sellDetails?.highlights || [],
+          propertyId: formData.sellDetails?.propertyId || '',
+          loanOnProperty: formData.sellDetails?.loanOnProperty || false,
+          lookingFor: formData.sellDetails?.lookingFor || '',
         };
+        console.log('Sell listing data before cleaning:', sellListingData);
         const cleanedSellListingData = cleanFormData(sellListingData);
+        console.log('Sell listing data after cleaning:', cleanedSellListingData);
+        console.log('Calling createListing for sell...');
         const result = await createListing('sell', cleanedSellListingData);
-        console.log('Sale listing created:', result);
+        console.log('Sale listing created successfully:', result);
       }
 
+      console.log('=== LISTING CREATION COMPLETE ===');
+      console.log('Showing success alert and navigating...');
       alert('Listing created successfully!');
+      console.log('Navigating to:', listingType === 'rent' ? '/rent' : '/buy');
       navigate(listingType === 'rent' ? '/rent' : '/buy');
     } catch (error) {
+      console.error('=== ERROR IN LISTING CREATION ===');
       console.error('Error creating listing:', error);
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        error: error
+      });
       alert(error instanceof Error ? error.message : 'Failed to create listing. Please try again.');
     } finally {
+      console.log('=== ADD LISTING DEBUG END ===');
       setIsSubmitting(false);
     }
   };
@@ -442,6 +430,7 @@ const AddListingPage = () => {
   };
 
   const removeImage = (index: number) => {
+    console.log('removeImage called with index:', index);
     setImages((prev: string[]) => prev.filter((_: string, i: number) => i !== index));
   };
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db, auth } from '../../config/firebase';
 import { getMarkets, Market } from '../../services/markets';
 import * as Yup from 'yup';
@@ -130,6 +130,14 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
         lastLoginAt: new Date().toISOString(),
         onboardingComplete: true, // Mark onboarding as complete
       }, { merge: true });
+
+      // Confirm onboardingComplete is set
+      const userDoc = await getDoc(doc(db, 'u', userId));
+      if (userDoc.exists() && userDoc.data().onboardingComplete === true) {
+        window.location.reload();
+      } else {
+        alert('Something went wrong: onboardingComplete was not set. Please try again.');
+      }
       onClose();
     } catch (err) {
       alert('Failed to save info. Please try again.');

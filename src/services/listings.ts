@@ -107,12 +107,29 @@ export async function createListing(type: 'rent' | 'sell', data: RentListing | S
       listingType: type // Add this to help with frontend routing
     };
 
+    console.log('=== CREATELISTING DEBUG ===');
+    console.log('User from auth:', user);
+    console.log('User UID:', user.uid);
+    console.log('Data passed in:', data);
+    console.log('Clean data being saved:', cleanData);
+
     console.log('Creating listing with data:', cleanData);
     console.log('Collection:', type === 'rent' ? 'r' : 's');
 
     const docRef = await addDoc(collectionRef, cleanData);
 
     console.log('Document written with ID:', docRef.id);
+    
+    // Test: Immediately try to fetch the listing we just created
+    console.log('Testing: Fetching the listing we just created...');
+    const testQuery = query(collection(db, type === 'rent' ? 'r' : 's'), where('userId', '==', user.uid));
+    const testSnapshot = await getDocs(testQuery);
+    console.log('Test query found', testSnapshot.size, 'listings for user', user.uid);
+    console.log('Test listings:', testSnapshot.docs.map(doc => ({
+      id: doc.id,
+      data: doc.data()
+    })));
+    
     return { success: true, id: docRef.id };
   } catch (error: any) {
     console.error('Error creating listing:', error);
@@ -125,6 +142,7 @@ export async function createListing(type: 'rent' | 'sell', data: RentListing | S
 
 export async function getListings(type: 'rent' | 'sell', filters?: any) {
   try {
+    console.log('=== GETLISTINGS DEBUG START ===');
     console.log('Fetching listings...');
     console.log('Getting listings for type:', type, 'with filters:', filters);
     // Use r for rent and s for sell collections
@@ -145,9 +163,14 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
       // Add other filters as needed...
     }
 
+    console.log('Executing Firestore query...');
     // Execute query
     const snapshot = await getDocs(baseQuery);
     console.log('Query returned:', snapshot.size, 'documents');
+    console.log('Raw Firestore documents:', snapshot.docs.map(doc => ({
+      id: doc.id,
+      data: doc.data()
+    })));
 
     // Transform and filter results
     const listings = snapshot.docs.map(doc => {
@@ -166,10 +189,13 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
       };
     });
 
+    console.log('Transformed listings before client-side filtering:', listings);
+
     // Apply all client-side filters
     let filteredListings = listings;
 
     if (filters) {
+      console.log('Applying client-side filters:', filters);
       // Price (for buy)
       if (type === 'sell' && (filters.priceMin || filters.priceMax)) {
         console.log('Filtering by priceMin:', filters.priceMin, 'priceMax:', filters.priceMax);
@@ -197,6 +223,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
 
       // City filter
       if (filters.city && filters.city.trim() !== '') {
+        console.log('Filtering by city:', filters.city);
         filteredListings = filteredListings.filter(listing =>
           listing.address?.city?.toLowerCase().includes(filters.city.toLowerCase())
         );
@@ -204,6 +231,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
 
       // Locality filter
       if (filters.locality && filters.locality.trim() !== '') {
+        console.log('Filtering by locality:', filters.locality);
         filteredListings = filteredListings.filter(listing =>
           listing.address?.locality?.toLowerCase().includes(filters.locality.toLowerCase())
         );
@@ -211,6 +239,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
 
       // BHK filter
       if (filters.bhk && filters.bhk !== '') {
+        console.log('Filtering by BHK:', filters.bhk);
         filteredListings = filteredListings.filter(listing =>
           String(listing.propertyType).toLowerCase().includes(String(filters.bhk).toLowerCase())
         );
@@ -218,6 +247,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
 
       // Bathrooms filter
       if (filters.bathrooms && filters.bathrooms !== '') {
+        console.log('Filtering by bathrooms:', filters.bathrooms);
         filteredListings = filteredListings.filter(listing => {
           const bathrooms =
             listing.rentDetails?.roomDetails?.bathrooms ??
@@ -229,6 +259,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
 
       // Property type filter
       if (filters.propertyType && filters.propertyType !== '') {
+        console.log('Filtering by property type:', filters.propertyType);
         filteredListings = filteredListings.filter(listing =>
           String(listing.propertyType).toLowerCase().includes(String(filters.propertyType).toLowerCase())
         );
@@ -236,6 +267,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
 
       // Amenities filter
       if (filters.amenities && filters.amenities !== '') {
+        console.log('Filtering by amenities:', filters.amenities);
         const amenityList = filters.amenities.split(',').map((a: string) => a.trim().toLowerCase());
         filteredListings = filteredListings.filter(listing => {
           const listingAmenities = listing.amenities || [];
@@ -249,8 +281,10 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
     }
 
     console.log('Final filtered listings count:', filteredListings.length);
+    console.log('=== GETLISTINGS DEBUG END ===');
     return filteredListings;
   } catch (error: any) {
+    console.error('=== GETLISTINGS ERROR ===');
     console.error('Error fetching listings:', error);
     throw error;
   }
@@ -344,9 +378,33 @@ export async function getListingsByIds(ids: string[]) {
  */
 export async function getListingsByUser(userId: string) {
   try {
+    console.log('=== GETLISTINGSBYUSER DEBUG START ===');
+    console.log('Fetching listings for userId:', userId);
+    
+    // First, let's check what's actually in the collections
+    console.log('Checking all documents in rent collection...');
+    const allRentSnapshot = await getDocs(collection(db, 'r'));
+    console.log('All rent documents:', allRentSnapshot.docs.map(doc => ({
+      id: doc.id,
+      data: doc.data()
+    })));
+    
+    console.log('Checking all documents in sell collection...');
+    const allSellSnapshot = await getDocs(collection(db, 's'));
+    console.log('All sell documents:', allSellSnapshot.docs.map(doc => ({
+      id: doc.id,
+      data: doc.data()
+    })));
+    
     // Query rent listings
     const rentQuery = query(collection(db, 'r'), where('userId', '==', userId));
+    console.log('Rent query:', rentQuery);
     const rentSnapshot = await getDocs(rentQuery);
+    console.log('Rent snapshot size:', rentSnapshot.size);
+    console.log('Rent documents:', rentSnapshot.docs.map(doc => ({
+      id: doc.id,
+      data: doc.data()
+    })));
     const rentListings = rentSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
@@ -355,16 +413,61 @@ export async function getListingsByUser(userId: string) {
 
     // Query sell listings
     const sellQuery = query(collection(db, 's'), where('userId', '==', userId));
+    console.log('Sell query:', sellQuery);
     const sellSnapshot = await getDocs(sellQuery);
+    console.log('Sell snapshot size:', sellSnapshot.size);
+    console.log('Sell documents:', sellSnapshot.docs.map(doc => ({
+      id: doc.id,
+      data: doc.data()
+    })));
     const sellListings = sellSnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
       listingType: 'sell',
     }));
 
+    // If no listings found with userId, try with createdByUser
+    if (rentListings.length === 0 && sellListings.length === 0) {
+      console.log('No listings found with userId, trying createdByUser...');
+      const rentQueryByCreatedBy = query(collection(db, 'r'), where('createdByUser', '==', userId));
+      const rentSnapshotByCreatedBy = await getDocs(rentQueryByCreatedBy);
+      console.log('Rent listings with createdByUser:', rentSnapshotByCreatedBy.docs.map(doc => ({
+        id: doc.id,
+        data: doc.data()
+      })));
+      
+      const sellQueryByCreatedBy = query(collection(db, 's'), where('createdByUser', '==', userId));
+      const sellSnapshotByCreatedBy = await getDocs(sellQueryByCreatedBy);
+      console.log('Sell listings with createdByUser:', sellSnapshotByCreatedBy.docs.map(doc => ({
+        id: doc.id,
+        data: doc.data()
+      })));
+      
+      const rentListingsByCreatedBy = rentSnapshotByCreatedBy.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        listingType: 'rent',
+      }));
+      
+      const sellListingsByCreatedBy = sellSnapshotByCreatedBy.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        listingType: 'sell',
+      }));
+      
+      const allListingsByCreatedBy = [...rentListingsByCreatedBy, ...sellListingsByCreatedBy];
+      console.log('Total listings found with createdByUser:', allListingsByCreatedBy.length);
+      return allListingsByCreatedBy;
+    }
+
     // Combine and return
-    return [...rentListings, ...sellListings];
+    const allListings = [...rentListings, ...sellListings];
+    console.log('Total listings found:', allListings.length);
+    console.log('All listings:', allListings);
+    console.log('=== GETLISTINGSBYUSER DEBUG END ===');
+    return allListings;
   } catch (error: any) {
+    console.error('=== GETLISTINGSBYUSER ERROR ===');
     console.error('Error fetching user listings:', error);
     throw error;
   }
