@@ -19,13 +19,14 @@ interface PropertyFiltersProps {
 }
 
 const PRICE_MIN = 1000; // Fixed min price
-const PRICE_MAX = 30000; // Max rent set to 30K
-const SLIDER_STEP = 500;
+const PRICE_MAX = 100000; // Max rent set to 100K
+const SLIDER_STEP = 5000;
 const SLIDER_MARKS = {
-  1000: '₹1k',
-  10000: '₹10k',
-  20000: '₹20k',
-  30000: '₹30k',
+  0: '₹0',
+  25000: '₹25k',
+  50000: '₹50k',
+  75000: '₹75k',
+  100000: '₹100k',
 };
 
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTypes, listingType }) => {
@@ -153,6 +154,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
   // Validation state for min/max rent
   const [minRentError, setMinRentError] = useState<string | null>(null);
   const [maxRentError, setMaxRentError] = useState<string | null>(null);
+  const [minPriceError, setMinPriceError] = useState<string | null>(null);
+  const [maxPriceError, setMaxPriceError] = useState<string | null>(null);
 
   // Handler for input changes
   const handleMinInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -377,9 +380,9 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                   <input
                     type="number"
                     className={`input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border rounded-md text-left ${minRentError ? 'border-red-400' : 'border-primary-100'}`}
-                    min={1000}
-                    max={30000}
-                    maxLength={5}
+                    min={0}
+                    max={100000}
+                    maxLength={6}
                     value={localMin}
                     onChange={e => setLocalMin(e.target.value)}
                     onBlur={commitMin}
@@ -398,9 +401,9 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                   <input
                     type="number"
                     className={`input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border rounded-md text-left ${maxRentError ? 'border-red-400' : 'border-primary-100'}`}
-                    min={Number(localMin) || 1000}
-                    max={30000}
-                    maxLength={5}
+                    min={0}
+                    max={100000}
+                    maxLength={6}
                     value={localMax}
                     onChange={e => setLocalMax(e.target.value)}
                     onBlur={commitMax}
@@ -426,7 +429,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                         max={PRICE_MAX}
                         step={SLIDER_STEP}
                         marks={SLIDER_MARKS}
-                        value={[Number(localMin), Number(localMax)]}
+                        value={[Number(localMin) || PRICE_MIN, Number(localMax) || PRICE_MAX]}
                         handleRender={(node: React.ReactElement, handleProps: any) => (
                           <Tooltip
                             prefixCls="rc-slider-tooltip"
@@ -475,6 +478,124 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
           </div>
         </div>
           </div>
+          </div>
+        </div>
+      )}
+      {listingType === 'buy' && (
+        <div className="mb-4">
+          <label className="block text-sm font-bold text-primary-700 mb-2">Price Range (₹)</label>
+          <div className="bg-white rounded-xl shadow p-6 border border-primary-100 flex flex-col gap-2">
+            {/* Inputs Row with labels */}
+            <div className="flex flex-row items-end gap-2 w-full mb-4">
+              <div className="flex flex-col items-start">
+                <span className="text-xs text-primary-500 font-medium mb-1">Min</span>
+                <div className="relative w-32">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                  <input
+                    type="number"
+                    className={`input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border rounded-md text-left ${minPriceError ? 'border-red-400' : 'border-primary-100'}`}
+                    min={1000}
+                    max={100000}
+                    maxLength={6}
+                    value={localMin}
+                    onChange={e => setLocalMin(e.target.value)}
+                    onBlur={commitMin}
+                    onKeyDown={e => { if (e.key === 'Enter') commitMin(); }}
+                    placeholder="Min"
+                    aria-label="Minimum Price"
+                  />
+                  {minPriceError && <div className="text-xs text-red-500 mt-1">{minPriceError}</div>}
+                </div>
+              </div>
+              <span className="text-gray-400 font-bold mb-1">-</span>
+              <div className="flex flex-col items-start">
+                <span className="text-xs text-primary-500 font-medium mb-1">Max</span>
+                <div className="relative w-32">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+                  <input
+                    type="number"
+                    className={`input w-32 text-base font-semibold focus:ring-2 focus:ring-primary-200 transition h-10 pl-7 pr-2 bg-gray-50 border rounded-md text-left ${maxPriceError ? 'border-red-400' : 'border-primary-100'}`}
+                    min={1000}
+                    max={100000}
+                    maxLength={6}
+                    value={localMax}
+                    onChange={e => setLocalMax(e.target.value)}
+                    onBlur={commitMax}
+                    onKeyDown={e => { if (e.key === 'Enter') commitMax(); }}
+                    placeholder="Max"
+                    aria-label="Maximum Price"
+                  />
+                  {maxPriceError && <div className="text-xs text-red-500 mt-1">{maxPriceError}</div>}
+                </div>
+              </div>
+            </div>
+            {/* Slider */}
+            <div className="px-2">
+              <Slider
+                range
+                min={1000}
+                max={100000}
+                step={5000}
+                marks={{
+                  1000: '₹1k',
+                  25000: '₹25k',
+                  50000: '₹50k',
+                  75000: '₹75k',
+                  100000: '₹100k'
+                }}
+                value={[Number(localMin) || 1000, Number(localMax) || 100000]}
+                onChange={(value: number | number[]) => {
+                  if (Array.isArray(value) && value.length === 2) {
+                    let [min, max] = value;
+                    min = Math.max(1000, Math.min(min, max));
+                    max = Math.min(100000, Math.max(max, min));
+                    setLocalMin(String(min));
+                    setLocalMax(String(max));
+                    setFilters({
+                      ...filters,
+                      [listingType]: {
+                        ...filters[listingType],
+                        minPrice: min,
+                        maxPrice: max,
+                      },
+                    });
+                  }
+                }}
+                onAfterChange={(value: number | number[]) => {
+                  if (Array.isArray(value) && value.length === 2) {
+                    const [min, max] = value;
+                    setLocalMin(String(min));
+                    setLocalMax(String(max));
+                    setFilters({
+                      ...filters,
+                      [listingType]: {
+                        ...filters[listingType],
+                        minPrice: min,
+                        maxPrice: max,
+                      },
+                    });
+                  }
+                }}
+                allowCross={false}
+                trackStyle={[{ backgroundColor: '#C2185B', height: 10 }]}
+                handleStyle={[
+                  { borderColor: '#C2185B', backgroundColor: '#fff', borderWidth: 3, width: 28, height: 28, marginTop: -10, boxShadow: '0 2px 8px rgba(194,24,91,0.10)' },
+                  { borderColor: '#C2185B', backgroundColor: '#fff', borderWidth: 3, width: 28, height: 28, marginTop: -10, boxShadow: '0 2px 8px rgba(194,24,91,0.10)' }
+                ]}
+                railStyle={{ backgroundColor: '#f3e8ee', height: 10, borderRadius: 5 }}
+                handleRender={(node: React.ReactElement, handleProps: any) => (
+                  <Tooltip
+                    prefixCls="rc-slider-tooltip"
+                    overlay={`₹${handleProps.value.toLocaleString()}`}
+                    visible={handleProps.dragging}
+                    placement="top"
+                    key={handleProps.index}
+                  >
+                    {node}
+                  </Tooltip>
+                )}
+              />
+            </div>
           </div>
         </div>
       )}
