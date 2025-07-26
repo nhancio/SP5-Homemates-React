@@ -293,40 +293,23 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
 export async function getPropertyById(type: 'rent' | 'sell', id: string) {
   try {
     console.log('Fetching property:', { type, id });
-    // const collectionName = type === 'rent' ? 'r' : 's';
-    // const docRef = doc(db, collectionName, id);
+    const collectionName = type === 'rent' ? 'r' : 's';
+    const docRef = doc(db, collectionName, id);
     
-    // // Remove any auth requirements for reading
-    // const docSnap = await getDoc(docRef);
+    // Remove any auth requirements for reading
+    const docSnap = await getDoc(docRef);
 
-    // if (!docSnap.exists()) {
-    //   console.log('Document not found in collection:', collectionName);
-    //   throw new Error('Property not found');
-    // }
+    if (!docSnap.exists()) {
+      console.log('Document not found in collection:', collectionName);
+      throw new Error('Property not found');
+    }
 
-    // const data = docSnap.data();
-    const mockData: any = { // Mock data
-      id: 'mock_id',
-      address: { city: 'Mock City', locality: 'Mock Locality', buildingName: 'Mock Building' },
-      propertyType: 'Mock Type',
-      furnishingType: 'Mock Furnishing',
-      parking: 'Mock Parking',
-      buildingType: 'Mock Building Type',
-      handoverDate: 'Mock Date',
-      isImmediate: true,
-      description: 'Mock Description',
-      amenities: { appliances: ['Mock Appliance'], furniture: ['Mock Furniture'], building: ['Mock Building'] },
-      images: ['mock_image_url'],
-      createdAt: Date.now(),
-      userId: 'mock_user_id',
-      createdByUser: 'mock_user_id',
-      status: 'active',
-      contactNumber: 'Mock Contact',
-      listingType: type
-    };
+    const data = docSnap.data();
+    console.log('Retrieved property data:', data);
+    
     return {
-      id: 'mock_id',
-      ...mockData,
+      id: docSnap.id,
+      ...data,
       listingType: type
     };
   } catch (error) {
@@ -340,30 +323,29 @@ export async function getListingsByIds(ids: string[]) {
     if (!ids.length) return [];
 
     // Fetch from both collections
-    // const rentDocs = await getDocs(query(collection(db, 'r'), where('__name__', 'in', ids)));
-    // const sellDocs = await getDocs(query(collection(db, 's'), where('__name__', 'in', ids)));
+    const rentDocs = await getDocs(query(collection(db, 'r'), where('__name__', 'in', ids)));
+    const sellDocs = await getDocs(query(collection(db, 's'), where('__name__', 'in', ids)));
 
-    const mockListings: any[] = []; // Mock data
-    // const rentProperties = rentDocs.docs.map(doc => ({
-    //   id: doc.id,
-    //   ...doc.data(),
-    //   listingType: 'rent'  // Add listing type
-    // }));
+    const rentProperties = rentDocs.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      listingType: 'rent'  // Add listing type
+    }));
 
-    // const sellProperties = sellDocs.docs.map(doc => ({
-    //   id: doc.id,
-    //   ...doc.data(),
-    //   listingType: 'sell'  // Add listing type as 'sell'
-    // }));
+    const sellProperties = sellDocs.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      listingType: 'sell'  // Add listing type as 'sell'
+    }));
 
-    // // Combine and maintain order
-    // const allProperties = [...rentProperties, ...sellProperties];
-    // const orderedProperties = ids
-    //   .map(id => allProperties.find(prop => prop.id === id))
-    //   .filter(Boolean);
+    // Combine and maintain order
+    const allProperties = [...rentProperties, ...sellProperties];
+    const orderedProperties = ids
+      .map(id => allProperties.find(prop => prop.id === id))
+      .filter(Boolean);
 
-    // console.log('Retrieved properties:', orderedProperties.length);
-    return mockListings;
+    console.log('Retrieved properties:', orderedProperties.length);
+    return orderedProperties;
 
   } catch (error) {
     console.error('Error fetching properties by ids:', error);

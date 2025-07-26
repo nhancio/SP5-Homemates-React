@@ -308,30 +308,35 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             <button onClick={handleView} title="View" className="bg-white border border-gray-200 rounded-full p-1 shadow hover:bg-gray-100 transition"><Eye className="w-4 h-4 text-gray-600" /></button>
           </div>
         )}
-        {/* Left Arrow */}
-        <div
-          className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
-          onClick={e => {
-            e.stopPropagation();
-            swiperRef.current?.slidePrev();
-          }}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </div>
-        {/* Right Arrow */}
-        <div
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
-          onClick={e => {
-            e.stopPropagation();
-            swiperRef.current?.slideNext();
-          }}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </div>
+        {/* Navigation Arrows - Only show when there are multiple images */}
+        {(property.images?.length || 0) > 1 && (
+          <>
+            {/* Left Arrow */}
+            <div
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
+              onClick={e => {
+                e.stopPropagation();
+                swiperRef.current?.slidePrev();
+              }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </div>
+            {/* Right Arrow */}
+            <div
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow z-10 cursor-pointer hover:bg-primary-50"
+              onClick={e => {
+                e.stopPropagation();
+                swiperRef.current?.slideNext();
+              }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </div>
+          </>
+        )}
       </div>
       {/* Main Info */}
       <div className="p-4 flex-1 flex flex-col justify-between">

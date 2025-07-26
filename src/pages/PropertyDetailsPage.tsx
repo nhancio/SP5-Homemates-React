@@ -433,7 +433,7 @@ Link: ${url}`;
                     <>
                       <div>
                         <span className="text-gray-600">Room Type</span>
-                        <p className="font-semibold">{property.rentDetails?.roomDetails?.roomType || '-'}</p>
+                        <p className="font-semibold">{property.rentDetails?.roomDetails?.availability || '-'}</p>
                       </div>
                       <div>
                         <span className="text-gray-600">Bathroom Type</span>

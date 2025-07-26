@@ -169,6 +169,10 @@ const ProfilePage = () => {
         console.log('User ID:', user.id);
         console.log('User object:', user);
         console.log('Is user authenticated?', !!user);
+        
+        // Add a small delay to ensure Firebase Auth is fully initialized
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         const listings = await getListingsByUser(user.id);
         console.log('Listings returned from getListingsByUser:', listings);
         console.log('Number of listings:', listings.length);
@@ -815,6 +819,8 @@ const ProfilePage = () => {
 
 
 
+
+
         {/* Manage Listings Section */}
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">Manage Listings</h2>
@@ -850,7 +856,7 @@ const ProfilePage = () => {
         {/* Edit Profile Modal */}
         <Dialog open={editProfileModalOpen} onClose={() => setEditProfileModalOpen(false)} className="fixed z-50 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
-            <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-30" />
+            <div className="fixed inset-0 bg-black bg-opacity-30" />
             <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto p-8 z-10">
               <Dialog.Title className="text-2xl font-bold mb-4">Edit Profile</Dialog.Title>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -927,7 +933,7 @@ const ProfilePage = () => {
         {/* Upgrade to Premium Popup */}
         <Dialog open={showUpgradePopup} onClose={() => setShowUpgradePopup(false)} className="fixed z-50 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
-            <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-30" />
+            <div className="fixed inset-0 bg-black bg-opacity-30" />
             <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-8 z-10">
               <Dialog.Title className="text-2xl font-bold mb-4">Upgrade to Premium</Dialog.Title>
               <p className="mb-4 text-gray-700">Get exclusive benefits and features with a Premium membership for just <span className="font-bold text-primary-700">₹99/month</span>.</p>
