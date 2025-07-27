@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil, Trash, MoreVertical, Eye, Edit, Star, Info, UserCheck, Users, MessageCircle, Briefcase } from 'lucide-react';
+import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil, Trash, MoreVertical, Eye, Edit, Star, Info, UserCheck, Users, MessageCircle, Briefcase, Share2 } from 'lucide-react';
 import { Dialog } from '@headlessui/react';
 import { useAppContext } from '../context/AppContext';
 import { getDoc, doc, updateDoc } from 'firebase/firestore';
@@ -583,119 +583,155 @@ const ProfilePage = () => {
               </div>
               {/* User Info */}
               <div className="md:ml-6 text-center md:text-left flex-grow">
-                <div className="flex flex-col md:flex-row items-center justify-between">
-                  <h1 className="text-2xl font-bold flex items-center gap-2">
-                    {displayName}
-                    {/* <button
-                      className="ml-2 p-1 rounded-full bg-gray-100 hover:bg-primary-50 text-primary-600"
-                      onClick={() => setEditProfileOpen(true)}
-                      title="Edit Profile"
-                      aria-label="Edit Profile"
+                <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-3">
+                  <div className="flex-1 text-center sm:text-left">
+                    <h1 className="text-xl sm:text-2xl font-bold">
+                      {displayName}
+                    </h1>
+                  </div>
+                  {/* Share Profile Button - Top Right */}
+                  <div className="flex-shrink-0 md:mt-2">
+                    <button
+                      onClick={() => {
+                        const shareData = {
+                          title: 'My Homemates Profile',
+                          text: 'Check out my Homemates profile!',
+                          url: window.location.origin + '/profile'
+                        };
+                        
+                        if (navigator.share) {
+                          navigator.share(shareData)
+                            .catch((error) => {
+                              console.log('Error sharing:', error);
+                              // Fallback to copying to clipboard
+                              navigator.clipboard.writeText(window.location.origin + '/profile')
+                                .then(() => {
+                                  alert('Profile link copied to clipboard!');
+                                })
+                                .catch(() => {
+                                  alert('Profile link: ' + window.location.origin + '/profile');
+                                });
+                            });
+                        } else {
+                          // Fallback for browsers that don't support Web Share API
+                          navigator.clipboard.writeText(window.location.origin + '/profile')
+                            .then(() => {
+                              alert('Profile link copied to clipboard!');
+                            })
+                            .catch(() => {
+                              alert('Profile link: ' + window.location.origin + '/profile');
+                            });
+                        }
+                      }}
+                      className="btn flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 bg-primary-600 hover:bg-primary-700 text-white"
                     >
-                      <Edit className="w-5 h-5" />
-                    </button> */}
-                  </h1>
+                      <Share2 className="w-4 h-4" /> 
+                      <span className="hidden sm:inline">Share Profile</span>
+                      <span className="sm:hidden">Share</span>
+                    </button>
+                  </div>
                 </div>
                 <div className="mt-4 space-y-2">
                   <p className="flex items-center justify-center md:justify-start text-gray-600">
-                    <Mail className="w-4 h-4 mr-2" />
-                    {displayEmail}
+                    <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="text-center md:text-left">{displayEmail}</span>
                   </p>
                   {displayPhone && (
                     <p className="flex items-center justify-center md:justify-start text-gray-600">
-                      <Phone className="w-4 h-4 mr-2" />
-                      {displayPhone}
+                      <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="text-center md:text-left">{displayPhone}</span>
                     </p>
                   )}
                   {displayCity && (
                     <p className="flex items-center justify-center md:justify-start text-gray-600">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {displayCity}
+                      <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="text-center md:text-left">{displayCity}</span>
                     </p>
                   )}
                   {displayAge && (
                     <p className="flex items-center justify-center md:justify-start text-gray-600">
-                      <User className="w-4 h-4 mr-2" />
-                      Age: {displayAge}
+                      <User className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="text-center md:text-left">Age: {displayAge}</span>
                     </p>
                   )}
                   {displayGender && (
                     <p className="flex items-center justify-center md:justify-start text-gray-600">
-                      <UserCheck className="w-4 h-4 mr-2" />
-                      Gender: {displayGender}
+                      <UserCheck className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="text-center md:text-left">Gender: {displayGender}</span>
                     </p>
                   )}
                   {displayProfession && (
                     <p className="flex items-center justify-center md:justify-start text-gray-600">
-                      <Briefcase className="w-4 h-4 mr-2" />
-                      Profession: {displayProfession}
+                      <Briefcase className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="text-center md:text-left">Profession: {displayProfession}</span>
                     </p>
                   )}
                   {/* Premium/Verified badge */}
                   {isPremium && (
                     <p className="flex items-center justify-center md:justify-start text-primary-600 font-semibold">
-                      <Star className="w-4 h-4 mr-2" /> Premium Member
+                      <Star className="w-4 h-4 mr-2 flex-shrink-0" />
+                      <span className="text-center md:text-left">Premium Member</span>
                     </p>
                   )}
                 </div>
                 {/* Premium and Credits side by side */}
                 <div className="flex flex-col md:flex-row gap-6 mt-6">
                   {/* Upgrade to Premium */}
-                  <div className="flex-1 bg-primary-50 border border-primary-200 rounded-lg p-6">
+                  <div className="flex-1 bg-primary-50 border border-primary-200 rounded-lg p-4 md:p-6">
                     <div className="text-center mb-4">
-                      <p className="text-lg mb-2">Plan: <span className="bg-gray-200 text-primary-700 px-3 py-1 rounded-full text-sm font-medium">Free</span></p>
+                      <p className="text-base md:text-lg mb-2">Plan: <span className="bg-gray-200 text-primary-700 px-3 py-1 rounded-full text-sm font-medium">Free</span></p>
                     </div>
                     <div className="text-center">
-                      <h3 className="text-xl font-bold mb-4">Upgrade to Premium</h3>
+                      <h3 className="text-lg md:text-xl font-bold mb-4">Upgrade to Premium</h3>
                       <ul className="text-left mb-6 space-y-2">
                         <li className="flex items-start gap-3">
-                          <span className="text-green-600 text-lg mt-0.5">✔</span>
-                          <span><span className="font-semibold">Unlimited Calls</span> to property owners</span>
+                          <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
+                          <span className="text-sm md:text-base"><span className="font-semibold">Unlimited Calls</span> to property owners</span>
                         </li>
                         <li className="flex items-start gap-3">
-                          <span className="text-green-600 text-lg mt-0.5">✔</span>
-                          <span><span className="font-semibold">Unlimited Chats</span> with potential flatmates</span>
+                          <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
+                          <span className="text-sm md:text-base"><span className="font-semibold">Unlimited Chats</span> with potential flatmates</span>
                         </li>
                         <li className="flex items-start gap-3">
-                          <span className="text-green-600 text-lg mt-0.5">✔</span>
-                          <span><span className="font-semibold">Advanced AI-based Matching</span> for best results</span>
+                          <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
+                          <span className="text-sm md:text-base"><span className="font-semibold">Advanced AI-based Matching</span> for best results</span>
                         </li>
                       </ul>
                       <div className="flex flex-col items-center gap-2 mb-6">
                         <div className="flex items-center gap-3">
-                          <span className="line-through text-gray-400 text-lg">₹499</span>
-                          <span className="text-3xl font-bold text-primary-700">₹99/month</span>
+                          <span className="line-through text-gray-400 text-base md:text-lg">₹499</span>
+                          <span className="text-2xl md:text-3xl font-bold text-primary-700">₹99/month</span>
                         </div>
                       </div>
                       <button 
-                        className="w-full bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 text-lg font-semibold rounded-lg transition-colors mb-4" 
+                        className="w-full bg-primary-600 hover:bg-primary-700 text-white px-4 md:px-6 py-3 text-base md:text-lg font-semibold rounded-lg transition-colors mb-4" 
                         onClick={handleUpgradeClick}
                       >
                         Upgrade to Premium
                       </button>
-                      <div className="text-sm text-gray-600 mb-3">
+                      <div className="text-xs md:text-sm text-gray-600 mb-3">
                         Get exclusive benefits and features with a Premium membership.
                       </div>
-                      <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                      <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-gray-500">
                         <span role="img" aria-label="secure">🔒</span>
                         <span>Secure Payment</span>
                       </div>
                     </div>
                   </div>
                   {/* Your Credits */}
-                  <div className="flex-1 bg-primary-50 border border-primary-200 rounded-lg p-6">
+                  <div className="flex-1 bg-primary-50 border border-primary-200 rounded-lg p-4 md:p-6">
                     <div className="text-center">
-                      <h3 className="text-lg font-semibold mb-4 flex items-center justify-center">
-                        <CreditCard className="w-5 h-5 mr-2 text-primary-600" />
+                      <h3 className="text-base md:text-lg font-semibold mb-4 flex items-center justify-center">
+                        <CreditCard className="w-4 h-4 md:w-5 md:h-5 mr-2 text-primary-600" />
                         Your Credits
                       </h3>
                       <div className="text-center">
-                        <div className="text-3xl font-bold text-primary-600 mb-2">{Math.max(0, userCredits)}</div>
-                        <div className="text-sm text-gray-600 mb-2">Credits remaining</div>
+                        <div className="text-2xl md:text-3xl font-bold text-primary-600 mb-2">{Math.max(0, userCredits)}</div>
+                        <div className="text-xs md:text-sm text-gray-600 mb-2">Credits remaining</div>
                         <div className="text-xs text-gray-500 mb-6">Use credits to contact property owners via call or WhatsApp.</div>
                         <button
                           onClick={() => window.location.href = '/payment'}
-                          className="w-full bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 text-lg font-semibold rounded-lg transition-colors"
+                          className="w-full bg-primary-600 hover:bg-primary-700 text-white px-4 md:px-6 py-3 text-base md:text-lg font-semibold rounded-lg transition-colors"
                         >
                           Buy Contact Credits
                         </button>
@@ -707,7 +743,7 @@ const ProfilePage = () => {
                 <div className="mt-6 flex flex-col md:flex-row gap-6">
                   {/* About Me */}
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Info className="w-5 h-5" /> About Me</h3>
+                    <h3 className="text-base md:text-lg font-bold mb-2 flex items-center gap-2"><Info className="w-4 h-4 md:w-5 md:h-5" /> About Me</h3>
                     {editingBio ? (
                       <div>
                         <textarea
@@ -722,14 +758,14 @@ const ProfilePage = () => {
                       </div>
                     ) : (
                       <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingBio(true)}>
-                        <span>{displayBio || <span className="italic text-gray-400">Add a short bio to let others know more about you!</span>}</span>
-                        <Edit className="w-4 h-4 text-primary-600 ml-2" />
+                        <span className="text-sm md:text-base">{displayBio || <span className="italic text-gray-400">Add a short bio to let others know more about you!</span>}</span>
+                        <Edit className="w-4 h-4 text-primary-600 ml-2 flex-shrink-0" />
                       </div>
                     )}
                   </div>
                   {/* Looking For */}
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Users className="w-5 h-5" /> Looking For</h3>
+                    <h3 className="text-base md:text-lg font-bold mb-2 flex items-center gap-2"><Users className="w-4 h-4 md:w-5 md:h-5" /> Looking For</h3>
                     {editingLookingFor ? (
                       <div>
                         <select
@@ -749,14 +785,14 @@ const ProfilePage = () => {
                     ) : (
                       <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingLookingFor(true)}>
                         <span>{displayLookingFor || <span className="italic text-gray-400">Let others know what you’re looking for (e.g., Room, Flat, Homemate).</span>}</span>
-                        <Edit className="w-4 h-4 text-primary-600 ml-2" />
+                        <Edit className="w-4 h-4 text-primary-600 ml-2 flex-shrink-0" />
                       </div>
                     )}
                   </div>
                 </div>
                 {/* Your Choices (Preferences) section */}
                 <div className="mt-6">
-                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><MessageCircle className="w-5 h-5" /> Your Choices</h3>
+                  <h3 className="text-base md:text-lg font-bold mb-2 flex items-center gap-2"><MessageCircle className="w-4 h-4 md:w-5 md:h-5" /> Your Choices</h3>
                   {editingPreferences ? (
                     <div className="flex flex-wrap gap-2 mb-2">
                       {USER_PREFERENCES.map((pref) => {
@@ -803,34 +839,18 @@ const ProfilePage = () => {
                     </div>
                   )}
                 </div>
-                {/* Share Your Profile section with WhatsApp only */}
-                <div className="mt-6">
-                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-                    <span>Share Your Profile</span>
-                  </h3>
-                  <div className="flex items-center gap-4">
-                    <a
-                      href={`https://wa.me/?text=${encodeURIComponent('Check out my Homemates profile: ' + window.location.origin + '/profile')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-success flex items-center gap-2 whatsapp-share-btn"
-                      style={{ backgroundColor: '#25D366', color: 'white' }}
-                    >
-                      <WhatsAppIcon /> Share on WhatsApp
-                    </a>
-                  </div>
-                </div>
+
                 {/* User stats */}
                 <div className="mt-6 flex flex-wrap gap-6 items-center">
                   <div className="flex items-center gap-2 text-primary-700 font-semibold">
-                    <CreditCard className="w-5 h-5" />
-                    {userListings.length} Listings Posted
+                    <CreditCard className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="text-sm md:text-base">{userListings.length} Listings Posted</span>
                   </div>
                 </div>
                 <div className="flex justify-center md:justify-start mt-4">
                   <button 
                     onClick={logout}
-                    className="btn btn-primary px-12 text-lg font-medium"
+                    className="btn btn-primary px-8 md:px-12 text-base md:text-lg font-medium"
                   >
                     Logout
                   </button>
