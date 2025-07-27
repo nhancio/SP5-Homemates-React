@@ -76,7 +76,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     e.stopPropagation();
     
     if (!user) {
-      alert('Please login to contact property owners');
+      alert('Please sign in to continue');
       return;
     }
 
@@ -109,7 +109,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     e.stopPropagation();
     
     if (!user) {
-      alert('Please login to contact property owners');
+      alert('Please sign in to continue');
       return;
     }
 
