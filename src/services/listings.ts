@@ -218,14 +218,26 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
       // Price (for buy)
       if (type === 'sell' && (filters.priceMin || filters.priceMax)) {
         console.log('Filtering by priceMin:', filters.priceMin, 'priceMax:', filters.priceMax);
+        console.log('Total listings before price filter:', filteredListings.length);
         filteredListings = filteredListings.filter(listing => {
           const price = listing.price || listing.sellDetails?.price;
-          if (price === undefined) return false;
+          if (price === undefined) {
+            console.log('Listing has no price:', listing);
+            return false;
+          }
           console.log('Listing price:', price, 'Filter min:', filters.priceMin, 'Filter max:', filters.priceMax);
-          if (filters.priceMin && price < Number(filters.priceMin)) return false;
-          if (filters.priceMax && price > Number(filters.priceMax)) return false;
+          if (filters.priceMin && price < Number(filters.priceMin)) {
+            console.log('Listing filtered out - price too low:', price, '<', filters.priceMin);
+            return false;
+          }
+          if (filters.priceMax && price > Number(filters.priceMax)) {
+            console.log('Listing filtered out - price too high:', price, '>', filters.priceMax);
+            return false;
+          }
+          console.log('Listing passed price filter:', price);
           return true;
         });
+        console.log('Total listings after price filter:', filteredListings.length);
       }
       
       // Rent (for rent)

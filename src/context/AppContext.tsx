@@ -73,8 +73,8 @@ export type Filters = {
     propertyType: string;
     bhk?: string;
     bathrooms?: string;
-    minPrice: number;
-    maxPrice: number;
+    priceMin: number;
+    priceMax: number;
     minSqft: number;
     maxSqft: number;
     ageOfProperty: string;
@@ -124,8 +124,8 @@ const defaultFilters: Filters = {
     propertyType: '',
     bhk: '',
     bathrooms: '',
-    minPrice: 1000,
-    maxPrice: 100000,
+    priceMin: 1000,
+    priceMax: 100000,
     minSqft: 0,
     maxSqft: 10000,
     ageOfProperty: '',

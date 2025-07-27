@@ -73,33 +73,33 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
   function isRentFilters(obj: any): obj is { minRent: number; maxRent: number; amenities: string } {
     return obj && typeof obj.minRent === 'number' && typeof obj.maxRent === 'number';
   }
-  function isBuyFilters(obj: any): obj is { minPrice: number; maxPrice: number; amenities?: string } {
-    return obj && typeof obj.minPrice === 'number' && typeof obj.maxPrice === 'number';
+  function isBuyFilters(obj: any): obj is { priceMin: number; priceMax: number; amenities?: string } {
+    return obj && typeof obj.priceMin === 'number' && typeof obj.priceMax === 'number';
   }
 
   // Add local state for price/rent inputs
-  const [localPriceMin, setLocalPriceMin] = useState<number | undefined>(isBuyFilters(filters[listingType]) ? filters[listingType].minPrice : undefined);
-  const [localPriceMax, setLocalPriceMax] = useState<number | undefined>(isBuyFilters(filters[listingType]) ? filters[listingType].maxPrice : undefined);
+  const [localPriceMin, setLocalPriceMin] = useState<number | undefined>(isBuyFilters(filters[listingType]) ? filters[listingType].priceMin : undefined);
+  const [localPriceMax, setLocalPriceMax] = useState<number | undefined>(isBuyFilters(filters[listingType]) ? filters[listingType].priceMax : undefined);
   const [localMinRent, setLocalMinRent] = useState(isRentFilters(filters[listingType]) ? filters[listingType].minRent : '');
   const [localMaxRent, setLocalMaxRent] = useState(isRentFilters(filters[listingType]) ? filters[listingType].maxRent : '');
 
   // Local state for min/max fields, keyed by listingType
   const isRent = listingType === 'rent';
   const [localMin, setLocalMin] = useState<string>(
-    String(isRent ? (filters[listingType]?.minRent ?? PRICE_MIN) : (filters[listingType]?.minPrice ?? PRICE_MIN))
+    String(isRent ? (filters[listingType]?.minRent ?? PRICE_MIN) : (filters[listingType]?.priceMin ?? PRICE_MIN))
   );
   const [localMax, setLocalMax] = useState<string>(
-    String(isRent ? (filters[listingType]?.maxRent ?? PRICE_MAX) : (filters[listingType]?.maxPrice ?? PRICE_MAX))
+    String(isRent ? (filters[listingType]?.maxRent ?? PRICE_MAX) : (filters[listingType]?.priceMax ?? PRICE_MAX))
   );
 
   // Sync local state with context filters when filters change externally
   useEffect(() => {
-    setLocalPriceMin(isBuyFilters(filters[listingType]) ? filters[listingType].minPrice : undefined);
-    setLocalPriceMax(isBuyFilters(filters[listingType]) ? filters[listingType].maxPrice : undefined);
+    setLocalPriceMin(isBuyFilters(filters[listingType]) ? filters[listingType].priceMin : undefined);
+    setLocalPriceMax(isBuyFilters(filters[listingType]) ? filters[listingType].priceMax : undefined);
     setLocalMinRent(isRentFilters(filters[listingType]) ? filters[listingType].minRent : '');
     setLocalMaxRent(isRentFilters(filters[listingType]) ? filters[listingType].maxRent : '');
-    setLocalMin(isRent ? String(filters[listingType].minRent) : String(filters[listingType].minPrice));
-    setLocalMax(isRent ? String(filters[listingType].maxRent) : String(filters[listingType].maxPrice));
+    setLocalMin(isRent ? String(filters[listingType].minRent) : String(filters[listingType].priceMin));
+    setLocalMax(isRent ? String(filters[listingType].maxRent) : String(filters[listingType].priceMax));
   }, [filters[listingType], listingType]);
 
   useEffect(() => {
@@ -137,7 +137,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
     const { name, value } = e.target;
     let newValue: any = value;
     if ([
-      'minRent', 'maxRent', 'minPrice', 'maxPrice', 'minSqft', 'maxSqft'
+      'minRent', 'maxRent', 'priceMin', 'priceMax', 'minSqft', 'maxSqft'
     ].includes(name)) {
       newValue = value === '' ? '' : Number(value);
     }
@@ -180,7 +180,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        ...(isRent ? { minRent: numVal, maxRent: maxNum } : { minPrice: numVal, maxPrice: maxNum }),
+        ...(isRent ? { minRent: numVal, maxRent: maxNum } : { priceMin: numVal, priceMax: maxNum }),
       },
     });
   };
@@ -206,7 +206,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
       ...filters,
       [listingType]: {
         ...filters[listingType],
-        ...(isRent ? { minRent: minNum, maxRent: numVal } : { minPrice: minNum, maxPrice: numVal }),
+        ...(isRent ? { minRent: minNum, maxRent: numVal } : { priceMin: minNum, priceMax: numVal }),
       },
     });
   };
@@ -214,6 +214,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
   // Commit filter on blur/enter
   const commitMin = () => {
     console.log('Committing min filter:', listingType === 'rent' ? 'minRent' : 'priceMin', localMin);
+    console.log('Current filters before commit:', filters[listingType]);
     setFilters({
       ...filters,
       [listingType]: {
@@ -224,6 +225,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
   };
   const commitMax = () => {
     console.log('Committing max filter:', listingType === 'rent' ? 'maxRent' : 'priceMax', localMax);
+    console.log('Current filters before commit:', filters[listingType]);
     setFilters({
       ...filters,
       [listingType]: {
@@ -245,7 +247,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
             bhk: '',
             bathrooms: '',
             minRent: 0,
-            maxRent: 10000000,
+            maxRent: 100000,
             minSqft: 0,
             maxSqft: 0,
             amenities: '',
@@ -259,8 +261,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
             locality: '',
             propertyType: '',
             bhk: '',
-            minPrice: 0,
-            maxPrice: 10000000,
+            priceMin: 0,
+            priceMax: 100000,
             minSqft: 0,
             maxSqft: 0,
             ageOfProperty: '',
@@ -274,8 +276,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
   };
 
   const formatPrice = (price: number) => {
-    if (price >= 10000000) {
-      return `₹${(price / 10000000).toFixed(1)}Cr`;
+    if (price >= 100000) {
+      return `₹${(price / 100000).toFixed(1)}Cr`;
     } else if (price >= 100000) {
       return `₹${(price / 100000).toFixed(1)}L`;
     } else {
@@ -451,7 +453,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                               ...filters,
                               [listingType]: {
                                 ...filters[listingType],
-                                ...(isRent ? { minRent: min, maxRent: max } : { minPrice: min, maxPrice: max }),
+                                ...(isRent ? { minRent: min, maxRent: max } : { priceMin: min, priceMax: max }),
                               },
                             });
                           }
@@ -461,7 +463,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                             const [min, max] = value;
                             setLocalMin(String(min));
                             setLocalMax(String(max));
-                            setFilters({ ...filters, [listingType]: { ...filters[listingType], minRent: min, maxRent: max, }, });
+                            setFilters({ ...filters, [listingType]: { ...filters[listingType], ...(isRent ? { minRent: min, maxRent: max } : { priceMin: min, priceMax: max }), }, });
                           }
                         }}
                         className="w-full"
@@ -553,8 +555,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                       ...filters,
                       [listingType]: {
                         ...filters[listingType],
-                        minPrice: min,
-                        maxPrice: max,
+                        priceMin: min,
+                        priceMax: max,
                       },
                     });
                   }
@@ -568,8 +570,8 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                       ...filters,
                       [listingType]: {
                         ...filters[listingType],
-                        minPrice: min,
-                        maxPrice: max,
+                        priceMin: min,
+                        priceMax: max,
                       },
                     });
                   }
