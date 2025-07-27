@@ -590,7 +590,7 @@ const ProfilePage = () => {
                     </h1>
                   </div>
                   {/* Share Profile Button - Top Right */}
-                  <div className="flex-shrink-0 md:mt-2">
+                  <div className="flex-shrink-0 md:mt-4">
                     <button
                       onClick={() => {
                         const shareData = {

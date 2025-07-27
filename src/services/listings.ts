@@ -288,12 +288,38 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
         const amenityList = filters.amenities.split(',').map((a: string) => a.trim().toLowerCase());
         console.log('Amenity list to filter by:', amenityList);
         filteredListings = filteredListings.filter(listing => {
-          // Check both amenities and features arrays
-          const listingAmenities = listing.amenities || [];
-          const listingFeatures = listing.features || [];
+          // Normalize all amenity data into a single array
+          const allListingAmenities: string[] = [];
           
-          console.log('Listing features:', listingFeatures);
-          console.log('Listing amenities:', listingAmenities);
+          // Add features array if it exists
+          if (listing.features && Array.isArray(listing.features)) {
+            allListingAmenities.push(...listing.features);
+          }
+          
+          // Add amenities array if it exists and is an array
+          if (listing.amenities && Array.isArray(listing.amenities)) {
+            allListingAmenities.push(...listing.amenities);
+          }
+          
+          // Add amenities object properties if it exists and is an object
+          if (listing.amenities && typeof listing.amenities === 'object' && !Array.isArray(listing.amenities)) {
+            if (listing.amenities.appliances && Array.isArray(listing.amenities.appliances)) {
+              allListingAmenities.push(...listing.amenities.appliances);
+            }
+            if (listing.amenities.furniture && Array.isArray(listing.amenities.furniture)) {
+              allListingAmenities.push(...listing.amenities.furniture);
+            }
+            if (listing.amenities.building && Array.isArray(listing.amenities.building)) {
+              allListingAmenities.push(...listing.amenities.building);
+            }
+          }
+          
+          // Add sellDetails amenities if it exists
+          if (listing.sellDetails && listing.sellDetails.amenities && Array.isArray(listing.sellDetails.amenities)) {
+            allListingAmenities.push(...listing.sellDetails.amenities);
+          }
+          
+          console.log('All listing amenities:', allListingAmenities);
           
           // Map amenity keys to actual feature names
           const amenityKeyMap: { [key: string]: string[] } = {
@@ -307,7 +333,12 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
             'power': ['Power Backup', 'Generator'],
             'car': ['Parking', 'Car Parking'],
             'bike': ['Bike Parking', 'Parking'],
-            'house': ['Gated Community', 'Gated Society']
+            'house': ['Gated Community', 'Gated Society'],
+            'ac': ['AC', 'Air Conditioning'],
+            'gym': ['Gym', 'Gymnasium'],
+            'pool': ['Swimming Pool', 'Pool'],
+            'garden': ['Garden', 'Private Garden'],
+            'smart': ['Smart Home', 'Smart']
           };
           
           const matchFound = amenityList.some((amenityKey: string) => {
@@ -315,14 +346,9 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
             console.log(`Checking amenity key "${amenityKey}" with mapped features:`, mappedFeatures);
             
             const hasMatch = mappedFeatures.some(feature => 
-              listingFeatures.some((listingFeature: string) => {
-                const featureMatch = listingFeature.toLowerCase().includes(feature.toLowerCase());
-                console.log(`Comparing "${listingFeature}" with "${feature}": ${featureMatch}`);
-                return featureMatch;
-              }) ||
-              listingAmenities.some((listingAmenity: string) => {
+              allListingAmenities.some((listingAmenity: string) => {
                 const amenityMatch = listingAmenity.toLowerCase().includes(feature.toLowerCase());
-                console.log(`Comparing amenity "${listingAmenity}" with "${feature}": ${amenityMatch}`);
+                console.log(`Comparing "${listingAmenity}" with "${feature}": ${amenityMatch}`);
                 return amenityMatch;
               })
             );
