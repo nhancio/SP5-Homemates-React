@@ -589,8 +589,8 @@ const ProfilePage = () => {
                       {displayName}
                     </h1>
                   </div>
-                  {/* Share Profile Button - Top Right */}
-                  <div className="flex-shrink-0 md:mt-4">
+                  {/* Share and Logout Buttons - Top Right */}
+                  <div className="flex items-center gap-2 flex-shrink-0 md:mt-4">
                     <button
                       onClick={() => {
                         const shareData = {
@@ -628,6 +628,14 @@ const ProfilePage = () => {
                       <Share2 className="w-4 h-4" /> 
                       <span className="hidden sm:inline">Share Profile</span>
                       <span className="sm:hidden">Share</span>
+                    </button>
+                    <button
+                      onClick={logout}
+                      className="btn flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 bg-red-600 hover:bg-red-700 text-white"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="hidden sm:inline">Logout</span>
+                      <span className="sm:hidden">Logout</span>
                     </button>
                   </div>
                 </div>
@@ -847,14 +855,7 @@ const ProfilePage = () => {
                     <span className="text-sm md:text-base">{userListings.length} Listings Posted</span>
                   </div>
                 </div>
-                <div className="flex justify-center md:justify-start mt-4">
-                  <button 
-                    onClick={logout}
-                    className="btn btn-primary px-8 md:px-12 text-base md:text-lg font-medium"
-                  >
-                    Logout
-                  </button>
-                </div>
+
               </div>
             </div>
           </div>
