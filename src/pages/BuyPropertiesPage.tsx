@@ -195,16 +195,17 @@ const BuyPropertiesPage = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
                     {filteredProperties.map(property => (
-                      <PropertyCard 
-                        key={property.id} 
-                        property={property}
-                        listingType={property.rentDetails ? 'rent' : 'buy'}
-                        variant="small"
-                        onClick={() => handlePropertyClick(property)}
-                        showBadge={false}
-                      />
+                      <div key={property.id} className="min-w-[300px]">
+                        <PropertyCard
+                          property={property}
+                          listingType={property.rentDetails ? 'rent' : 'buy'}
+                          variant="small"
+                          onClick={() => handlePropertyClick(property)}
+                          showBadge={false}
+                        />
+                      </div>
                     ))}
                   </div>
                 )}

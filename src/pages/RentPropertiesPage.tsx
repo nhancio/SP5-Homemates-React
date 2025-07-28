@@ -224,15 +224,16 @@ const RentPropertiesPage = () => {
                   </div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
                       {paginatedProperties.map(property => (
-                        <PropertyCard 
-                          key={property.id} 
-                          property={property}
-                          listingType="rent"
-                          variant="small"
-                          onClick={() => handlePropertyClick(property.id)}
-                        />
+                        <div key={property.id} className="min-w-[300px]">
+                          <PropertyCard
+                            property={property}
+                            listingType="rent"
+                            variant="small"
+                            onClick={() => handlePropertyClick(property.id)}
+                          />
+                        </div>
                       ))}
                     </div>
                     {/* Pagination Controls */}
@@ -249,8 +250,8 @@ const RentPropertiesPage = () => {
                           <button
                             key={page}
                             className={`px-4 py-2 rounded-lg border transition-colors shadow-sm ${
-                              page === currentPage 
-                                ? 'bg-primary-600 text-white shadow-lg' 
+                              currentPage === page
+                                ? 'bg-primary-600 text-white border-primary-600'
                                 : 'bg-white text-primary-600 hover:bg-primary-50'
                             }`}
                             onClick={() => handlePageChange(page)}

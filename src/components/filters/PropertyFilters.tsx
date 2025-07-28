@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Filter, X, SlidersHorizontal } from 'lucide-react';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
@@ -442,230 +442,176 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
 
       {/* Row 3: Price/Rent Range - Compact */}
       {listingType === 'rent' && (
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">Rent Range (₹/month)</label>
-          <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1">
-                <span className="text-xs text-gray-600 font-medium mb-1 block">Min</span>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₹</span>
-                  <input
-                    type="number"
-                    className="w-full text-sm py-2 pl-8 pr-3 bg-white border border-gray-300 rounded-lg focus:border-primary-500 focus:ring-1 focus:ring-primary-100 transition-colors"
-                    min={RENT_MIN}
-                    max={RENT_MAX}
-                    value={localMin}
-                    onChange={e => setLocalMin(e.target.value)}
-                    onBlur={commitMin}
-                    placeholder="1000"
-                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-                  />
-                </div>
-              </div>
-              <span className="text-gray-400 font-medium text-lg">-</span>
-              <div className="flex-1">
-                <span className="text-xs text-gray-600 font-medium mb-1 block">Max</span>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₹</span>
-                  <input
-                    type="number"
-                    className="w-full text-sm py-2 pl-8 pr-3 bg-white border border-gray-300 rounded-lg focus:border-primary-500 focus:ring-1 focus:ring-primary-100 transition-colors"
-                    min={RENT_MIN}
-                    max={RENT_MAX}
-                    value={localMax}
-                    onChange={e => setLocalMax(e.target.value)}
-                    onBlur={commitMax}
-                    placeholder="100000"
-                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-                  />
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-4 shadow-md">
+          <label className="block text-base font-semibold text-gray-900 mb-4">Rent Range <span className="text-gray-400 text-sm">(₹/month)</span></label>
+          <div className="flex flex-col gap-3">
+            {/* Min Rent */}
+            <div className="flex-1">
+              <span className="block text-xs text-gray-500 mb-1">Min</span>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-medium">₹</span>
+                <input
+                  type="number"
+                  className="w-full text-lg py-3 px-6 pr-10 bg-gray-50 border border-gray-200 rounded-lg shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-100 placeholder-gray-400 transition"
+                  min={RENT_MIN}
+                  max={RENT_MAX}
+                  value={localMin}
+                  onChange={e => setLocalMin(e.target.value)}
+                  onBlur={commitMin}
+                  placeholder="Min Rent"
+                  onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                  <button
+                    type="button"
+                    className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => setLocalMin(String(Math.max(RENT_MIN, Number(localMin || RENT_MIN) - 1000)))}
+                    tabIndex={-1}
+                    aria-label="Decrease min rent"
+                  >
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => setLocalMin(String(Math.min(RENT_MAX, Number(localMin || RENT_MIN) + 1000)))}
+                    tabIndex={-1}
+                    aria-label="Increase min rent"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="px-2">
-              <Slider
-                range
-                min={RENT_MIN}
-                max={RENT_MAX}
-                step={RENT_SLIDER_STEP}
-                marks={RENT_SLIDER_MARKS}
-                value={[Number(localMin) || RENT_MIN, Number(localMax) || RENT_MAX]}
-                onChange={(value: number | number[]) => {
-                  if (Array.isArray(value) && value.length === 2) {
-                    let [min, max] = value;
-                    min = Math.max(RENT_MIN, Math.min(min, max));
-                    max = Math.min(RENT_MAX, Math.max(max, min));
-                    setLocalMin(String(min));
-                    setLocalMax(String(max));
-                    setFilters({
-                      ...filters,
-                      [listingType]: {
-                        ...filters[listingType],
-                        ...(isRent ? { minRent: min, maxRent: max } : { priceMin: min, priceMax: max }),
-                      },
-                    });
-                  }
-                }}
-                onAfterChange={(value: number | number[]) => {
-                  if (Array.isArray(value) && value.length === 2) {
-                    const [min, max] = value;
-                    setLocalMin(String(min));
-                    setLocalMax(String(max));
-                    setFilters({ ...filters, [listingType]: { ...filters[listingType], ...(isRent ? { minRent: min, maxRent: max } : { priceMin: min, priceMax: max }), }, });
-                  }
-                }}
-                className="w-full"
-                trackStyle={[{ backgroundColor: '#C2185B', height: 8, borderRadius: 4 }]}
-                handleStyle={[
-                  { 
-                    borderColor: '#C2185B', 
-                    backgroundColor: '#fff', 
-                    borderWidth: 2, 
-                    width: 24, 
-                    height: 24, 
-                    marginTop: -8, 
-                    boxShadow: '0 2px 8px rgba(194,24,91,0.15)',
-                    borderRadius: '50%'
-                  },
-                  { 
-                    borderColor: '#C2185B', 
-                    backgroundColor: '#fff', 
-                    borderWidth: 2, 
-                    width: 24, 
-                    height: 24, 
-                    marginTop: -8, 
-                    boxShadow: '0 2px 8px rgba(194,24,91,0.15)',
-                    borderRadius: '50%'
-                  }
-                ]}
-                railStyle={{ backgroundColor: '#f3e8ee', height: 8, borderRadius: 4 }}
-                handleRender={(node: React.ReactElement, handleProps: any) => (
-                  <Tooltip
-                    prefixCls="rc-slider-tooltip"
-                    overlay={`₹${handleProps.value.toLocaleString()}`}
-                    visible={handleProps.dragging}
-                    placement="top"
-                    key={handleProps.index}
+            {/* Max Rent */}
+            <div className="flex-1">
+              <span className="block text-xs text-gray-500 mb-1">Max</span>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-medium">₹</span>
+                <input
+                  type="number"
+                  className="w-full text-lg py-3 px-6 pr-10 bg-gray-50 border border-gray-200 rounded-lg shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-100 placeholder-gray-400 transition"
+                  min={RENT_MIN}
+                  max={RENT_MAX}
+                  value={localMax}
+                  onChange={e => setLocalMax(e.target.value)}
+                  onBlur={commitMax}
+                  placeholder="Max Rent"
+                  onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                  <button
+                    type="button"
+                    className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => setLocalMax(String(Math.max(RENT_MIN, Number(localMax || RENT_MAX) - 1000)))}
+                    tabIndex={-1}
+                    aria-label="Decrease max rent"
                   >
-                    {node}
-                  </Tooltip>
-                )}
-              />
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => setLocalMax(String(Math.min(RENT_MAX, Number(localMax || RENT_MAX) + 1000)))}
+                    tabIndex={-1}
+                    aria-label="Increase max rent"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {listingType === 'buy' && (
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">Price Range (₹)</label>
-          <div className="bg-white rounded-xl p-4 border border-gray-200">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex-1">
-                <span className="text-xs text-gray-600 font-medium mb-1 block">Min</span>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₹</span>
-                  <input
-                    type="number"
-                    className="w-full text-sm py-2 pl-8 pr-3 bg-white border border-gray-300 rounded-lg focus:border-primary-500 focus:ring-1 focus:ring-primary-100 transition-colors"
-                    min={BUY_MIN}
-                    max={BUY_MAX}
-                    value={localMin}
-                    onChange={e => setLocalMin(e.target.value)}
-                    onBlur={commitMin}
-                    placeholder="1000"
-                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-                  />
-                </div>
-              </div>
-              <span className="text-gray-400 font-medium text-lg">-</span>
-              <div className="flex-1">
-                <span className="text-xs text-gray-600 font-medium mb-1 block">Max</span>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₹</span>
-                  <input
-                    type="number"
-                    className="w-full text-sm py-2 pl-8 pr-3 bg-white border border-gray-300 rounded-lg focus:border-primary-500 focus:ring-1 focus:ring-primary-100 transition-colors"
-                    min={BUY_MIN}
-                    max={BUY_MAX}
-                    value={localMax}
-                    onChange={e => setLocalMax(e.target.value)}
-                    onBlur={commitMax}
-                    placeholder="100000"
-                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
-                  />
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-4 shadow-md">
+          <label className="block text-base font-semibold text-gray-900 mb-4">Price Range <span className="text-gray-400 text-sm">(₹)</span></label>
+          <div className="flex flex-col gap-3">
+            {/* Min Price */}
+            <div className="flex-1">
+              <span className="block text-xs text-gray-500 mb-1">Min</span>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-medium">₹</span>
+                <input
+                  type="number"
+                  className="w-full text-lg py-3 px-6 pr-10 bg-gray-50 border border-gray-200 rounded-lg shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-100 placeholder-gray-400 transition"
+                  min={BUY_MIN}
+                  max={BUY_MAX}
+                  value={localPriceMin}
+                  onChange={e => setLocalPriceMin(Number(e.target.value))}
+                  onBlur={() => {
+                    if (localPriceMin !== undefined) {
+                      setFilters({ ...filters, [listingType]: { ...filters[listingType], priceMin: localPriceMin } });
+                    }
+                  }}
+                  placeholder="Min Price"
+                  onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                  <button
+                    type="button"
+                    className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => setLocalPriceMin(Math.max(BUY_MIN, Number(localPriceMin || BUY_MIN) - 1000))}
+                    tabIndex={-1}
+                    aria-label="Decrease min price"
+                  >
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => setLocalPriceMin(Math.min(BUY_MAX, Number(localPriceMin || BUY_MIN) + 1000))}
+                    tabIndex={-1}
+                    aria-label="Increase min price"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="px-2">
-              <Slider
-                range
-                min={BUY_MIN}
-                max={BUY_MAX}
-                step={BUY_SLIDER_STEP}
-                marks={BUY_SLIDER_MARKS}
-                value={[Number(localMin) || BUY_MIN, Number(localMax) || BUY_MAX]}
-                onChange={(value: number | number[]) => {
-                  if (Array.isArray(value) && value.length === 2) {
-                    let [min, max] = value;
-                    min = Math.max(BUY_MIN, Math.min(min, max));
-                    max = Math.min(BUY_MAX, Math.max(max, min));
-                    setLocalMin(String(min));
-                    setLocalMax(String(max));
-                    setFilters({
-                      ...filters,
-                      [listingType]: {
-                        ...filters[listingType],
-                        ...(isRent ? { minRent: min, maxRent: max } : { priceMin: min, priceMax: max }),
-                      },
-                    });
-                  }
-                }}
-                onAfterChange={(value: number | number[]) => {
-                  if (Array.isArray(value) && value.length === 2) {
-                    const [min, max] = value;
-                    setLocalMin(String(min));
-                    setLocalMax(String(max));
-                    setFilters({ ...filters, [listingType]: { ...filters[listingType], ...(isRent ? { minRent: min, maxRent: max } : { priceMin: min, priceMax: max }), }, });
-                  }
-                }}
-                className="w-full"
-                trackStyle={[{ backgroundColor: '#C2185B', height: 8, borderRadius: 4 }]}
-                handleStyle={[
-                  { 
-                    borderColor: '#C2185B', 
-                    backgroundColor: '#fff', 
-                    borderWidth: 2, 
-                    width: 24, 
-                    height: 24, 
-                    marginTop: -8, 
-                    boxShadow: '0 2px 8px rgba(194,24,91,0.15)',
-                    borderRadius: '50%'
-                  },
-                  { 
-                    borderColor: '#C2185B', 
-                    backgroundColor: '#fff', 
-                    borderWidth: 2, 
-                    width: 24, 
-                    height: 24, 
-                    marginTop: -8, 
-                    boxShadow: '0 2px 8px rgba(194,24,91,0.15)',
-                    borderRadius: '50%'
-                  }
-                ]}
-                railStyle={{ backgroundColor: '#f3e8ee', height: 8, borderRadius: 4 }}
-                handleRender={(node: React.ReactElement, handleProps: any) => (
-                  <Tooltip
-                    prefixCls="rc-slider-tooltip"
-                    overlay={`₹${handleProps.value.toLocaleString()}`}
-                    visible={handleProps.dragging}
-                    placement="top"
-                    key={handleProps.index}
+            {/* Max Price */}
+            <div className="flex-1">
+              <span className="block text-xs text-gray-500 mb-1">Max</span>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-medium">₹</span>
+                <input
+                  type="number"
+                  className="w-full text-lg py-3 px-6 pr-10 bg-gray-50 border border-gray-200 rounded-lg shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-100 placeholder-gray-400 transition"
+                  min={BUY_MIN}
+                  max={BUY_MAX}
+                  value={localPriceMax}
+                  onChange={e => setLocalPriceMax(Number(e.target.value))}
+                  onBlur={() => {
+                    if (localPriceMax !== undefined) {
+                      setFilters({ ...filters, [listingType]: { ...filters[listingType], priceMax: localPriceMax } });
+                    }
+                  }}
+                  placeholder="Max Price"
+                  onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                  <button
+                    type="button"
+                    className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => setLocalPriceMax(Math.max(BUY_MIN, Number(localPriceMax || BUY_MIN) - 1000))}
+                    tabIndex={-1}
+                    aria-label="Decrease max price"
                   >
-                    {node}
-                  </Tooltip>
-                )}
-              />
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                    onClick={() => setLocalPriceMax(Math.min(BUY_MAX, Number(localPriceMax || BUY_MIN) + 1000))}
+                    tabIndex={-1}
+                    aria-label="Increase max price"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -699,221 +645,248 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
   );
 
   // Side panel filter content
-  const SidePanelFilters = () => (
-    <>
-      {/* Side Panel Overlay */}
-      {sidePanelOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden backdrop-blur-sm"
-          onClick={() => setSidePanelOpen(false)}
-        />
-      )}
-      
-      {/* Side Panel */}
-      <div className={`fixed top-0 right-0 h-[calc(100dvh-4rem)] w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
-        sidePanelOpen ? 'translate-x-0' : 'translate-x-full'
-      } lg:relative lg:translate-x-0 lg:w-72 lg:shadow-xl lg:border-r lg:border-gray-100 lg:h-screen lg:pb-0`}>
-        <div className="h-full flex flex-col bg-gradient-to-b from-white to-gray-50">
-          
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 lg:p-6 border-b border-gray-200 bg-white flex-shrink-0">
-            <div>
-              <h3 className="text-lg lg:text-xl font-bold text-gray-900">Filters</h3>
-              <p className="text-xs lg:text-sm text-gray-500 mt-1">Refine your search</p>
-            </div>
-            <button
-              onClick={() => setSidePanelOpen(false)}
-              className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-600" />
-            </button>
-          </div>
+  const SidePanelFilters = () => {
+    const [sidebarWidth, setSidebarWidth] = useState(360);
+    const sidebarRef = useRef<HTMLDivElement>(null);
+    const isDragging = useRef(false);
 
-          {/* Filter Content */}
-          <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4 lg:space-y-6 pb-20 lg:pb-36 min-h-0 overscroll-contain">
-            {/* City and Locality */}
-            <div className="space-y-4">
-              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-                <label className="block text-sm font-semibold text-gray-800 mb-3">Location</label>
-                <div className="space-y-3">
-                  <div>
-                    <span className="text-xs text-gray-500 font-medium mb-2 block">City</span>
-                    <select 
-                      className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
-                      value={currentFilters.city || ''} 
-                      onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); console.log('[PropertyFilters] setFilters called (city):', { ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); }} 
-                      disabled={marketsLoading}
-                    >
-                      <option value="">Select City</option>
-                      {cities.map(city => <option key={city} value={city}>{city}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 font-medium mb-2 block">Locality</span>
-                    <select 
-                      className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
-                      value={currentFilters.locality || ''} 
-                      onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], locality: e.target.value } }); console.log('[PropertyFilters] setFilters called (locality):', { ...filters, [listingType]: { ...filters[listingType], locality: e.target.value } }); }} 
-                      disabled={!currentFilters.city || marketsLoading}
-                    >
-                      <option value="">Select Locality</option>
-                      {localities.map(loc => <option key={loc} value={loc}>{loc}</option>)}
-                    </select>
-                  </div>
-                </div>
+    const handleMouseDown = (e: React.MouseEvent) => {
+      isDragging.current = true;
+      document.body.style.cursor = 'ew-resize';
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+      const min = 280;
+      const max = 600;
+      const newWidth = Math.min(max, Math.max(min, e.clientX - (sidebarRef.current?.getBoundingClientRect().left || 0)));
+      setSidebarWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      isDragging.current = false;
+      document.body.style.cursor = '';
+    };
+
+    React.useEffect(() => {
+      if (typeof window === 'undefined') return;
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }, []);
+
+    return (
+      <>
+        {/* Side Panel Overlay */}
+        {sidePanelOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden backdrop-blur-sm"
+            onClick={() => setSidePanelOpen(false)}
+          />
+        )}
+        
+        {/* Side Panel */}
+        <div
+          ref={sidebarRef}
+          className={`fixed top-0 right-0 h-[calc(100dvh-4rem)] bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
+            sidePanelOpen ? 'translate-x-0' : 'translate-x-full'
+          } lg:relative lg:translate-x-0 lg:shadow-xl lg:border-r lg:border-gray-100 lg:h-screen lg:pb-0`}
+          style={{ width: sidebarWidth }}
+        >
+          {/* Draggable resize handle (desktop only) */}
+          <div
+            className="hidden lg:block absolute left-0 top-0 h-full w-2 cursor-ew-resize z-50 bg-transparent hover:bg-primary-100 transition"
+            onMouseDown={handleMouseDown}
+            style={{ userSelect: 'none' }}
+            aria-label="Resize filters sidebar"
+          />
+          <div className="h-full flex flex-col bg-gradient-to-b from-white to-gray-50">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 lg:p-6 border-b border-gray-200 bg-white flex-shrink-0">
+              <div>
+                <h3 className="text-lg lg:text-xl font-bold text-gray-900">Filters</h3>
+                <p className="text-xs lg:text-sm text-gray-500 mt-1">Refine your search</p>
               </div>
+              <button
+                onClick={() => setSidePanelOpen(false)}
+                className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
             </div>
 
-            {/* Property Type and BHK */}
-            <div className="space-y-4">
-              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-                <label className="block text-sm font-semibold text-gray-800 mb-3">Property Details</label>
-                <div className="space-y-3">
-                  <div>
-                    <span className="text-xs text-gray-500 font-medium mb-2 block">Property Type</span>
-                    <select 
-                      className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
-                      value={currentFilters.propertyType || ''} 
-                      onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], propertyType: e.target.value } }); console.log('[PropertyFilters] setFilters called (propertyType):', { ...filters, [listingType]: { ...filters[listingType], propertyType: e.target.value } }); }} 
-                      disabled={marketsLoading}
-                    >
-                      <option value="">Select Property Type</option>
-                      {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <span className="text-xs text-gray-500 font-medium mb-2 block">BHK</span>
-                    <select 
-                      className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
-                      value={currentFilters.bhk || ''} 
-                      onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } }); console.log('[PropertyFilters] setFilters called (bhk):', { ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } }); }} 
-                      disabled={marketsLoading}
-                    >
-                      <option value="">Select BHK</option>
-                      {bhkTypes
-                        ? bhkTypes.map((type: string) => <option key={type} value={type}>{type}</option>)
-                        : Array.from({ length: 10 }, (_, i) => i + 1).map((bhk: number) => <option key={bhk} value={bhk}>{bhk} BHK</option>)}
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Price/Rent Range */}
-            {listingType === 'rent' && (
-              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-                <label className="block text-sm font-semibold text-gray-800 mb-3">Rent Range (₹/month)</label>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
+            {/* Filter Content */}
+            <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4 lg:space-y-6 pb-20 lg:pb-36 min-h-0 overscroll-contain">
+              {/* City and Locality */}
+              <div className="space-y-4">
+                <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                  <label className="block text-sm font-semibold text-gray-800 mb-3">Location</label>
+                  <div className="space-y-3">
                     <div>
-                      <span className="text-xs text-gray-500 font-medium mb-2 block">Min</span>
+                      <span className="text-xs text-gray-500 font-medium mb-2 block">City</span>
+                      <select 
+                        className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
+                        value={currentFilters.city || ''} 
+                        onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); console.log('[PropertyFilters] setFilters called (city):', { ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); }} 
+                        disabled={marketsLoading}
+                      >
+                        <option value="">Select City</option>
+                        {cities.map(city => <option key={city} value={city}>{city}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-500 font-medium mb-2 block">Locality</span>
+                      <select 
+                        className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
+                        value={currentFilters.locality || ''} 
+                        onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], locality: e.target.value } }); console.log('[PropertyFilters] setFilters called (locality):', { ...filters, [listingType]: { ...filters[listingType], locality: e.target.value } }); }} 
+                        disabled={!currentFilters.city || marketsLoading}
+                      >
+                        <option value="">Select Locality</option>
+                        {localities.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Property Type and BHK */}
+              <div className="space-y-4">
+                <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                  <label className="block text-sm font-semibold text-gray-800 mb-3">Property Details</label>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-xs text-gray-500 font-medium mb-2 block">Property Type</span>
+                      <select 
+                        className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
+                        value={currentFilters.propertyType || ''} 
+                        onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], propertyType: e.target.value } }); console.log('[PropertyFilters] setFilters called (propertyType):', { ...filters, [listingType]: { ...filters[listingType], propertyType: e.target.value } }); }} 
+                        disabled={marketsLoading}
+                      >
+                        <option value="">Select Property Type</option>
+                        {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-500 font-medium mb-2 block">BHK</span>
+                      <select 
+                        className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
+                        value={currentFilters.bhk || ''} 
+                        onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } }); console.log('[PropertyFilters] setFilters called (bhk):', { ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } }); }} 
+                        disabled={marketsLoading}
+                      >
+                        <option value="">Select BHK</option>
+                        {bhkTypes
+                          ? bhkTypes.map((type: string) => <option key={type} value={type}>{type}</option>)
+                          : Array.from({ length: 10 }, (_, i) => i + 1).map((bhk: number) => <option key={bhk} value={bhk}>{bhk} BHK</option>)}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Price/Rent Range */}
+              {listingType === 'rent' && (
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-4 shadow-md">
+                  <label className="block text-base font-semibold text-gray-900 mb-4">Rent Range <span className="text-gray-400 text-sm">(₹/month)</span></label>
+                  <div className="flex flex-col gap-3">
+                    {/* Min Rent */}
+                    <div className="flex-1">
+                      <span className="block text-xs text-gray-500 mb-1">Min</span>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₹</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-medium">₹</span>
                         <input
                           type="number"
-                          className="w-full text-sm py-2 lg:py-2.5 pl-8 pr-3 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all"
+                          className="w-full text-lg py-3 px-6 pr-10 bg-gray-50 border border-gray-200 rounded-lg shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-100 placeholder-gray-400 transition"
                           min={RENT_MIN}
                           max={RENT_MAX}
                           value={localMin}
                           onChange={e => setLocalMin(e.target.value)}
                           onBlur={commitMin}
-                          placeholder="1000"
+                          placeholder="Min Rent"
                           onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                          <button
+                            type="button"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                            onClick={() => setLocalMin(String(Math.max(RENT_MIN, Number(localMin || RENT_MIN) - 1000)))}
+                            tabIndex={-1}
+                            aria-label="Decrease min rent"
+                          >
+                            -
+                          </button>
+                          <button
+                            type="button"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                            onClick={() => setLocalMin(String(Math.min(RENT_MAX, Number(localMin || RENT_MIN) + 1000)))}
+                            tabIndex={-1}
+                            aria-label="Increase min rent"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <span className="text-xs text-gray-500 font-medium mb-2 block">Max</span>
+                    {/* Max Rent */}
+                    <div className="flex-1">
+                      <span className="block text-xs text-gray-500 mb-1">Max</span>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₹</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-medium">₹</span>
                         <input
                           type="number"
-                          className="w-full text-sm py-2 lg:py-2.5 pl-8 pr-3 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all"
+                          className="w-full text-lg py-3 px-6 pr-10 bg-gray-50 border border-gray-200 rounded-lg shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-100 placeholder-gray-400 transition"
                           min={RENT_MIN}
                           max={RENT_MAX}
                           value={localMax}
                           onChange={e => setLocalMax(e.target.value)}
                           onBlur={commitMax}
-                          placeholder="100000"
+                          placeholder="Max Rent"
                           onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                          <button
+                            type="button"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                            onClick={() => setLocalMax(String(Math.max(RENT_MIN, Number(localMax || RENT_MAX) - 1000)))}
+                            tabIndex={-1}
+                            aria-label="Decrease max rent"
+                          >
+                            -
+                          </button>
+                          <button
+                            type="button"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                            onClick={() => setLocalMax(String(Math.min(RENT_MAX, Number(localMax || RENT_MAX) + 1000)))}
+                            tabIndex={-1}
+                            aria-label="Increase max rent"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="pt-2">
-                    <Slider
-                      range
-                      min={RENT_MIN}
-                      max={RENT_MAX}
-                      step={RENT_SLIDER_STEP}
-                      value={[localMinRent || RENT_MIN, localMaxRent || RENT_MAX]}
-                      onChange={(value: number | number[]) => {
-                        if (Array.isArray(value) && value.length === 2) {
-                          setLocalMinRent(value[0]);
-                          setLocalMaxRent(value[1]);
-                        }
-                      }}
-                      onAfterChange={(value: number | number[]) => {
-                        if (Array.isArray(value) && value.length === 2) {
-                          setFilters({ ...filters, [listingType]: { ...filters[listingType], minRent: value[0], maxRent: value[1] } });
-                        }
-                      }}
-                      marks={RENT_SLIDER_MARKS}
-                      className="rent-slider"
-                      trackStyle={{ backgroundColor: '#be185d', height: 8, borderRadius: 4 }}
-                      handleStyle={[
-                        { 
-                          borderColor: '#be185d', 
-                          backgroundColor: '#ffffff', 
-                          borderWidth: 2, 
-                          width: 20, 
-                          height: 20, 
-                          marginTop: -8, 
-                          boxShadow: '0 4px 12px rgba(194,24,91,0.25)',
-                          borderRadius: '50%'
-                        },
-                        { 
-                          borderColor: '#be185d', 
-                          backgroundColor: '#ffffff', 
-                          borderWidth: 2, 
-                          width: 20, 
-                          height: 20, 
-                          marginTop: -8, 
-                          boxShadow: '0 4px 12px rgba(194,24,91,0.25)',
-                          borderRadius: '50%'
-                        }
-                      ]}
-                      railStyle={{ backgroundColor: '#f3e8ee', height: 8, borderRadius: 4 }}
-                      handleRender={(node: React.ReactElement, handleProps: any) => (
-                        <Tooltip
-                          prefixCls="rc-slider-tooltip"
-                          overlay={`₹${handleProps.value.toLocaleString()}`}
-                          visible={handleProps.dragging}
-                          placement="top"
-                          key={handleProps.index}
-                        >
-                          {node}
-                        </Tooltip>
-                      )}
-                    />
-                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Buy Price Range */}
-            {listingType === 'buy' && (
-              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-                <label className="block text-sm font-semibold text-gray-800 mb-3">Price Range (₹)</label>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <span className="text-xs text-gray-500 font-medium mb-2 block">Min</span>
+              {/* Buy Price Range */}
+              {listingType === 'buy' && (
+                <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-4 shadow-md">
+                  <label className="block text-base font-semibold text-gray-900 mb-4">Price Range <span className="text-gray-400 text-sm">(₹)</span></label>
+                  <div className="flex flex-col gap-3">
+                    {/* Min Price */}
+                    <div className="flex-1">
+                      <span className="block text-xs text-gray-500 mb-1">Min</span>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₹</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-medium">₹</span>
                         <input
                           type="number"
-                          className="w-full text-sm py-2 lg:py-2.5 pl-8 pr-3 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all"
+                          className="w-full text-lg py-3 px-6 pr-10 bg-gray-50 border border-gray-200 rounded-lg shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-100 placeholder-gray-400 transition"
                           min={BUY_MIN}
                           max={BUY_MAX}
                           value={localPriceMin}
@@ -923,18 +896,39 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                               setFilters({ ...filters, [listingType]: { ...filters[listingType], priceMin: localPriceMin } });
                             }
                           }}
-                          placeholder="1000"
+                          placeholder="Min Price"
                           onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                          <button
+                            type="button"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                            onClick={() => setLocalPriceMin(Math.max(BUY_MIN, Number(localPriceMin || BUY_MIN) - 1000))}
+                            tabIndex={-1}
+                            aria-label="Decrease min price"
+                          >
+                            -
+                          </button>
+                          <button
+                            type="button"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                            onClick={() => setLocalPriceMin(Math.min(BUY_MAX, Number(localPriceMin || BUY_MIN) + 1000))}
+                            tabIndex={-1}
+                            aria-label="Increase min price"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <span className="text-xs text-gray-500 font-medium mb-2 block">Max</span>
+                    {/* Max Price */}
+                    <div className="flex-1">
+                      <span className="block text-xs text-gray-500 mb-1">Max</span>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">₹</span>
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg font-medium">₹</span>
                         <input
                           type="number"
-                          className="w-full text-sm py-2 lg:py-2.5 pl-8 pr-3 bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all"
+                          className="w-full text-lg py-3 px-6 pr-10 bg-gray-50 border border-gray-200 rounded-lg shadow-sm focus:border-primary-500 focus:ring-2 focus:ring-primary-100 placeholder-gray-400 transition"
                           min={BUY_MIN}
                           max={BUY_MAX}
                           value={localPriceMax}
@@ -944,124 +938,87 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                               setFilters({ ...filters, [listingType]: { ...filters[listingType], priceMax: localPriceMax } });
                             }
                           }}
-                          placeholder="100000"
+                          placeholder="Max Price"
                           onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                         />
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col gap-1">
+                          <button
+                            type="button"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                            onClick={() => setLocalPriceMax(Math.max(BUY_MIN, Number(localPriceMax || BUY_MIN) - 1000))}
+                            tabIndex={-1}
+                            aria-label="Decrease max price"
+                          >
+                            -
+                          </button>
+                          <button
+                            type="button"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary-50 border border-gray-200 shadow text-base text-gray-600 hover:text-primary-600 transition"
+                            onClick={() => setLocalPriceMax(Math.min(BUY_MAX, Number(localPriceMax || BUY_MIN) + 1000))}
+                            tabIndex={-1}
+                            aria-label="Increase max price"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="pt-2">
-                    <Slider
-                      range
-                      min={BUY_MIN}
-                      max={BUY_MAX}
-                      step={BUY_SLIDER_STEP}
-                      value={[localPriceMin || BUY_MIN, localPriceMax || BUY_MAX]}
-                      onChange={(value: number | number[]) => {
-                        if (Array.isArray(value) && value.length === 2) {
-                          setLocalPriceMin(value[0]);
-                          setLocalPriceMax(value[1]);
-                        }
-                      }}
-                      onAfterChange={(value: number | number[]) => {
-                        if (Array.isArray(value) && value.length === 2) {
-                          setFilters({ ...filters, [listingType]: { ...filters[listingType], priceMin: value[0], priceMax: value[1] } });
-                        }
-                      }}
-                      marks={BUY_SLIDER_MARKS}
-                      className="buy-slider"
-                      trackStyle={{ backgroundColor: '#be185d', height: 8, borderRadius: 4 }}
-                      handleStyle={[
-                        { 
-                          borderColor: '#be185d', 
-                          backgroundColor: '#ffffff', 
-                          borderWidth: 2, 
-                          width: 20, 
-                          height: 20, 
-                          marginTop: -8, 
-                          boxShadow: '0 4px 12px rgba(194,24,91,0.25)',
-                          borderRadius: '50%'
-                        },
-                        { 
-                          borderColor: '#be185d', 
-                          backgroundColor: '#ffffff', 
-                          borderWidth: 2, 
-                          width: 20, 
-                          height: 20, 
-                          marginTop: -8, 
-                          boxShadow: '0 4px 12px rgba(194,24,91,0.25)',
-                          borderRadius: '50%'
-                        }
-                      ]}
-                      railStyle={{ backgroundColor: '#f3e8ee', height: 8, borderRadius: 4 }}
-                      handleRender={(node: React.ReactElement, handleProps: any) => (
-                        <Tooltip
-                          prefixCls="rc-slider-tooltip"
-                          overlay={`₹${handleProps.value.toLocaleString()}`}
-                          visible={handleProps.dragging}
-                          placement="top"
-                          key={handleProps.index}
-                        >
-                          {node}
-                        </Tooltip>
-                      )}
-                    />
-                  </div>
+                </div>
+              )}
+
+              {/* Amenities */}
+              <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                <label className="block text-sm font-semibold text-gray-800 mb-3">Amenities</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {AMENITY_OPTIONS.map(opt => {
+                    const Icon = opt.icon;
+                    const selected = selectedAmenities.includes(opt.key);
+                    return (
+                      <button
+                        key={opt.key}
+                        type="button"
+                        onClick={() => handleAmenityToggle(opt.key)}
+                        className={`flex items-center gap-1.5 lg:gap-2 p-2 lg:p-2.5 rounded-lg border transition-all duration-200 text-xs lg:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-200 ${
+                          selected 
+                            ? 'bg-primary-600 text-white border-primary-600 shadow-lg shadow-primary-200' 
+                            : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:border-primary-300'
+                        }`}
+                        tabIndex={0}
+                      >
+                        <Icon className={`w-3 h-3 lg:w-4 lg:h-4 ${selected ? 'text-white' : 'text-gray-600'}`} />
+                        <span className="text-xs truncate">{opt.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* Amenities */}
-            <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-              <label className="block text-sm font-semibold text-gray-800 mb-3">Amenities</label>
-              <div className="grid grid-cols-2 gap-2">
-                {AMENITY_OPTIONS.map(opt => {
-                  const Icon = opt.icon;
-                  const selected = selectedAmenities.includes(opt.key);
-                  return (
-                    <button
-                      key={opt.key}
-                      type="button"
-                      onClick={() => handleAmenityToggle(opt.key)}
-                      className={`flex items-center gap-1.5 lg:gap-2 p-2 lg:p-2.5 rounded-lg border transition-all duration-200 text-xs lg:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary-200 ${
-                        selected 
-                          ? 'bg-primary-600 text-white border-primary-600 shadow-lg shadow-primary-200' 
-                          : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 hover:border-primary-300'
-                      }`}
-                      tabIndex={0}
-                    >
-                      <Icon className={`w-3 h-3 lg:w-4 lg:h-4 ${selected ? 'text-white' : 'text-gray-600'}`} />
-                      <span className="text-xs truncate">{opt.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Sticky Footer for Mobile */}
+            <div className="lg:hidden bg-white border-t border-gray-200 p-4 z-10">
+              <button
+                onClick={clearFilters}
+                className="w-full px-4 py-3 text-sm font-medium text-white bg-primary-600 border border-primary-600 rounded-lg hover:bg-primary-700 hover:border-primary-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-200 shadow-lg"
+              >
+                Clear All Filters
+              </button>
+            </div>
+          
+            {/* Desktop Footer */}
+            <div className="hidden lg:block p-4 lg:p-6 border-t border-gray-200 bg-white flex-shrink-0">
+              <button
+                onClick={clearFilters}
+                className="w-full px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 hover:border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-200"
+              >
+                Clear All Filters
+              </button>
             </div>
           </div>
-
-          {/* Sticky Footer for Mobile */}
-          <div className="lg:hidden bg-white border-t border-gray-200 p-4 z-10">
-            <button
-              onClick={clearFilters}
-              className="w-full px-4 py-3 text-sm font-medium text-white bg-primary-600 border border-primary-600 rounded-lg hover:bg-primary-700 hover:border-primary-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-200 shadow-lg"
-            >
-              Clear All Filters
-            </button>
-          </div>
-  
-          {/* Desktop Footer */}
-          <div className="hidden lg:block p-4 lg:p-6 border-t border-gray-200 bg-white flex-shrink-0">
-            <button
-              onClick={clearFilters}
-              className="w-full px-4 py-3 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 hover:border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-200"
-            >
-              Clear All Filters
-            </button>
-          </div>
         </div>
-      </div>
-    </>
-  );
+      </>
+    );
+  };
 
   // Return based on variant
   if (variant === 'side-panel') {
