@@ -13,6 +13,7 @@
     "@firebase/auth": "^1.10.1",
     "@headlessui/react": "^2.2.4",
     "@types/react-datepicker": "^6.2.0",
+    "axios": "^1.11.0",
     "clsx": "^2.1.0",
     "firebase": "^11.6.1",
     "firebase-admin": "^13.4.0",

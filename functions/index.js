@@ -40,6 +40,8 @@ const PHONEPE_SALT_KEY = functions.config().phonepe.salt_key;
 const PHONEPE_SALT_INDEX = functions.config().phonepe.salt_index;
 const PHONEPE_BASE_URL = functions.config().phonepe.base_url || 'https://api-preprod.phonepe.com/apis/pg-sandbox'; // Use sandbox for testing
 
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || functions.config().openai?.key;
+
 exports.phonepePay = functions.https.onRequest(async (req, res) => {
   try {
     const { amount, merchantTransactionId, userPhone } = req.body;
@@ -88,5 +90,44 @@ exports.phonepePay = functions.https.onRequest(async (req, res) => {
     }
   } catch (err) {
     res.json({ success: false, error: err.message || 'Payment initiation failed' });
+  }
+});
+
+exports.parseQuery = functions.https.onRequest(async (req, res) => {
+  try {
+    const { query } = req.body;
+    if (!query) {
+      return res.status(400).json({ error: 'Missing query' });
+    }
+
+    // Enhanced prompt for Friends page
+    const prompt = `Extract user search filters from this query: "${query}". Return a JSON object with keys like city, profession, gender, age, interests, bhk, maxRent, minRent, priceMin, priceMax, propertyType. If a field is not present, omit it.`;
+    const openaiRes = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 120,
+        temperature: 0,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    // Parse the JSON from the AI's response
+    const text = openaiRes.data.choices[0].message.content;
+    let filters;
+    try {
+      filters = JSON.parse(text);
+    } catch (e) {
+      return res.status(500).json({ error: 'Failed to parse AI response', raw: text });
+    }
+    res.json(filters);
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Failed to parse query' });
   }
 });
