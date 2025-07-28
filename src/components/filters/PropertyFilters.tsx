@@ -202,6 +202,13 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
         [name]: newValue,
       },
     });
+    console.log('[PropertyFilters] setFilters called:', {
+      ...filters,
+      [listingType]: {
+        ...filters[listingType],
+        [name]: newValue,
+      },
+    });
   };
 
   // Validation state for min/max rent
@@ -236,6 +243,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
         ...(isRent ? { minRent: numVal, maxRent: maxNum } : { priceMin: numVal, priceMax: maxNum }),
       },
     });
+    console.log('[PropertyFilters] setFilters called (min/max):', { ...filters, [listingType]: { ...filters[listingType], ...(isRent ? { minRent: numVal, maxRent: maxNum } : { priceMin: numVal, priceMax: maxNum }), }, });
   };
   const handleMaxInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     let val = e.target.value.replace(/[^0-9]/g, ''); // Only allow digits
@@ -398,14 +406,14 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">City</label>
-          <select className="input w-full bg-gray-50 border-gray-200 focus:border-primary-500 focus:ring-primary-100" value={currentFilters.city || ''} onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } })} disabled={marketsLoading}>
+          <select className="input w-full bg-gray-50 border-gray-200 focus:border-primary-500 focus:ring-primary-100" value={currentFilters.city || ''} onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); console.log('[PropertyFilters] setFilters called (city):', { ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); }} disabled={marketsLoading}>
             <option value="">Select City</option>
             {cities.map(city => <option key={city} value={city}>{city}</option>)}
           </select>
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Locality</label>
-          <select className="input w-full bg-gray-50 border-gray-200 focus:border-primary-500 focus:ring-primary-100" value={currentFilters.locality || ''} onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], locality: e.target.value } })} disabled={!currentFilters.city || marketsLoading}>
+          <select className="input w-full bg-gray-50 border-gray-200 focus:border-primary-500 focus:ring-primary-100" value={currentFilters.locality || ''} onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], locality: e.target.value } }); console.log('[PropertyFilters] setFilters called (locality):', { ...filters, [listingType]: { ...filters[listingType], locality: e.target.value } }); }} disabled={!currentFilters.city || marketsLoading}>
             <option value="">Select Locality</option>
             {localities.map(loc => <option key={loc} value={loc}>{loc}</option>)}
           </select>
@@ -416,14 +424,14 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Property Type</label>
-          <select className="input w-full bg-gray-50 border-gray-200 focus:border-primary-500 focus:ring-primary-100" value={currentFilters.propertyType || ''} onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], propertyType: e.target.value } })} disabled={marketsLoading}>
+          <select className="input w-full bg-gray-50 border-gray-200 focus:border-primary-500 focus:ring-primary-100" value={currentFilters.propertyType || ''} onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], propertyType: e.target.value } }); console.log('[PropertyFilters] setFilters called (propertyType):', { ...filters, [listingType]: { ...filters[listingType], propertyType: e.target.value } }); }} disabled={marketsLoading}>
             <option value="">Select Property Type</option>
             {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
           </select>
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">BHK</label>
-          <select className="input w-full bg-gray-50 border-gray-200 focus:border-primary-500 focus:ring-primary-100" value={currentFilters.bhk || ''} onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } })} disabled={marketsLoading}>
+          <select className="input w-full bg-gray-50 border-gray-200 focus:border-primary-500 focus:ring-primary-100" value={currentFilters.bhk || ''} onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } }); console.log('[PropertyFilters] setFilters called (bhk):', { ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } }); }} disabled={marketsLoading}>
             <option value="">Select BHK</option>
             {bhkTypes
               ? bhkTypes.map((type: string) => <option key={type} value={type}>{type}</option>)
@@ -451,6 +459,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                     onChange={e => setLocalMin(e.target.value)}
                     onBlur={commitMin}
                     placeholder="1000"
+                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                   />
                 </div>
               </div>
@@ -468,6 +477,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                     onChange={e => setLocalMax(e.target.value)}
                     onBlur={commitMax}
                     placeholder="100000"
+                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                   />
                 </div>
               </div>
@@ -564,6 +574,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                     onChange={e => setLocalMin(e.target.value)}
                     onBlur={commitMin}
                     placeholder="1000"
+                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                   />
                 </div>
               </div>
@@ -581,6 +592,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                     onChange={e => setLocalMax(e.target.value)}
                     onBlur={commitMax}
                     placeholder="100000"
+                    onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                   />
                 </div>
               </div>
@@ -729,7 +741,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                     <select 
                       className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
                       value={currentFilters.city || ''} 
-                      onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } })} 
+                      onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); console.log('[PropertyFilters] setFilters called (city):', { ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); }} 
                       disabled={marketsLoading}
                     >
                       <option value="">Select City</option>
@@ -741,7 +753,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                     <select 
                       className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
                       value={currentFilters.locality || ''} 
-                      onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], locality: e.target.value } })} 
+                      onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], locality: e.target.value } }); console.log('[PropertyFilters] setFilters called (locality):', { ...filters, [listingType]: { ...filters[listingType], locality: e.target.value } }); }} 
                       disabled={!currentFilters.city || marketsLoading}
                     >
                       <option value="">Select Locality</option>
@@ -762,7 +774,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                     <select 
                       className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
                       value={currentFilters.propertyType || ''} 
-                      onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], propertyType: e.target.value } })} 
+                      onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], propertyType: e.target.value } }); console.log('[PropertyFilters] setFilters called (propertyType):', { ...filters, [listingType]: { ...filters[listingType], propertyType: e.target.value } }); }} 
                       disabled={marketsLoading}
                     >
                       <option value="">Select Property Type</option>
@@ -774,7 +786,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                     <select 
                       className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
                       value={currentFilters.bhk || ''} 
-                      onChange={e => setFilters({ ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } })} 
+                      onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } }); console.log('[PropertyFilters] setFilters called (bhk):', { ...filters, [listingType]: { ...filters[listingType], bhk: e.target.value } }); }} 
                       disabled={marketsLoading}
                     >
                       <option value="">Select BHK</option>
@@ -806,6 +818,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                           onChange={e => setLocalMin(e.target.value)}
                           onBlur={commitMin}
                           placeholder="1000"
+                          onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                         />
                       </div>
                     </div>
@@ -822,6 +835,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                           onChange={e => setLocalMax(e.target.value)}
                           onBlur={commitMax}
                           placeholder="100000"
+                          onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                         />
                       </div>
                     </div>
@@ -910,6 +924,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                             }
                           }}
                           placeholder="1000"
+                          onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                         />
                       </div>
                     </div>
@@ -930,6 +945,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                             }
                           }}
                           placeholder="100000"
+                          onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
                         />
                       </div>
                     </div>

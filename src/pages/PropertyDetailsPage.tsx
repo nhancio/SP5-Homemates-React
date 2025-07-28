@@ -316,13 +316,6 @@ Link: ${url}`;
           <span className="sm:hidden">Back</span>
         </button>
 
-        {/* Property Type Badge */}
-        <div className="mb-4">
-          <span className="bg-primary-600 text-white text-sm font-medium px-3 py-1 rounded">
-            {listingType === 'rent' ? 'For Rent' : 'For Sale'}
-          </span>
-        </div>
-
         {/* Image Gallery */}
         <div className="mb-6 md:mb-8">
           <div className="aspect-[16/9] w-full rounded-lg overflow-hidden bg-gray-100">
