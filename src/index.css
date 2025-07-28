@@ -248,37 +248,103 @@ div[class*="rc-slider-rail"] {
   /* Price Range Slider Mobile Optimizations */
   .rc-slider {
     @apply touch-manipulation;
+    padding: 8px 0 !important;
+    margin: 8px 0 !important;
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
 
   .rc-slider-handle {
     @apply touch-manipulation;
-    min-width: 44px !important;
-    min-height: 44px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
     border: 3px solid #C2185B !important;
     background-color: #fff !important;
-    box-shadow: 0 2px 8px rgba(194,24,91,0.15) !important;
-    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(194,24,91,0.20) !important;
+    transition: all 0.1s ease !important;
+    cursor: grab !important;
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    pointer-events: auto !important;
   }
 
   .rc-slider-handle:hover {
-    transform: scale(1.1) !important;
-    box-shadow: 0 4px 12px rgba(194,24,91,0.25) !important;
+    transform: scale(1.15) !important;
+    box-shadow: 0 6px 16px rgba(194,24,91,0.30) !important;
+    border-color: #9c1454 !important;
   }
 
   .rc-slider-handle:active {
-    transform: scale(1.05) !important;
+    cursor: grabbing !important;
+    transform: scale(1.2) !important;
+    box-shadow: 0 8px 20px rgba(194,24,91,0.40) !important;
+    border-color: #7a0f42 !important;
+  }
+
+  .rc-slider-handle:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(194,24,91,0.2), 0 4px 12px rgba(194,24,91,0.20) !important;
   }
 
   .rc-slider-track {
     background-color: #C2185B !important;
-    height: 8px !important;
-    border-radius: 4px !important;
+    height: 12px !important;
+    border-radius: 6px !important;
+    transition: all 0.1s ease !important;
+    cursor: pointer !important;
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
 
   .rc-slider-rail {
     background-color: #fdf2f8 !important;
-    height: 8px !important;
-    border-radius: 4px !important;
+    height: 12px !important;
+    border-radius: 6px !important;
+    transition: all 0.1s ease !important;
+    cursor: pointer !important;
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  /* Prevent any interference from parent containers */
+  .rc-slider * {
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    pointer-events: auto !important;
+  }
+
+  /* Critical: Disable any potential interference */
+  .rc-slider {
+    pointer-events: auto !important;
+  }
+
+  .rc-slider-handle {
+    pointer-events: auto !important;
   }
 
   /* Force override any conflicting styles */
@@ -311,25 +377,97 @@ div[class*="rc-slider-rail"] {
   .rc-slider-tooltip {
     @apply bg-gray-900 text-white text-xs font-medium px-2 py-1 rounded;
     z-index: 1000 !important;
+    background-color: #C2185B !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 4px 12px rgba(194,24,91,0.25) !important;
+  }
+
+  /* Prevent any interference from parent containers */
+  .rc-slider * {
+    touch-action: none !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
 
   /* Mobile-specific slider improvements */
   @media (max-width: 768px) {
     .rc-slider-handle {
-      min-width: 48px !important;
-      min-height: 48px !important;
-      border-width: 4px !important;
+      min-width: 32px !important;
+      min-height: 32px !important;
+      border-width: 3px !important;
+      box-shadow: 0 6px 16px rgba(194,24,91,0.25) !important;
+      touch-action: none !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      -webkit-touch-callout: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+      pointer-events: auto !important;
+      transition: all 0.1s ease !important;
+    }
+
+    .rc-slider-handle:hover {
+      transform: scale(1.2) !important;
+      box-shadow: 0 8px 20px rgba(194,24,91,0.35) !important;
+    }
+
+    .rc-slider-handle:active {
+      transform: scale(1.25) !important;
+      box-shadow: 0 10px 24px rgba(194,24,91,0.45) !important;
     }
 
     .rc-slider-track,
     .rc-slider-rail {
-      height: 10px !important;
+      height: 12px !important;
     }
 
     .rc-slider-mark-text {
       font-size: 11px !important;
       margin-top: 12px !important;
     }
+  }
+
+  /* Critical: Prevent browser from interfering with slider movement */
+  .rc-slider {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    touch-action: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    will-change: transform !important;
+  }
+
+  .rc-slider-handle {
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -khtml-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    touch-action: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    will-change: transform !important;
+    transform: translateZ(0) !important;
+  }
+
+  /* Prevent any potential interference */
+  .rc-slider-track,
+  .rc-slider-rail {
+    will-change: transform !important;
+    transform: translateZ(0) !important;
   }
 }
 
