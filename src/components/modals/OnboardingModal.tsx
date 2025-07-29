@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db, auth } from '../../config/firebase';
-import { getMarkets, Market } from '../../services/markets';
+import { getMarkets } from '../../services/markets';
 import * as Yup from 'yup';
 
 interface OnboardingModalProps {
@@ -30,6 +30,8 @@ const onboardingSchema = Yup.object().shape({
     .matches(/^[6-9][0-9]{9}$/, 'Enter a valid 10-digit mobile number')
     .required('Mobile number is required'),
   gender: Yup.string().required('Gender is required'),
+  age: Yup.number().min(18, 'Age must be at least 18').max(100, 'Age must be less than 100').required('Age is required'),
+  profession: Yup.string().required('Profession is required'),
   lookingFor: Yup.string().required('Looking for is required'),
   city: Yup.string().required('City is required'),
   locality: Yup.string().required('Locality is required'),
@@ -39,18 +41,22 @@ const onboardingSchema = Yup.object().shape({
 const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, onClose }) => {
   const [mobile, setMobile] = useState('');
   const [gender, setGender] = useState('');
+  const [age, setAge] = useState('');
+  const [profession, setProfession] = useState('');
   const [lookingFor, setLookingFor] = useState('');
   const [loading, setLoading] = useState(false);
   const [preferences, setPreferences] = useState<string[]>([]);
   const [city, setCity] = useState('');
   const [locality, setLocality] = useState('');
-  const [markets, setMarkets] = useState<Market[]>([]);
+  const [markets, setMarkets] = useState<any[]>([]);
   const [cities, setCities] = useState<string[]>([]);
-  const [localities, setLocalities] = useState<Market[]>([]);
+  const [localities, setLocalities] = useState<any[]>([]);
   const [marketsLoading, setMarketsLoading] = useState(true);
   const [mobileError, setMobileError] = useState('');
   const [submitted, setSubmitted] = useState(false); // Set to false initially - only show errors on submit
   const [genderError, setGenderError] = useState('');
+  const [ageError, setAgeError] = useState('');
+  const [professionError, setProfessionError] = useState('');
   const [lookingForError, setLookingForError] = useState('');
   const [cityError, setCityError] = useState('');
   const [localityError, setLocalityError] = useState('');
@@ -84,6 +90,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
       await onboardingSchema.validate({
         mobile,
         gender,
+        age: Number(age),
+        profession,
         lookingFor,
         city,
         locality,
@@ -91,6 +99,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
       }, { abortEarly: false });
       setMobileError('');
       setGenderError('');
+      setAgeError('');
+      setProfessionError('');
       setLookingForError('');
       setCityError('');
       setLocalityError('');
@@ -103,6 +113,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
         });
         setMobileError(errorMap.mobile || '');
         setGenderError(errorMap.gender || '');
+        setAgeError(errorMap.age || '');
+        setProfessionError(errorMap.profession || '');
         setLookingForError(errorMap.lookingFor || '');
         setCityError(errorMap.city || '');
         setLocalityError(errorMap.locality || '');
@@ -122,6 +134,8 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
         photoURL, // Save Google photoURL
         userPhoneNumber: mobile,
         gender,
+        age: Number(age),
+        profession,
         lookingFor,
         preferences,
         city,
@@ -186,6 +200,46 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
           {submitted && genderError && (
             <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {genderError}
+            </p>
+          )}
+        </div>
+        <div className="mb-3">
+          <label className="block text-sm font-medium mb-1" htmlFor="onboard-age">Age</label>
+          <input
+            id="onboard-age"
+            type="number"
+            value={age}
+            onChange={e => { setAge(e.target.value); if (ageError) setAgeError(''); }}
+            className={`input w-full${ageError ? ' border-red-500 bg-red-50' : ''}`}
+            placeholder="Enter your age"
+            title="Age"
+            min="18"
+            max="100"
+            spellCheck={false}
+            autoCorrect="off"
+          />
+          {submitted && ageError && (
+            <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {ageError}
+            </p>
+          )}
+        </div>
+        <div className="mb-3">
+          <label className="block text-sm font-medium mb-1" htmlFor="onboard-profession">Profession</label>
+          <input
+            id="onboard-profession"
+            type="text"
+            value={profession}
+            onChange={e => { setProfession(e.target.value); if (professionError) setProfessionError(''); }}
+            className={`input w-full${professionError ? ' border-red-500 bg-red-50' : ''}`}
+            placeholder="Enter your profession"
+            title="Profession"
+            spellCheck={true}
+            autoCorrect="on"
+          />
+          {submitted && professionError && (
+            <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {professionError}
             </p>
           )}
         </div>

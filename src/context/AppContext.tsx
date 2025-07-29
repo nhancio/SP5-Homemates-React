@@ -141,11 +141,18 @@ type User = {
   photoURL: string;
   isPremium: boolean;
   preferences?: string[];
+  gender?: string;
+  age?: number;
+  profession?: string;
+  city?: string;
+  locality?: string;
+  userPhoneNumber?: string;
 };
 
 interface AppContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   filters: Filters;
   setFilters: (filters: Filters) => void;
   login: () => Promise<void>;
@@ -195,6 +202,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   const [showPreferences, setShowPreferences] = React.useState(false);
   const [showOnboarding, setShowOnboarding] = React.useState(false);
   const [loginError, setLoginError] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const clearLoginError = () => {
     setLoginError(null);
@@ -286,6 +294,12 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
             photoURL: data.photoURL || firebaseUser.photoURL || '',
             isPremium: data.isPremium || false,
             preferences: data.preferences || [],
+            gender: data.gender || '',
+            age: data.age || 0,
+            profession: data.profession || '',
+            city: data.city || '',
+            locality: data.locality || '',
+            userPhoneNumber: data.userPhoneNumber || '',
           };
           // Check for required fields
           const hasRequiredFields = !!(data.userPhoneNumber && data.gender && data.lookingFor);
@@ -307,6 +321,12 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
             photoURL: firebaseUser.photoURL || '',
             isPremium: false,
             preferences: [],
+            gender: '',
+            age: 0,
+            profession: '',
+            city: '',
+            locality: '',
+            userPhoneNumber: '',
           };
           needsOnboarding = true;
         }
@@ -319,6 +339,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
         setUser(null);
         localStorage.removeItem('user');
       }
+      setIsLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -354,6 +375,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   const value: AppContextType = {
     user,
     isAuthenticated: !!user,
+    isLoading,
     filters,
     setFilters,
     login,

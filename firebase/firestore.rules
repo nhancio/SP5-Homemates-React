@@ -31,5 +31,21 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAuthenticated();
     }
+
+    // Rules for messages collection
+    match /messages/{messageId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Rules for conversations collection
+    match /conversations/{conversationId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // Rules for user collection (u)
+    match /u/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
   }
 }
