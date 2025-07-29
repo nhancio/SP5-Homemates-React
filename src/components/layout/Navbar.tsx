@@ -65,7 +65,7 @@ const Navbar = () => {
                 <Home className="w-5 h-5" />
                 <span className="font-medium">Home</span>
               </Link>
-              <Link
+              {/* <Link
                 to="/rent" 
                 className={`flex items-center space-x-2 transition-colors ${
                   isActive('/rent') ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'
@@ -73,7 +73,7 @@ const Navbar = () => {
               >
                 <Building className="w-5 h-5" />
                 <span className="font-medium">Shared Homes</span>
-              </Link>
+              </Link> */}
               <Link 
                 to="/add-listing" 
                 className={`flex items-center space-x-2 transition-colors ${

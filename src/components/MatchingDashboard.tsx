@@ -58,40 +58,40 @@ const MatchingDashboard: React.FC<MatchingDashboardProps> = ({ onViewMatches }) 
         </div>
       </div>
 
-      {/* Algorithm Features */}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+        {/* <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
           <div className="flex items-center gap-3 mb-2">
             <Heart className="w-6 h-6 text-blue-600" />
             <h3 className="font-semibold text-blue-800">Preference Matching</h3>
           </div>
           <p className="text-sm text-blue-700">35% weight on shared interests and lifestyle preferences</p>
-        </div>
+        </div>  */}
 
-        <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+        {/* <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
           <div className="flex items-center gap-3 mb-2">
             <MapPin className="w-6 h-6 text-green-600" />
             <h3 className="font-semibold text-green-800">Location Matching</h3>
           </div>
           <p className="text-sm text-green-700">25% weight on city and locality compatibility</p>
-        </div>
+        </div> */}
 
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+        {/* <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
           <div className="flex items-center gap-3 mb-2">
             <DollarSign className="w-6 h-6 text-purple-600" />
             <h3 className="font-semibold text-purple-800">Budget Compatibility</h3>
           </div>
           <p className="text-sm text-purple-700">20% weight on budget range overlap</p>
-        </div>
+        </div> */}
 
-        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
+        {/* <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-4 rounded-lg border border-orange-200">
           <div className="flex items-center gap-3 mb-2">
             <Users className="w-6 h-6 text-orange-600" />
             <h3 className="font-semibold text-orange-800">Lifestyle Match</h3>
           </div>
           <p className="text-sm text-orange-700">15% weight on age, profession, and lifestyle</p>
-        </div>
-      </div>
+        </div>  */}
+      </div> 
 
       {/* Top Matches Preview */}
       <div className="mb-6">

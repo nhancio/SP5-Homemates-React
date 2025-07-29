@@ -1361,24 +1361,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         </p>}
       </section>
       {/* Property Type */}
-      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-semibold mb-4">Property Type</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
-            <select
-              className={`input w-full${displayErrors.propertyType ? ' border-red-500 bg-red-50' : ''}`}
-              value={formData.propertyType || ''}
-              onChange={e => setFormData({ ...formData, propertyType: e.target.value })}
-              onBlur={() => markTouched('propertyType')}
-            >
-              <option value="">Select Property Type</option>
-              {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
-            </select>
-            {displayErrors.propertyType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.propertyType}</p>}
-          </div>
-        </div>
-      </section>
+      
       {/* Home Details Section */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4">Home Details</h2>
@@ -1577,7 +1560,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       </section>
       {/* Price Details */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-semibold mb-4">Price Details</h2>
+        <h2 className="text-lg font-semibold mb-4">Rent Details</h2>
         {submitted && displayErrors.price && (
           <div className="mb-4">
             <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">

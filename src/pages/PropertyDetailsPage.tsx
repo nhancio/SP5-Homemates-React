@@ -451,10 +451,7 @@ Link: ${url}`;
                     <span className="text-gray-600 text-sm">Furnishing</span>
                     <p className="font-semibold text-sm md:text-base">{property.furnishingType}</p>
                   </div>
-                  <div>
-                    <span className="text-gray-600 text-sm">Building Type</span>
-                    <p className="font-semibold text-sm md:text-base">{property.buildingType}</p>
-                  </div>
+                  
                   <div>
                     <span className="text-gray-600 text-sm">Available From</span>
                     <p className="font-semibold text-sm md:text-base">
@@ -613,16 +610,16 @@ Link: ${url}`;
               {/* Description */}
               <div className="p-4 md:p-6">
                 <h2 className="text-lg font-semibold mb-4">Description</h2>
-                <div className="mb-4">
+                {/* <div className="mb-4">
                   <h3 className="font-bold mb-1 text-sm md:text-base">Location</h3>
                   <div className="text-sm md:text-base">City: {property.address?.city}</div>
                   <div className="text-sm md:text-base">Locality: {property.address?.locality}</div>
                   {property.address?.buildingName && <div className="text-sm md:text-base">Address: {property.address.buildingName}</div>}
-                </div>
-                <div className="mb-4">
+                </div> */}
+                {/* <div className="mb-4">
                   <h3 className="font-bold mb-1 text-sm md:text-base">Services</h3>
-                  <div className="text-sm md:text-base">{property.services?.length ? property.services.map((s: string) => SERVICES.find(x => x.key === s)?.label).join(', ') : 'None'}</div>
-                </div>
+                  {/* <div className="text-sm md:text-base">{property.services?.length ? property.services.map((s: string) => SERVICES.find(x => x.key === s)?.label).join(', ') : 'None'}</div>
+                </div> */} 
                 <p className="text-gray-700 whitespace-pre-line text-sm md:text-base">{property.description}</p>
               </div>
             </div>

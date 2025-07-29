@@ -532,7 +532,7 @@ const ProfilePage = () => {
           </button> */}
         </div>
         {/* Profile Completion Progress Bar */}
-        <div className="mb-6">
+        {/* <div className="mb-6">
           <div className="flex items-center justify-between mb-1">
             <span className="font-semibold text-primary-700">Profile Completion</span>
             <span className="text-primary-700 font-bold">{completionPercent}%</span>
@@ -544,7 +544,7 @@ const ProfilePage = () => {
             />
           </div>
           <div className="text-sm text-gray-600 mt-1">{completionMsg}</div>
-        </div>
+        </div> */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           {/* Cover Image - now supports upload and display */}
           <div className="relative h-32 bg-gradient-to-r from-primary-600 to-primary-800">
@@ -708,7 +708,7 @@ const ProfilePage = () => {
                       <div className="flex flex-col items-center gap-2 mb-6">
                         <div className="flex items-center gap-3">
                           <span className="line-through text-gray-400 text-base md:text-lg">₹499</span>
-                          <span className="text-2xl md:text-3xl font-bold text-primary-700">₹99/month</span>
+                          <span className="text-2xl md:text-3xl font-bold text-primary-700">₹99 only</span>
                         </div>
                       </div>
                       <button 
@@ -850,10 +850,10 @@ const ProfilePage = () => {
 
                 {/* User stats */}
                 <div className="mt-6 flex flex-wrap gap-6 items-center">
-                  <div className="flex items-center gap-2 text-primary-700 font-semibold">
+                  {/* <div className="flex items-center gap-2 text-primary-700 font-semibold">
                     <CreditCard className="w-4 h-4 md:w-5 md:h-5" />
                     <span className="text-sm md:text-base">{userListings.length} Listings Posted</span>
-                  </div>
+                  </div> */}
                 </div>
 
               </div>
@@ -980,7 +980,7 @@ const ProfilePage = () => {
             <div className="fixed inset-0 bg-black bg-opacity-30" />
             <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-8 z-10">
               <Dialog.Title className="text-2xl font-bold mb-4">Upgrade to Premium</Dialog.Title>
-              <p className="mb-4 text-gray-700">Get exclusive benefits and features with a Premium membership for just <span className="font-bold text-primary-700">₹99/month</span>.</p>
+              <p className="mb-4 text-gray-700">Get exclusive benefits and features with a Premium membership for just <span className="font-bold text-primary-700">₹99 only</span>.</p>
               <ul className="list-disc pl-6 mb-4 text-primary-700">
                 <li className="mb-1">Priority support from Homemates team</li>
                 <li className="mb-1">Exclusive Homemates community events</li>
