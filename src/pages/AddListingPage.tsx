@@ -361,7 +361,6 @@ const AddListingPage = () => {
             brokerage: formData.brokerage,
             securityDeposit: formData.securityDeposit,
             gst: formData.sellDetails?.gst || 0,
-            isNegotiable: formData.sellDetails?.isNegotiable || false,
             sqft: formData.sellDetails?.sqft || 0,
             direction: formData.sellDetails?.direction || '',
             ownership: formData.sellDetails?.ownership || '',
