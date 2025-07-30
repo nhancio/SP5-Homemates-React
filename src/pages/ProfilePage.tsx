@@ -688,15 +688,19 @@ const ProfilePage = () => {
                       <ul className="text-left mb-6 space-y-2">
                         <li className="flex items-start gap-3">
                           <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
-                          <span className="text-sm md:text-base"><span className="font-semibold">Unlimited Calls</span> to property owners</span>
+                          <span className="text-sm md:text-base"><span className="font-semibold">20 Calls</span> to property owners</span>
                         </li>
                         <li className="flex items-start gap-3">
                           <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
-                          <span className="text-sm md:text-base"><span className="font-semibold">Unlimited Chats</span> with potential flatmates</span>
+                          <span className="text-sm md:text-base"><span className="font-semibold">20 WhatsApp</span> connections</span>
                         </li>
                         <li className="flex items-start gap-3">
                           <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
-                          <span className="text-sm md:text-base"><span className="font-semibold">Advanced AI-based Matching</span> for best results</span>
+                          <span className="text-sm md:text-base"><span className="font-semibold">Priority Support</span> for faster assistance</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
+                          <span className="text-sm md:text-base"><span className="font-semibold">Exclusive AI Features</span> for better matching</span>
                         </li>
                       </ul>
                       <div className="flex flex-col items-center gap-2 mb-6">
