@@ -1352,27 +1352,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           </div>
         </div>
       )}
-      {/* Contact Details */}
-      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-semibold mb-4">Contact Details</h2>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
-        <input
-          type="tel"
-          className={`input w-full${displayErrors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
-          placeholder="Enter your 10-digit mobile number"
-          value={formData.contactNumber || ''}
-          onChange={e => setFormData({ ...formData, contactNumber: e.target.value })}
-          pattern="[0-9]{10}"
-          maxLength={10}
-          spellCheck={false}
-          autoCorrect="off"
-          onBlur={() => markTouched('contactNumber')}
-        />
-        <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
-        {displayErrors.contactNumber && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-          {displayErrors.contactNumber}
-        </p>}
-      </section>
+
       {/* Property Type */}
       
       {/* Home Details Section */}
@@ -1750,6 +1730,27 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           onBlur={() => markTouched('securityDeposit')}
         />
         {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">{displayErrors.securityDeposit}</p>}
+      </div>
+
+      {/* Contact Details */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
+        <input
+          type="tel"
+          className={`input w-full${displayErrors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
+          placeholder="Enter your 10-digit mobile number"
+          value={formData.contactNumber || ''}
+          onChange={e => setFormData({ ...formData, contactNumber: e.target.value })}
+          pattern="[0-9]{10}"
+          maxLength={10}
+          spellCheck={false}
+          autoCorrect="off"
+          onBlur={() => markTouched('contactNumber')}
+        />
+        <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
+        {displayErrors.contactNumber && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {displayErrors.contactNumber}
+        </p>}
       </div>
       {/* Submit button removed for EditListingPage - handled by parent */}
     </>
