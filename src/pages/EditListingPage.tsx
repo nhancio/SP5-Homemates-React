@@ -20,14 +20,110 @@ const EditListingPage = () => {
   const [images, setImages] = useState<string[]>([]);
 
   useEffect(() => {
+    console.log('=== EDIT LISTING PAGE DEBUG ===');
+    console.log('isAuthenticated:', isAuthenticated);
+    console.log('existingListing:', existingListing);
+    console.log('location.state:', location.state);
+    console.log('listingType:', listingType);
+    console.log('listingId:', listingId);
+    
     if (!isAuthenticated) {
+      console.log('User not authenticated, redirecting to profile');
       navigate('/profile');
       return;
     }
 
     if (!existingListing) {
-      alert('No listing data found. Please go back to your profile.');
-      navigate('/profile');
+      console.log('No existing listing found in state, trying to fetch from Firestore');
+      // Try to fetch the listing from Firestore if not in state
+      const fetchListing = async () => {
+        try {
+          const { getPropertyById } = await import('../services/listings');
+          const listing = await getPropertyById(listingType as 'rent' | 'sell', listingId!);
+          console.log('Fetched listing from Firestore:', listing);
+          if (listing) {
+            // Initialize form data with fetched listing
+            setFormData({
+              // Common fields
+              address: {
+                city: (listing as any).address?.city || '',
+                locality: (listing as any).address?.locality || '',
+                buildingName: (listing as any).address?.buildingName || '',
+              },
+              propertyType: (listing as any).propertyType || '',
+              furnishingType: (listing as any).furnishingType || '',
+              parking: (listing as any).parking || '',
+              buildingType: (listing as any).buildingType || '',
+              handoverDate: (listing as any).handoverDate || '',
+              isImmediate: (listing as any).isImmediate || false,
+              description: (listing as any).description || '',
+              contactNumber: (listing as any).contactNumber || '',
+
+              // Rent specific fields
+              rentDetails: {
+                preferredTenant: {
+                  lookingFor: (listing as any).rentDetails?.preferredTenant?.lookingFor || '',
+                  preferences: (listing as any).rentDetails?.preferredTenant?.preferences || [],
+                },
+                roomDetails: {
+                  availableRooms: (listing as any).rentDetails?.roomDetails?.availableRooms || '',
+                  availability: (listing as any).rentDetails?.roomDetails?.availability || '',
+                  bathroomType: (listing as any).rentDetails?.roomDetails?.bathroomType || '',
+                },
+                amenities: (listing as any).rentDetails?.amenities || [],
+                costs: {
+                  rent: (listing as any).rentDetails?.costs?.rent || '',
+                  maintenance: (listing as any).rentDetails?.costs?.maintenance || '',
+                  securityDeposit: (listing as any).rentDetails?.costs?.securityDeposit || '',
+                  setupCost: (listing as any).rentDetails?.costs?.setupCost || '',
+                  brokerage: (listing as any).rentDetails?.costs?.brokerage || '',
+                },
+                additionalBills: {
+                  wifi: (listing as any).rentDetails?.additionalBills?.wifi || '',
+                  water: (listing as any).rentDetails?.additionalBills?.water || '',
+                  gas: (listing as any).rentDetails?.additionalBills?.gas || '',
+                  cook: (listing as any).rentDetails?.additionalBills?.cook || '',
+                  maid: (listing as any).rentDetails?.additionalBills?.maid || '',
+                  others: (listing as any).rentDetails?.additionalBills?.others || '',
+                }
+              },
+
+              // Sell specific fields
+              sellDetails: {
+                price: (listing as any).sellDetails?.price || '',
+                gst: (listing as any).sellDetails?.gst || '',
+                sqft: (listing as any).sellDetails?.sqft || '',
+                direction: (listing as any).sellDetails?.direction || '',
+                isNegotiable: (listing as any).sellDetails?.isNegotiable || false,
+                propertyType: (listing as any).sellDetails?.propertyType || '',
+                ownership: (listing as any).sellDetails?.ownership || '',
+                ageOfProperty: (listing as any).sellDetails?.ageOfProperty || '',
+                totalFloors: (listing as any).sellDetails?.totalFloors || '',
+                floorNumber: (listing as any).sellDetails?.floorNumber || '',
+                waterSupply: (listing as any).sellDetails?.waterSupply || '',
+                approvals: (listing as any).sellDetails?.approvals || [],
+                amenities: (listing as any).sellDetails?.amenities || [],
+                highlights: (listing as any).sellDetails?.highlights || [],
+                description: (listing as any).sellDetails?.description || '',
+                propertyId: (listing as any).sellDetails?.propertyId || '',
+                loanOnProperty: (listing as any).sellDetails?.loanOnProperty || false
+              },
+              builtUpArea: (listing as any).builtUpArea || '',
+              ageOfProperty: (listing as any).ageOfProperty || '',
+            });
+            setImages((listing as any).images || []);
+          } else {
+            alert('No listing data found. Please go back to your profile.');
+            navigate('/profile');
+          }
+        } catch (error) {
+          console.error('Error fetching listing:', error);
+          alert('Failed to load listing data. Please go back to your profile.');
+          navigate('/profile');
+        }
+      };
+      
+      fetchListing();
       return;
     }
     
@@ -106,7 +202,7 @@ const EditListingPage = () => {
 
     // Set images
     setImages(existingListing.images || []);
-  }, [isAuthenticated, navigate, existingListing]);
+  }, [isAuthenticated, navigate, existingListing, listingType, listingId, location.state]);
 
   const validate = () => {
     const newErrors: any = {};

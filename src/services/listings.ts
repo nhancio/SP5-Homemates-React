@@ -1,6 +1,6 @@
 // Coming soon
 
-import { collection, addDoc, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { getAuth } from 'firebase/auth';
 
@@ -601,9 +601,9 @@ export const initiatePhonePePayment = async (amount: number, userPhone: string) 
  */
 export async function updateListing(type: 'rent' | 'sell', id: string, data: Partial<RentListing | SellListing>) {
   try {
-    // const collectionName = type === 'rent' ? 'r' : 's';
-    // const docRef = doc(db, collectionName, id);
-    // await import('firebase/firestore').then(({ updateDoc }) => updateDoc(docRef, data));
+    const collectionName = type === 'rent' ? 'r' : 's';
+    const docRef = doc(db, collectionName, id);
+    await updateDoc(docRef, data);
     return { success: true };
   } catch (error) {
     console.error('Error updating listing:', error);
@@ -618,9 +618,9 @@ export async function updateListing(type: 'rent' | 'sell', id: string, data: Par
  */
 export async function deleteListing(type: 'rent' | 'sell', id: string) {
   try {
-    // const collectionName = type === 'rent' ? 'r' : 's';
-    // const docRef = doc(db, collectionName, id);
-    // await import('firebase/firestore').then(({ deleteDoc }) => deleteDoc(docRef));
+    const collectionName = type === 'rent' ? 'r' : 's';
+    const docRef = doc(db, collectionName, id);
+    await deleteDoc(docRef);
     return { success: true };
   } catch (error) {
     console.error('Error deleting listing:', error);

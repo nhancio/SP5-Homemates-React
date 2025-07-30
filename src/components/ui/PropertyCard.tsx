@@ -220,29 +220,42 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   }, [user, property, listingType]);
 
   // --- Management Actions ---
-  const handleEdit = () => {
-    navigate(`/edit-listing/${listingType}/${property.id}`);
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Use the property's actual listing type
+    const actualListingType = (property as any).listingType || listingType;
+    navigate(`/edit-listing/${actualListingType}/${property.id}`, {
+      state: { listing: property }
+    });
   };
-  const handleDelete = async () => {
+  
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!window.confirm('Are you sure you want to delete this listing?')) return;
     try {
       const { deleteListing } = await import('../../services/listings');
-      const apiType = listingType === 'buy' ? 'sell' : 'rent';
-      await deleteListing(apiType, property.id);
+      // Use the property's actual listing type
+      const actualListingType = (property as any).listingType || listingType;
+      await deleteListing(actualListingType, property.id);
       alert('Listing deleted successfully!');
       if (onDelete) onDelete(property.id);
     } catch (err) {
+      console.error('Error deleting listing:', err);
       alert('Failed to delete listing. Please try again.');
     }
   };
-  const handleView = () => {
+  
+  const handleView = (e: React.MouseEvent) => {
+    e.stopPropagation();
     // Force scroll to top immediately
     window.scrollTo(0, 0);
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
     
     // Navigate after ensuring scroll position
-    navigate(listingType === 'rent' ? `/rent/${property.id}` : `/buy/${property.id}`);
+    const actualListingType = (property as any).listingType || listingType;
+    const displayType = actualListingType === 'sell' ? 'buy' : 'rent';
+    navigate(displayType === 'rent' ? `/rent/${property.id}` : `/buy/${property.id}`);
   };
 
   // --- Small Card Variant ---

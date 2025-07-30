@@ -156,32 +156,21 @@ const ProfilePage = () => {
   useEffect(() => {
     // Fetch user listings
     const fetchUserListings = async () => {
-      if (!user) {
-        console.log('No user found in ProfilePage');
-        setUserListings([]);
-        return;
-      }
+      if (!user) return;
+      
       setListingsLoading(true);
       setListingsError(null);
+      
       try {
-        console.log('=== PROFILE PAGE DEBUG START ===');
-        console.log('Fetching user listings for user:', user);
-        console.log('User ID:', user.id);
-        console.log('User object:', user);
-        console.log('Is user authenticated?', !!user);
-        
-        // Add a small delay to ensure Firebase Auth is fully initialized
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        console.log('=== FETCH USER LISTINGS DEBUG ===');
+        console.log('Fetching listings for user:', user.id);
         const listings = await getListingsByUser(user.id);
-        console.log('Listings returned from getListingsByUser:', listings);
-        console.log('Number of listings:', listings.length);
+        console.log('Retrieved listings:', listings);
+        console.log('Listing types:', listings.map(l => ({ id: l.id, listingType: l.listingType })));
         setUserListings(listings);
-        console.log('=== PROFILE PAGE DEBUG END ===');
-      } catch (err) {
-        console.error('=== PROFILE PAGE ERROR ===');
-        console.error('Error fetching user listings:', err);
-        setListingsError('Failed to load your listings.');
+      } catch (error) {
+        console.error('Error fetching user listings:', error);
+        setListingsError('Failed to load listings');
       } finally {
         setListingsLoading(false);
       }
@@ -515,9 +504,14 @@ const ProfilePage = () => {
   const savePreferences = async () => {
     setSavingField('preferences');
     try {
+      console.log('Saving preferences:', preferencesInput);
+      console.log('User ID:', profileUser.id);
       await updateDoc(doc(db, 'u', profileUser.id), { preferences: preferencesInput });
       setProfileUser((prev: any) => ({ ...prev, preferences: preferencesInput }));
       setEditingPreferences(false);
+      console.log('Preferences saved successfully');
+    } catch (error) {
+      console.error('Error saving preferences:', error);
     } finally {
       setSavingField(null);
     }
@@ -804,30 +798,45 @@ const ProfilePage = () => {
                   {editingPreferences ? (
                     <div className="flex flex-wrap gap-2 mb-2">
                       {USER_PREFERENCES.map((pref) => {
+                        // Use a fallback icon if the specified icon doesn't exist
                         const Icon = (LucideIcons as any)[pref.icon] || LucideIcons.User;
                         const selected = preferencesInput.includes(pref.label);
                         return (
-                  <button
+                          <button
                             key={pref.id}
                             type="button"
-                    onClick={() => {
+                            onClick={() => {
                               setPreferencesInput(selected
                                 ? preferencesInput.filter((p: string) => p !== pref.label)
                                 : [...preferencesInput, pref.label]);
-                    }}
+                            }}
                             className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
                               ? 'bg-primary-600 text-white border-primary-600 shadow'
                               : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
                             tabIndex={0}
-                  >
+                          >
                             <Icon className={`w-5 h-5 mb-1 ${selected ? 'text-white' : 'text-primary-600'}`} />
                             <span className="whitespace-nowrap">{pref.label}</span>
-                  </button>
+                          </button>
                         );
                       })}
                       <div className="w-full flex gap-2 mt-2">
-                        <button className="btn btn-primary btn-sm" onClick={savePreferences} disabled={savingField==='preferences'}>Save</button>
-                        <button className="btn btn-outline btn-sm" onClick={() => { setEditingPreferences(false); setPreferencesInput(displayPreferences || []); }}>Cancel</button>
+                        <button 
+                          className="btn btn-primary btn-sm" 
+                          onClick={savePreferences} 
+                          disabled={savingField === 'preferences'}
+                        >
+                          {savingField === 'preferences' ? 'Saving...' : 'Save'}
+                        </button>
+                        <button 
+                          className="btn btn-outline btn-sm" 
+                          onClick={() => { 
+                            setEditingPreferences(false); 
+                            setPreferencesInput(displayPreferences || []); 
+                          }}
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
                   ) : (
@@ -843,7 +852,10 @@ const ProfilePage = () => {
                           <span className="text-gray-500">No preferences set yet.</span>
                         )}
                       </div>
-                      <button className="ml-2" onClick={() => setEditingPreferences(true)}><Edit className="w-4 h-4 text-primary-600" /></button>
+                      <button className="ml-2" onClick={() => {
+                        setEditingPreferences(true);
+                        setPreferencesInput(displayPreferences || []);
+                      }}><Edit className="w-4 h-4 text-primary-600" /></button>
                     </div>
                   )}
                 </div>

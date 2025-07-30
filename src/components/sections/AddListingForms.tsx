@@ -1191,20 +1191,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         </p>}
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
         </div>
-      {/* Only one submit button at the bottom */}
-      <button 
-        type="button" 
-        className="btn btn-primary max-w-xs mx-auto block"
-        onClick={async () => {
-          setSubmitted(true);
-          const isValid = await validate();
-          if (isValid && props.onSubmit) {
-            props.onSubmit();
-          }
-        }}
-      >
-        Submit
-      </button>
+      {/* Submit button removed for EditListingPage - handled by parent */}
     </>
   );
 };
@@ -1685,25 +1672,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           {displayErrors.images}
         </p>}
       </section>
-      {/* Only one submit button at the bottom */}
-      <button 
-        type="button" 
-        className="btn btn-primary max-w-xs mx-auto block"
-        onClick={async () => {
-          setSubmitted(true);
-          try {
-            const isValid = await validate();
-            console.log('SellForm submit - validation result:', isValid);
-            if (isValid && props.onSubmit) {
-              props.onSubmit();
-            }
-          } catch (error) {
-            console.error('SellForm validation error:', error);
-          }
-        }}
-      >
-        Submit
-      </button>
+      {/* Submit button removed for EditListingPage - handled by parent */}
     </>
   );
 };

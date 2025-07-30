@@ -16,6 +16,7 @@ import RefundPolicyPage from './pages/RefundPolicyPage';
 import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
 import CardDemoPage from './pages/CardDemoPage';
 import ErrorBoundary from './components/ErrorBoundary';
+import { AppContextProvider } from './context/AppContext';
 
 const router = createBrowserRouter([
   {
@@ -66,9 +67,11 @@ function App() {
       });
   }, []);
   return (
-    <ErrorBoundary>
-      <RouterProvider router={router} />
-    </ErrorBoundary>
+    <AppContextProvider>
+      <ErrorBoundary>
+        <RouterProvider router={router} />
+      </ErrorBoundary>
+    </AppContextProvider>
   );
 }
 
