@@ -1,19 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PropertyFilters from '../components/filters/PropertyFilters';
 import PropertyCard from '../components/ui/PropertyCard';
 import { Building, Loader, User, Search, X } from 'lucide-react';
 import { getListings } from '../services/listings';
 import { useAppContext } from '../context/AppContext';
 
-const propertyTypes = ['Flat', 'Gated Community', 'Independent House', 'Villa'];
-const bhkTypes = [
-  '1RK',
-  '2BHK',
-  '3BHK',
-  '4BHK',
-  '4BHK+'
-];
+
 
 const BuyPropertiesPage = () => {
   const navigate = useNavigate();
@@ -163,55 +155,48 @@ const BuyPropertiesPage = () => {
             )}
           </div>
         </div>
-        {/* Property Filters */}
+        {/* Properties Grid */}
         <div className="pb-24 lg:pb-0">
-          <PropertyFilters 
-            propertyTypes={propertyTypes} 
-            bhkTypes={bhkTypes}
-            listingType="buy"
-            variant="side-panel"
-          >
-            {isLoading ? (
-              <div className="flex items-center justify-center min-h-[400px]">
-                <div className="text-center">
-                  <Loader className="w-12 h-12 animate-spin text-primary-600 mx-auto mb-4" />
-                  <p className="text-gray-600">Loading properties...</p>
+          {isLoading ? (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <Loader className="w-12 h-12 animate-spin text-primary-600 mx-auto mb-4" />
+                <p className="text-gray-600">Loading properties...</p>
+              </div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
+              <Building className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Error Loading Properties</h3>
+              <p className="text-gray-600">{error}</p>
+            </div>
+          ) : (
+            <>
+              {filteredProperties.length === 0 ? (
+                <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
+                  <Building className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">No properties found</h3>
+                  <p className="text-gray-600">
+                    Try adjusting your search or check back later for new listings
+                  </p>
                 </div>
-              </div>
-            ) : error ? (
-              <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
-                <Building className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Error Loading Properties</h3>
-                <p className="text-gray-600">{error}</p>
-              </div>
-            ) : (
-              <>
-                {filteredProperties.length === 0 ? (
-                  <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
-                    <Building className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No properties found</h3>
-                    <p className="text-gray-600">
-                      Try adjusting your filters or check back later for new listings
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
-                    {filteredProperties.map(property => (
-                      <div key={property.id} className="min-w-[300px]">
-                        <PropertyCard
-                          property={property}
-                          listingType={property.rentDetails ? 'rent' : 'buy'}
-                          variant="small"
-                          onClick={() => handlePropertyClick(property)}
-                          showBadge={false}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </PropertyFilters>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
+                  {filteredProperties.map(property => (
+                    <div key={property.id} className="min-w-[300px]">
+                      <PropertyCard
+                        property={property}
+                        listingType={property.rentDetails ? 'rent' : 'buy'}
+                        variant="small"
+                        onClick={() => handlePropertyClick(property)}
+                        showBadge={false}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

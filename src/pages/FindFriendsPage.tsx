@@ -41,6 +41,7 @@ interface User {
   photoURL?: string;
   avatarUrl?: string;
   gender?: string;
+  housingType?: string; // 'shared' or 'full'
   address?: {
     city?: string;
     locality?: string;
@@ -53,6 +54,7 @@ interface Filters {
   profession?: string;
   age?: string;
   preferences?: string;
+  housingType?: string; // 'shared' or 'full'
 }
 
 const FindFriendsPage = () => {
@@ -62,6 +64,8 @@ const FindFriendsPage = () => {
   const [activeFilters, setActiveFilters] = useState<Filters>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -134,6 +138,12 @@ const FindFriendsPage = () => {
         );
       });
     }
+    if (filters.housingType) {
+      filtered = filtered.filter(u => {
+        const userHousingType = u.housingType || '';
+        return userHousingType.toLowerCase() === filters.housingType!.toLowerCase();
+      });
+    }
     
     setFilteredUsers(filtered);
   };
@@ -162,38 +172,24 @@ const FindFriendsPage = () => {
     if (phoneNumber) {
       const currentUserName = user?.name || 'a Homemates user';
       const message = `Hi ${userName}! I'm ${currentUserName} from the Homemates app. I found your profile and would love to connect with you!`;
-      const url = `https://wa.me/${phoneNumber.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+      
+      // Clean phone number and ensure it has country code
+      let cleanPhone = phoneNumber.replace(/\D/g, '');
+      if (!cleanPhone.startsWith('91') && cleanPhone.length === 10) {
+        cleanPhone = '91' + cleanPhone; // Add India country code if missing
+      }
+      
+      // Use the api.whatsapp.com format for better compatibility
+      const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
       window.open(url, '_blank');
     } else {
       alert('Phone number not available');
     }
   };
 
+  // Filter chips are hidden for now
   const renderFilterChips = () => {
-    return (
-      <div className="flex flex-wrap gap-2 mb-6 justify-center items-center animate-fade-in">
-        {Object.entries(activeFilters).map(([key, value]) => (
-          <span key={key} className="inline-flex items-center px-3 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-semibold border border-primary-200 transition-all duration-300 animate-fade-in">
-            {key}: <span className="ml-1 font-bold">{String(value)}</span>
-            <button
-              className="ml-2 text-primary-400 hover:text-primary-700 focus:outline-none"
-              onClick={() => handleRemoveFilter(key)}
-              aria-label={`Remove filter ${key}`}
-              type="button"
-            >
-              ×
-            </button>
-          </span>
-        ))}
-        <button
-          className="ml-4 px-3 py-1 rounded-full bg-gray-200 hover:bg-primary-100 text-gray-700 hover:text-primary-700 border border-gray-300 text-xs font-medium transition"
-          onClick={handleClearAllFilters}
-          type="button"
-        >
-          Clear All
-        </button>
-      </div>
-    );
+    return null; // Don't render filter chips
   };
 
   return (
@@ -213,7 +209,7 @@ const FindFriendsPage = () => {
         
         <AIQueryBox
           onFiltersExtracted={handleAIFilters}
-          placeholder="Find friends, e.g. Software engineers in Bangalore, 25-30, who like music"
+          placeholder="Search for friends..."
           suggestions={[
             'Software engineers in Pune',
             'People who like cricket in Mumbai',
@@ -221,10 +217,12 @@ const FindFriendsPage = () => {
             'People interested in music in Kolkata',
             'Students in Delhi',
             'People who like movies in Bangalore',
+            'People looking for shared homes',
+            'People with full homes',
+            'Shared housing in Mumbai',
+            'Full homes in Bangalore',
           ]}
         />
-        
-        {Object.keys(activeFilters).length > 0 && renderFilterChips()}
         
         {loading && <div className="text-center text-lg text-primary-600">Loading...</div>}
         {error && <div className="text-red-500 text-center mb-4">{error}</div>}
@@ -289,13 +287,27 @@ const FindFriendsPage = () => {
                   <span className="text-xs font-semibold truncate">{city !== 'No City' ? city : 'City not set'}</span>
                 </div>
                 
-                {/* Locality */}
-                <div className="mb-3 flex items-center gap-2 text-gray-700 w-full">
-                  <div className="w-6 h-6 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                    <MapPin className="w-3.5 h-3.5 text-white" />
-                  </div>
-                  <span className="text-xs font-semibold truncate">{locality || 'Locality not set'}</span>
-                </div>
+                                 {/* Locality */}
+                 <div className="mb-3 flex items-center gap-2 text-gray-700 w-full">
+                   <div className="w-6 h-6 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                     <MapPin className="w-3.5 h-3.5 text-white" />
+                   </div>
+                   <span className="text-xs font-semibold truncate">{locality || 'Locality not set'}</span>
+                 </div>
+                 
+                 {/* Housing Type */}
+                 {user.housingType && (
+                   <div className="mb-3 flex items-center gap-2 text-gray-700 w-full">
+                     <div className="w-6 h-6 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
+                       <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                         <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6z"/>
+                       </svg>
+                     </div>
+                     <span className="text-xs font-semibold truncate capitalize">
+                       {user.housingType === 'shared' ? 'Shared Home' : user.housingType === 'full' ? 'Full Home' : user.housingType}
+                     </span>
+                   </div>
+                 )}
                 
                 {/* Preferences */}
                 {preferences && Array.isArray(preferences) && preferences.length > 0 && (
