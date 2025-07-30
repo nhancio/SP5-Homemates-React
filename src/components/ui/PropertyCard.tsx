@@ -185,7 +185,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       propertyType = property.sellDetails?.propertyType || property.type || '-';
     }
 
-    const shareText = `Hey, check this property on Homemates!\nName: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Rent'}: ₹${formatCurrency(price)}\nType: ${propertyType}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
+    const shareText = `Name: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Rent'}: ₹${formatCurrency(price)}\nType: ${propertyType}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
 
     try {
       if (navigator.share) {

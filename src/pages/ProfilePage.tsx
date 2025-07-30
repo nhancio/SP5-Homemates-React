@@ -736,11 +736,11 @@ const ProfilePage = () => {
                         <div className="space-y-2 mb-4">
                           <div className="flex items-center justify-center gap-2">
                             <Phone className="w-4 h-4 text-green-600" />
-                            <span className="text-sm md:text-base font-medium">3/3 Call credits available</span>
+                            <span className="text-sm md:text-base font-medium">{userCredits}/3 Call credits available</span>
                           </div>
                           <div className="flex items-center justify-center gap-2">
                             <MessageCircle className="w-4 h-4 text-green-600" />
-                            <span className="text-sm md:text-base font-medium">3/3 WhatsApp credits available</span>
+                            <span className="text-sm md:text-base font-medium">{userCredits}/3 WhatsApp credits available</span>
                           </div>
                         </div>
                         <div className="text-xs text-gray-500 mb-6">Use credits to contact property owners via call or WhatsApp.</div>
