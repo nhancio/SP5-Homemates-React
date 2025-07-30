@@ -49,7 +49,7 @@ const ProfilePage = () => {
 
   const { user, isAuthenticated, login, logout, loginError, clearLoginError } = useAppContext();
   const navigate = useNavigate();
-  const [showUpgradePopup, setShowUpgradePopup] = useState(false);
+
   const [profileUser, setProfileUser] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [userListings, setUserListings] = useState<any[]>([]);
@@ -246,10 +246,7 @@ const ProfilePage = () => {
     fetchMutualInterests();
   }, [user, profileUser]);
 
-  const handleUpgradeClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setShowUpgradePopup(true);
-  };
+
 
   const handlePhonePePayment = async () => {
     const upgradeAmount = 999; // Premium upgrade amount
@@ -263,7 +260,6 @@ const ProfilePage = () => {
     try {
       const res = await initiatePhonePePayment(upgradeAmount, userPhone);
       console.log('PhonePe payment response:', res);
-      setShowUpgradePopup(false);
     } catch (err) {
       alert('Payment initiation failed');
       console.error(err);
@@ -710,8 +706,13 @@ const ProfilePage = () => {
                         </div>
                       </div>
                       <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Upgrade button clicked - navigating to payment');
+                          window.location.href = '/payment';
+                        }}
                         className="w-full bg-primary-600 hover:bg-primary-700 text-white px-4 md:px-6 py-3 text-base md:text-lg font-semibold rounded-lg transition-colors mb-4" 
-                        onClick={handleUpgradeClick}
                       >
                         Upgrade to Premium
                       </button>
@@ -998,25 +999,7 @@ const ProfilePage = () => {
             </div>
           </div>
         </Dialog>
-        {/* Upgrade to Premium Popup */}
-        <Dialog open={showUpgradePopup} onClose={() => setShowUpgradePopup(false)} className="fixed z-50 inset-0 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-4">
-            <div className="fixed inset-0 bg-black bg-opacity-30" />
-            <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-8 z-10">
-              <Dialog.Title className="text-2xl font-bold mb-4">Upgrade to Premium</Dialog.Title>
-              <p className="mb-4 text-gray-700">Get exclusive benefits and features with a Premium membership for just <span className="font-bold text-primary-700">₹99 only</span>.</p>
-              <ul className="list-disc pl-6 mb-4 text-primary-700">
-                <li className="mb-1">Priority support from Homemates team</li>
-                <li className="mb-1">Exclusive Homemates community events</li>
-                <li className="mb-1">Personalized property recommendations</li>
-              </ul>
-              <div className="flex gap-4 mt-6">
-                <button className="btn btn-primary flex-1" onClick={handlePhonePePayment}>Pay ₹99 & Upgrade</button>
-                <button className="btn btn-outline flex-1" onClick={() => setShowUpgradePopup(false)}>Cancel</button>
-              </div>
-            </div>
-          </div>
-        </Dialog>
+
       </div>
     </div>
   );
