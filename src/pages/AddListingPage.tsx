@@ -73,6 +73,10 @@ const initialFormData = {
   homeType: '', // Add homeType for SellForm
   roomType: '', // Add roomType for SellForm
   furnishType: '', // Add furnishType for SellForm
+  rent: '', // Add rent field for sell listings
+  maintenance: '', // Add maintenance field for sell listings
+  brokerage: '', // Add brokerage field for sell listings
+  securityDeposit: '', // Add security deposit field for sell listings
 
   // Rent specific fields
   rentDetails: {
@@ -352,6 +356,10 @@ const AddListingPage = () => {
           listingType: 'sell',
           sellDetails: cleanFormData({
             price: formData.price,
+            rent: formData.rent,
+            maintenance: formData.maintenance,
+            brokerage: formData.brokerage,
+            securityDeposit: formData.securityDeposit,
             gst: formData.sellDetails?.gst || 0,
             isNegotiable: formData.sellDetails?.isNegotiable || false,
             sqft: formData.sellDetails?.sqft || 0,
