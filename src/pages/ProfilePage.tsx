@@ -732,8 +732,16 @@ const ProfilePage = () => {
                         Your Credits
                       </h3>
                       <div className="text-center">
-                        <div className="text-2xl md:text-3xl font-bold text-primary-600 mb-2">{Math.max(0, userCredits)}</div>
-                        <div className="text-xs md:text-sm text-gray-600 mb-2">Credits remaining</div>
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <Phone className="w-4 h-4 text-green-600" />
+                            <span className="text-sm md:text-base font-medium">3/3 Call credits available</span>
+                          </div>
+                          <div className="flex items-center justify-center gap-2">
+                            <MessageCircle className="w-4 h-4 text-green-600" />
+                            <span className="text-sm md:text-base font-medium">3/3 WhatsApp credits available</span>
+                          </div>
+                        </div>
                         <div className="text-xs text-gray-500 mb-6">Use credits to contact property owners via call or WhatsApp.</div>
                         <button
                           onClick={() => window.location.href = '/payment'}
