@@ -200,7 +200,7 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
         if (type === 'rent') {
           return property.listingType === 'rent';
         } else {
-          return property.listingType === 'buy' || property.listingType === 'sell';
+          return property.listingType === 'buy';
         }
       });
       
@@ -421,29 +421,54 @@ export async function getListingsByIds(ids: string[]) {
   try {
     if (!ids.length) return [];
 
-    // Fetch from both collections
-    const rentDocs = await getDocs(query(collection(db, 'r'), where('__name__', 'in', ids)));
-    const sellDocs = await getDocs(query(collection(db, 's'), where('__name__', 'in', ids)));
+    console.log('Fetching properties for IDs:', ids);
 
-    const rentProperties = rentDocs.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      listingType: 'rent'  // Add listing type
-    }));
+    // Split IDs into chunks of 10 (Firestore limitation)
+    const chunkSize = 10;
+    const idChunks = [];
+    for (let i = 0; i < ids.length; i += chunkSize) {
+      idChunks.push(ids.slice(i, i + chunkSize));
+    }
 
-    const sellProperties = sellDocs.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      listingType: 'sell'  // Add listing type as 'sell'
-    }));
+    console.log('Split into chunks:', idChunks.length);
+
+    // Fetch from both collections in chunks
+    const allRentProperties = [];
+    const allSellProperties = [];
+
+    for (const chunk of idChunks) {
+      try {
+        const rentDocs = await getDocs(query(collection(db, 'r'), where('__name__', 'in', chunk)));
+        const sellDocs = await getDocs(query(collection(db, 's'), where('__name__', 'in', chunk)));
+
+        const rentProperties = rentDocs.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          listingType: 'rent'
+        }));
+
+        const sellProperties = sellDocs.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          listingType: 'sell'
+        }));
+
+        allRentProperties.push(...rentProperties);
+        allSellProperties.push(...sellProperties);
+      } catch (error) {
+        console.error('Error fetching chunk:', chunk, error);
+        // Continue with other chunks even if one fails
+      }
+    }
 
     // Combine and maintain order
-    const allProperties = [...rentProperties, ...sellProperties];
+    const allProperties = [...allRentProperties, ...allSellProperties];
     const orderedProperties = ids
       .map(id => allProperties.find(prop => prop.id === id))
-      .filter(Boolean);
+      .filter((p): p is NonNullable<typeof p> => Boolean(p));
 
     console.log('Retrieved properties:', orderedProperties.length);
+    console.log('Property IDs found:', orderedProperties.map(p => p.id));
     return orderedProperties;
 
   } catch (error) {

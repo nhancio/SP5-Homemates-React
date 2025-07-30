@@ -81,5 +81,28 @@ export const logoutUser = async () => {
   }
 };
 
-export const getUserFavorites = () => [];
-// Add other dummy exports here as needed for your app to run.
+export const getUserFavorites = async (userId?: string): Promise<string[]> => {
+  try {
+    if (!userId && !auth.currentUser) {
+      return [];
+    }
+    
+    const targetUserId = userId || auth.currentUser?.uid;
+    if (!targetUserId) {
+      return [];
+    }
+
+    const userRef = doc(db, 'u', targetUserId);
+    const userSnap = await getDoc(userRef);
+    
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      return Array.isArray(data.favorites) ? data.favorites : [];
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error('Error fetching user favorites:', error);
+    return [];
+  }
+};

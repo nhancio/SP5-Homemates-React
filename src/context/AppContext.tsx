@@ -12,6 +12,7 @@ import { signInWithGoogle, logoutUser, getUserFavorites } from '../services/auth
 import { auth, db } from '../config/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { updateUserFavorites } from '../utils/userFavorites';
 
 type BaseFilters = {
   priceMin: number;
@@ -269,11 +270,27 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   const toggleFavorite = async (propertyId: string) => {
     if (!user) return;
 
+    const isCurrentlyFavorite = favoriteProperties.includes(propertyId);
+    const newFavoriteState = !isCurrentlyFavorite;
+
     setFavoriteProperties((prev) =>
-      prev.includes(propertyId)
+      isCurrentlyFavorite
         ? prev.filter((id) => id !== propertyId)
         : [...prev, propertyId]
     );
+
+    try {
+      await updateUserFavorites(user.id, propertyId, newFavoriteState);
+      console.log(`Property ${propertyId} ${newFavoriteState ? 'added to' : 'removed from'} favorites`);
+    } catch (error) {
+      console.error('Error updating favorites:', error);
+      // Revert the state change if the update failed
+      setFavoriteProperties((prev) =>
+        newFavoriteState
+          ? prev.filter((id) => id !== propertyId)
+          : [...prev, propertyId]
+      );
+    }
   };
 
   useEffect(() => {
@@ -364,7 +381,9 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const loadFavorites = async () => {
       if (user) {
-        const favorites = await getUserFavorites();
+        console.log('Loading favorites for user:', user.id);
+        const favorites = await getUserFavorites(user.id);
+        console.log('Loaded favorites:', favorites);
         setFavoriteProperties(favorites);
       }
     };

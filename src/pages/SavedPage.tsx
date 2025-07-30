@@ -18,14 +18,21 @@ const SavedPage = () => {
 
   useEffect(() => {
     const fetchSavedProperties = async () => {
+      console.log('=== SAVED PAGE DEBUG ===');
+      console.log('User:', user);
+      console.log('Favorite properties:', favoriteProperties);
+      
       if (!user || !favoriteProperties.length) {
+        console.log('No user or no favorite properties');
         setSavedProperties([]);
         setIsLoading(false);
         return;
       }
 
       try {
+        console.log('Fetching saved properties for IDs:', favoriteProperties);
         const properties = await getListingsByIds(favoriteProperties);
+        console.log('Retrieved properties:', properties);
         setSavedProperties(properties);
       } catch (error) {
         console.error('Error fetching saved properties:', error);
@@ -95,7 +102,7 @@ const SavedPage = () => {
                 key={property.id}
                 property={property}
                 listingType={property.listingType === 'sell' ? 'buy' : 'rent'}
-                variant="large"
+                variant="small"
               />
             ))}
           </div>
