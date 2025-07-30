@@ -11,6 +11,7 @@ import EditListingPage from './pages/EditListingPage';
 import SavedPage from './pages/SavedPage';
 import FindFriendsPage from './pages/FindFriendsPage';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
+import PaymentPage from './pages/PaymentPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
 import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
       { path: 'edit-listing/:listingType/:listingId', element: <EditListingPage /> },
       { path: 'saved', element: <SavedPage /> },
       { path: 'users', element: <FindFriendsPage /> },
+      { path: 'payment', element: <PaymentPage /> },
       { path: 'card-demo', element: <CardDemoPage /> },
       { path: 'privacy_policy', element: <PrivacyPolicyPage /> },
       { path: 'refund_policy', element: <RefundPolicyPage /> },

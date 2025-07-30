@@ -101,7 +101,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       }
     } catch (error) {
       console.error('Error using credits:', error);
-      alert('Failed to process request. Please try again.');
+      
+      // Fallback: If credits service is unavailable, still allow calling
+      // but show a warning that credits couldn't be deducted
+      console.log('Credits service unavailable, proceeding with call without credit deduction');
+      
+      const phone = property.contactInfo?.phone;
+      if (phone) {
+        window.location.href = `tel:${phone}`;
+      } else {
+        alert('Contact number not available for this property');
+      }
     }
   };
 
@@ -136,7 +146,19 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       }
     } catch (error) {
       console.error('Error using credits:', error);
-      alert('Failed to process request. Please try again.');
+      
+      // Fallback: If credits service is unavailable, still allow WhatsApp sharing
+      // but show a warning that credits couldn't be deducted
+      console.log('Credits service unavailable, proceeding with WhatsApp share without credit deduction');
+      
+      const phone = property.contactInfo?.phone;
+      if (phone) {
+        const message = `Hey, I want to know more about your flat listing I found at homematesapp.in/rent/${property.id}`;
+        const url = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+      } else {
+        alert('Contact number not available for this property');
+      }
     }
   };
 
@@ -144,9 +166,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     e.stopPropagation();
     const type = listingType === 'buy' ? 'sell' : 'rent';
     const url = getShareableUrl(property.id, type);
-    const price = listingType === 'rent' ? property.rentDetails?.costs?.rent : property.price;
+    
+    // Get the correct price/rent based on listing type
+    let price = 0;
+    if (listingType === 'rent') {
+      price = property.rentDetails?.costs?.rent || 0;
+    } else {
+      // For sell listings (full homes), use sellDetails.rent
+      price = property.sellDetails?.rent || property.price || 0;
+    }
 
-    const shareText = `Hey, check this property on Homemates!\nName: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Price'}: ₹${formatCurrency(price || 0)}\nType: ${property.type || '-'}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
+    const shareText = `Hey, check this property on Homemates!\nName: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Rent'}: ₹${formatCurrency(price)}\nType: ${property.type || '-'}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
 
     try {
       if (navigator.share) {

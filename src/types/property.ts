@@ -41,6 +41,10 @@ export interface RentDetailsFull {
 
 export interface SellDetails {
   price: number;
+  rent: number;
+  maintenance: number;
+  brokerage: number;
+  securityDeposit: number;
   gst: number;
   isNegotiable: boolean;
   propertyType: string;

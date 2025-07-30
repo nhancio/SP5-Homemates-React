@@ -169,30 +169,52 @@ const PropertyDetailsPage = () => {
 
   const handleShare = async () => {
     try {
+      console.log('Share function called');
+      console.log('Property:', property);
+      console.log('Listing type:', listingType);
+      
       const url = getShareableUrl(property.id, listingType);
+      console.log('Generated URL:', url);
+      
+      // Get the rent amount safely
+      let rentAmount = 0;
+      if (listingType === 'rent') {
+        rentAmount = property.rentDetails?.costs?.rent || 0;
+      } else {
+        rentAmount = property.sellDetails?.rent || 0;
+      }
+      console.log('Rent amount:', rentAmount);
+      
       const shareText = 
 `Hey, check this property on Homemates!
 Name: ${property.address?.buildingName || 'Property'}
-${listingType === 'rent' ? 'Rent' : 'Price'}: ₹${formatCurrency(
-  listingType === 'rent' 
-    ? (property.rentDetails?.costs?.rent || 0) 
-    : (property.sellDetails?.price || property.price || 0)
-)}
+Rent: ₹${formatCurrency(rentAmount)}
 Type: ${property.propertyType || '-'}
 Location: ${property.address?.locality}, ${property.address?.city}
 Link: ${url}`;
 
+      console.log('Share text:', shareText);
+
       if (navigator.share) {
+        console.log('Using navigator.share');
         await navigator.share({
           title: 'Check out this property on Homemates',
           text: shareText,
         });
+        console.log('Share successful');
       } else {
+        console.log('Using clipboard fallback');
         await navigator.clipboard.writeText(shareText);
         alert('Property details copied to clipboard!');
       }
     } catch (err) {
       console.error('Error sharing property:', err);
+      console.error('Error details:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+        error: err
+      });
+      alert('Failed to share property. Please try again.');
     }
   };
 
