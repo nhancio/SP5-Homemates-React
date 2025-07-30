@@ -76,24 +76,46 @@ const FindFriendsPage = () => {
         // Get current user's gender for filtering
         const currentUserGender = user?.gender || '';
         
+                                                              console.log('Current user gender:', currentUserGender);
+        console.log('Current user:', user);
+        
         // Fetch all users first
         const snapshot = await getDocs(collection(db, 'u'));
         let usersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as User[];
         
-        // Apply gender-based filtering
-        if (currentUserGender) {
+        console.log('Total users fetched:', usersData.length);
+        console.log('Users before gender filtering:', usersData.map(u => ({ id: u.id, name: u.name, gender: u.gender })));
+        
+        // Apply gender-based filtering - ALWAYS apply if user has gender
+        if (currentUserGender && currentUserGender.trim() !== '') {
+          const beforeCount = usersData.length;
           usersData = usersData.filter(u => {
             const userGender = u.gender || '';
+            const matches = userGender.toLowerCase() === currentUserGender.toLowerCase();
+            console.log(`User ${u.name} (${u.id}): gender=${userGender}, matches=${matches}`);
             // Males can only see males, females can only see females
-            return userGender.toLowerCase() === currentUserGender.toLowerCase();
+            return matches;
           });
+          console.log(`Gender filtering: ${beforeCount} -> ${usersData.length} users (showing only ${currentUserGender} users)`);
+        } else {
+          console.log('No gender filtering applied - current user has no gender set');
+          // If user has no gender, don't show any users for safety
+          usersData = [];
         }
         
         // Filter out current user
         usersData = usersData.filter(u => u.id !== user?.id);
+        console.log('Users after removing current user:', usersData.length);
         
         setUsers(usersData);
         setFilteredUsers(usersData);
+        
+        // Debug: Show which users are being displayed
+        console.log('=== FINAL USERS BEING DISPLAYED ===');
+        usersData.forEach((u, index) => {
+          console.log(`${index + 1}. ${u.name || 'No Name'} (${u.id}) - Gender: ${u.gender || 'Not set'}`);
+        });
+        console.log('=== END DISPLAYED USERS ===');
       } catch {
         setError('Failed to fetch users.');
       } finally {
@@ -199,10 +221,16 @@ const FindFriendsPage = () => {
         <p className="text-lg text-gray-600 mb-4 text-center">
           Connect with other Homemates users and grow your network!
         </p>
-        {user?.gender && (
+        {user?.gender ? (
           <div className="flex justify-center mb-8">
             <p className="text-sm font-medium text-primary-700 bg-primary-50 px-6 py-3 rounded-full inline-block">
               Showing only {user.gender} users
+            </p>
+          </div>
+        ) : (
+          <div className="flex justify-center mb-8">
+            <p className="text-sm font-medium text-red-700 bg-red-50 px-6 py-3 rounded-full inline-block">
+              ⚠️ Gender not set - please complete your profile
             </p>
           </div>
         )}

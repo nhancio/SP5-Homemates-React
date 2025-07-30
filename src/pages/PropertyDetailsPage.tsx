@@ -657,16 +657,60 @@ Link: ${url}`;
       </div>
       {showImageModal && modalImage && (
         // Defensive: fallback to [] if property.images is undefined
-        (() => { const images = property.images?.length ? property.images : []; return (
+        (() => { 
+          const images = property.images?.length ? property.images : []; 
+          return (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
           onClick={() => setShowImageModal(false)}
+          onTouchStart={(e) => {
+            const touch = e.touches[0];
+            const startX = touch.clientX;
+            const startY = touch.clientY;
+            
+            const handleTouchEnd = (e: TouchEvent) => {
+              const touch = e.changedTouches[0];
+              const endX = touch.clientX;
+              const endY = touch.clientY;
+              const deltaX = endX - startX;
+              const deltaY = endY - startY;
+              
+              // Only handle horizontal swipes with minimal vertical movement
+              if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 100) {
+                if (deltaX > 0) {
+                  // Swipe right - go to previous image
+                  if (!images.length) return;
+                  const prevIndex = (modalImageIndex - 1 + images.length) % images.length;
+                  setModalImage(images[prevIndex]);
+                  setModalImageIndex(prevIndex);
+                } else {
+                  // Swipe left - go to next image
+                  if (!images.length) return;
+                  const nextIndex = (modalImageIndex + 1) % images.length;
+                  setModalImage(images[nextIndex]);
+                  setModalImageIndex(nextIndex);
+                }
+              }
+              
+              document.removeEventListener('touchend', handleTouchEnd);
+            };
+            
+            document.addEventListener('touchend', handleTouchEnd);
+          }}
         >
-          {/* Left Clickable Area */}
-          <div
-            className="absolute left-0 top-0 bottom-0 w-1/2 cursor-pointer z-40"
+          {/* Image (centered, below navigation buttons) */}
+          <img
+            src={modalImage}
+            alt="Property Full"
+            className="max-h-[90vh] max-w-[90vw] rounded-lg z-10"
+            onClick={e => e.stopPropagation()}
+          />
+          {/* Left Navigation Button - Always show for testing */}
+          <button
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 sm:p-3 transition-all duration-200 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-lg border border-white border-opacity-30 z-[9999]"
             onClick={e => {
               e.stopPropagation();
+              console.log('Left button clicked!');
               if (!images.length) return;
               const prevIndex = (modalImageIndex - 1 + images.length) % images.length;
               setModalImage(images[prevIndex]);
@@ -674,17 +718,14 @@ Link: ${url}`;
             }}
             aria-label="Previous image"
           >
-            <span className="absolute left-8 top-1/2 -translate-y-1/2">
-              <span className="flex items-center justify-center w-12 h-12 bg-black bg-opacity-60 rounded-full text-white hover:bg-opacity-80 pointer-events-none select-none">
-                <ChevronLeft className="w-8 h-8" />
-              </span>
-            </span>
-          </div>
-          {/* Right Clickable Area */}
-          <div
-            className="absolute right-0 top-0 bottom-0 w-1/2 cursor-pointer z-40"
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+          {/* Right Navigation Button - Always show for testing */}
+          <button
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 sm:p-3 transition-all duration-200 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-lg border border-white border-opacity-30 z-[9999]"
             onClick={e => {
               e.stopPropagation();
+              console.log('Right button clicked!');
               if (!images.length) return;
               const nextIndex = (modalImageIndex + 1) % images.length;
               setModalImage(images[nextIndex]);
@@ -692,19 +733,8 @@ Link: ${url}`;
             }}
             aria-label="Next image"
           >
-            <span className="absolute right-8 top-1/2 -translate-y-1/2">
-              <span className="flex items-center justify-center w-12 h-12 bg-black bg-opacity-60 rounded-full text-white hover:bg-opacity-80 pointer-events-none select-none">
-                <ChevronRight className="w-8 h-8" />
-              </span>
-            </span>
-          </div>
-          {/* Image (centered, above click areas) */}
-          <img
-            src={modalImage}
-            alt="Property Full"
-            className="max-h-[90vh] max-w-[90vw] rounded-lg z-50"
-            onClick={e => e.stopPropagation()}
-          />
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
           {/* Close Button */}
           <button
             className="absolute top-6 right-6 text-white text-3xl font-bold z-50"

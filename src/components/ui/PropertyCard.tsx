@@ -417,18 +417,68 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       </div>
       {/* Full-resolution Image Modal */}
       {showImageModal && modalImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" onClick={() => setShowImageModal(false)}>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80" 
+          onClick={() => setShowImageModal(false)}
+          onTouchStart={(e) => {
+            const touch = e.touches[0];
+            const startX = touch.clientX;
+            const startY = touch.clientY;
+            
+            const handleTouchEnd = (e: TouchEvent) => {
+              const touch = e.changedTouches[0];
+              const endX = touch.clientX;
+              const endY = touch.clientY;
+              const deltaX = endX - startX;
+              const deltaY = endY - startY;
+              
+              // Only handle horizontal swipes with minimal vertical movement
+              if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 100) {
+                if (deltaX > 0) {
+                  // Swipe right - go to previous image
+                  setModalImageIndex(i => {
+                    const total = property.images?.length || 1;
+                    const next = (i - 1 + total) % total;
+                    setModalImage(property.images?.[next] || modalImage);
+                    return next;
+                  });
+                } else {
+                  // Swipe left - go to next image
+                  setModalImageIndex(i => {
+                    const total = property.images?.length || 1;
+                    const next = (i + 1) % total;
+                    setModalImage(property.images?.[next] || modalImage);
+                    return next;
+                  });
+                }
+              }
+              
+              document.removeEventListener('touchend', handleTouchEnd);
+            };
+            
+            document.addEventListener('touchend', handleTouchEnd);
+          }}
+        >
           <button
-            className="absolute top-6 right-6 text-white text-3xl font-bold"
+            className="absolute top-6 right-6 text-white text-3xl font-bold z-[9999]"
             onClick={e => { e.stopPropagation(); setShowImageModal(false); }}
             aria-label="Close"
           >
             <X className="w-8 h-8" />
           </button>
+          {/* Image (below navigation buttons) */}
+          <img
+            src={modalImage}
+            alt="Property"
+            className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg z-10"
+            onClick={e => e.stopPropagation()}
+          />
+          {/* Left Navigation Button - Always show for testing */}
           <button
-            className="absolute left-6 top-1/2 -translate-y-1/2 text-white text-3xl font-bold bg-black bg-opacity-40 rounded-full p-2"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 sm:p-3 transition-all duration-200 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-lg border border-white border-opacity-30 z-[9999]"
             onClick={e => {
               e.stopPropagation();
+              console.log('PropertyCard Left button clicked!');
               setModalImageIndex(i => {
                 const total = property.images?.length || 1;
                 const next = (i - 1 + total) % total;
@@ -438,18 +488,14 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             }}
             aria-label="Previous image"
           >
-            <ChevronLeft className="w-8 h-8" />
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
-          <img
-            src={modalImage}
-            alt="Property"
-            className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg"
-            onClick={e => e.stopPropagation()}
-          />
+          {/* Right Navigation Button - Always show for testing */}
           <button
-            className="absolute right-6 top-1/2 -translate-y-1/2 text-white text-3xl font-bold bg-black bg-opacity-40 rounded-full p-2"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 sm:p-3 transition-all duration-200 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-lg border border-white border-opacity-30 z-[9999]"
             onClick={e => {
               e.stopPropagation();
+              console.log('PropertyCard Right button clicked!');
               setModalImageIndex(i => {
                 const total = property.images?.length || 1;
                 const next = (i + 1) % total;
@@ -459,7 +505,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             }}
             aria-label="Next image"
           >
-            <ChevronRight className="w-8 h-8" />
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
       )}
@@ -587,19 +633,93 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
           onClick={() => setShowImageModal(false)}
+          onTouchStart={(e) => {
+            const touch = e.touches[0];
+            const startX = touch.clientX;
+            const startY = touch.clientY;
+            
+            const handleTouchEnd = (e: TouchEvent) => {
+              const touch = e.changedTouches[0];
+              const endX = touch.clientX;
+              const endY = touch.clientY;
+              const deltaX = endX - startX;
+              const deltaY = endY - startY;
+              
+              // Only handle horizontal swipes with minimal vertical movement
+              if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 100) {
+                if (deltaX > 0) {
+                  // Swipe right - go to previous image
+                  setModalImageIndex(i => {
+                    const total = property.images?.length || 1;
+                    const next = (i - 1 + total) % total;
+                    setModalImage(property.images?.[next] || modalImage);
+                    return next;
+                  });
+                } else {
+                  // Swipe left - go to next image
+                  setModalImageIndex(i => {
+                    const total = property.images?.length || 1;
+                    const next = (i + 1) % total;
+                    setModalImage(property.images?.[next] || modalImage);
+                    return next;
+                  });
+                }
+              }
+              
+              document.removeEventListener('touchend', handleTouchEnd);
+            };
+            
+            document.addEventListener('touchend', handleTouchEnd);
+          }}
         >
-          <img
-            src={modalImage}
-            alt="Property"
-            className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg"
-            onClick={e => e.stopPropagation()}
-          />
           <button
-            className="absolute top-6 right-6 text-white text-3xl font-bold"
+            className="absolute top-6 right-6 text-white text-3xl font-bold z-[9999]"
             onClick={() => setShowImageModal(false)}
             aria-label="Close"
           >
             <X className="w-8 h-8" />
+          </button>
+          {/* Image (below navigation buttons) */}
+          <img
+            src={modalImage}
+            alt="Property"
+            className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-lg z-10"
+            onClick={e => e.stopPropagation()}
+          />
+          {/* Left Navigation Button - Always show for testing */}
+          <button
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 sm:p-3 transition-all duration-200 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-lg border border-white border-opacity-30 z-[9999]"
+            onClick={e => {
+              e.stopPropagation();
+              console.log('PropertyCard Large Left button clicked!');
+              setModalImageIndex(i => {
+                const total = property.images?.length || 1;
+                const next = (i - 1 + total) % total;
+                setModalImage(property.images?.[next] || modalImage);
+                return next;
+              });
+            }}
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+          
+          {/* Right Navigation Button - Always show for testing */}
+          <button
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 sm:p-3 transition-all duration-200 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-lg border border-white border-opacity-30 z-[9999]"
+            onClick={e => {
+              e.stopPropagation();
+              console.log('PropertyCard Large Right button clicked!');
+              setModalImageIndex(i => {
+                const total = property.images?.length || 1;
+                const next = (i + 1) % total;
+                setModalImage(property.images?.[next] || modalImage);
+                return next;
+              });
+            }}
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
       )}
