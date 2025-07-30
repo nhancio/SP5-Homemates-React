@@ -176,7 +176,16 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       price = property.sellDetails?.rent || property.price || 0;
     }
 
-    const shareText = `Hey, check this property on Homemates!\nName: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Rent'}: ₹${formatCurrency(price)}\nType: ${property.type || '-'}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
+    // Get the correct property type based on listing type
+    let propertyType = '-';
+    if (listingType === 'rent') {
+      propertyType = property.type || '-';
+    } else {
+      // For sell listings (full homes), use sellDetails.propertyType
+      propertyType = property.sellDetails?.propertyType || property.type || '-';
+    }
+
+    const shareText = `Hey, check this property on Homemates!\nName: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Rent'}: ₹${formatCurrency(price)}\nType: ${propertyType}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
 
     try {
       if (navigator.share) {
