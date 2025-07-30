@@ -1464,8 +1464,9 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               onBlur={() => markTouched('parking')}
             >
               <option value="">Select Parking Type</option>
-              <option value="Available">Available</option>
-              <option value="Not Available">Not Available</option>
+              <option value="Bike">Bike</option>
+              <option value="Car">Car</option>
+              <option value="Both">Both</option>
             </select>
             {displayErrors.parking && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {displayErrors.parking}
