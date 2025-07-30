@@ -1259,7 +1259,30 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       errs.price = 'Price must be between ₹1,000 and ₹100,000';
     }
     
-
+    // Validate new cost fields
+    if (!formData.rent || formData.rent === '') {
+      errs.rent = 'Rent amount is required';
+    } else if (Number(formData.rent) < 1000 || Number(formData.rent) > 100000) {
+      errs.rent = 'Rent must be between ₹1,000 and ₹100,000';
+    }
+    
+    if (!formData.maintenance || formData.maintenance === '') {
+      errs.maintenance = 'Maintenance amount is required';
+    } else if (Number(formData.maintenance) < 0 || Number(formData.maintenance) > 50000) {
+      errs.maintenance = 'Maintenance must be between ₹0 and ₹50,000';
+    }
+    
+    if (!formData.brokerage || formData.brokerage === '') {
+      errs.brokerage = 'Brokerage amount is required';
+    } else if (Number(formData.brokerage) < 0 || Number(formData.brokerage) > 50000) {
+      errs.brokerage = 'Brokerage must be between ₹0 and ₹50,000';
+    }
+    
+    if (!formData.securityDeposit || formData.securityDeposit === '') {
+      errs.securityDeposit = 'Security deposit is required';
+    } else if (Number(formData.securityDeposit) < 1000 || Number(formData.securityDeposit) > 200000) {
+      errs.securityDeposit = 'Security deposit must be between ₹1,000 and ₹200,000';
+    }
     
     if (!isImmediate) {
       const handoverDate = formData.handoverDate || '';
@@ -1682,6 +1705,60 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           {displayErrors.contactNumber}
         </p>}
       </div>
+
+      {/* Rent */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Rent (₹/month)</label>
+        <input
+          type="number"
+          className={`input w-full${displayErrors.rent ? ' border-red-500 bg-red-50' : ''}`}
+          placeholder="Enter rent amount"
+          value={formData.rent || ''}
+          onChange={e => setFormData({ ...formData, rent: e.target.value })}
+          onBlur={() => markTouched('rent')}
+        />
+        {displayErrors.rent && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">{displayErrors.rent}</p>}
+      </div>
+      {/* Maintenance */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Maintenance (₹/month)</label>
+        <input
+          type="number"
+          className={`input w-full${displayErrors.maintenance ? ' border-red-500 bg-red-50' : ''}`}
+          placeholder="Enter maintenance amount"
+          value={formData.maintenance || ''}
+          onChange={e => setFormData({ ...formData, maintenance: e.target.value })}
+          onBlur={() => markTouched('maintenance')}
+        />
+        {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">{displayErrors.maintenance}</p>}
+      </div>
+      {/* Brokerage */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Brokerage (₹)</label>
+        <input
+          type="number"
+          className={`input w-full${displayErrors.brokerage ? ' border-red-500 bg-red-50' : ''}`}
+          placeholder="Enter brokerage amount"
+          value={formData.brokerage || ''}
+          onChange={e => setFormData({ ...formData, brokerage: e.target.value })}
+          onBlur={() => markTouched('brokerage')}
+        />
+        {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">{displayErrors.brokerage}</p>}
+      </div>
+      {/* Security Deposit */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Security Deposit (₹)</label>
+        <input
+          type="number"
+          className={`input w-full${displayErrors.securityDeposit ? ' border-red-500 bg-red-50' : ''}`}
+          placeholder="Enter security deposit"
+          value={formData.securityDeposit || ''}
+          onChange={e => setFormData({ ...formData, securityDeposit: e.target.value })}
+          onBlur={() => markTouched('securityDeposit')}
+        />
+        {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">{displayErrors.securityDeposit}</p>}
+      </div>
+
       {/* Submit button removed for EditListingPage - handled by parent */}
     </>
   );

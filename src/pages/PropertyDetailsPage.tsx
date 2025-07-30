@@ -489,6 +489,31 @@ Link: ${url}`;
                   </div>
                 </div>
               )}
+
+              {/* Cost Details - Only for Sell */}
+              {listingType === 'sell' && (
+                <div className="p-4 md:p-6 border-b">
+                  <h2 className="text-lg font-semibold mb-4">Cost Details</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div>
+                      <span className="text-gray-600 text-sm">Rent</span>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.rent || 0)} <span className="text-xs text-gray-500">/month</span></p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 text-sm">Maintenance</span>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 text-sm">Security Deposit</span>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.securityDeposit || 0)}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600 text-sm">Brokerage</span>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.brokerage || 0)}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
               {/* Contact Number - Show if available */}
               {/* Removed contact number display for privacy */}
 
