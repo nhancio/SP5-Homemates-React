@@ -1247,7 +1247,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
     if (!formData.contactNumber || !/^[6-9][0-9]{9}$/.test(formData.contactNumber)) errs.contactNumber = 'Enter a valid 10-digit mobile number';
     if (!formData.propertyType) errs.propertyType = 'Property type is required';
     if (!formData.homeType) errs.homeType = 'Home type is required';
-    if (!formData.roomType) errs.roomType = 'Room type is required';
+    if (!formData.roomType) errs.roomType = 'Flat type is required';
     if (!formData.furnishType) errs.furnishType = 'Furnish type is required';
     if (!formData.description || formData.description.length < 10) errs.description = 'Description must be at least 10 characters.';
     if (!images || images.length === 0) errs.images = 'Please upload at least one image.';
@@ -1400,14 +1400,14 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             {displayErrors.homeType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.homeType}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type</label>
             <select
               className={`input w-full${displayErrors.roomType ? ' border-red-500 bg-red-50' : ''}`}
               value={formData.roomType || ''}
               onChange={e => setFormData({ ...formData, roomType: e.target.value })}
               onBlur={() => markTouched('roomType')}
             >
-              <option value="">Select Room Type</option>
+              <option value="">Select Flat Type</option>
               {roomTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
             {displayErrors.roomType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomType}</p>}
