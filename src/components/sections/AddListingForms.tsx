@@ -279,7 +279,7 @@ const listingSchema = Yup.object().shape({
 });
 
 export const RentForm: React.FC<AddListingFormsProps> = (props) => {
-  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors } = props;
+  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors, onSubmit } = props;
   const [isDragActive, setIsDragActive] = useState(false);
   const [localErrors, setLocalErrors] = useState<any>({});
   const errors: Record<string, any> = propErrors || localErrors;
@@ -1191,7 +1191,39 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         </p>}
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
         </div>
-      {/* Submit button removed for EditListingPage - handled by parent */}
+
+      {/* Submit Button */}
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <button
+          type="submit"
+          className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={submitted}
+          onClick={async (e) => {
+            e.preventDefault();
+            setSubmitted(true);
+            
+            // Validate form
+            const validationErrors = await validate();
+            if (Object.keys(validationErrors).length > 0) {
+              if (setErrors) {
+                setErrors(validationErrors);
+              }
+              setSubmitted(false);
+              return;
+            }
+            
+            // Call parent onSubmit if provided
+            if (onSubmit) {
+              onSubmit();
+            }
+          }}
+        >
+          {submitted ? 'Creating Listing...' : 'Submit Listing'}
+        </button>
+        <p className="text-xs text-gray-500 mt-2 text-center">
+          By submitting, you agree to our terms and conditions
+        </p>
+      </div>
     </>
   );
 };
@@ -1759,7 +1791,38 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">{displayErrors.securityDeposit}</p>}
       </div>
 
-      {/* Submit button removed for EditListingPage - handled by parent */}
+      {/* Submit Button */}
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <button
+          type="submit"
+          className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={submitted}
+          onClick={async (e) => {
+            e.preventDefault();
+            setSubmitted(true);
+            
+            // Validate form
+            const validationErrors = await validate();
+            if (Object.keys(validationErrors).length > 0) {
+              if (setErrors) {
+                setErrors(validationErrors);
+              }
+              setSubmitted(false);
+              return;
+            }
+            
+            // Call parent onSubmit if provided
+            if (onSubmit) {
+              onSubmit();
+            }
+          }}
+        >
+          {submitted ? 'Creating Listing...' : 'Submit Listing'}
+        </button>
+        <p className="text-xs text-gray-500 mt-2 text-center">
+          By submitting, you agree to our terms and conditions
+        </p>
+      </div>
     </>
   );
 };
