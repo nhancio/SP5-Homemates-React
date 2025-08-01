@@ -73,15 +73,15 @@ const Navbar = () => {
                   to="/add-listing" 
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
                     isActive('/add-listing') 
-                      ? 'bg-green-100 text-green-700 shadow-md' 
-                      : 'bg-gray-50 text-gray-700 hover:bg-green-50 hover:text-green-600'
+                      ? 'bg-pink-100 text-pink-700 shadow-md' 
+                      : 'bg-gray-50 text-gray-700 hover:bg-pink-50 hover:text-pink-600'
                   }`}
                 >
                   <PlusSquare className="w-5 h-5" />
                   <span className="font-medium">Post</span>
                 </Link>
                 {/* FREE Tag */}
-                <div className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm z-10">
+                <div className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm z-10">
                   FREE
                 </div>
               </div>

@@ -42,6 +42,7 @@ interface AddListingFormsProps {
   onSubmit?: () => void; // Made optional for edit page
   errors?: any; // Optional errors prop for inline error display
   setErrors?: (errors: any) => void; // Optional setErrors for edit page
+  submitted?: boolean; // Optional submitted prop for error display
 }
 
 export const AddressFields = ({ formData, setFormData, errors = {}, listingType, images, setImages, handleImageUpload, removeImage, submitted = false }: AddListingFormsProps & { errors?: any, submitted?: boolean }) => {
@@ -117,7 +118,7 @@ export const AddressFields = ({ formData, setFormData, errors = {}, listingType,
           <input
             type="text"
             placeholder="Building Name"
-            className={`input w-full${errors['address.buildingName'] ? ' border-red-500 bg-red-50' : ''}`}
+            className={`input w-full${errors['address.buildingName'] ? ' border-pink-500 bg-pink-50' : ''}`}
             value={formData.address.buildingName}
             onChange={e => setFormData({
               ...formData,
@@ -129,8 +130,8 @@ export const AddressFields = ({ formData, setFormData, errors = {}, listingType,
             spellCheck={true}
             autoCorrect="on"
           />
-          {submitted && errors['address.buildingName'] && (
-            <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {errors['address.buildingName'] && (
+            <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               Please enter building name
             </p>
           )}
@@ -139,7 +140,7 @@ export const AddressFields = ({ formData, setFormData, errors = {}, listingType,
         <div className="col-span-1 md:col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
           <select
-            className={`input w-full${errors['address.city'] ? ' border-red-500 bg-red-50' : ''}`}
+            className={`input w-full${errors['address.city'] ? ' border-pink-500 bg-pink-50' : ''}`}
             value={formData.address.city || ''}
             onChange={e => {
               setFormData({
@@ -158,8 +159,8 @@ export const AddressFields = ({ formData, setFormData, errors = {}, listingType,
               <option key={city} value={city}>{city}</option>
             ))}
           </select>
-          {submitted && errors['address.city'] && (
-            <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {errors['address.city'] && (
+            <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               Please select city
             </p>
           )}
@@ -167,7 +168,7 @@ export const AddressFields = ({ formData, setFormData, errors = {}, listingType,
         <div className="col-span-1 md:col-span-1">
           <label className="block text-sm font-medium text-gray-700 mb-2">Locality</label>
           <select
-            className={`input w-full${errors['address.locality'] ? ' border-red-500 bg-red-50' : ''}`}
+            className={`input w-full${errors['address.locality'] ? ' border-pink-500 bg-pink-50' : ''}`}
             value={formData.address.locality || ''}
             onChange={e => {
               setFormData({
@@ -188,8 +189,8 @@ export const AddressFields = ({ formData, setFormData, errors = {}, listingType,
               <option key={market.id} value={market.market}>{market.market}</option>
             ))}
           </select>
-          {submitted && errors['address.locality'] && (
-            <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {errors['address.locality'] && (
+            <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               Please select locality
             </p>
           )}
@@ -199,7 +200,7 @@ export const AddressFields = ({ formData, setFormData, errors = {}, listingType,
           <label className="block text-sm font-medium text-gray-700 mb-2">Google Maps Link</label>
           <input
             type="text"
-            className={`input w-full${errors.googleMapsLink ? ' border-red-500 bg-red-50' : ''}`}
+            className={`input w-full${errors.googleMapsLink ? ' border-pink-500 bg-pink-50' : ''}`}
             placeholder="Paste Google Maps link (optional)"
             value={formData.address.googleMapsLink || ''}
             onChange={e => setFormData({
@@ -228,7 +229,7 @@ const ContactNumberField = ({ formData, setFormData, errors = {} }: { formData: 
       <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
       <input
         type="tel"
-        className={`input${errors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
+        className={`input${errors.contactNumber ? ' border-pink-500 bg-pink-50' : ''}`}
         placeholder="Enter your 10-digit mobile number"
         value={formData.contactNumber || ''}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -241,9 +242,9 @@ const ContactNumberField = ({ formData, setFormData, errors = {} }: { formData: 
         autoCorrect="off"
       />
       <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
-      {errors.contactNumber && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-        {errors.contactNumber}
-      </p>}
+              {errors.contactNumber && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {errors.contactNumber}
+        </p>}
     </div>
   </section>
 );
@@ -279,7 +280,7 @@ const listingSchema = Yup.object().shape({
 });
 
 export const RentForm: React.FC<AddListingFormsProps> = (props) => {
-  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors, onSubmit } = props;
+  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors, onSubmit, submitted = false } = props;
   const [isDragActive, setIsDragActive] = useState(false);
   const [localErrors, setLocalErrors] = useState<any>({});
   const errors: Record<string, any> = propErrors || localErrors;
@@ -347,55 +348,12 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
   }, [formData.address.city]);
 
   // Replace the validate function with Yup validation
-  const validate = async () => {
-    const errs: any = {};
-    if (!formData.address?.city) errs['address.city'] = 'Please select city';
-    if (!formData.address?.locality) errs['address.locality'] = 'Please select locality';
-    if (!formData.address?.buildingName) errs['address.buildingName'] = 'Please enter building name';
-    if (!formData.rentDetails?.roomDetails?.flatType) errs.flatType = 'Please select a flat type.';
-    if (!formData.rentDetails?.roomDetails?.availableRooms) errs.availableRooms = 'Please select available rooms.';
-    if (!formData.rentDetails?.roomDetails?.roomType) errs.roomType = 'Please select a room type.';
-    if (!formData.rentDetails?.roomDetails?.bathroomType) errs.bathroomType = 'Please select a bathroom type.';
-    if (!formData.propertyType) errs.propertyType = 'Property type is required';
-    if (!formData.furnishingType) errs.furnishingType = 'Furnishing type is required';
-    if (!formData.parking) errs.parking = 'Parking is required';
-    if (!formData.rentDetails?.costs?.rent) errs.rent = 'Rent is required';
-    if (!formData.rentDetails?.costs?.maintenance) errs.maintenance = 'Maintenance is required';
-    if (!formData.rentDetails?.costs?.securityDeposit) errs.securityDeposit = 'Security deposit is required';
-    if (!formData.rentDetails?.costs?.setupCost) errs.setupCost = 'Setup cost is required';
-    if (!formData.rentDetails?.costs?.brokerage) errs.brokerage = 'Brokerage is required';
-    if (!formData.contactNumber || !/^[6-9][0-9]{9}$/.test(formData.contactNumber)) errs.contactNumber = 'Enter a valid 10-digit mobile number';
-    if (!formData.description || formData.description.length < 10) errs.description = 'Description must be at least 10 characters.';
-    if (!images || images.length === 0) errs.images = 'Please upload at least one image.';
-    if (!formData.rentDetails?.amenities || formData.rentDetails.amenities.length === 0) errs.amenities = 'Please select at least one amenity.';
-    if (!formData.rentDetails?.preferredTenant?.lookingFor) errs.lookingFor = 'Looking for is required';
-    if (!formData.isImmediate) {
-      const handoverDate = formData.handoverDate || '';
-      if (!handoverDate) {
-        errs.handoverDate = 'Move-in date is required.';
-      } else if (handoverDate < minDateStr || handoverDate > maxDateStr) {
-        errs.handoverDate = `Move-in date must be between today and the next 90 days.`;
-      }
-    }
-    setLocalErrors(errs);
-    if (setErrors) setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
+
 
   // Only show errors after form submission
-  const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('RentForm handleSubmit called');
-    setSubmitted(true);
-    const isValid = await validate();
-    console.log('After submit. isValid:', isValid, errors);
-    if (isValid) {
-      if (props.onSubmit) props.onSubmit();
-    }
-  };
+
 
   // Helper to mark a field as touched
   const markTouched = (field: string) => setTouched(prev => ({ ...prev, [field]: true }));
@@ -554,8 +512,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         removeImage={removeImage}
         submitted={submitted}
       />
-      {/* Section-level error for Address (only show after submission) */}
-      {submitted && (displayErrors['address.city'] || displayErrors['address.locality'] || displayErrors['address.buildingName']) && (
+      {/* Section-level error for Address */}
+      {(displayErrors['address.city'] || displayErrors['address.locality'] || displayErrors['address.buildingName']) && (
         <div className="mb-4">
           <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
             Please complete all Address fields marked in red.
@@ -569,7 +527,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
             <select
-              className={`input w-full${displayErrors.propertyType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.propertyType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.propertyType || ''}
               onChange={e => setFormData({ ...formData, propertyType: e.target.value })}
               onBlur={() => markTouched('propertyType')}
@@ -577,15 +535,15 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="">Select Property Type</option>
               {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
-            {displayErrors.propertyType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.propertyType}</p>}
+            {displayErrors.propertyType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.propertyType}</p>}
           </div>
         </div>
       </section>
       {/* Home Details section (remove Property Type dropdown from here) */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Home Details</h2>
-        {/* Section-level error for Home Details (only show after submission) */}
-        {submitted && (displayErrors.flatType || displayErrors.availableRooms || displayErrors.roomType || displayErrors.bathroomType || displayErrors.furnishingType || displayErrors.parking) && (
+        {/* Section-level error for Home Details */}
+        {(displayErrors.flatType || displayErrors.availableRooms || displayErrors.roomType || displayErrors.bathroomType || displayErrors.furnishingType || displayErrors.parking) && (
           <div className="mb-4">
             <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
               Please complete all Home Details fields marked in red.
@@ -598,7 +556,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Home Type</label>
             <select
               ref={fieldRefs['rentDetails.roomDetails.flatType']}
-              className={`input w-full${displayErrors.flatType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.flatType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.rentDetails.roomDetails.flatType || ''}
               onChange={e => setFormData({
                 ...formData,
@@ -616,7 +574,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               {flatTypes.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
             {displayErrors.flatType && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
                 {displayErrors.flatType}
               </p>
             )}
@@ -625,7 +583,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Available Rooms</label>
             <select
               ref={fieldRefs['rentDetails.roomDetails.availableRooms']}
-              className={`input w-full${displayErrors.availableRooms ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.availableRooms ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.rentDetails.roomDetails.availableRooms}
               onChange={e => setFormData({
                 ...formData,
@@ -642,7 +600,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="">Select</option>
               {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
             </select>
-            {displayErrors.availableRooms && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {displayErrors.availableRooms && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {displayErrors.availableRooms}
             </p>}
           </div>
@@ -651,7 +609,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
             <select 
               ref={fieldRefs['rentDetails.roomDetails.roomType']}
-              className={`input w-full${displayErrors.roomType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.roomType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.rentDetails.roomDetails.roomType}
               onChange={e => setFormData({
                 ...formData,
@@ -670,7 +628,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="shared">Shared</option>
             </select>
             {displayErrors.roomType && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
                 {displayErrors.roomType}
               </p>
             )}
@@ -679,7 +637,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Washroom Type</label>
             <select
               ref={fieldRefs['rentDetails.roomDetails.bathroomType']}
-              className={`input w-full${displayErrors.bathroomType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.bathroomType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.rentDetails.roomDetails.bathroomType}
               onChange={e => setFormData({
                 ...formData,
@@ -697,7 +655,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="attached">Attached</option>
               <option value="common">Common</option>
             </select>
-            {displayErrors.bathroomType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {displayErrors.bathroomType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {displayErrors.bathroomType}
             </p>}
           </div>
@@ -707,7 +665,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
             <select
               ref={fieldRefs['furnishingType']}
-              className={`input w-full${displayErrors.furnishingType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.furnishingType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.furnishingType}
               onChange={e => setFormData({
                 ...formData,
@@ -720,7 +678,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="semi">Semi Furnished</option>
               <option value="unfurnished">Unfurnished</option>
             </select>
-            {displayErrors.furnishingType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {displayErrors.furnishingType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {displayErrors.furnishingType}
             </p>}
           </div>
@@ -729,7 +687,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
             <select 
               ref={fieldRefs['parking']}
-              className={`input w-full${displayErrors.parking ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.parking ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.parking}
               onChange={e => setFormData({
                 ...formData,
@@ -742,7 +700,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="car">Car Parking</option>
               <option value="bike">Bike Parking</option>
             </select>
-            {displayErrors.parking && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {displayErrors.parking && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {displayErrors.parking}
             </p>}
           </div>
@@ -751,8 +709,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       {/* 7. Amenities */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-4">
         <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Amenities</h2>
-        {/* Section-level error for Amenities (only show after submission) */}
-        {submitted && displayErrors.amenities && (
+        {/* Section-level error for Amenities */}
+        {displayErrors.amenities && (
           <div className="mb-4">
             <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
               Please select at least one amenity.
@@ -791,7 +749,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           })}
           </div>
         {displayErrors.amenities && (
-          <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+          <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
             {displayErrors.amenities}
           </p>
         )}
@@ -799,8 +757,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       {/* 8. Preferred Tenant */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-4">
         <h2 className="text-lg font-semibold mb-4">Preferred Tenant</h2>
-        {/* Section-level error for Preferred Tenant (only show after submission) */}
-        {submitted && displayErrors.lookingFor && (
+        {/* Section-level error for Preferred Tenant */}
+        {displayErrors.lookingFor && (
           <div className="mb-4">
             <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
               Please select a preferred tenant.
@@ -811,7 +769,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
             <select 
-              className={`input w-full${displayErrors.lookingFor ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.lookingFor ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.rentDetails.preferredTenant.lookingFor}
               onChange={e => setFormData({
                 ...formData,
@@ -831,7 +789,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="Any Gender">Any Gender</option>
             </select>
             {displayErrors.lookingFor && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
                 {displayErrors.lookingFor}
               </p>
             )}
@@ -882,8 +840,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       {/* Move In Section */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-4">
         <h2 className="text-lg font-semibold mb-4">Move In</h2>
-        {/* Section-level error for Move In (only show after submission) */}
-        {submitted && displayErrors.handoverDate && (
+        {/* Section-level error for Move In */}
+        {displayErrors.handoverDate && (
           <div className="mb-4">
             <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
               Please select a move-in date.
@@ -914,7 +872,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           <div className="mb-2">
             <input
               type="date"
-              className={`input max-w-xs${displayErrors.handoverDate ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input max-w-xs${displayErrors.handoverDate ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.handoverDate || ''}
               min={minDateStr}
               max={maxDateStr}
@@ -923,7 +881,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             />
             <span className="block text-xs text-gray-500 mt-1">Select your move-in date.</span>
             {displayErrors.handoverDate && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
                 {displayErrors.handoverDate}
               </p>
             )}
@@ -933,8 +891,8 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       {/* 10. Rental Details */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Rental Details</h2>
-        {/* Section-level error for Rental Details (only show after submission) */}
-        {submitted && (displayErrors.rent || displayErrors.maintenance || displayErrors.securityDeposit || displayErrors.setupCost || displayErrors.brokerage) && (
+        {/* Section-level error for Rental Details */}
+        {(displayErrors.rent || displayErrors.maintenance || displayErrors.securityDeposit || displayErrors.setupCost || displayErrors.brokerage) && (
           <div className="mb-4">
             <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
               Please complete all Rental Details fields marked in red.
@@ -947,7 +905,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <input
               ref={fieldRefs['rentDetails.costs.rent']}
               type="number"
-              className={`input w-full${displayErrors.rent ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.rent ? ' border-pink-500 bg-pink-50' : ''}`}
               placeholder="Enter rent amount"
               min={0}
               value={formData.rentDetails.costs.rent || ''}
@@ -969,7 +927,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               onBlur={() => markTouched('rent')}
             />
             {displayErrors.rent && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
                 {displayErrors.rent}
               </p>
             )}
@@ -978,7 +936,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance (₹/month)</label>
             <input
               type="number"
-              className={`input w-full${displayErrors.maintenance ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.maintenance ? ' border-pink-500 bg-pink-50' : ''}`}
               placeholder="Enter maintenance amount"
               value={formData.rentDetails.costs.maintenance}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -996,7 +954,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               onBlur={() => markTouched('maintenance')}
             />
             {displayErrors.maintenance && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
                 {displayErrors.maintenance}
               </p>
             )}
@@ -1005,7 +963,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (₹)</label>
             <input
               type="number"
-              className={`input w-full${displayErrors.securityDeposit ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.securityDeposit ? ' border-pink-500 bg-pink-50' : ''}`}
               placeholder="Enter security deposit"
               value={formData.rentDetails.costs.securityDeposit}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -1023,7 +981,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               onBlur={() => markTouched('securityDeposit')}
             />
             {displayErrors.securityDeposit && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
                 {displayErrors.securityDeposit}
               </p>
             )}
@@ -1032,7 +990,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Setup Cost (₹)</label>
             <input
               type="number"
-              className={`input w-full${displayErrors.setupCost ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.setupCost ? ' border-pink-500 bg-pink-50' : ''}`}
               placeholder="Enter setup cost"
               value={formData.rentDetails.costs.setupCost}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -1050,7 +1008,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               onBlur={() => markTouched('setupCost')}
             />
             {displayErrors.setupCost && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
                 {displayErrors.setupCost}
               </p>
             )}
@@ -1059,7 +1017,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage (₹)</label>
             <input
               type="number"
-              className={`input w-full${displayErrors.brokerage ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.brokerage ? ' border-pink-500 bg-pink-50' : ''}`}
               placeholder="Enter brokerage amount"
               value={formData.rentDetails.costs.brokerage}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({
@@ -1077,7 +1035,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               onBlur={() => markTouched('brokerage')}
             />
             {displayErrors.brokerage && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
                 {displayErrors.brokerage}
               </p>
             )}
@@ -1090,7 +1048,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Description</h2>
         <textarea
           ref={fieldRefs['description']}
-          className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${displayErrors.description ? ' border-red-500 bg-red-50' : ''}`}
+          className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${displayErrors.description ? ' border-pink-500 bg-pink-50' : ''}`}
           placeholder="Add property description..."
           value={formData.description}
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setFormData({
@@ -1104,7 +1062,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         <p className="text-xs text-gray-500 mt-1">
           Tip: Use this box to share unique details about your property, such as house rules, vibe, or anything not covered above. Avoid repeating amenities, phone number, or location.
         </p>
-        {displayErrors.description && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+        {displayErrors.description && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
           {displayErrors.description}
         </p>}
       </section>
@@ -1163,7 +1121,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           {images.length >= 5 && <span className="text-red-500">(Maximum reached)</span>}
         </div>
         <div className="text-xs text-gray-400 mt-1">Tip: Add clear, well-lit photos for better responses.</div>
-        {displayErrors.images && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+        {displayErrors.images && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
           {displayErrors.images}
         </p>}
       </section>
@@ -1173,7 +1131,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <input
           type="tel"
           ref={fieldRefs['contactNumber']}
-          className={`input${displayErrors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
+          className={`input${displayErrors.contactNumber ? ' border-pink-500 bg-pink-50' : ''}`}
           placeholder="Enter your 10-digit mobile number"
           value={formData.contactNumber || ''}
           onChange={e => setFormData({
@@ -1186,7 +1144,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           autoCorrect="off"
           onBlur={() => markTouched('contactNumber')}
         />
-        {displayErrors.contactNumber && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+        {displayErrors.contactNumber && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
           {displayErrors.contactNumber}
         </p>}
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
@@ -1198,21 +1156,10 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           type="submit"
           className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={submitted}
-          onClick={async (e) => {
+          onClick={(e) => {
             e.preventDefault();
-            setSubmitted(true);
             
-            // Validate form
-            const validationErrors = await validate();
-            if (Object.keys(validationErrors).length > 0) {
-              if (setErrors) {
-                setErrors(validationErrors);
-              }
-              setSubmitted(false);
-              return;
-            }
-            
-            // Call parent onSubmit if provided
+            // Call parent onSubmit - validation will be handled by parent
             if (onSubmit) {
               onSubmit();
             }
@@ -1230,12 +1177,11 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
 
 // Minimal SellForm implementation to resolve missing export
 export const SellForm: React.FC<AddListingFormsProps> = (props) => {
-  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors = {}, setErrors, onSubmit } = props;
+  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors, onSubmit, submitted = false } = props;
   const [moveInDate, setMoveInDate] = useState<Date | null>(null);
   const [isImmediate, setIsImmediate] = useState(formData.isImmediate ?? true);
   const [localErrors, setLocalErrors] = useState<any>({});
   // Only show errors after form submission
-  const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   // Property type options - same as BuyPropertiesPage (Full Homes)
@@ -1268,76 +1214,15 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
   maxDateObj.setDate(today.getDate() + 90);
   const maxDate = maxDateObj.toISOString().split('T')[0];
 
-  // Validation
-  const validate = async () => {
-    const errs: any = {};
-    console.log('SellForm validation - formData:', formData);
-    
-    if (!formData.address?.city) errs['address.city'] = 'Please select city';
-    if (!formData.address?.locality) errs['address.locality'] = 'Please select locality';
-    if (!formData.address?.buildingName) errs['address.buildingName'] = 'Please enter building name';
-    if (!formData.contactNumber || !/^[6-9][0-9]{9}$/.test(formData.contactNumber)) errs.contactNumber = 'Enter a valid 10-digit mobile number';
-    if (!formData.propertyType) errs.propertyType = 'Property type is required';
-    if (!formData.homeType) errs.homeType = 'Home type is required';
-    if (!formData.roomType) errs.roomType = 'Flat type is required';
-    if (!formData.furnishType) errs.furnishType = 'Furnish type is required';
-    if (!formData.description || formData.description.length < 10) errs.description = 'Description must be at least 10 characters.';
-    if (!images || images.length === 0) errs.images = 'Please upload at least one image.';
-    if (!formData.sellDetails?.amenities || formData.sellDetails.amenities.length === 0) errs.amenities = 'Please select at least one amenity.';
-    if (!formData.parking) errs.parking = 'Parking is required';
-    if (!formData.price || formData.price === '') {
-      errs.price = 'Price is required';
-    } else if (Number(formData.price) < 1000 || Number(formData.price) > 100000) {
-      errs.price = 'Price must be between ₹1,000 and ₹100,000';
-    }
-    
-    // Validate new cost fields
-    if (!formData.rent || formData.rent === '') {
-      errs.rent = 'Rent amount is required';
-    } else if (Number(formData.rent) < 1000 || Number(formData.rent) > 100000) {
-      errs.rent = 'Rent must be between ₹1,000 and ₹100,000';
-    }
-    
-    if (!formData.maintenance || formData.maintenance === '') {
-      errs.maintenance = 'Maintenance amount is required';
-    } else if (Number(formData.maintenance) < 0 || Number(formData.maintenance) > 50000) {
-      errs.maintenance = 'Maintenance must be between ₹0 and ₹50,000';
-    }
-    
-    if (!formData.brokerage || formData.brokerage === '') {
-      errs.brokerage = 'Brokerage amount is required';
-    } else if (Number(formData.brokerage) < 0 || Number(formData.brokerage) > 50000) {
-      errs.brokerage = 'Brokerage must be between ₹0 and ₹50,000';
-    }
-    
-    if (!formData.securityDeposit || formData.securityDeposit === '') {
-      errs.securityDeposit = 'Security deposit is required';
-    } else if (Number(formData.securityDeposit) < 1000 || Number(formData.securityDeposit) > 200000) {
-      errs.securityDeposit = 'Security deposit must be between ₹1,000 and ₹200,000';
-    }
-    
-    if (!isImmediate) {
-      const handoverDate = formData.handoverDate || '';
-      if (!handoverDate) {
-        errs.handoverDate = 'Move-in date is required.';
-      } else if (handoverDate < minDate || handoverDate > maxDate) {
-        errs.handoverDate = `Move-in date must be between today and the next 90 days.`;
-      }
-    }
-    
-    console.log('SellForm validation - errors found:', errs);
-    setLocalErrors(errs);
-    if (setErrors) setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-
-
   // Mark field as touched for validation
   const markTouched = (field: string) => setTouched(prev => ({ ...prev, [field]: true }));
 
   // Use localErrors for error display
+  const errors: Record<string, any> = propErrors || localErrors;
+  const setErrors = propSetErrors || setLocalErrors;
   const displayErrors = { ...errors, ...localErrors };
+
+
 
   // Options for Home Type, Room Type, and Furnish Type
   const homeTypeOptions = [
@@ -1376,8 +1261,8 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         removeImage={removeImage}
         submitted={submitted}
       />
-      {/* Section-level error for Address (only show after submission) */}
-      {submitted && (displayErrors['address.city'] || displayErrors['address.locality'] || displayErrors['address.buildingName']) && (
+      {/* Section-level error for Address */}
+      {(displayErrors['address.city'] || displayErrors['address.locality'] || displayErrors['address.buildingName']) && (
         <div className="mb-4">
           <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
             Please complete all Address fields marked in red.
@@ -1390,7 +1275,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       {/* Home Details Section */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4">Home Details</h2>
-        {submitted && (displayErrors.homeType || displayErrors.roomType || displayErrors.furnishType) && (
+        {(displayErrors.homeType || displayErrors.roomType || displayErrors.furnishType) && (
           <div className="mb-4">
             <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
               Please select Home Type, Room Type, and Furnish Type.
@@ -1401,7 +1286,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Home Type</label>
             <select
-              className={`input w-full${displayErrors.homeType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.homeType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.homeType || ''}
               onChange={e => setFormData({ ...formData, homeType: e.target.value })}
               onBlur={() => markTouched('homeType')}
@@ -1409,12 +1294,12 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="">Select Home Type</option>
               {homeTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
-            {displayErrors.homeType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.homeType}</p>}
+            {displayErrors.homeType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.homeType}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type</label>
             <select
-              className={`input w-full${displayErrors.roomType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.roomType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.roomType || ''}
               onChange={e => setFormData({ ...formData, roomType: e.target.value })}
               onBlur={() => markTouched('roomType')}
@@ -1422,12 +1307,12 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="">Select Flat Type</option>
               {roomTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
-            {displayErrors.roomType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomType}</p>}
+            {displayErrors.roomType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomType}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
             <select
-              className={`input w-full${displayErrors.furnishType ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.furnishType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.furnishType || ''}
               onChange={e => setFormData({ ...formData, furnishType: e.target.value })}
               onBlur={() => markTouched('furnishType')}
@@ -1435,14 +1320,14 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="">Select Furnishing</option>
               {furnishTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
-            {displayErrors.furnishType && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.furnishType}</p>}
+            {displayErrors.furnishType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.furnishType}</p>}
           </div>
         </div>
       </section>
       {/* Details */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4">Details</h2>
-        {submitted && (displayErrors.lookingFor || displayErrors.parking) && (
+        {(displayErrors.lookingFor || displayErrors.parking) && (
           <div className="mb-4">
             <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
               Please complete all Details fields.
@@ -1453,7 +1338,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
             <select
-              className={`input w-full${displayErrors.lookingFor ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.lookingFor ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.lookingFor || ''}
               onChange={e => setFormData({ ...formData, lookingFor: e.target.value })}
               onBlur={() => markTouched('lookingFor')}
@@ -1463,14 +1348,14 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="Family">Family</option>
               <option value="Bachelors">Bachelors</option>
             </select>
-            {displayErrors.lookingFor && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {displayErrors.lookingFor && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {displayErrors.lookingFor}
             </p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
             <select
-              className={`input w-full${displayErrors.parking ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.parking ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.parking || ''}
               onChange={e => setFormData({ ...formData, parking: e.target.value })}
               onBlur={() => markTouched('parking')}
@@ -1480,7 +1365,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="Car">Car</option>
               <option value="Both">Both</option>
             </select>
-            {displayErrors.parking && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+            {displayErrors.parking && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {displayErrors.parking}
             </p>}
           </div>
@@ -1489,7 +1374,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       {/* Amenities */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4">Amenities</h2>
-        {submitted && displayErrors.amenities && (
+        {displayErrors.amenities && (
           <div className="mb-4">
             <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
               Please select at least one amenity.
@@ -1528,7 +1413,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           })}
         </div>
         {displayErrors.amenities && (
-          <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+          <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
             {displayErrors.amenities}
           </p>
         )}
@@ -1536,8 +1421,8 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       {/* Move In */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4">Move In</h2>
-        {/* Section-level error for Move In (always show if any error) */}
-        {submitted && displayErrors.handoverDate && (
+        {/* Section-level error for Move In */}
+        {displayErrors.handoverDate && (
           <div className="mb-4">
             <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
               Please select a move-in date.
@@ -1568,7 +1453,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           <div className="mb-2">
             <input
               type="date"
-              className={`input max-w-xs${displayErrors.handoverDate ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input max-w-xs${displayErrors.handoverDate ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.handoverDate || ''}
               min={minDate}
               max={maxDate}
@@ -1577,7 +1462,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             />
             <span className="block text-xs text-gray-500 mt-1">Select your move-in date.</span>
             {displayErrors.handoverDate && (
-              <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
                 {displayErrors.handoverDate}
               </p>
             )}
@@ -1587,7 +1472,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       {/* Price Details */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
         <h2 className="text-lg font-semibold mb-4">Rent Details</h2>
-        {submitted && displayErrors.price && (
+        {displayErrors.price && (
           <div className="mb-4">
             <div className="text-red-700 bg-red-100 border border-red-300 rounded px-3 py-2 font-semibold">
               Please enter a valid price (₹1,000 - ₹100,000).
@@ -1599,14 +1484,14 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
             <input
               type="number"
-              className={`input w-full${displayErrors.price ? ' border-red-500 bg-red-50' : ''}`}
+              className={`input w-full${displayErrors.price ? ' border-pink-500 bg-pink-50' : ''}`}
               placeholder="Enter price"
               value={formData.price || ''}
               onChange={e => setFormData({ ...formData, price: e.target.value })}
               min={0}
               onBlur={() => markTouched('price')}
             />
-            {displayErrors.price && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+            {displayErrors.price && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
               {displayErrors.price}
             </p>}
           </div>
@@ -1621,7 +1506,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               min={0}
               onBlur={() => markTouched('maintenance')}
             />
-            {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+            {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
               {displayErrors.maintenance}
             </p>}
           </div>
@@ -1636,7 +1521,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               min={0}
               onBlur={() => markTouched('securityDeposit')}
             />
-            {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+            {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
               {displayErrors.securityDeposit}
             </p>}
           </div>
@@ -1651,7 +1536,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               min={0}
               onBlur={() => markTouched('brokerage')}
             />
-            {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+            {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
               {displayErrors.brokerage}
             </p>}
           </div>
@@ -1661,7 +1546,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       <section className="bg-white p-6 rounded-2xl shadow mb-8">
         <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Description</h2>
         <textarea
-          className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${displayErrors.description ? ' border-red-500 bg-red-50' : ''}`}
+          className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${displayErrors.description ? ' border-pink-500 bg-pink-50' : ''}`}
           placeholder="Add property description..."
           value={formData.description || ''}
           onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -1670,7 +1555,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           onBlur={() => markTouched('description')}
         />
         <p className="text-xs text-gray-500 mt-1">Tip: Add clear, well-lit photos for better responses.</p>
-        {displayErrors.description && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+        {displayErrors.description && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
           {displayErrors.description}
         </p>}
       </section>
@@ -1712,7 +1597,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           {images.length >= 5 && <span className="text-red-500">(Maximum reached)</span>}
         </div>
         <div className="text-xs text-gray-400 mt-1">Tip: Add clear, well-lit photos for better responses.</div>
-        {displayErrors.images && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">
+        {displayErrors.images && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
           {displayErrors.images}
         </p>}
       </section>
@@ -1722,7 +1607,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
         <input
           type="tel"
-          className={`input w-full${displayErrors.contactNumber ? ' border-red-500 bg-red-50' : ''}`}
+          className={`input w-full${displayErrors.contactNumber ? ' border-pink-500 bg-pink-50' : ''}`}
           placeholder="Enter your 10-digit mobile number"
           value={formData.contactNumber || ''}
           onChange={e => setFormData({ ...formData, contactNumber: e.target.value })}
@@ -1733,7 +1618,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           onBlur={() => markTouched('contactNumber')}
         />
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
-        {displayErrors.contactNumber && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+        {displayErrors.contactNumber && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
           {displayErrors.contactNumber}
         </p>}
       </div>
@@ -1744,21 +1629,10 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           type="submit"
           className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={submitted}
-          onClick={async (e) => {
+          onClick={(e) => {
             e.preventDefault();
-            setSubmitted(true);
             
-            // Validate form
-            const validationErrors = await validate();
-            if (Object.keys(validationErrors).length > 0) {
-              if (setErrors) {
-                setErrors(validationErrors);
-              }
-              setSubmitted(false);
-              return;
-            }
-            
-            // Call parent onSubmit if provided
+            // Call parent onSubmit - validation will be handled by parent
             if (onSubmit) {
               onSubmit();
             }

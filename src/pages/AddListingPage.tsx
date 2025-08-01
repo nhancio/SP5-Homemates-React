@@ -168,6 +168,7 @@ const AddListingPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
   const [errors, setErrors] = useState<any>({});
+  const [submitted, setSubmitted] = useState(false);
   
   // Image handling state
   const [images, setImages] = useState<string[]>([]);
@@ -183,92 +184,139 @@ const AddListingPage = () => {
 
   const validate = () => {
     const newErrors: any = {};
+    
     // Mobile validation
     const mobile = formData.contactNumber || '';
     if (!/^[6-9][0-9]{9}$/.test(mobile)) {
       newErrors.contactNumber = 'Please enter a valid mobile number.';
     }
+    
+    // Address validation (for both rent and sell)
+    if (!formData.address.city) newErrors['address.city'] = 'Please select city';
+    if (!formData.address.locality) newErrors['address.locality'] = 'Please select locality';
+    if (!formData.address.buildingName) newErrors['address.buildingName'] = 'Please enter building name';
+    
     // Rent validation
     if (listingType === 'rent') {
+      // Property Type
+      if (!formData.propertyType) newErrors.propertyType = 'Please select a property type.';
+      
+      // Home Details - All fields required
+      if (!formData.rentDetails?.roomDetails?.flatType) newErrors.flatType = 'Please select a flat type.';
+      if (!formData.rentDetails?.roomDetails?.availableRooms) newErrors.availableRooms = 'Please select available rooms.';
+      if (!formData.rentDetails?.roomDetails?.roomType) newErrors.roomType = 'Please select a room type.';
+      if (!formData.rentDetails?.roomDetails?.bathroomType) newErrors.bathroomType = 'Please select a washroom type.';
+      if (!formData.furnishingType) newErrors.furnishingType = 'Please select a furnish type.';
+      if (!formData.parking) newErrors.parking = 'Please select a parking type.';
+      
+      // Home Type validation (for Shared Home form)
+      if (!formData.rentDetails?.roomDetails?.flatType) newErrors.homeType = 'Please select a home type.';
+      
+      // Amenities
+      if (!formData.rentDetails?.amenities || formData.rentDetails.amenities.length === 0) {
+        newErrors.amenities = 'Please select at least one amenity.';
+      }
+      
+      // Preferred Tenant
+      if (!formData.rentDetails?.preferredTenant?.lookingFor) newErrors.lookingFor = 'Please select a gender.';
+      
+      // Move In
+      if (formData.isImmediate === undefined || (formData.isImmediate === false && !formData.handoverDate)) {
+        newErrors.handoverDate = 'Please select a move-in option.';
+      }
+      
+      // Rental Details - All fields required
       const rent = Number(formData.rentDetails?.costs?.rent);
       if (!rent || rent < 1000) {
         newErrors.rent = 'Rent must be at least ₹1,000.';
       }
+      
+      // Price validation for Shared Home form
+      if (!formData.rentDetails?.costs?.rent || formData.rentDetails.costs.rent === '') {
+        newErrors.price = 'Please enter price amount.';
+      }
+      
+      // Required fields for rental details
+      if (!formData.rentDetails?.costs?.maintenance || formData.rentDetails.costs.maintenance === '') {
+        newErrors.maintenance = 'Please enter maintenance amount.';
+      }
+      
+      if (!formData.rentDetails?.costs?.securityDeposit || formData.rentDetails.costs.securityDeposit === '') {
+        newErrors.securityDeposit = 'Please enter security deposit amount.';
+      }
+      
+      if (!formData.rentDetails?.costs?.setupCost || formData.rentDetails.costs.setupCost === '') {
+        newErrors.setupCost = 'Please enter setup cost amount.';
+      }
+      
+      if (!formData.rentDetails?.costs?.brokerage || formData.rentDetails.costs.brokerage === '') {
+        newErrors.brokerage = 'Please enter brokerage amount.';
+      }
+      
       // Numeric fields non-negative
-      ['maintenance', 'securityDeposit', 'setupCost', 'brokerage'].forEach(field => {
+      ['rent', 'maintenance', 'securityDeposit', 'setupCost', 'brokerage'].forEach(field => {
         const value = Number((formData.rentDetails?.costs as any)?.[field]);
         if (value < 0) newErrors[field] = 'Cannot be negative.';
       });
-      // Make availableRooms mandatory for shared flats >1 BHK
-      const flatType = formData.rentDetails?.roomDetails?.flatType;
-      const propertyType = formData.propertyType;
-      const availableRooms = formData.rentDetails?.roomDetails?.availableRooms;
-      if (
-        flatType === 'Shared' &&
-        ['2 BHK', '3 BHK', '4 BHK', '4+ BHK'].includes(propertyType) &&
-        (!availableRooms || Number(availableRooms) <= 0)
-      ) {
-        newErrors.availableRooms = 'Please enter the number of available spots (required for shared flats with more than 1 BHK).';
-      }
     }
-    // Price validation
+    
+    // Sell validation
     if (listingType === 'sell') {
-      const price = Number(formData.price);
-      if (!price || price < 1000) {
-        newErrors.price = 'Price must be at least ₹1,000.';
+      // Home Details - All fields required
+      if (!formData.homeType) newErrors.homeType = 'Please select a home type.';
+      if (!formData.roomType) newErrors.roomType = 'Please select a room type.';
+      if (!formData.furnishType) newErrors.furnishType = 'Please select a furnish type.';
+      
+      // Details
+      if (!formData.rentDetails?.preferredTenant?.lookingFor) newErrors.lookingFor = 'Please select a gender.';
+      if (!formData.parking) newErrors.parking = 'Please select a parking type.';
+      
+      // Amenities
+      if (!formData.rentDetails?.amenities || formData.rentDetails.amenities.length === 0) {
+        newErrors.amenities = 'Please select at least one amenity.';
       }
-      // Numeric fields non-negative
-      ['maintenance', 'securityDeposit', 'brokerage'].forEach(field => {
-        const value = Number((formData.sellDetails as any)?.[field]);
-        if (value < 0) newErrors[field] = 'Cannot be negative.';
-      });
+      
+      // Move In
+      if (formData.isImmediate === undefined || (formData.isImmediate === false && !formData.handoverDate)) {
+        newErrors.handoverDate = 'Please select a move-in option.';
+      }
+      
+             // Price Details - Only Price is required
+       const price = Number(formData.price);
+       if (!price || price < 1000) {
+         newErrors.price = 'Price must be at least ₹1,000.';
+       }
+       
+       // Numeric fields non-negative
+       ['maintenance', 'securityDeposit', 'brokerage'].forEach(field => {
+         const value = Number((formData as any)?.[field]);
+         if (value < 0) newErrors[field] = 'Cannot be negative.';
+       });
     }
-    // Required fields (apply to both rent and sell)
-    if (!formData.address.city) newErrors.city = 'City is required.';
-    if (!formData.address.locality) newErrors.locality = 'Locality is required.';
-    if (!formData.address.buildingName) newErrors.buildingName = 'Building name is required.';
-    if (!formData.rentDetails?.roomDetails?.flatType) newErrors.flatType = 'Please select a flat type.';
-    if (!formData.rentDetails?.roomDetails?.roomType) newErrors.roomType = 'Please select a room type.';
-    if (!formData.propertyType) newErrors.propertyType = 'Please select a property type.';
-    if (!formData.furnishingType) newErrors.furnishingType = 'Please select a furnish type.';
-    if (!formData.parking) newErrors.parking = 'Please select a parking type.';
-    // For rent (shared home)
-    if (listingType === 'rent') {
-      if (!formData.rentDetails?.roomDetails?.availableRooms) newErrors.availableRooms = 'Please select available rooms.';
-      if (!formData.rentDetails?.roomDetails?.bathroomType) newErrors.bathroomType = 'Please select a washroom type.';
-      if (!formData.rentDetails?.amenities || formData.rentDetails.amenities.length === 0) newErrors.amenities = 'Please select at least one amenity.';
-      if (!formData.rentDetails?.preferredTenant?.lookingFor) newErrors.gender = 'Please select a gender.';
-      if (formData.isImmediate === undefined || (formData.isImmediate === false && !formData.handoverDate)) newErrors.moveIn = 'Please select a move-in option.';
-    }
-    // For sell (full home)
-    if (listingType === 'sell') {
-      if (!formData.sellDetails?.totalFloors) newErrors.totalFloors = 'Please enter total floors.';
-      if (!formData.sellDetails?.floorNumber) newErrors.floorNumber = 'Please enter floor number.';
-      if (!formData.sellDetails?.waterSupply) newErrors.waterSupply = 'Please select water supply.';
-    }
+    
+    // Common validation
     if (!images || images.length === 0) newErrors.images = 'Please upload at least one image.';
     if (!formData.description || formData.description.length < 10) newErrors.description = 'Description must be at least 10 characters.';
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('=== ADD LISTING DEBUG START ===');
-    console.log('AddListingPage handleSubmit called');
-    console.log('Listing type:', listingType);
-    console.log('Form data:', formData);
-    console.log('Images count:', images.length);
-    console.log('User:', user);
     
+    setSubmitted(true);
     setIsSubmitting(true);
     setErrors({});
 
-    try {
-      // The validation will be handled by the child forms (RentForm/SellForm)
-      // They will set the errors and call this function back if validation passes
-      console.log('Validation passed, creating listing...');
+    // Validate the form before proceeding
+    const isValid = validate();
+    if (!isValid) {
+      setIsSubmitting(false);
+      return;
+    }
 
+    try {
       console.log('Validation passed, creating listing...');
       
       if (!user) {
@@ -799,6 +847,10 @@ const AddListingPage = () => {
     />
   );
 
+  const handleFormSubmit = () => {
+    handleSubmit(new Event('submit') as unknown as React.FormEvent);
+  };
+
   return (
     <div className="py-8 bg-white min-h-screen flex flex-col">
       <div className="container flex flex-col flex-1">
@@ -842,7 +894,8 @@ const AddListingPage = () => {
               removeImage={removeImage}
               errors={errors}
               setErrors={setErrors}
-              onSubmit={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)}
+              onSubmit={handleFormSubmit}
+              submitted={submitted}
             />
           ) : (
             <SellForm
@@ -855,7 +908,8 @@ const AddListingPage = () => {
               removeImage={removeImage}
               errors={errors}
               setErrors={setErrors}
-              onSubmit={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)}
+              onSubmit={handleFormSubmit}
+              submitted={submitted}
             />
           )}
           {/* No extra submit button here. Only the form component renders the button. */}
