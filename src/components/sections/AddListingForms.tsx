@@ -51,6 +51,7 @@ interface AddListingFormsProps {
   errors?: any; // Optional errors prop for inline error display
   setErrors?: (errors: any) => void; // Optional setErrors for edit page
   submitted?: boolean; // Optional submitted prop for error display
+  isSubmitting?: boolean; // Optional isSubmitting prop for submit button state
 }
 
 export const AddressFields = ({ formData, setFormData, errors = {}, listingType, images, setImages, handleImageUpload, removeImage, submitted = false }: AddListingFormsProps & { errors?: any, submitted?: boolean }) => {
@@ -288,7 +289,7 @@ const listingSchema = Yup.object().shape({
 });
 
 export const RentForm: React.FC<AddListingFormsProps> = (props) => {
-  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors, onSubmit, submitted = false } = props;
+  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors, onSubmit, submitted = false, isSubmitting = false } = props;
   const [isDragActive, setIsDragActive] = useState(false);
   const [localErrors, setLocalErrors] = useState<any>({});
   const errors: Record<string, any> = propErrors || localErrors;
@@ -1163,7 +1164,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         <button
           type="submit"
           className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={submitted}
+          disabled={isSubmitting}
           onClick={(e) => {
             e.preventDefault();
             
@@ -1173,7 +1174,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             }
           }}
         >
-          {submitted ? 'Creating Listing...' : 'Submit Listing'}
+          {isSubmitting ? 'Creating Listing...' : 'Submit Listing'}
         </button>
         <p className="text-xs text-gray-500 mt-2 text-center">
           By submitting, you agree to our terms and conditions
@@ -1185,7 +1186,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
 
 // Minimal SellForm implementation to resolve missing export
 export const SellForm: React.FC<AddListingFormsProps> = (props) => {
-  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors, onSubmit, submitted = false } = props;
+  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors, onSubmit, submitted = false, isSubmitting = false } = props;
   const [moveInDate, setMoveInDate] = useState<Date | null>(null);
   const [isImmediate, setIsImmediate] = useState(formData.isImmediate ?? true);
   const [localErrors, setLocalErrors] = useState<any>({});
@@ -1636,7 +1637,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         <button
           type="submit"
           className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={submitted}
+          disabled={isSubmitting}
           onClick={(e) => {
             e.preventDefault();
             
@@ -1646,7 +1647,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             }
           }}
         >
-          {submitted ? 'Creating Listing...' : 'Submit Listing'}
+          {isSubmitting ? 'Creating Listing...' : 'Submit Listing'}
         </button>
         <p className="text-xs text-gray-500 mt-2 text-center">
           By submitting, you agree to our terms and conditions

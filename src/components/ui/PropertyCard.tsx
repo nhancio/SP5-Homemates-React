@@ -414,7 +414,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               ₹{formatCurrency(
                 listingType === 'rent' 
                   ? (property.rentDetails?.costs?.rent || 0)
-                  : (property.sellDetails?.price || property.price || 0)
+                  : (property.sellDetails?.price || 0)
               )}
             </span>
           </div>
@@ -434,9 +434,14 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           )}
           {/* Amenity Icons Row */}
           <div className="flex gap-1 md:gap-2 mt-2 mb-2">
-            {Object.entries(AMENITY_ICONS).map(([key, icon]) => (
-              <span key={key} className={`rounded-full p-1 bg-gray-100 ${property.features?.includes(key) ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
-            ))}
+            {Object.entries(AMENITY_ICONS).map(([key, icon]) => {
+              const hasAmenity = listingType === 'rent' 
+                ? (property.rentDetails as any)?.amenities?.includes(key)
+                : property.sellDetails?.amenities?.includes(key);
+              return (
+                <span key={key} className={`rounded-full p-1 bg-gray-100 ${hasAmenity ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
+              );
+            })}
           </div>
         </div>
         {/* Action Buttons - Icon Only */}
@@ -644,7 +649,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </div>
             <div className="text-right">
               <div className="text-xl md:text-2xl font-extrabold text-primary-600">
-                ₹{formatCurrency(property.rentDetails?.costs?.rent || property.price || 0)}
+                ₹{formatCurrency(
+                  listingType === 'rent' 
+                    ? (property.rentDetails?.costs?.rent || 0)
+                    : (property.sellDetails?.price || 0)
+                )}
               </div>
               <div className="text-sm text-gray-500">
                 {listingType === 'rent' ? 'per month' : 'total price'}
@@ -653,9 +662,14 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           </div>
           {/* Amenity Icons Row */}
           <div className="flex gap-3 mb-4">
-            {Object.entries(AMENITY_ICONS).map(([key, icon]) => (
-              <span key={key} className={`rounded-full p-2 bg-gray-100 ${property.features?.includes(key) ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
-            ))}
+            {Object.entries(AMENITY_ICONS).map(([key, icon]) => {
+              const hasAmenity = listingType === 'rent' 
+                ? (property.rentDetails as any)?.amenities?.includes(key)
+                : property.sellDetails?.amenities?.includes(key);
+              return (
+                <span key={key} className={`rounded-full p-2 bg-gray-100 ${hasAmenity ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
+              );
+            })}
           </div>
         </div>
         {/* Action Buttons - Icon Only */}

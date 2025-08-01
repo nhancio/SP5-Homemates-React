@@ -442,44 +442,73 @@ Link: ${url}`;
               <div className="p-4 md:p-6 border-b">
                 <h2 className="text-lg font-semibold mb-4">Property Details</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  <div>
-                    <span className="text-gray-600 text-sm">Type</span>
-                    <p className="font-semibold text-sm md:text-base">{property.propertyType}</p>
-                  </div>
-                  {listingType === 'sell' ? (
+                  {listingType === 'rent' ? (
                     <>
                       <div>
-                        <span className="text-gray-600 text-sm">Built Up Area</span>
-                        <p className="font-semibold text-sm md:text-base">{property.sellDetails?.sqft || '-'} Sq.ft</p>
+                        <span className="text-gray-600 text-sm">Property Type</span>
+                        <p className="font-semibold text-sm md:text-base">{property.propertyType || '-'}</p>
                       </div>
                       <div>
-                        <span className="text-gray-600 text-sm">Direction</span>
-                        <p className="font-semibold text-sm md:text-base">{property.sellDetails?.direction || '-'}</p>
+                        <span className="text-gray-600 text-sm">Home Type</span>
+                        <p className="font-semibold text-sm md:text-base">{property.rentDetails?.roomDetails?.flatType || '-'}</p>
                       </div>
-                    </>
-                  ) : (
-                    <>
+                      <div>
+                        <span className="text-gray-600 text-sm">Available Rooms</span>
+                        <p className="font-semibold text-sm md:text-base">{property.rentDetails?.roomDetails?.availableRooms || '-'}</p>
+                      </div>
                       <div>
                         <span className="text-gray-600 text-sm">Room Type</span>
-                        <p className="font-semibold text-sm md:text-base">{property.rentDetails?.roomDetails?.availability || '-'}</p>
+                        <p className="font-semibold text-sm md:text-base">{property.rentDetails?.roomDetails?.roomType || '-'}</p>
                       </div>
                       <div>
                         <span className="text-gray-600 text-sm">Bathroom Type</span>
                         <p className="font-semibold text-sm md:text-base">{property.rentDetails?.roomDetails?.bathroomType || '-'}</p>
                       </div>
+                      <div>
+                        <span className="text-gray-600 text-sm">Furnishing</span>
+                        <p className="font-semibold text-sm md:text-base">{property.furnishingType || '-'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 text-sm">Parking</span>
+                        <p className="font-semibold text-sm md:text-base">{property.parking || '-'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 text-sm">Available From</span>
+                        <p className="font-semibold text-sm md:text-base">
+                          {property.isImmediate ? 'Immediate' : (property.handoverDate || '-')}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <span className="text-gray-600 text-sm">Home Type</span>
+                        <p className="font-semibold text-sm md:text-base">{property.homeType || '-'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 text-sm">Room Type</span>
+                        <p className="font-semibold text-sm md:text-base">{property.roomType || '-'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 text-sm">Furnish Type</span>
+                        <p className="font-semibold text-sm md:text-base">{property.furnishType || '-'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 text-sm">Looking For</span>
+                        <p className="font-semibold text-sm md:text-base">{property.lookingFor || '-'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 text-sm">Parking</span>
+                        <p className="font-semibold text-sm md:text-base">{property.parking || '-'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 text-sm">Available From</span>
+                        <p className="font-semibold text-sm md:text-base">
+                          {property.isImmediate ? 'Immediate' : (property.handoverDate || '-')}
+                        </p>
+                      </div>
                     </>
                   )}
-                  <div>
-                    <span className="text-gray-600 text-sm">Furnishing</span>
-                    <p className="font-semibold text-sm md:text-base">{property.furnishingType}</p>
-                  </div>
-                  
-                  <div>
-                    <span className="text-gray-600 text-sm">Available From</span>
-                    <p className="font-semibold text-sm md:text-base">
-                      {property.isImmediate ? 'Immediate' : property.handoverDate}
-                    </p>
-                  </div>
                 </div>
               </div>
 
@@ -518,20 +547,20 @@ Link: ${url}`;
                   <h2 className="text-lg font-semibold mb-4">Cost Details</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <div>
-                      <span className="text-gray-600 text-sm">Rent</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.rent || 0)} <span className="text-xs text-gray-500">/month</span></p>
+                      <span className="text-gray-600 text-sm">Price</span>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.price || 0)}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Maintenance</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Security Deposit</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.securityDeposit || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.securityDeposit || 0)}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Brokerage</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.brokerage || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.brokerage || 0)}</p>
                     </div>
                   </div>
                 </div>
@@ -539,31 +568,7 @@ Link: ${url}`;
               {/* Contact Number - Show if available */}
               {/* Removed contact number display for privacy */}
 
-              {/* Additional Bills - Only for Rent */}
-              {listingType === 'rent' && property.rentDetails?.additionalBills && (
-                <div className="p-4 md:p-6 border-b">
-                  <h2 className="text-lg font-semibold mb-4">Additional Bills</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {Object.entries(property.rentDetails.additionalBills).map(([key, value]) => (
-                      value ? (
-                        <div key={key}>
-                          <span className="text-gray-600 text-sm">{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-                          <p className="font-semibold text-sm md:text-base">₹{formatCurrency(Number(value))}</p>
-                        </div>
-                      ) : null
-                    ))}
-                    <div className="col-span-full mt-4 pt-4 border-t">
-                      <span className="text-gray-600 text-sm">Total Additional Bills</span>
-                      <p className="font-semibold text-lg text-primary-600">
-                        ₹{formatCurrency(
-                          Object.values(property.rentDetails.additionalBills)
-                            .reduce((sum: number, value) => sum + (Number(value) || 0), 0)
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
+
 
               {/* Tenant Preferences - Only for Rent */}
               {listingType === 'rent' && property.rentDetails?.preferredTenant && (
@@ -593,51 +598,18 @@ Link: ${url}`;
               {/* Amenities Section */}
               <div className="p-4 md:p-6 border-b">
                 <h2 className="text-lg font-semibold mb-4">Amenities</h2>
-                {listingType === 'rent' && property.amenities && (
-                  <div className="space-y-2">
-                    {property.amenities.appliances?.length > 0 && (
-                      <div>
-                        <span className="text-gray-600 font-medium text-sm">Appliances:</span>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {property.amenities.appliances.map((amenity: string) => (
-                            <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
-                              {amenityIconMap[amenity.toLowerCase()] || null}
-                              {amenity}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {property.amenities.furniture?.length > 0 && (
-                      <div>
-                        <span className="text-gray-600 font-medium text-sm">Furniture:</span>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {property.amenities.furniture.map((amenity: string) => (
-                            <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
-                              {amenityIconMap[amenity.toLowerCase()] || null}
-                              {amenity}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {property.amenities.building?.length > 0 && (
-                      <div>
-                        <span className="text-gray-600 font-medium text-sm">Building:</span>
-                        <div className="flex flex-wrap gap-2 mt-1">
-                          {property.amenities.building.map((amenity: string) => (
-                            <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
-                              {amenityIconMap[amenity.toLowerCase()] || null}
-                              {amenity}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {(!property.amenities.appliances?.length && !property.amenities.furniture?.length && !property.amenities.building?.length) && (
-                      <span className="text-gray-500">No amenities listed.</span>
-                    )}
+                {listingType === 'rent' && property.rentDetails?.amenities?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {property.rentDetails.amenities.map((amenity: string) => (
+                      <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
+                        {amenityIconMap[amenity.toLowerCase()] || null}
+                        {amenity}
+                      </span>
+                    ))}
                   </div>
+                )}
+                {listingType === 'rent' && (!property.rentDetails?.amenities || property.rentDetails.amenities.length === 0) && (
+                  <span className="text-gray-500">No amenities listed.</span>
                 )}
                 {listingType === 'sell' && property.sellDetails?.amenities?.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-1">

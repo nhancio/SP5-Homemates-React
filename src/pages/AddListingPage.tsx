@@ -354,6 +354,8 @@ const AddListingPage = () => {
           createdAt: Date.now(),
           status: 'active' as const,
           listingType: 'rent',
+          // Set price to 0 for rent listings (price is in rentDetails.costs.rent)
+          price: 0,
           // Rent Details - only the fields that are actually in the form
           rentDetails: cleanFormData({
             // Home Details
@@ -406,11 +408,6 @@ const AddListingPage = () => {
           // Move In details
           handoverDate: formData.handoverDate,
           isImmediate: formData.isImmediate,
-          // Price Details
-          price: formData.price,
-          maintenance: formData.maintenance,
-          securityDeposit: formData.securityDeposit,
-          brokerage: formData.brokerage,
           // Description
           description: formData.description,
           // Contact Number
@@ -422,6 +419,8 @@ const AddListingPage = () => {
           listingType: 'sell',
           // Sell Details - only the fields that are actually in the form
           sellDetails: cleanFormData({
+            // Price Details (moved to sellDetails to match interface)
+            price: formData.price,
             // Amenities
             amenities: formData.sellDetails?.amenities || [],
           }),
@@ -899,6 +898,7 @@ const AddListingPage = () => {
               setErrors={setErrors}
               onSubmit={handleFormSubmit}
               submitted={submitted}
+              isSubmitting={isSubmitting}
             />
           ) : (
             <SellForm
@@ -913,6 +913,7 @@ const AddListingPage = () => {
               setErrors={setErrors}
               onSubmit={handleFormSubmit}
               submitted={submitted}
+              isSubmitting={isSubmitting}
             />
           )}
           {/* No extra submit button here. Only the form component renders the button. */}

@@ -5,7 +5,7 @@ const mockProperties: Property[] = [
     id: 'prop-1',
     title: 'Luxury Apartment in Downtown',
     description: 'Beautiful luxury apartment in the heart of downtown with amazing city views. Features high-end finishes, modern appliances, and a private balcony.',
-    price: 4500000,
+    price: 0, // Set to 0 for sell listings (price is in sellDetails)
     location: 'Koramangala, Bangalore',
     type: 'Flat',
     bedrooms: 2,
@@ -29,38 +29,35 @@ const mockProperties: Property[] = [
       locality: 'Koramangala',
       city: 'Bangalore'
     },
-    rentDetails: {
-      roomDetails: {
-        availableRooms: 2,
-        availability: 'Immediate',
-        bathroomType: 'Attached'
-      },
-      costs: {
-        rent: 35000,
-        maintenance: 3000,
-        securityDeposit: 70000,
-        setupCost: 5000,
-        brokerage: 0
-      },
-      additionalBills: {
-        wifi: 1000,
-        water: 500,
-        gas: 600,
-        cook: 2000,
-        maid: 1500,
-        others: 0
-      },
-      preferredTenant: {
-        lookingFor: 'Any',
-        preferences: []
-      }
+    sellDetails: {
+      price: 4500000,
+      rent: 0,
+      maintenance: 0,
+      brokerage: 0,
+      securityDeposit: 0,
+      gst: 0,
+      isNegotiable: false,
+      propertyType: 'Flat',
+      sqft: 1200,
+      direction: 'North',
+      ownership: 'Freehold',
+      ageOfProperty: 'New',
+      totalFloors: '15',
+      floorNumber: '8',
+      waterSupply: '24/7',
+      approvals: ['RERA'],
+      amenities: ['Elevator', 'Parking', 'Gym', 'Swimming Pool'],
+      highlights: ['Premium Location', 'Modern Amenities'],
+      description: 'Beautiful luxury apartment in the heart of downtown with amazing city views.',
+      propertyId: 'PROP001',
+      loanOnProperty: false
     }
   },
   {
     id: 'prop-2',
     title: 'Modern Villa with Swimming Pool',
     description: 'Stunning modern villa with a private swimming pool and garden. Perfect for families looking for luxury and comfort.',
-    price: 12000000,
+    price: 0, // Set to 0 for sell listings (price is in sellDetails)
     location: 'Whitefield, Bangalore',
     type: 'Villa',
     bedrooms: 4,
@@ -84,38 +81,35 @@ const mockProperties: Property[] = [
       locality: 'Whitefield',
       city: 'Bangalore'
     },
-    rentDetails: {
-      roomDetails: {
-        availableRooms: 4,
-        availability: 'Immediate',
-        bathroomType: 'Attached'
-      },
-      costs: {
-        rent: 90000,
-        maintenance: 8000,
-        securityDeposit: 180000,
-        setupCost: 10000,
-        brokerage: 0
-      },
-      additionalBills: {
-        wifi: 2000,
-        water: 1000,
-        gas: 1200,
-        cook: 4000,
-        maid: 3000,
-        others: 0
-      },
-      preferredTenant: {
-        lookingFor: 'Family',
-        preferences: []
-      }
+    sellDetails: {
+      price: 12000000,
+      rent: 0,
+      maintenance: 0,
+      brokerage: 0,
+      securityDeposit: 0,
+      gst: 0,
+      isNegotiable: false,
+      propertyType: 'Villa',
+      sqft: 3200,
+      direction: 'North',
+      ownership: 'Freehold',
+      ageOfProperty: 'New',
+      totalFloors: '2',
+      floorNumber: '1',
+      waterSupply: '24/7',
+      approvals: ['RERA'],
+      amenities: ['Swimming Pool', 'Garden', 'Smart Home', 'Security System'],
+      highlights: ['Premium Location', 'Modern Amenities'],
+      description: 'Stunning modern villa with a private swimming pool and garden.',
+      propertyId: 'PROP002',
+      loanOnProperty: false
     }
   },
   {
     id: 'prop-3',
     title: 'Spacious 3BHK Apartment',
     description: 'Modern 3BHK apartment with premium amenities and great connectivity.',
-    price: 7500000,
+    price: 0, // Set to 0 for sell listings (price is in sellDetails)
     location: 'HSR Layout, Bangalore',
     type: 'Flat',
     bedrooms: 3,
@@ -135,31 +129,28 @@ const mockProperties: Property[] = [
       locality: 'HSR Layout',
       city: 'Bangalore'
     },
-    rentDetails: {
-      roomDetails: {
-        availableRooms: 3,
-        availability: 'Immediate',
-        bathroomType: 'Common'
-      },
-      costs: {
-        rent: 45000,
-        maintenance: 4000,
-        securityDeposit: 90000,
-        setupCost: 6000,
-        brokerage: 0
-      },
-      additionalBills: {
-        wifi: 1200,
-        water: 700,
-        gas: 800,
-        cook: 2500,
-        maid: 1800,
-        others: 0
-      },
-      preferredTenant: {
-        lookingFor: 'Any',
-        preferences: []
-      }
+    sellDetails: {
+      price: 7500000,
+      rent: 0,
+      maintenance: 0,
+      brokerage: 0,
+      securityDeposit: 0,
+      gst: 0,
+      isNegotiable: false,
+      propertyType: 'Flat',
+      sqft: 1800,
+      direction: 'North',
+      ownership: 'Freehold',
+      ageOfProperty: 'New',
+      totalFloors: '10',
+      floorNumber: '5',
+      waterSupply: '24/7',
+      approvals: ['RERA'],
+      amenities: ['Modular Kitchen', 'Power Backup', 'Club House', "Children's Play Area"],
+      highlights: ['Premium Location', 'Modern Amenities'],
+      description: 'Modern 3BHK apartment with premium amenities and great connectivity.',
+      propertyId: 'PROP003',
+      loanOnProperty: false
     }
   },
   // Add rent properties
