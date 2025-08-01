@@ -14,12 +14,11 @@ import InputMask from 'react-input-mask';
 // Amenity/feature options with icon and label (same as PropertyFilters)
 const AMENITY_OPTIONS = [
   { key: 'ac', label: 'AC', icon: Snowflake },
-  { key: 'security', label: 'Security', icon: Shield },
-  { key: 'fridge', label: 'Fridge', icon: Refrigerator },
-  { key: 'washing', label: 'Washing', icon: WashingMachine },
   { key: 'bed', label: 'Bed', icon: BedDouble },
-  { key: 'pet', label: 'Pet Friendly', icon: PawPrint },
   { key: 'power', label: 'Power Backup', icon: Plug },
+  { key: 'gym', label: 'Gym', icon: Dumbbell },
+  { key: 'fridge', label: 'Fridge', icon: Refrigerator },
+  { key: 'washing', label: 'Washing machine', icon: WashingMachine },
 ];
 
 // Services available options
