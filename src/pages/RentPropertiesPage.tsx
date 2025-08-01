@@ -6,7 +6,6 @@ import { getListings } from '../services/listings';
 import { useAppContext } from '../context/AppContext';
 import { getDoc, doc } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import AIQueryBox from '../components/ai/AIQueryBox';
 
 const PROPERTIES_PER_PAGE = 9;
 
@@ -116,7 +115,6 @@ const RentPropertiesPage = () => {
   return (
     <div className="py-8">
       <div className="container">
-        <AIQueryBox onFiltersExtracted={extracted => setFilters({ ...filters, rent: { ...filters.rent, ...extracted } })} />
         {!isAuthenticated && (
           <div className="bg-gradient-to-r from-primary-50 to-primary-100 border border-primary-200 rounded-xl p-6 mb-8 shadow-sm">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

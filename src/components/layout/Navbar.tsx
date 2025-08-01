@@ -55,48 +55,56 @@ const Navbar = () => {
             )}
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
               <Link 
                 to="/" 
-                className={`flex items-center space-x-2 transition-colors ${
-                  isActive('/') ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  isActive('/') 
+                    ? 'bg-blue-100 text-blue-700 shadow-md' 
+                    : 'bg-gray-50 text-gray-700 hover:bg-blue-50 hover:text-blue-600'
                 }`}
               >
                 <Home className="w-5 h-5" />
                 <span className="font-medium">Home</span>
               </Link>
-              {/* <Link
-                to="/rent" 
-                className={`flex items-center space-x-2 transition-colors ${
-                  isActive('/rent') ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'
-                }`}
-              >
-                <Building className="w-5 h-5" />
-                <span className="font-medium">Shared Homes</span>
-              </Link> */}
-              <Link 
-                to="/add-listing" 
-                className={`flex items-center space-x-2 transition-colors ${
-                  isActive('/add-listing') ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'
-                }`}
-              >
-                <PlusSquare className="w-5 h-5" />
-                <span className="font-medium">Post</span>
-              </Link>
+              
+              <div className="relative">
+                <Link 
+                  to="/add-listing" 
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    isActive('/add-listing') 
+                      ? 'bg-green-100 text-green-700 shadow-md' 
+                      : 'bg-gray-50 text-gray-700 hover:bg-green-50 hover:text-green-600'
+                  }`}
+                >
+                  <PlusSquare className="w-5 h-5" />
+                  <span className="font-medium">Post</span>
+                </Link>
+                {/* FREE Tag */}
+                <div className="absolute -top-1 -right-1 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm z-10">
+                  FREE
+                </div>
+              </div>
+              
               <Link 
                 to="/saved" 
-                className={`flex items-center space-x-2 transition-colors ${
-                  isActive('/saved') ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  isActive('/saved') 
+                    ? 'bg-red-100 text-red-700 shadow-md' 
+                    : 'bg-gray-50 text-gray-700 hover:bg-red-50 hover:text-red-600'
                 }`}
               >
                 <Heart className="w-5 h-5" />
                 <span className="font-medium">Saved</span>
               </Link>
+              
               {isAuthenticated ? (
                 <Link 
                   to="/profile" 
-                  className={`flex items-center space-x-2 transition-colors ${
-                    isActive('/profile') ? 'text-primary-600' : 'text-gray-600 hover:text-primary-600'
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    isActive('/profile') 
+                      ? 'bg-purple-100 text-purple-700 shadow-md' 
+                      : 'bg-gray-50 text-gray-700 hover:bg-purple-50 hover:text-purple-600'
                   }`}
                 >
                   <User className="w-5 h-5" />

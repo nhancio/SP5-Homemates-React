@@ -1738,59 +1738,6 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         </p>}
       </div>
 
-      {/* Rent */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Rent (₹/month)</label>
-        <input
-          type="number"
-          className={`input w-full${displayErrors.rent ? ' border-red-500 bg-red-50' : ''}`}
-          placeholder="Enter rent amount"
-          value={formData.rent || ''}
-          onChange={e => setFormData({ ...formData, rent: e.target.value })}
-          onBlur={() => markTouched('rent')}
-        />
-        {displayErrors.rent && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">{displayErrors.rent}</p>}
-      </div>
-      {/* Maintenance */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Maintenance (₹/month)</label>
-        <input
-          type="number"
-          className={`input w-full${displayErrors.maintenance ? ' border-red-500 bg-red-50' : ''}`}
-          placeholder="Enter maintenance amount"
-          value={formData.maintenance || ''}
-          onChange={e => setFormData({ ...formData, maintenance: e.target.value })}
-          onBlur={() => markTouched('maintenance')}
-        />
-        {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">{displayErrors.maintenance}</p>}
-      </div>
-      {/* Brokerage */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Brokerage (₹)</label>
-        <input
-          type="number"
-          className={`input w-full${displayErrors.brokerage ? ' border-red-500 bg-red-50' : ''}`}
-          placeholder="Enter brokerage amount"
-          value={formData.brokerage || ''}
-          onChange={e => setFormData({ ...formData, brokerage: e.target.value })}
-          onBlur={() => markTouched('brokerage')}
-        />
-        {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">{displayErrors.brokerage}</p>}
-      </div>
-      {/* Security Deposit */}
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Security Deposit (₹)</label>
-        <input
-          type="number"
-          className={`input w-full${displayErrors.securityDeposit ? ' border-red-500 bg-red-50' : ''}`}
-          placeholder="Enter security deposit"
-          value={formData.securityDeposit || ''}
-          onChange={e => setFormData({ ...formData, securityDeposit: e.target.value })}
-          onBlur={() => markTouched('securityDeposit')}
-        />
-        {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full">{displayErrors.securityDeposit}</p>}
-      </div>
-
       {/* Submit Button */}
       <div className="mt-8 pt-6 border-t border-gray-200">
         <button

@@ -3,7 +3,6 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAppContext } from '../context/AppContext';
 import { Phone, MapPin, User, Briefcase, Heart } from 'lucide-react';
-import AIQueryBox from '../components/ai/AIQueryBox';
 
 // Helper to get initials from name
 function getInitials(name?: string) {
@@ -235,22 +234,7 @@ const FindFriendsPage = () => {
           </div>
         )}
         
-        <AIQueryBox
-          onFiltersExtracted={handleAIFilters}
-          placeholder="Search for friends..."
-          suggestions={[
-            'Software engineers in Pune',
-            'People who like cricket in Mumbai',
-            'Age 25-30 in Chennai',
-            'People interested in music in Kolkata',
-            'Students in Delhi',
-            'People who like movies in Bangalore',
-            'People looking for shared homes',
-            'People with full homes',
-            'Shared housing in Mumbai',
-            'Full homes in Bangalore',
-          ]}
-        />
+
         
         {loading && <div className="text-center text-lg text-primary-600">Loading...</div>}
         {error && <div className="text-red-500 text-center mb-4">{error}</div>}
