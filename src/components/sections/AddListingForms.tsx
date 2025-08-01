@@ -11,7 +11,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import InputMask from 'react-input-mask';
 
-// Amenity/feature options with icon and label (same as PropertyFilters)
+// Amenity/feature options with icon and label for Shared Home (Rent)
 const AMENITY_OPTIONS = [
   { key: 'ac', label: 'AC', icon: Snowflake },
   { key: 'bed', label: 'Bed', icon: BedDouble },
@@ -19,6 +19,15 @@ const AMENITY_OPTIONS = [
   { key: 'gym', label: 'Gym', icon: Dumbbell },
   { key: 'fridge', label: 'Fridge', icon: Refrigerator },
   { key: 'washing', label: 'Washing machine', icon: WashingMachine },
+];
+
+// Amenity/feature options with icon and label for Full Home (Sell)
+const SELL_AMENITY_OPTIONS = [
+  { key: 'security', label: 'Security', icon: Shield },
+  { key: 'power', label: 'Power Backup', icon: Plug },
+  { key: 'gym', label: 'Gym', icon: Dumbbell },
+  { key: 'lift', label: 'Lift', icon: Home },
+  { key: 'balcony', label: 'Balcony', icon: Sun },
 ];
 
 // Services available options
@@ -1381,7 +1390,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           </div>
         )}
         <div className="flex flex-wrap gap-3">
-          {AMENITY_OPTIONS.map(opt => {
+          {SELL_AMENITY_OPTIONS.map(opt => {
             const Icon = opt.icon;
             const selected = Array.isArray(formData.sellDetails?.amenities) && formData.sellDetails.amenities.includes(opt.key);
             return (
