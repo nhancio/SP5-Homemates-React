@@ -328,50 +328,55 @@ const AddListingPage = () => {
 
       if (listingType === 'rent') {
         console.log('Creating RENT listing...');
-        // Prepare rent listing data with only filled fields
+        // Prepare rent listing data with only the fields that are actually in the RentForm
         const rentListingData = {
+          // Address fields (from AddressFields component)
           address: cleanFormData({
             city: formData.address.city,
             locality: formData.address.locality,
             buildingName: formData.address.buildingName,
           }),
+          // Property Type
           propertyType: formData.propertyType,
+          // Furnish Type (from Home Details)
           furnishingType: formData.furnishingType,
+          // Parking (from Home Details)
           parking: formData.parking,
-          buildingType: formData.buildingType,
+          // Move In details
           handoverDate: formData.handoverDate,
           isImmediate: formData.isImmediate,
+          // Description
           description: formData.description,
+          // Contact Number
           contactNumber: formData.contactNumber,
+          // Images
           images,
           createdAt: Date.now(),
           status: 'active' as const,
           listingType: 'rent',
+          // Rent Details - only the fields that are actually in the form
           rentDetails: cleanFormData({
+            // Home Details
+            roomDetails: {
+              flatType: formData.rentDetails.roomDetails.flatType, // Home Type
+              availableRooms: formData.rentDetails.roomDetails.availableRooms,
+              roomType: formData.rentDetails.roomDetails.roomType,
+              bathroomType: formData.rentDetails.roomDetails.bathroomType,
+            },
+            // Preferred Tenant
             preferredTenant: {
               lookingFor: formData.rentDetails.preferredTenant.lookingFor,
               preferences: formData.rentDetails.preferredTenant.preferences,
             },
-            roomDetails: {
-              availableRooms: formData.rentDetails.roomDetails.availableRooms,
-              bathroomType: formData.rentDetails.roomDetails.bathroomType,
-              flatType: formData.rentDetails.roomDetails.flatType,
-              roomType: formData.rentDetails.roomDetails.roomType,
-            },
+            // Rental Costs
             costs: {
               rent: formData.rentDetails.costs.rent,
               maintenance: formData.rentDetails.costs.maintenance,
+              securityDeposit: formData.rentDetails.costs.securityDeposit,
               setupCost: formData.rentDetails.costs.setupCost,
               brokerage: formData.rentDetails.costs.brokerage,
             },
-            additionalBills: {
-              wifi: formData.rentDetails.additionalBills.wifi,
-              water: formData.rentDetails.additionalBills.water,
-              gas: formData.rentDetails.additionalBills.gas,
-              cook: formData.rentDetails.additionalBills.cook,
-              maid: formData.rentDetails.additionalBills.maid,
-              others: formData.rentDetails.additionalBills.others,
-            },
+            // Amenities
             amenities: formData.rentDetails.amenities,
           }),
         };
@@ -383,44 +388,42 @@ const AddListingPage = () => {
         console.log('Rent listing created successfully:', result);
       } else {
         console.log('Creating SELL listing...');
-        // Prepare sell listing data with only filled fields
+        // Prepare sell listing data with only the fields that are actually in the SellForm
         const sellListingData = {
+          // Address fields (from AddressFields component)
           address: cleanFormData({
             city: formData.address.city,
             locality: formData.address.locality,
             buildingName: formData.address.buildingName,
           }),
-          propertyType: formData.propertyType,
-          furnishingType: formData.furnishingType,
+          // Home Details
+          homeType: formData.homeType,
+          roomType: formData.roomType,
+          furnishType: formData.furnishType,
+          // Details
+          lookingFor: formData.sellDetails?.lookingFor || '',
           parking: formData.parking,
-          buildingType: formData.buildingType,
+          // Move In details
           handoverDate: formData.handoverDate,
           isImmediate: formData.isImmediate,
+          // Price Details
+          price: formData.price,
+          maintenance: formData.maintenance,
+          securityDeposit: formData.securityDeposit,
+          brokerage: formData.brokerage,
+          // Description
           description: formData.description,
+          // Contact Number
           contactNumber: formData.contactNumber,
+          // Images
           images,
           createdAt: Date.now(),
           status: 'active' as const,
           listingType: 'sell',
+          // Sell Details - only the fields that are actually in the form
           sellDetails: cleanFormData({
-            price: formData.price,
-            rent: formData.rent,
-            maintenance: formData.maintenance,
-            brokerage: formData.brokerage,
-            securityDeposit: formData.securityDeposit,
-            sqft: formData.sellDetails?.sqft || 0,
-            direction: formData.sellDetails?.direction || '',
-            ownership: formData.sellDetails?.ownership || '',
-            ageOfProperty: formData.sellDetails?.ageOfProperty || '',
-            totalFloors: formData.sellDetails?.totalFloors || '',
-            floorNumber: formData.sellDetails?.floorNumber || '',
-            waterSupply: formData.sellDetails?.waterSupply || '',
-            approvals: formData.sellDetails?.approvals || [],
+            // Amenities
             amenities: formData.sellDetails?.amenities || [],
-            highlights: formData.sellDetails?.highlights || [],
-            propertyId: formData.sellDetails?.propertyId || '',
-            loanOnProperty: formData.sellDetails?.loanOnProperty || false,
-            lookingFor: formData.sellDetails?.lookingFor || '',
           }),
         };
         console.log('Sell listing data before cleaning:', sellListingData);
