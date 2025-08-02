@@ -118,7 +118,7 @@ const SavedPage = () => {
                 Full Homes
               </Link>
               <Link to="/rent" className="btn btn-secondary">
-                Rent Properties
+                Shared Homes
               </Link>
             </div>
           </div>
