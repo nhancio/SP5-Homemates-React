@@ -907,28 +907,6 @@ Link: ${url}`;
                 </span>
               </div>
               
-              {/* Square Feet */}
-              <div>
-                <span className="text-gray-600">Square Feet:</span>
-                <span className="font-medium ml-1">
-                  {listingType === 'buy' 
-                    ? `${property.sellDetails?.sqft || property.area || '-'} sq ft`
-                    : `${property.area || '-'} sq ft`
-                  }
-                </span>
-              </div>
-              
-              {/* Direction */}
-              <div>
-                <span className="text-gray-600">Direction:</span>
-                <span className="font-medium ml-1">
-                  {listingType === 'buy' 
-                    ? (property.sellDetails?.direction || '-')
-                    : '-'
-                  }
-                </span>
-              </div>
-              
               {/* Furnishing */}
               <div>
                 <span className="text-gray-600">Furnishing:</span>

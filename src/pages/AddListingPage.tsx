@@ -451,6 +451,7 @@ const AddListingPage = () => {
           sqft: (formData as any).sqft,
           direction: (formData as any).direction,
         });
+        console.log('Full formData object:', formData);
         console.log('Calling createListing for sell...');
         const result = await createListing('sell', cleanedSellListingData);
         console.log('Sale listing created successfully:', result);

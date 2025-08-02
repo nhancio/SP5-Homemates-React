@@ -117,6 +117,9 @@ const PropertyDetailsPage = () => {
           parking: (fetchedProperty as any).parking,
           handoverDate: (fetchedProperty as any).handoverDate,
           isImmediate: (fetchedProperty as any).isImmediate,
+          // Add more detailed debugging
+          fullProperty: fetchedProperty,
+          listingType: listingType,
         });
         setProperty(fetchedProperty);
       } catch (error) {
@@ -579,6 +582,11 @@ Link: ${url}`;
                         <span className="text-gray-600 text-sm">BHK</span>
                         <p className="font-semibold text-sm md:text-base">
                           {(() => {
+                            console.log('PropertyDetailsPage Debug - BHK display data:', {
+                              bedrooms: property.bedrooms,
+                              roomType: (property as any).roomType,
+                              sellDetailsPropertyType: property.sellDetails?.propertyType,
+                            });
                             if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
                               return `${property.bedrooms}BHK`;
                             }
@@ -601,14 +609,6 @@ Link: ${url}`;
                       <div>
                         <span className="text-gray-600 text-sm">Property Type</span>
                         <p className="font-semibold text-sm md:text-base">{(property as any).homeType || property.sellDetails?.propertyType || property.propertyType || '-'}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-600 text-sm">Square Feet</span>
-                        <p className="font-semibold text-sm md:text-base">{property.sellDetails?.sqft || property.area || '-'}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-600 text-sm">Direction</span>
-                        <p className="font-semibold text-sm md:text-base">{property.sellDetails?.direction || '-'}</p>
                       </div>
                       <div>
                         <span className="text-gray-600 text-sm">Furnishing</span>
