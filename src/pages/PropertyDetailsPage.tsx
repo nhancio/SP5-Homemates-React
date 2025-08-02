@@ -778,9 +778,9 @@ const PropertyDetailsPage = () => {
                 {listingType === 'rent' && property.rentDetails?.amenities?.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-1">
                     {property.rentDetails.amenities.map((amenity: string) => (
-                      <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
-                        {amenityIconMap[amenity] || amenityIconMap[amenity.toLowerCase()] || null}
-                        {amenity}
+                      <span key={amenity} className="flex flex-col items-center justify-center px-3 py-2 rounded-full border border-primary-200 bg-primary-50 text-primary-700 text-xs font-semibold min-w-[70px]">
+                        <span className="mb-1">{amenityIconMap[amenity] || amenityIconMap[amenity.toLowerCase()] || null}</span>
+                        <span className="whitespace-nowrap">{amenity}</span>
                       </span>
                     ))}
                   </div>
@@ -791,9 +791,9 @@ const PropertyDetailsPage = () => {
                 {listingType === 'sell' && property.sellDetails?.amenities?.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-1">
                     {property.sellDetails.amenities.map((amenity: string) => (
-                      <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
-                        {amenityIconMap[amenity] || amenityIconMap[amenity.toLowerCase()] || null}
-                        {amenity}
+                      <span key={amenity} className="flex flex-col items-center justify-center px-3 py-2 rounded-full border border-primary-200 bg-primary-50 text-primary-700 text-xs font-semibold min-w-[70px]">
+                        <span className="mb-1">{amenityIconMap[amenity] || amenityIconMap[amenity.toLowerCase()] || null}</span>
+                        <span className="whitespace-nowrap">{amenity}</span>
                       </span>
                     ))}
                   </div>

@@ -431,23 +431,42 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             </select>
             {displayErrors.furnishType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.furnishType}</p>}
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
+            <select
+              className={`input w-full${displayErrors.parking ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.parking || ''}
+              onChange={e => setFormData({ ...formData, parking: e.target.value })}
+              onBlur={() => markTouched('parking')}
+            >
+              <option value="">Select Parking Type</option>
+              <option value="No Parking">No Parking</option>
+              <option value="1 Car Parking">1 Car Parking</option>
+              <option value="2 Car Parking">2 Car Parking</option>
+              <option value="3+ Car Parking">3+ Car Parking</option>
+              <option value="Bike Parking">Bike Parking</option>
+              <option value="Both">Both</option>
+            </select>
+            {displayErrors.parking && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.parking}</p>}
+          </div>
         </div>
       </section>
 
       {/* Amenities Section */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-3">Amenities</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {rentAmenitiesOptions.map((amenity) => (
-            <label key={amenity.key} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.rentDetails?.amenities?.includes(amenity.key) || false}
-                onChange={(e) => {
+        <div className="flex flex-wrap gap-3">
+          {rentAmenitiesOptions.map((amenity) => {
+            const selected = formData.rentDetails?.amenities?.includes(amenity.key) || false;
+            return (
+              <button
+                key={amenity.key}
+                type="button"
+                onClick={() => {
                   const currentAmenities = formData.rentDetails?.amenities || [];
-                  const newAmenities = e.target.checked
-                    ? [...currentAmenities, amenity.key]
-                    : currentAmenities.filter((a: string) => a !== amenity.key);
+                  const newAmenities = selected
+                    ? currentAmenities.filter((a: string) => a !== amenity.key)
+                    : [...currentAmenities, amenity.key];
                   setFormData({
                     ...formData,
                     rentDetails: {
@@ -456,11 +475,18 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
                     }
                   });
                 }}
-                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-              />
-              <span className="text-sm flex items-center gap-1"><amenity.icon className="h-4 w-4" />{amenity.label}</span>
-            </label>
-          ))}
+                className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${
+                  selected
+                    ? 'bg-primary-600 text-white border-primary-600 shadow'
+                    : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'
+                }`}
+                tabIndex={0}
+              >
+                <span className="mb-1">{React.createElement(amenity.icon, { className: "h-4 w-4" })}</span>
+                <span className="whitespace-nowrap">{amenity.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -827,6 +853,26 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
   // Mark field as touched for validation
   const markTouched = (field: string) => {};
 
+  // Move In date handling functions
+  const handleMoveInOption = (immediate: boolean) => {
+    setFormData({
+      ...formData,
+      isImmediate: immediate,
+      handoverDate: immediate ? '' : formData.handoverDate
+    });
+  };
+
+  const handleMoveInDateChange = (date: Date | null) => {
+    setFormData({
+      ...formData,
+      handoverDate: date ? date.toISOString().split('T')[0] : ''
+    });
+  };
+
+  // Date constraints for move-in
+  const minDate = new Date().toISOString().split('T')[0];
+  const maxDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
   // Use localErrors for error display
   const errors: Record<string, any> = propErrors || {};
   const setErrors = propSetErrors || (() => {});
@@ -878,10 +924,10 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         </div>
       </section>
 
-      {/* Home Details section */}
+      {/* Room Details section */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Home Details</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Room Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
             <select
@@ -896,20 +942,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             {displayErrors.roomType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomType}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Home Type</label>
-            <select
-              className={`input w-full${displayErrors.homeType ? ' border-pink-500 bg-pink-50' : ''}`}
-              value={formData.homeType || ''}
-              onChange={e => setFormData({ ...formData, homeType: e.target.value })}
-              onBlur={() => markTouched('homeType')}
-            >
-              <option value="">Select Home Type</option>
-              {homeTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
-            </select>
-            {displayErrors.homeType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.homeType}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Furnishing</label>
             <select
               className={`input w-full${displayErrors.furnishType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.furnishType || ''}
@@ -927,17 +960,18 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       {/* Amenities Section */}
       <div className="mb-6">
         <h3 className="text-lg font-semibold mb-3">Amenities</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {sellAmenitiesOptions.map((amenity) => (
-            <label key={amenity.key} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.sellDetails?.amenities?.includes(amenity.key) || false}
-                onChange={(e) => {
+        <div className="flex flex-wrap gap-3">
+          {sellAmenitiesOptions.map((amenity) => {
+            const selected = formData.sellDetails?.amenities?.includes(amenity.key) || false;
+            return (
+              <button
+                key={amenity.key}
+                type="button"
+                onClick={() => {
                   const currentAmenities = formData.sellDetails?.amenities || [];
-                  const newAmenities = e.target.checked
-                    ? [...currentAmenities, amenity.key]
-                    : currentAmenities.filter((a: string) => a !== amenity.key);
+                  const newAmenities = selected
+                    ? currentAmenities.filter((a: string) => a !== amenity.key)
+                    : [...currentAmenities, amenity.key];
                   setFormData({
                     ...formData,
                     sellDetails: {
@@ -946,11 +980,18 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                     }
                   });
                 }}
-                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-              />
-              <span className="text-sm flex items-center gap-1"><amenity.icon className="h-4 w-4" />{amenity.label}</span>
-            </label>
-          ))}
+                className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${
+                  selected
+                    ? 'bg-primary-600 text-white border-primary-600 shadow'
+                    : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'
+                }`}
+                tabIndex={0}
+              >
+                <span className="mb-1">{React.createElement(amenity.icon, { className: "h-4 w-4" })}</span>
+                <span className="whitespace-nowrap">{amenity.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -1185,22 +1226,25 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         <div className="mt-8 pt-6 border-t border-gray-200">
           <button
             type="button"
-            className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isSubmitting}
-            onClick={(e) => {
-              e.preventDefault();
-              console.log('Submit button clicked in SellForm');
+            onClick={() => {
+              console.log('=== SELLFORM SUBMIT BUTTON CLICKED ===');
               console.log('onSubmit function:', onSubmit);
               console.log('formData:', formData);
+              console.log('Calling onSubmit...');
               if (onSubmit) {
-                console.log('Calling onSubmit...');
                 onSubmit();
               } else {
-                console.log('No onSubmit function provided');
+                console.log('❌ onSubmit function is undefined!');
               }
             }}
+            disabled={isSubmitting}
+            className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
+              isSubmitting
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-primary-600 hover:bg-primary-700'
+            }`}
           >
-            {isSubmitting ? 'Creating Listing...' : 'Submit Listing'}
+            {isSubmitting ? 'Submitting...' : 'Submit Listing'}
           </button>
           <p className="text-xs text-gray-500 mt-2 text-center">
             By submitting, you agree to our terms and conditions

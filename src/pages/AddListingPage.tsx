@@ -66,7 +66,7 @@ const initialFormData = {
   parking: '',
   buildingType: '',
   handoverDate: '',
-  isImmediate: false,
+  isImmediate: undefined,
   description: '',
   contactNumber: '',
   price: '', // Add price field for sell listings
@@ -225,6 +225,7 @@ const AddListingPage = () => {
       if (!formData.roomType) newErrors.roomType = 'Please select a BHK.';
       if (!formData.roomAvailable) newErrors.roomAvailable = 'Please select room available.';
       if (!formData.furnishType) newErrors.furnishType = 'Please select a furnish type.';
+      if (!formData.parking) newErrors.parking = 'Please select a parking type.';
       
       // Amenities
       if (!formData.rentDetails?.amenities || formData.rentDetails.amenities.length === 0) {
@@ -235,8 +236,12 @@ const AddListingPage = () => {
       if (!formData.rentDetails?.preferredTenant?.lookingFor) newErrors.lookingFor = 'Please select a gender.';
       
       // Move In
-      if (formData.isImmediate === undefined || (formData.isImmediate === false && !formData.handoverDate)) {
+      if (formData.isImmediate === undefined) {
         newErrors.handoverDate = 'Please select a move-in option.';
+        console.log('❌ Handover Date validation failed - no option selected');
+      } else if (formData.isImmediate === false && !formData.handoverDate) {
+        newErrors.handoverDate = 'Please select a move-in date.';
+        console.log('❌ Handover Date validation failed - immediate false but no date');
       }
       
       // Rental Details - All fields required
@@ -272,36 +277,74 @@ const AddListingPage = () => {
     // Sell validation
     if (listingType === 'sell') {
       console.log('Validating sell form...');
+      console.log('=== SELL VALIDATION DEBUG ===');
+      console.log('propertyType:', formData.propertyType);
+      console.log('roomType:', formData.roomType);
+      console.log('furnishType:', formData.furnishType);
+      console.log('lookingFor:', formData.sellDetails?.lookingFor);
+      console.log('parking:', formData.parking);
+      console.log('amenities:', formData.sellDetails?.amenities);
+      console.log('isImmediate:', formData.isImmediate);
+      console.log('handoverDate:', formData.handoverDate);
+      console.log('price:', formData.sellDetails?.price);
+      console.log('description:', formData.description);
+      console.log('images:', images);
+      
+      // Property Type
+      if (!formData.propertyType) {
+        newErrors.propertyType = 'Please select a property type.';
+        console.log('❌ Property Type validation failed');
+      }
       
       // Home Details - Check the actual field names from SellForm
-      if (!formData.homeType) newErrors.homeType = 'Please select a home type.';
-      if (!formData.roomType) newErrors.roomType = 'Please select a room type.';
-      if (!formData.furnishType) newErrors.furnishType = 'Please select a furnish type.';
+      if (!formData.roomType) {
+        newErrors.roomType = 'Please select a BHK.';
+        console.log('❌ Room Type validation failed');
+      }
+      if (!formData.furnishType) {
+        newErrors.furnishType = 'Please select a furnish type.';
+        console.log('❌ Furnish Type validation failed');
+      }
       
       // Details
-      if (!formData.sellDetails?.lookingFor) newErrors.lookingFor = 'Please select a gender.';
-      if (!formData.parking) newErrors.parking = 'Please select a parking type.';
+      if (!formData.sellDetails?.lookingFor) {
+        newErrors.lookingFor = 'Please select a gender.';
+        console.log('❌ Looking For validation failed');
+      }
+      if (!formData.parking) {
+        newErrors.parking = 'Please select a parking type.';
+        console.log('❌ Parking validation failed');
+      }
       
       // Amenities
       if (!formData.sellDetails?.amenities || formData.sellDetails.amenities.length === 0) {
         newErrors.amenities = 'Please select at least one amenity.';
+        console.log('❌ Amenities validation failed');
       }
       
       // Move In
-      if (formData.isImmediate === undefined || (formData.isImmediate === false && !formData.handoverDate)) {
+      if (formData.isImmediate === undefined) {
         newErrors.handoverDate = 'Please select a move-in option.';
+        console.log('❌ Handover Date validation failed - no option selected');
+      } else if (formData.isImmediate === false && !formData.handoverDate) {
+        newErrors.handoverDate = 'Please select a move-in date.';
+        console.log('❌ Handover Date validation failed - immediate false but no date');
       }
       
       // Price Details - Only Price is required
       const price = Number(formData.sellDetails?.price);
       if (!price || price < 1000) {
         newErrors.price = 'Price must be at least ₹1,000.';
+        console.log('❌ Price validation failed:', price);
       }
       
       // Numeric fields non-negative
       ['maintenance', 'securityDeposit', 'brokerage'].forEach(field => {
         const value = Number((formData.sellDetails as any)?.[field]);
-        if (value < 0) newErrors[field] = 'Cannot be negative.';
+        if (value < 0) {
+          newErrors[field] = 'Cannot be negative.';
+          console.log(`❌ ${field} validation failed:`, value);
+        }
       });
     }
     
@@ -329,6 +372,8 @@ const AddListingPage = () => {
     // Validate the form before proceeding
     const isValid = validate();
     console.log('Validation result:', isValid);
+    console.log('Validation errors:', errors);
+    
     if (!isValid) {
       console.log('Validation failed, stopping submission');
       setIsSubmitting(false);
@@ -418,9 +463,8 @@ const AddListingPage = () => {
           }),
           // Property Type
           propertyType: formData.propertyType,
-          // Home Details - BHK, Flat Type, Furnish Type
-          homeType: formData.homeType, // BHK (1BHK, 2BHK, etc.)
-          roomType: formData.roomType, // Flat Type (1BHK, 2BHK, etc.)
+          // Home Details - BHK, Furnish Type
+          roomType: formData.roomType, // BHK (1BHK, 2BHK, etc.)
           furnishType: formData.furnishType, // Furnished status
           // Details
           lookingFor: formData.sellDetails?.lookingFor || '', // Family/Bachelor preference
@@ -437,28 +481,37 @@ const AddListingPage = () => {
           createdAt: Date.now(),
           status: 'active' as const,
           listingType: 'sell',
-          // Sell Details - only the fields that are actually in the form
+          // Sell Details - match the SellListing interface exactly
           sellDetails: cleanFormData({
-            // Price Details (moved to sellDetails to match interface)
-            price: formData.sellDetails?.price || formData.price,
-            // Square Feet
-            sqft: (formData as any).sqft,
-            // Direction
-            direction: (formData as any).direction,
+            // Price Details
+            price: Number(formData.sellDetails?.price || formData.price || 0),
+            gst: 0, // Default value
+            isNegotiable: false, // Default value
             // Property Type for BHK display
-            propertyType: formData.roomType || formData.homeType, // Use roomType as propertyType for BHK display
-            // Home Type for BHK display
-            homeType: formData.homeType,
+            propertyType: formData.roomType, // Use roomType as propertyType for BHK display
             // Furnish Type
             furnishType: formData.furnishType,
             // Looking For (Family/Bachelor)
             lookingFor: formData.sellDetails?.lookingFor || '',
             // Cost Details
-            maintenance: formData.sellDetails?.maintenance,
-            securityDeposit: formData.sellDetails?.securityDeposit,
-            brokerage: formData.sellDetails?.brokerage,
+            maintenance: Number(formData.sellDetails?.maintenance || 0),
+            securityDeposit: Number(formData.sellDetails?.securityDeposit || 0),
+            brokerage: Number(formData.sellDetails?.brokerage || 0),
             // Amenities
             amenities: formData.sellDetails?.amenities || [],
+            // Required fields for SellListing interface
+            sqft: 0, // Default value
+            direction: 'North' as const, // Default value
+            ownership: '', // Default value
+            ageOfProperty: '', // Default value
+            totalFloors: '', // Default value
+            floorNumber: '', // Default value
+            waterSupply: '', // Default value
+            approvals: [], // Default value
+            highlights: [], // Default value
+            description: formData.description || '', // Use root description
+            propertyId: '', // Default value
+            loanOnProperty: false, // Default value
           }),
         };
         console.log('sellDetails before cleaning:', {
@@ -485,6 +538,15 @@ const AddListingPage = () => {
         });
         console.log('Full formData object:', formData);
         console.log('Calling createListing for sell...');
+        console.log('Final sell listing data:', cleanedSellListingData);
+        console.log('User:', user);
+        console.log('=== SELL LISTING DATA STRUCTURE DEBUG ===');
+        console.log('Has sellDetails:', 'sellDetails' in cleanedSellListingData);
+        console.log('sellDetails content:', cleanedSellListingData.sellDetails);
+        console.log('Has rentDetails:', 'rentDetails' in cleanedSellListingData);
+        console.log('listingType:', cleanedSellListingData.listingType);
+        console.log('Data type being passed:', typeof cleanedSellListingData);
+        console.log('Data keys:', Object.keys(cleanedSellListingData));
         const result = await createListing('sell', cleanedSellListingData);
         console.log('Sale listing created successfully:', result);
       }
@@ -568,15 +630,23 @@ const AddListingPage = () => {
   );
 
   const handleFormSubmit = () => {
+    console.log('=== HANDLE FORM SUBMIT DEBUG ===');
     console.log('handleFormSubmit called');
     console.log('formData:', formData);
     console.log('errors:', errors);
     console.log('isSubmitting:', isSubmitting);
     console.log('listingType:', listingType);
     console.log('roomType:', formData.roomType);
-    console.log('homeType:', formData.homeType);
     console.log('furnishType:', formData.furnishType);
-    handleSubmit(new Event('submit') as unknown as React.FormEvent);
+    console.log('propertyType:', formData.propertyType);
+    console.log('sellDetails:', formData.sellDetails);
+    console.log('Calling handleSubmit...');
+    try {
+      handleSubmit(new Event('submit') as unknown as React.FormEvent);
+      console.log('✅ handleSubmit called successfully');
+    } catch (error) {
+      console.error('❌ Error calling handleSubmit:', error);
+    }
   };
 
   return (

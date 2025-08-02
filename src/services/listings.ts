@@ -96,6 +96,19 @@ export async function createListing(type: 'rent' | 'sell', data: RentListing | S
 
     // Ensure we're using the correct collection
     const collectionRef = collection(db, type === 'rent' ? 'r' : 's');
+    const collectionName = type === 'rent' ? 'r' : 's';
+
+    console.log('=== CREATELISTING DEBUG ===');
+    console.log('Type parameter:', type);
+    console.log('Collection name:', collectionName);
+    console.log('Collection reference:', collectionRef);
+    console.log('User from auth:', user);
+    console.log('User UID:', user.uid);
+    console.log('Data passed in:', data);
+    console.log('Data type:', typeof data);
+    console.log('Data keys:', Object.keys(data));
+    console.log('Has rentDetails:', 'rentDetails' in data);
+    console.log('Has sellDetails:', 'sellDetails' in data);
 
     // Clean data before saving
     const cleanData = {
@@ -107,32 +120,35 @@ export async function createListing(type: 'rent' | 'sell', data: RentListing | S
       listingType: type // Add this to help with frontend routing
     };
 
-    console.log('=== CREATELISTING DEBUG ===');
-    console.log('User from auth:', user);
-    console.log('User UID:', user.uid);
-    console.log('Data passed in:', data);
     console.log('Clean data being saved:', cleanData);
-
+    console.log('Clean data listingType:', cleanData.listingType);
     console.log('Creating listing with data:', cleanData);
-    console.log('Collection:', type === 'rent' ? 'r' : 's');
+    console.log('Collection:', collectionName);
 
     const docRef = await addDoc(collectionRef, cleanData);
 
     console.log('Document written with ID:', docRef.id);
+    console.log('Document written to collection:', collectionName);
     
     // Test: Immediately try to fetch the listing we just created
     console.log('Testing: Fetching the listing we just created...');
-    const testQuery = query(collection(db, type === 'rent' ? 'r' : 's'), where('userId', '==', user.uid));
+    const testQuery = query(collection(db, collectionName), where('userId', '==', user.uid));
     const testSnapshot = await getDocs(testQuery);
-    console.log('Test query found', testSnapshot.size, 'listings for user', user.uid);
+    console.log('Test query found', testSnapshot.size, 'listings for user', user.uid, 'in collection', collectionName);
     console.log('Test listings:', testSnapshot.docs.map(doc => ({
       id: doc.id,
+      listingType: doc.data().listingType,
       data: doc.data()
     })));
     
     return { success: true, id: docRef.id };
   } catch (error: any) {
     console.error('Error creating listing:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
     if (error.code === 'permission-denied') {
       throw new Error('You do not have permission to create listings');
     }
