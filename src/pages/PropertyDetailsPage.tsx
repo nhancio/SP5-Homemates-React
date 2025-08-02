@@ -233,10 +233,10 @@ const PropertyDetailsPage = () => {
         // For sell listings, try to get BHK from various sources
         if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
           bhkType = `${property.bedrooms}BHK`;
-        } else if (property.sellDetails?.propertyType) {
-          // Try to extract BHK from propertyType
+        } else if ((property as any).roomType) {
+          // Try to extract BHK from roomType field first (where BHK data is saved)
           const bhkRegex = /[1-9]BHK\+?/;
-          const match = property.sellDetails.propertyType.match(bhkRegex);
+          const match = (property as any).roomType.match(bhkRegex);
           if (match) {
             bhkType = match[0];
           }
@@ -245,11 +245,13 @@ const PropertyDetailsPage = () => {
           const bhkRegex = /[1-9]BHK\+?/;
           const match = (property as any).homeType.match(bhkRegex);
           if (match) bhkType = match[0];
-        } else if ((property as any).roomType) {
-          // Try to extract BHK from roomType field
+        } else if (property.sellDetails?.propertyType) {
+          // Try to extract BHK from propertyType
           const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property as any).roomType.match(bhkRegex);
-          if (match) bhkType = match[0];
+          const match = property.sellDetails.propertyType.match(bhkRegex);
+          if (match) {
+            bhkType = match[0];
+          }
         } else if ((property as any).flatType) {
           // Try to extract BHK from flatType field
           const bhkRegex = /[1-9]BHK\+?/;
