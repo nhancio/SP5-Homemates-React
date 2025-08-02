@@ -77,7 +77,8 @@ export interface Property {
   features: string[];
   listingType: 'buy' | 'rent';
   listedAt: string;
-  contactInfo: {
+  contactNumber?: string; // Contact number stored at top level
+  contactInfo?: {
     name: string;
     phone: string;
     email: string;

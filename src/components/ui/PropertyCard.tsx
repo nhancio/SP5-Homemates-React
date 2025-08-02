@@ -93,7 +93,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         return;
       }
 
-      const phone = property.contactInfo?.phone;
+      const phone = property.contactNumber;
       if (phone) {
         window.location.href = `tel:${phone}`;
       } else {
@@ -106,7 +106,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       // but show a warning that credits couldn't be deducted
       console.log('Credits service unavailable, proceeding with call without credit deduction');
       
-      const phone = property.contactInfo?.phone;
+      const phone = property.contactNumber;
       if (phone) {
         window.location.href = `tel:${phone}`;
       } else {
@@ -136,7 +136,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         return;
       }
 
-      const phone = property.contactInfo?.phone;
+      const phone = property.contactNumber;
       if (phone) {
         const message = `Hey, I want to know more about your flat listing I found at homematesapp.in/rent/${property.id}`;
         const url = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
@@ -151,7 +151,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       // but show a warning that credits couldn't be deducted
       console.log('Credits service unavailable, proceeding with WhatsApp share without credit deduction');
       
-      const phone = property.contactInfo?.phone;
+      const phone = property.contactNumber;
       if (phone) {
         const message = `Hey, I want to know more about your flat listing I found at homematesapp.in/rent/${property.id}`;
         const url = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
