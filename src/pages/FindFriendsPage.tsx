@@ -57,12 +57,28 @@ interface Filters {
 }
 
 const FindFriendsPage = () => {
-  const { user } = useAppContext();
+  const { user, isAuthenticated, login, loginError, clearLoginError } = useAppContext();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [activeFilters, setActiveFilters] = useState<Filters>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Check if user is authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // Redirect to login if not authenticated
+      const handleLoginPrompt = () => {
+        if (window.confirm('Please login to access Find Friends. Would you like to login now?')) {
+          login();
+        } else {
+          // If user cancels, redirect to home page
+          window.location.href = '/';
+        }
+      };
+      handleLoginPrompt();
+    }
+  }, [isAuthenticated, login]);
 
 
 
@@ -281,11 +297,35 @@ const FindFriendsPage = () => {
           Connect with other Homemates users and grow your network!
         </p>
         
-
-
-        
-        {loading && <div className="text-center text-lg text-primary-600">Loading...</div>}
-        {error && <div className="text-red-500 text-center mb-4">{error}</div>}
+        {/* Authentication Check */}
+        {!isAuthenticated ? (
+          <div className="text-center py-12 bg-white rounded-lg shadow-lg border border-gray-200">
+            <div className="mb-6">
+              <User className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Login Required</h3>
+              <p className="text-gray-600 mb-6">
+                Please login to access Find Friends and connect with other Homemates users.
+              </p>
+            </div>
+            <button
+              onClick={async () => {
+                clearLoginError();
+                await login();
+              }}
+              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              Login to Continue
+            </button>
+            {loginError && (
+              <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded text-red-700">
+                {loginError}
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {loading && <div className="text-center text-lg text-primary-600">Loading...</div>}
+            {error && <div className="text-red-500 text-center mb-4">{error}</div>}
         
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredUsers.map((user, idx) => {
@@ -421,8 +461,10 @@ const FindFriendsPage = () => {
                 {user?.gender ? `No ${user.gender} users found matching your criteria.` : 'No users found matching your criteria.'}
               </div>
             )}
-          </div>
-        </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 
