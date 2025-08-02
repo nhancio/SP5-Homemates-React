@@ -299,12 +299,13 @@ const PropertyDetailsPage = () => {
       }
       
       const shareText = 
-`Hey, check this property on Homemates!
-Name: ${property.address?.buildingName || 'Property'}
-${amountLabel}: ₹${formatCurrency(amount)}
-Type: ${bhkType}
-Location: ${property.address?.locality}, ${property.address?.city}
-Link: ${url}`;
+ `Hey, check this property on Homemates!
+ Name: ${property.address?.buildingName || 'Property'}
+ ${amountLabel}: ₹${formatCurrency(amount)}
+ Type: ${bhkType}
+ ${listingType === 'rent' ? `Room Available: ${(property as any).roomAvailable || '-'}` : ''}
+ Location: ${property.address?.locality}, ${property.address?.city}
+ Link: ${url}`;
 
       console.log('Share text:', shareText);
 
@@ -342,26 +343,29 @@ Link: ${url}`;
 
   // Amenity icon mapping
   const amenityIconMap: Record<string, React.ReactNode> = {
+    'AC': <Snowflake className="w-4 h-4 mr-1 text-primary-600" />,
+    'Bed': <BedDouble className="w-4 h-4 mr-1 text-primary-600" />,
+    'Power Backup': <Plug className="w-4 h-4 mr-1 text-primary-600" />,
+    'Gym': <Dumbbell className="w-4 h-4 mr-1 text-primary-600" />,
+    'Fridge': <Refrigerator className="w-4 h-4 mr-1 text-primary-600" />,
+    'Washing Machine': <WashingMachine className="w-4 h-4 mr-1 text-primary-600" />,
+    'Security': <Shield className="w-4 h-4 mr-1 text-primary-600" />,
+    'Lift': <Home className="w-4 h-4 mr-1 text-primary-600" />,
+    'Balcony': <Sun className="w-4 h-4 mr-1 text-primary-600" />,
     wifi: <Wifi className="w-4 h-4 mr-1 text-primary-600" />,
     parking: <Car className="w-4 h-4 mr-1 text-primary-600" />,
     water: <Droplet className="w-4 h-4 mr-1 text-primary-600" />,
     kitchen: <Utensils className="w-4 h-4 mr-1 text-primary-600" />,
-    gym: <Dumbbell className="w-4 h-4 mr-1 text-primary-600" />,
     ac: <Snowflake className="w-4 h-4 mr-1 text-primary-600" />,
-    security: <Shield className="w-4 h-4 mr-1 text-primary-600" />,
     tv: <Tv className="w-4 h-4 mr-1 text-primary-600" />,
     gas: <Flame className="w-4 h-4 mr-1 text-primary-600" />,
     fan: <Fan className="w-4 h-4 mr-1 text-primary-600" />,
     light: <Lightbulb className="w-4 h-4 mr-1 text-primary-600" />,
     lock: <Lock className="w-4 h-4 mr-1 text-primary-600" />,
-    fridge: <Refrigerator className="w-4 h-4 mr-1 text-primary-600" />,
-    washing: <WashingMachine className="w-4 h-4 mr-1 text-primary-600" />,
-    bed: <BedDouble className="w-4 h-4 mr-1 text-primary-600" />,
     shower: <ShowerHead className="w-4 h-4 mr-1 text-primary-600" />,
     pet: <PawPrint className="w-4 h-4 mr-1 text-primary-600" />,
     roommate: <Users className="w-4 h-4 mr-1 text-primary-600" />,
     key: <KeyRound className="w-4 h-4 mr-1 text-primary-600" />,
-    power: <Plug className="w-4 h-4 mr-1 text-primary-600" />,
     music: <Speaker className="w-4 h-4 mr-1 text-primary-600" />,
     car: <ParkingCircle className="w-4 h-4 mr-1 text-primary-600" />,
     bike: <Bike className="w-4 h-4 mr-1 text-primary-600" />,
@@ -548,6 +552,8 @@ Link: ${url}`;
               {/* Property Details */}
               <div className="p-4 md:p-6 border-b">
                 <h2 className="text-lg font-semibold mb-4">Property Details</h2>
+                
+                
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {listingType === 'rent' ? (
                     <>
@@ -559,6 +565,22 @@ Link: ${url}`;
                         <span className="text-gray-600 text-sm">BHK</span>
                         <p className="font-semibold text-sm md:text-base">
                           {(() => {
+                            console.log('=== PROPERTY DETAILS DEBUG ===');
+                            console.log('Property object:', property);
+                            console.log('roomType:', (property as any).roomType);
+                            console.log('homeType:', (property as any).homeType);
+                            console.log('furnishType:', (property as any).furnishType);
+                            console.log('propertyType:', property.propertyType);
+                            console.log('rentDetails:', property.rentDetails);
+                            console.log('rentDetails.roomDetails:', property.rentDetails?.roomDetails);
+                            
+                            // Look for BHK in roomType first (where it's saved from RentForm)
+                            if ((property as any).roomType) {
+                              const bhkRegex = /[1-9]BHK\+?/;
+                              const match = (property as any).roomType.match(bhkRegex);
+                              if (match) return match[0];
+                            }
+                            // Fallback to old structure
                             if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
                               return `${property.bedrooms}BHK`;
                             }
@@ -572,29 +594,41 @@ Link: ${url}`;
                         </p>
                       </div>
                       <div>
-                        <span className="text-gray-600 text-sm">Available Rooms</span>
-                        <p className="font-semibold text-sm md:text-base">{property.rentDetails?.roomDetails?.availableRooms || '-'}</p>
-                      </div>
-                      <div>
                         <span className="text-gray-600 text-sm">Room Type</span>
-                        <p className="font-semibold text-sm md:text-base">{property.rentDetails?.roomDetails?.roomType || '-'}</p>
-                      </div>
-                      <div>
-                        <span className="text-gray-600 text-sm">Bathroom Type</span>
-                        <p className="font-semibold text-sm md:text-base">{property.rentDetails?.roomDetails?.bathroomType || '-'}</p>
+                        <p className="font-semibold text-sm md:text-base">
+                          {(property as any).roomType || 
+                           property.rentDetails?.roomDetails?.roomType || 
+                           property.rentDetails?.roomDetails?.availability || 
+                           '-'}
+                        </p>
                       </div>
                       <div>
                         <span className="text-gray-600 text-sm">Furnishing</span>
-                        <p className="font-semibold text-sm md:text-base">{property.furnishingType || '-'}</p>
+                        <p className="font-semibold text-sm md:text-base">
+                          {(property as any).furnishType || 
+                           property.furnishingType || 
+                           property.rentDetails?.roomDetails?.furnishing || 
+                           '-'}
+                        </p>
                       </div>
                       <div>
                         <span className="text-gray-600 text-sm">Parking</span>
-                        <p className="font-semibold text-sm md:text-base">{property.parking || '-'}</p>
+                        <p className="font-semibold text-sm md:text-base">
+                          {property.parking || 
+                           property.rentDetails?.roomDetails?.parking || 
+                           '-'}
+                        </p>
                       </div>
                       <div>
                         <span className="text-gray-600 text-sm">Available From</span>
                         <p className="font-semibold text-sm md:text-base">
                           {property.isImmediate ? 'Immediate' : (property.handoverDate || '-')}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 text-sm">Room Available</span>
+                        <p className="font-semibold text-sm md:text-base">
+                          {(property as any).roomAvailable || '-'}
                         </p>
                       </div>
                     </>
@@ -745,7 +779,7 @@ Link: ${url}`;
                   <div className="flex flex-wrap gap-2 mt-1">
                     {property.rentDetails.amenities.map((amenity: string) => (
                       <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
-                        {amenityIconMap[amenity.toLowerCase()] || null}
+                        {amenityIconMap[amenity] || amenityIconMap[amenity.toLowerCase()] || null}
                         {amenity}
                       </span>
                     ))}
@@ -758,7 +792,7 @@ Link: ${url}`;
                   <div className="flex flex-wrap gap-2 mt-1">
                     {property.sellDetails.amenities.map((amenity: string) => (
                       <span key={amenity} className="flex items-center px-2 py-1 bg-primary-50 text-primary-700 rounded-full text-xs font-semibold border border-primary-100">
-                        {amenityIconMap[amenity.toLowerCase()] || null}
+                        {amenityIconMap[amenity] || amenityIconMap[amenity.toLowerCase()] || null}
                         {amenity}
                       </span>
                     ))}

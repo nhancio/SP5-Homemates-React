@@ -77,6 +77,7 @@ const initialFormData = {
   maintenance: '', // Add maintenance field for sell listings
   brokerage: '', // Add brokerage field for sell listings
   securityDeposit: '', // Add security deposit field for sell listings
+  roomAvailable: '', // Add roomAvailable for RentForm
 
   // Rent specific fields
   rentDetails: {
@@ -198,6 +199,10 @@ const AddListingPage = () => {
   const validate = () => {
     const newErrors: any = {};
     
+    console.log('=== VALIDATION DEBUG ===');
+    console.log('listingType:', listingType);
+    console.log('formData:', formData);
+    
     // Mobile validation
     const mobile = formData.contactNumber || '';
     if (!/^[6-9][0-9]{9}$/.test(mobile)) {
@@ -211,19 +216,15 @@ const AddListingPage = () => {
     
     // Rent validation
     if (listingType === 'rent') {
+      console.log('Validating rent form...');
+      
       // Property Type
       if (!formData.propertyType) newErrors.propertyType = 'Please select a property type.';
       
-      // Home Details - All fields required
-      if (!formData.rentDetails?.roomDetails?.flatType) newErrors.flatType = 'Please select a flat type.';
-      if (!formData.rentDetails?.roomDetails?.availableRooms) newErrors.availableRooms = 'Please select available rooms.';
-      if (!formData.rentDetails?.roomDetails?.roomType) newErrors.roomType = 'Please select a room type.';
-      if (!formData.rentDetails?.roomDetails?.bathroomType) newErrors.bathroomType = 'Please select a washroom type.';
-      if (!formData.furnishingType) newErrors.furnishingType = 'Please select a furnish type.';
-      if (!formData.parking) newErrors.parking = 'Please select a parking type.';
-      
-      // Home Type validation (for Shared Home form)
-      if (!formData.rentDetails?.roomDetails?.flatType) newErrors.homeType = 'Please select a home type.';
+      // Home Details - Check the actual field names from RentForm
+      if (!formData.roomType) newErrors.roomType = 'Please select a BHK.';
+      if (!formData.roomAvailable) newErrors.roomAvailable = 'Please select room available.';
+      if (!formData.furnishType) newErrors.furnishType = 'Please select a furnish type.';
       
       // Amenities
       if (!formData.rentDetails?.amenities || formData.rentDetails.amenities.length === 0) {
@@ -242,11 +243,6 @@ const AddListingPage = () => {
       const rent = Number(formData.rentDetails?.costs?.rent);
       if (!rent || rent < 1000) {
         newErrors.rent = 'Rent must be at least ₹1,000.';
-      }
-      
-      // Price validation for Shared Home form
-      if (!formData.rentDetails?.costs?.rent || formData.rentDetails.costs.rent === '') {
-        newErrors.price = 'Please enter price amount.';
       }
       
       // Required fields for rental details
@@ -275,7 +271,9 @@ const AddListingPage = () => {
     
     // Sell validation
     if (listingType === 'sell') {
-      // Home Details - All fields required
+      console.log('Validating sell form...');
+      
+      // Home Details - Check the actual field names from SellForm
       if (!formData.homeType) newErrors.homeType = 'Please select a home type.';
       if (!formData.roomType) newErrors.roomType = 'Please select a room type.';
       if (!formData.furnishType) newErrors.furnishType = 'Please select a furnish type.';
@@ -295,14 +293,14 @@ const AddListingPage = () => {
       }
       
       // Price Details - Only Price is required
-      const price = Number(formData.price);
+      const price = Number(formData.sellDetails?.price);
       if (!price || price < 1000) {
         newErrors.price = 'Price must be at least ₹1,000.';
       }
       
       // Numeric fields non-negative
       ['maintenance', 'securityDeposit', 'brokerage'].forEach(field => {
-        const value = Number((formData as any)?.[field]);
+        const value = Number((formData.sellDetails as any)?.[field]);
         if (value < 0) newErrors[field] = 'Cannot be negative.';
       });
     }
@@ -311,6 +309,7 @@ const AddListingPage = () => {
     if (!images || images.length === 0) newErrors.images = 'Please upload at least one image.';
     if (!formData.description || formData.description.length < 10) newErrors.description = 'Description must be at least 10 characters.';
     
+    console.log('Validation errors:', newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -318,13 +317,20 @@ const AddListingPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('handleSubmit called');
+    console.log('listingType:', listingType);
+    console.log('formData:', formData);
+    console.log('images:', images);
+    
     setSubmitted(true);
     setIsSubmitting(true);
     setErrors({});
 
     // Validate the form before proceeding
     const isValid = validate();
+    console.log('Validation result:', isValid);
     if (!isValid) {
+      console.log('Validation failed, stopping submission');
       setIsSubmitting(false);
       return;
     }
@@ -351,10 +357,11 @@ const AddListingPage = () => {
           }),
           // Property Type
           propertyType: formData.propertyType,
-          // Furnish Type (from Home Details)
-          furnishingType: formData.furnishingType,
-          // Parking (from Home Details)
+          // Home Details - from RentForm (saved at root level)
+          roomType: formData.roomType, // BHK (1BHK, 2BHK, etc.)
+          furnishType: formData.furnishType, // Furnished status
           parking: formData.parking,
+          roomAvailable: formData.roomAvailable, // Room Available (1 Room, 2 Rooms, etc.)
           // Move In details
           handoverDate: formData.handoverDate,
           isImmediate: formData.isImmediate,
@@ -371,33 +378,31 @@ const AddListingPage = () => {
           price: 0,
           // Rent Details - only the fields that are actually in the form
           rentDetails: cleanFormData({
-            // Home Details
-            roomDetails: {
-              flatType: formData.rentDetails.roomDetails.flatType, // Home Type
-              availableRooms: formData.rentDetails.roomDetails.availableRooms,
-              roomType: formData.rentDetails.roomDetails.roomType,
-              bathroomType: formData.rentDetails.roomDetails.bathroomType,
-            },
             // Preferred Tenant
             preferredTenant: {
-              lookingFor: formData.rentDetails.preferredTenant.lookingFor,
-              preferences: formData.rentDetails.preferredTenant.preferences,
+              lookingFor: formData.rentDetails?.preferredTenant?.lookingFor || '',
+              preferences: formData.rentDetails?.preferredTenant?.preferences || [],
             },
             // Rental Costs
             costs: {
-              rent: formData.rentDetails.costs.rent,
-              maintenance: formData.rentDetails.costs.maintenance,
-              securityDeposit: formData.rentDetails.costs.securityDeposit,
-              setupCost: formData.rentDetails.costs.setupCost,
-              brokerage: formData.rentDetails.costs.brokerage,
+              rent: formData.rentDetails?.costs?.rent || 0,
+              maintenance: formData.rentDetails?.costs?.maintenance || 0,
+              securityDeposit: formData.rentDetails?.costs?.securityDeposit || 0,
+              setupCost: formData.rentDetails?.costs?.setupCost || 0,
+              brokerage: formData.rentDetails?.costs?.brokerage || 0,
             },
             // Amenities
-            amenities: formData.rentDetails.amenities,
+            amenities: formData.rentDetails?.amenities || [],
           }),
         };
         console.log('Rent listing data before cleaning:', rentListingData);
         const cleanedRentListingData = cleanFormData(rentListingData);
         console.log('Rent listing data after cleaning:', cleanedRentListingData);
+        console.log('=== RENT DATA DEBUG ===');
+        console.log('roomType:', cleanedRentListingData.roomType);
+        console.log('homeType:', cleanedRentListingData.homeType);
+        console.log('furnishType:', cleanedRentListingData.furnishType);
+        console.log('propertyType:', cleanedRentListingData.propertyType);
         console.log('Calling createListing for rent...');
         const result = await createListing('rent', cleanedRentListingData);
         console.log('Rent listing created successfully:', result);
@@ -545,350 +550,9 @@ const AddListingPage = () => {
 
   // Toggle functions and handlers
 
-  const renderRentFields = () => (
-    <>
-      <AddressFields 
-        listingType={listingType}
-        formData={formData}
-        setFormData={setFormData}
-        images={images}
-        setImages={setImages}
-        handleImageUpload={handleImageUpload}
-        removeImage={removeImage}
-        onSubmit={() => handleSubmit(new Event('submit') as unknown as React.FormEvent)}
-      />
-      {/* Preferred Tenant Section */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Preferred Tenant</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
-            <select 
-              className="input"
-              value={formData.rentDetails.preferredTenant.lookingFor}
-              onChange={(e) => setFormData(prev => ({
-                ...prev,
-                rentDetails: {
-                  ...prev.rentDetails,
-                  preferredTenant: {
-                    ...prev.rentDetails.preferredTenant,
-                    lookingFor: e.target.value
-                  }
-                }
-              }))}
-            >
-              <option value="">Select Option</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Couple">Couple</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Preferences</label>
-            <div className="flex flex-wrap gap-3">
-              {PREFERRED_TENANT_OPTIONS.preferences.map(pref => (
-                <label 
-                  key={pref}
-                  className={`flex items-center space-x-2 p-2 border rounded cursor-pointer hover:bg-gray-50 ${
-                    formData.rentDetails.preferredTenant.preferences.includes(pref) 
-                      ? 'border-primary-500 bg-primary-50' 
-                      : ''
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={formData.rentDetails.preferredTenant.preferences.includes(pref)}
-                    onChange={() => {
-                      const preferences = formData.rentDetails.preferredTenant.preferences;
-                      setFormData(prev => ({
-                        ...prev,
-                        rentDetails: {
-                          ...prev.rentDetails,
-                          preferredTenant: {
-                            ...prev.rentDetails.preferredTenant,
-                            preferences: preferences.includes(pref)
-                              ? preferences.filter(p => p !== pref)
-                              : [...preferences, pref]
-                          }
-                        }
-                      }));
-                    }}
-                    className="form-checkbox h-4 w-4 text-primary-600"
-                  />
-                  <span>{pref}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Property Details Section */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Property Details</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
-          {['1RK', '1 BHK', '2 BHK', '3 BHK', '4 BHK', '4+ BHK'].map(type => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => setFormData(prev => ({ ...prev, propertyType: type }))}
-              className={`p-3 rounded-full border-2 ${
-                formData.propertyType === type 
-                  ? 'border-primary-500 bg-primary-50' 
-                  : 'border-gray-200 hover:border-primary-500'
-              }`}
-            >
-              {type}
-            </button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Availability</label>
-            <select
-              className="input"
-              value={formData.rentDetails.roomDetails.availability}
-              onChange={(e) => setFormData(prev => ({
-                ...prev,
-                rentDetails: {
-                  ...prev.rentDetails,
-                  roomDetails: {
-                    ...prev.rentDetails.roomDetails,
-                    availability: e.target.value
-                  }
-                }
-              }))}
-            >
-              <option value="">Select Availability</option>
-              <option value="1 Room">1 Room</option>
-              <option value="2 Rooms">2 Rooms</option>
-              <option value="Full Flat">Full Flat</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Furnishing Type</label>
-            <select 
-              className="input"
-              value={formData.furnishingType}
-              onChange={(e) => setFormData(prev => ({ ...prev, furnishingType: e.target.value }))}
-            >
-              <option value="">Select Furnishing Type</option>
-              <option value="fully">Fully Furnished</option>
-              <option value="semi">Semi Furnished</option>
-              <option value="unfurnished">Unfurnished</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Parking</label>
-            <select 
-              className="input"
-              value={formData.parking}
-              onChange={(e) => setFormData(prev => ({ ...prev, parking: e.target.value }))}
-            >
-              <option value="">Select Parking Type</option>
-              <option value="car">Car Parking</option>
-              <option value="bike">Bike Parking</option>
-              <option value="both">Both</option>
-            </select>
-          </div>
-        </div>
-      </section>
-
-      {/* Move In Section */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Move In</h2>
-        <div className="flex items-center gap-8 mb-2">
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="moveInOption"
-              checked={formData.isImmediate === true}
-              onChange={() => setFormData(prev => ({ ...prev, isImmediate: true, handoverDate: '' }))}
-            />
-            Immediate
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              name="moveInOption"
-              checked={formData.isImmediate === false}
-              onChange={() => setFormData(prev => ({ ...prev, isImmediate: false }))}
-            />
-            Specific Date
-          </label>
-        </div>
-        {formData.isImmediate === false && (
-          <>
-            <input
-              type="date"
-              className="input w-full mb-1"
-              placeholder="dd-mm-yyyy"
-              value={formData.handoverDate}
-              onChange={e => setFormData(prev => ({ ...prev, handoverDate: e.target.value }))}
-              min={(() => {
-                const d = new Date();
-                d.setDate(d.getDate() + 1);
-                return d.toISOString().split('T')[0];
-              })()}
-            />
-            {errors.handoverDate && <p className="text-red-500 text-xs mt-1">{errors.handoverDate}</p>}
-            <span className="text-xs text-gray-500">Select your move-in date.</span>
-          </>
-        )}
-      </section>
-
-      {/* Rent Details Section */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Rent Details</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {['rent', 'maintenance', 'securityDeposit', 'brokerage'].map(field => (
-            <div key={field}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {field.split(/(?=[A-Z])/).join(' ').replace(/^\w/, c => c.toUpperCase())}
-              </label>
-              <input
-                type="number"
-                className="input"
-                value={formData.rentDetails.costs[field as keyof typeof formData.rentDetails.costs]}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  rentDetails: {
-                    ...prev.rentDetails,
-                    costs: {
-                      ...prev.rentDetails.costs,
-                      [field]: e.target.value
-                    }
-                  }
-                }))}
-                spellCheck={false}
-                autoCorrect="off"
-              />
-              {errors[field] && <p className="text-red-500 text-xs mt-1">{errors[field]}</p>}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Additional Bills Section */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Additional Bills</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {Object.keys(formData.rentDetails.additionalBills).map(bill => (
-            <div key={bill}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {bill === 'others' ? 'Other bills' : bill.charAt(0).toUpperCase() + bill.slice(1)}
-              </label>
-              <input
-                type="number"
-                className="input"
-                value={formData.rentDetails.additionalBills[bill as keyof typeof formData.rentDetails.additionalBills]}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  rentDetails: {
-                    ...prev.rentDetails,
-                    additionalBills: {
-                      ...prev.rentDetails.additionalBills,
-                      [bill]: e.target.value
-                    }
-                  }
-                }))}
-                spellCheck={false}
-                autoCorrect="off"
-              />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Description Section */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Description</h2>
-        <textarea
-          className="input min-h-[100px]"
-          placeholder="Add property description..."
-          value={formData.description}
-          onChange={(e) => setFormData(prev => ({
-            ...prev,
-            description: e.target.value
-          }))}
-        />
-        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
-      </section>
-
-      {/* Images Section */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Upload Images</h2>
-        <p className="text-sm text-gray-600 mb-4">Upload up to 5 images (Max size: 5MB each)</p>
-        
-        {/* Image upload button */}
-        {images.length < 5 && (
-          <label className="mb-4 inline-block">
-            <span className="btn btn-secondary flex items-center">
-              <Camera className="w-4 h-4 mr-2" />
-              Select Images
-            </span>
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              multiple
-              onChange={handleImageUpload}
-            />
-          </label>
-        )}
-
-        {/* Image preview grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {images.map((img, index) => (
-            <div key={index} className="relative aspect-square">
-              <img 
-                src={img} 
-                alt={`Upload ${index + 1}`} 
-                className="w-full h-full object-cover rounded-lg"
-              />
-              <button
-                onClick={() => removeImage(index)}
-                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-        </div>
-        {errors.images && <p className="text-red-500 text-xs mt-1">{errors.images}</p>}
-      </section>
-
-      {/* Contact Details Section */}
-      <section className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">Contact Details</h2>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number*</label>
-          <input
-            type="tel"
-            className="input"
-            placeholder="Enter your 10-digit mobile number"
-            value={formData.contactNumber}
-            onChange={(e) => setFormData(prev => ({
-              ...prev,
-              contactNumber: e.target.value
-            }))}
-            pattern="[0-9]{10}"
-            maxLength={10}
-            required
-            spellCheck={false}
-            autoCorrect="off"
-          />
-          {errors.contactNumber && <p className="text-red-500 text-xs mt-1">{errors.contactNumber}</p>}
-        </div>
-      </section>
-    </>
-  );
-
   const renderSellFields = () => (
     <SellForm
-      listingType="sell"
+      listingType={listingType}
       formData={formData}
       setFormData={setFormData}
       images={images}
@@ -897,10 +561,21 @@ const AddListingPage = () => {
       removeImage={removeImage}
       errors={errors}
       setErrors={setErrors}
+      onSubmit={handleFormSubmit}
+      submitted={submitted}
+      isSubmitting={isSubmitting}
     />
   );
 
   const handleFormSubmit = () => {
+    console.log('handleFormSubmit called');
+    console.log('formData:', formData);
+    console.log('errors:', errors);
+    console.log('isSubmitting:', isSubmitting);
+    console.log('listingType:', listingType);
+    console.log('roomType:', formData.roomType);
+    console.log('homeType:', formData.homeType);
+    console.log('furnishType:', formData.furnishType);
     handleSubmit(new Event('submit') as unknown as React.FormEvent);
   };
 
@@ -952,20 +627,7 @@ const AddListingPage = () => {
               isSubmitting={isSubmitting}
             />
           ) : (
-            <SellForm
-              listingType={listingType}
-              formData={formData}
-              setFormData={setFormData}
-              images={images}
-              setImages={setImages}
-              handleImageUpload={handleImageUpload}
-              removeImage={removeImage}
-              errors={errors}
-              setErrors={setErrors}
-              onSubmit={handleFormSubmit}
-              submitted={submitted}
-              isSubmitting={isSubmitting}
-            />
+            renderSellFields()
           )}
           {/* No extra submit button here. Only the form component renders the button. */}
         </form>

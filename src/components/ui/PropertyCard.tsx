@@ -168,19 +168,24 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             bhkType = match[0];
           }
         } else if ((property.rentDetails?.roomDetails as any)?.roomType) {
-          // Try to extract BHK from roomType field
+          // Try to extract BHK from roomType field first (where BHK data is saved)
           const bhkRegex = /[1-9]BHK\+?/;
           const match = (property.rentDetails?.roomDetails as any).roomType.match(bhkRegex);
           if (match) {
             bhkType = match[0];
           }
-        } else if ((property.rentDetails?.roomDetails as any)?.flatType) {
-          // Try to extract BHK from flatType field (if it exists)
+        } else if (property.sellDetails?.propertyType) {
+          // Try to extract BHK from propertyType
           const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property.rentDetails?.roomDetails as any).flatType?.match(bhkRegex);
+          const match = property.sellDetails.propertyType.match(bhkRegex);
           if (match) {
             bhkType = match[0];
           }
+        } else if ((property as any).flatType) {
+          // Try to extract BHK from flatType field
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = (property as any).flatType.match(bhkRegex);
+          if (match) bhkType = match[0];
         } else {
           // Try to extract BHK from various fields
           const bhkRegex = /[1-9]BHK\+?/;
@@ -189,7 +194,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             property.title,
             property.description,
             (property as any).propertyType,
-            (property as any).homeType,
             (property as any).roomType,
             (property as any).flatType,
           ];
@@ -211,13 +215,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           if (match) {
             bhkType = match[0];
           }
-        } else if ((property as any).homeType) {
-          // Try to extract BHK from homeType field
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property as any).homeType.match(bhkRegex);
-          if (match) {
-            bhkType = match[0];
-          }
         } else if (property.sellDetails?.propertyType) {
           // Try to extract BHK from propertyType
           const bhkRegex = /[1-9]BHK\+?/;
@@ -229,9 +226,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           // Try to extract BHK from flatType field
           const bhkRegex = /[1-9]BHK\+?/;
           const match = (property as any).flatType.match(bhkRegex);
-          if (match) {
-            bhkType = match[0];
-          }
+          if (match) bhkType = match[0];
         } else {
           // Try to extract BHK from various fields
           const bhkRegex = /[1-9]BHK\+?/;
@@ -240,7 +235,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             property.title,
             property.description,
             (property as any).propertyType,
-            (property as any).homeType,
             (property as any).roomType,
             (property as any).flatType,
           ];

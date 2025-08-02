@@ -58,6 +58,7 @@ const EditListingPage = () => {
               isImmediate: (listing as any).isImmediate || false,
               description: (listing as any).description || '',
               contactNumber: (listing as any).contactNumber || '',
+              roomAvailable: (listing as any).roomAvailable || '',
 
               // Rent specific fields
               rentDetails: {
@@ -150,6 +151,7 @@ const EditListingPage = () => {
       isImmediate: existingListing.isImmediate || false,
       description: existingListing.description || '',
       contactNumber: existingListing.contactNumber || '',
+      roomAvailable: existingListing.roomAvailable || '',
 
       // Rent specific fields
       rentDetails: {
@@ -513,7 +515,7 @@ const EditListingPage = () => {
               />
             ) : (
               <SellForm
-                listingType={listingType === 'sell' ? 'sell' : 'rent'}
+                listingType={listingType === 'rent' ? 'rent' : 'sell'}
                 formData={formData}
                 setFormData={setFormData}
                 images={images}

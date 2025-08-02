@@ -1,7 +1,7 @@
 import React, { useState, useEffect, ChangeEvent, useRef } from 'react';
 import { Camera, X } from 'lucide-react';
 import {
-  Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home
+  Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home, Check, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { USER_PREFERENCES } from '../../constants/theme';
 import * as LucideIcons from 'lucide-react';
@@ -11,32 +11,23 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import InputMask from 'react-input-mask';
 
-// Amenity/feature options with icon and label for Shared Home (Rent)
-const AMENITY_OPTIONS = [
-  { key: 'ac', label: 'AC', icon: Snowflake },
-  { key: 'bed', label: 'Bed', icon: BedDouble },
-  { key: 'power', label: 'Power Backup', icon: Plug },
-  { key: 'gym', label: 'Gym', icon: Dumbbell },
-  { key: 'fridge', label: 'Fridge', icon: Refrigerator },
-  { key: 'washing', label: 'Washing machine', icon: WashingMachine },
+// Amenities options for shared home (rent) with icons
+const rentAmenitiesOptions = [
+  { key: 'AC', label: 'AC', icon: Snowflake },
+  { key: 'Bed', label: 'Bed', icon: BedDouble },
+  { key: 'Power Backup', label: 'Power Backup', icon: Plug },
+  { key: 'Gym', label: 'Gym', icon: Dumbbell },
+  { key: 'Fridge', label: 'Fridge', icon: Refrigerator },
+  { key: 'Washing Machine', label: 'Washing Machine', icon: WashingMachine }
 ];
 
-// Amenity/feature options with icon and label for Full Home (Sell)
-const SELL_AMENITY_OPTIONS = [
-  { key: 'security', label: 'Security', icon: Shield },
-  { key: 'power', label: 'Power Backup', icon: Plug },
-  { key: 'gym', label: 'Gym', icon: Dumbbell },
-  { key: 'lift', label: 'Lift', icon: Home },
-  { key: 'balcony', label: 'Balcony', icon: Sun },
-];
-
-// Services available options
-const SERVICES = [
-  { key: 'maid', label: 'Maid' },
-  { key: 'cook', label: 'Cook' },
-  { key: 'laundry', label: 'Laundry' },
-  { key: 'wifi', label: 'WiFi' },
-  { key: 'security', label: 'Security' },
+// Amenities options for full home (sell) with icons
+const sellAmenitiesOptions = [
+  { key: 'Security', label: 'Security', icon: Shield },
+  { key: 'Power Backup', label: 'Power Backup', icon: Plug },
+  { key: 'Gym', label: 'Gym', icon: Dumbbell },
+  { key: 'Lift', label: 'Lift', icon: Home },
+  { key: 'Balcony', label: 'Balcony', icon: Sun }
 ];
 
 interface AddListingFormsProps {
@@ -394,9 +385,9 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         </div>
       </section>
 
-      {/* Home Details section */}
+      {/* Room Details section */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
-        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Home Details</h2>
+        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Room Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
@@ -412,20 +403,23 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             {displayErrors.roomType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomType}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Home Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Room Available</label>
             <select
-              className={`input w-full${displayErrors.homeType ? ' border-pink-500 bg-pink-50' : ''}`}
-              value={formData.homeType || ''}
-              onChange={e => setFormData({ ...formData, homeType: e.target.value })}
-              onBlur={() => markTouched('homeType')}
+              className={`input w-full${displayErrors.roomAvailable ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.roomAvailable || ''}
+              onChange={e => setFormData({ ...formData, roomAvailable: e.target.value })}
+              onBlur={() => markTouched('roomAvailable')}
             >
-              <option value="">Select Home Type</option>
-              {homeTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
+              <option value="">Select Room Available</option>
+              <option value="1 Room">1 Room</option>
+              <option value="2 Rooms">2 Rooms</option>
+              <option value="3 Rooms">3 Rooms</option>
+              <option value="4+ Rooms">4+ Rooms</option>
             </select>
-            {displayErrors.homeType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.homeType}</p>}
+            {displayErrors.roomAvailable && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomAvailable}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Furnishing</label>
             <select
               className={`input w-full${displayErrors.furnishType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.furnishType || ''}
@@ -440,44 +434,35 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         </div>
       </section>
 
-      {/* Amenities */}
-      <section className="bg-white p-6 rounded-lg shadow-sm mb-4">
-        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Amenities</h2>
-        <div className="flex flex-wrap gap-3">
-          {['WiFi', 'Gym', 'Lift', 'Parking', 'Security', 'Garden'].map(amenity => {
-            const selected = Array.isArray(formData.rentDetails?.amenities) && formData.rentDetails.amenities.includes(amenity);
-            return (
-              <button
-                key={amenity}
-                type="button"
-                onClick={() => {
-                  const amenities = formData.rentDetails?.amenities || [];
+      {/* Amenities Section */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-3">Amenities</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {rentAmenitiesOptions.map((amenity) => (
+            <label key={amenity.key} className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.rentDetails?.amenities?.includes(amenity.key) || false}
+                onChange={(e) => {
+                  const currentAmenities = formData.rentDetails?.amenities || [];
+                  const newAmenities = e.target.checked
+                    ? [...currentAmenities, amenity.key]
+                    : currentAmenities.filter((a: string) => a !== amenity.key);
                   setFormData({
                     ...formData,
                     rentDetails: {
                       ...formData.rentDetails,
-                      amenities: amenities.includes(amenity)
-                        ? amenities.filter((a: string) => a !== amenity)
-                        : [...amenities, amenity]
+                      amenities: newAmenities
                     }
                   });
                 }}
-                className={`flex flex-col items-center justify-center px-3 py-2 rounded-full border transition min-w-[70px] text-xs font-medium focus:outline-none ${selected
-                  ? 'bg-primary-600 text-white border-primary-600 shadow'
-                  : 'bg-white text-primary-600 border-primary-200 hover:bg-primary-50'}`}
-                tabIndex={0}
-              >
-                <span className="whitespace-nowrap">{amenity}</span>
-              </button>
-            );
-          })}
+                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              />
+              <span className="text-sm flex items-center gap-1"><amenity.icon className="h-4 w-4" />{amenity.label}</span>
+            </label>
+          ))}
         </div>
-        {displayErrors.amenities && (
-          <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
-            {displayErrors.amenities}
-          </p>
-        )}
-      </section>
+      </div>
 
       {/* Preferred Tenant */}
       <section className="bg-white p-6 rounded-lg shadow-sm mb-4">
@@ -523,7 +508,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               type="radio"
               name="moveInOption"
               checked={formData.isImmediate === true}
-              onChange={() => setFormData({ ...formData, isImmediate: true, handoverDate: '' })}
+              onChange={() => handleMoveInOption(true)}
             />
             Immediate
           </label>
@@ -532,7 +517,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               type="radio"
               name="moveInOption"
               checked={formData.isImmediate === false}
-              onChange={() => setFormData({ ...formData, isImmediate: false })}
+              onChange={() => handleMoveInOption(false)}
             />
             Specific Date
           </label>
@@ -796,13 +781,422 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
       {!hideSubmitButton && (
         <div className="mt-8 pt-6 border-t border-gray-200">
           <button
-            type="submit"
+            type="button"
             className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isSubmitting}
             onClick={(e) => {
               e.preventDefault();
+              console.log('Submit button clicked in RentForm');
+              console.log('onSubmit function:', onSubmit);
+              console.log('formData:', formData);
               if (onSubmit) {
+                console.log('Calling onSubmit...');
                 onSubmit();
+              } else {
+                console.log('No onSubmit function provided');
+              }
+            }}
+          >
+            {isSubmitting ? 'Creating Listing...' : 'Submit Listing'}
+          </button>
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            By submitting, you agree to our terms and conditions
+          </p>
+        </div>
+      )}
+    </>
+  );
+};
+
+export const SellForm: React.FC<AddListingFormsProps> = (props) => {
+  const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors, onSubmit, submitted = false, isSubmitting = false, hideSubmitButton = false } = props;
+  
+  // Add missing variable definitions
+  const roomTypeOptions = ['1BHK', '2BHK', '3BHK', '4BHK', '4+BHK'];
+  const homeTypeOptions = ['Flat', 'Independent House', 'Villa', 'Gated Community'];
+  const furnishTypeOptions = ['Fully Furnished', 'Semi Furnished', 'Unfurnished'];
+  
+  // Property type options
+  const propertyTypes = [
+    'Flat',
+    'Gated Community',
+    'Independent House',
+    'Villa'
+  ];
+
+  // Mark field as touched for validation
+  const markTouched = (field: string) => {};
+
+  // Use localErrors for error display
+  const errors: Record<string, any> = propErrors || {};
+  const setErrors = propSetErrors || (() => {});
+  const displayErrors = errors;
+
+  // Refs for error fields
+  const fieldRefs: Record<string, React.RefObject<any>> = {
+    'address.buildingName': React.createRef(),
+    'address.city': React.createRef(),
+    'address.locality': React.createRef(),
+    'propertyType': React.createRef(),
+    'sellDetails.price': React.createRef(),
+    'contactNumber': React.createRef(),
+    'description': React.createRef(),
+  };
+
+  return (
+    <>
+      {/* Address: Building Name, City, Locality in one row */}
+      <AddressFields
+        formData={formData}
+        setFormData={setFormData}
+        errors={displayErrors}
+        listingType={props.listingType}
+        images={images}
+        setImages={setImages}
+        handleImageUpload={handleImageUpload}
+        removeImage={removeImage}
+        submitted={submitted}
+      />
+      
+      {/* Property Type */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4">Property Type</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+            <select
+              className={`input w-full${displayErrors.propertyType ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.propertyType || ''}
+              onChange={e => setFormData({ ...formData, propertyType: e.target.value })}
+              onBlur={() => markTouched('propertyType')}
+            >
+              <option value="">Select Property Type</option>
+              {propertyTypes.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+            {displayErrors.propertyType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.propertyType}</p>}
+          </div>
+        </div>
+      </section>
+
+      {/* Home Details section */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Home Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
+            <select
+              className={`input w-full${displayErrors.roomType ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.roomType || ''}
+              onChange={e => setFormData({ ...formData, roomType: e.target.value })}
+              onBlur={() => markTouched('roomType')}
+            >
+              <option value="">Select BHK</option>
+              {roomTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+            {displayErrors.roomType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomType}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Home Type</label>
+            <select
+              className={`input w-full${displayErrors.homeType ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.homeType || ''}
+              onChange={e => setFormData({ ...formData, homeType: e.target.value })}
+              onBlur={() => markTouched('homeType')}
+            >
+              <option value="">Select Home Type</option>
+              {homeTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+            {displayErrors.homeType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.homeType}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
+            <select
+              className={`input w-full${displayErrors.furnishType ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.furnishType || ''}
+              onChange={e => setFormData({ ...formData, furnishType: e.target.value })}
+              onBlur={() => markTouched('furnishType')}
+            >
+              <option value="">Select Furnishing</option>
+              {furnishTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+            {displayErrors.furnishType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.furnishType}</p>}
+          </div>
+        </div>
+      </section>
+
+      {/* Amenities Section */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-3">Amenities</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {sellAmenitiesOptions.map((amenity) => (
+            <label key={amenity.key} className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.sellDetails?.amenities?.includes(amenity.key) || false}
+                onChange={(e) => {
+                  const currentAmenities = formData.sellDetails?.amenities || [];
+                  const newAmenities = e.target.checked
+                    ? [...currentAmenities, amenity.key]
+                    : currentAmenities.filter((a: string) => a !== amenity.key);
+                  setFormData({
+                    ...formData,
+                    sellDetails: {
+                      ...formData.sellDetails,
+                      amenities: newAmenities
+                    }
+                  });
+                }}
+                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              />
+              <span className="text-sm flex items-center gap-1"><amenity.icon className="h-4 w-4" />{amenity.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Details */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4">Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
+            <select
+              className={`input w-full${displayErrors.lookingFor ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.sellDetails?.lookingFor || ''}
+              onChange={e => setFormData({ 
+                ...formData, 
+                sellDetails: { 
+                  ...formData.sellDetails, 
+                  lookingFor: e.target.value 
+                } 
+              })}
+              onBlur={() => markTouched('lookingFor')}
+            >
+              <option value="">Select</option>
+              <option value="Anyone">Anyone</option>
+              <option value="Family">Family</option>
+              <option value="Bachelors">Bachelors</option>
+            </select>
+            {displayErrors.lookingFor && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.lookingFor}
+            </p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
+            <select
+              className={`input w-full${displayErrors.parking ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.parking || ''}
+              onChange={e => setFormData({ ...formData, parking: e.target.value })}
+              onBlur={() => markTouched('parking')}
+            >
+              <option value="">Select Parking Type</option>
+              <option value="Bike">Bike</option>
+              <option value="Car">Car</option>
+              <option value="Both">Both</option>
+            </select>
+            {displayErrors.parking && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+              {displayErrors.parking}
+            </p>}
+          </div>
+        </div>
+      </section>
+
+      {/* Price Details */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4">Price Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Price</label>
+            <input
+              ref={fieldRefs['sellDetails.price']}
+              type="number"
+              className={`input w-full${displayErrors.price ? ' border-pink-500 bg-pink-50' : ''}`}
+              placeholder="Enter price"
+              value={formData.sellDetails?.price || ''}
+              onChange={e => setFormData({ 
+                ...formData, 
+                sellDetails: { 
+                  ...formData.sellDetails, 
+                  price: e.target.value 
+                } 
+              })}
+              min={0}
+              onBlur={() => markTouched('price')}
+            />
+            {displayErrors.price && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
+              {displayErrors.price}
+            </p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter maintenance"
+              value={formData.sellDetails?.maintenance || ''}
+              onChange={e => setFormData({ 
+                ...formData, 
+                sellDetails: { 
+                  ...formData.sellDetails, 
+                  maintenance: e.target.value 
+                } 
+              })}
+              min={0}
+              onBlur={() => markTouched('maintenance')}
+            />
+            {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
+              {displayErrors.maintenance}
+            </p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter security deposit"
+              value={formData.sellDetails?.securityDeposit || ''}
+              onChange={e => setFormData({ 
+                ...formData, 
+                sellDetails: { 
+                  ...formData.sellDetails, 
+                  securityDeposit: e.target.value 
+                } 
+              })}
+              min={0}
+              onBlur={() => markTouched('securityDeposit')}
+            />
+            {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
+              {displayErrors.securityDeposit}
+            </p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter brokerage"
+              value={formData.sellDetails?.brokerage || ''}
+              onChange={e => setFormData({ 
+                ...formData, 
+                sellDetails: { 
+                  ...formData.sellDetails, 
+                  brokerage: e.target.value 
+                } 
+              })}
+              min={0}
+              onBlur={() => markTouched('brokerage')}
+            />
+            {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
+              {displayErrors.brokerage}
+            </p>}
+          </div>
+        </div>
+      </section>
+
+      {/* Description */}
+      <section className="bg-white p-6 rounded-2xl shadow mb-8">
+        <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Description</h2>
+        <textarea
+          ref={fieldRefs['description']}
+          className={`input min-h-[100px] focus:ring-2 focus:ring-primary-300${displayErrors.description ? ' border-pink-500 bg-pink-50' : ''}`}
+          placeholder="Add property description..."
+          value={formData.description || ''}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({
+            ...formData,
+            description: e.target.value
+          })}
+          spellCheck={true}
+          autoCorrect="on"
+          onBlur={() => markTouched('description')}
+        />
+        <p className="text-xs text-gray-500 mt-1">
+          Tip: Use this box to share unique details about your property, such as house rules, vibe, or anything not covered above. Avoid repeating amenities, phone number, or location.
+        </p>
+        {displayErrors.description && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
+          {displayErrors.description}
+        </p>}
+      </section>
+
+      {/* Upload Images */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+        <h2 className="text-lg font-semibold mb-4 bg-gray-50 p-2 rounded">Upload Images</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-2 border-2 border-dashed rounded-lg p-2">
+          {images.map((image, index) => (
+            <div key={index} className="relative rounded-lg shadow hover:shadow-lg transition overflow-hidden group bg-gray-50">
+              <img src={image} alt={`Property ${index + 1}`} className="w-full h-24 sm:h-28 object-cover" />
+              <button
+                type="button"
+                onClick={() => {
+                  console.log('Remove button clicked for index:', index);
+                  removeImage(index);
+                }}
+                className="absolute top-1 left-1 bg-white bg-opacity-80 text-red-600 rounded-full p-1 hover:bg-red-500 hover:text-white transition z-10"
+                title="Remove Image"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+          {images.length < 5 && (
+            <label htmlFor="image-upload-sell" className="flex flex-col items-center justify-center h-24 sm:h-28 rounded-lg border-2 border-dashed border-primary-300 cursor-pointer hover:border-primary-500 bg-primary-50 text-primary-600 font-medium shadow group transition">
+              <Camera className="h-7 w-7 mb-1 group-hover:text-primary-700" />
+              <span className="text-xs">Add Photo</span>
+              <input id="image-upload-sell" type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} />
+            </label>
+          )}
+        </div>
+        <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+          {images.length}/5 images uploaded
+          {images.length >= 5 && <span className="text-red-500">(Maximum reached)</span>}
+        </div>
+        <div className="text-xs text-gray-400 mt-1">Tip: Add clear, well-lit photos for better responses.</div>
+        {displayErrors.images && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
+          {displayErrors.images}
+        </p>}
+      </section>
+
+      {/* Contact Number */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
+        <input
+          type="tel"
+          ref={fieldRefs['contactNumber']}
+          className={`input${displayErrors.contactNumber ? ' border-pink-500 bg-pink-50' : ''}`}
+          placeholder="Enter your 10-digit mobile number"
+          value={formData.contactNumber || ''}
+          onChange={e => setFormData({
+            ...formData,
+            contactNumber: e.target.value
+          })}
+          pattern="[0-9]{10}"
+          maxLength={10}
+          spellCheck={false}
+          autoCorrect="off"
+          onBlur={() => markTouched('contactNumber')}
+        />
+        {displayErrors.contactNumber && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
+          {displayErrors.contactNumber}
+        </p>}
+        <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
+      </div>
+
+      {/* Submit Button */}
+      {!hideSubmitButton && (
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
+            onClick={(e) => {
+              e.preventDefault();
+              console.log('Submit button clicked in SellForm');
+              console.log('onSubmit function:', onSubmit);
+              console.log('formData:', formData);
+              if (onSubmit) {
+                console.log('Calling onSubmit...');
+                onSubmit();
+              } else {
+                console.log('No onSubmit function provided');
               }
             }}
           >
