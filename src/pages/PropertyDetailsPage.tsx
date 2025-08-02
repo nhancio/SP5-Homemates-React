@@ -103,27 +103,25 @@ const PropertyDetailsPage = () => {
   useEffect(() => {
     const fetchProperty = async () => {
       if (!propertyId) return;
-      setIsLoading(true);
-      setError(null);
+      
       try {
-        // Try fetching as rent first
-        let propertyData = null;
-        try {
-          propertyData = await getPropertyById('rent', propertyId);
-          setProperty(propertyData);
-        } catch (err) {
-          // If not found as rent, try as sell
-          try {
-            propertyData = await getPropertyById('sell', propertyId);
-            setProperty(propertyData);
-          } catch (err2) {
-            setError('Property not found');
-            setProperty(null);
-          }
-        }
+        setIsLoading(true);
+        const fetchedProperty = await getPropertyById(listingType, propertyId);
+        console.log('PropertyDetailsPage Debug - Fetched property data:', {
+          id: fetchedProperty.id,
+          roomType: (fetchedProperty as any).roomType,
+          homeType: (fetchedProperty as any).homeType,
+          furnishType: (fetchedProperty as any).furnishType,
+          lookingFor: (fetchedProperty as any).lookingFor,
+          sellDetails: (fetchedProperty as any).sellDetails,
+          parking: (fetchedProperty as any).parking,
+          handoverDate: (fetchedProperty as any).handoverDate,
+          isImmediate: (fetchedProperty as any).isImmediate,
+        });
+        setProperty(fetchedProperty);
       } catch (error) {
         console.error('Error fetching property:', error);
-        setError(error instanceof Error ? error.message : 'Failed to load property');
+        setError('Failed to load property details');
       } finally {
         setIsLoading(false);
       }
@@ -176,20 +174,110 @@ const PropertyDetailsPage = () => {
       const url = getShareableUrl(property.id, listingType);
       console.log('Generated URL:', url);
       
-      // Get the rent amount safely
-      let rentAmount = 0;
+      // Get the correct price/rent based on listing type
+      let amount = 0;
+      let amountLabel = 'Price';
       if (listingType === 'rent') {
-        rentAmount = property.rentDetails?.costs?.rent || 0;
+        amount = property.rentDetails?.costs?.rent || 0;
+        amountLabel = 'Rent';
       } else {
-        rentAmount = property.sellDetails?.rent || 0;
+        amount = property.sellDetails?.price || property.price || 0;
+        amountLabel = 'Price';
       }
-      console.log('Rent amount:', rentAmount);
+      console.log('Amount:', amount);
+      
+      // Get the correct BHK type based on listing type
+      let bhkType = '-';
+      if (listingType === 'rent') {
+        // For rent listings, try to get BHK from various sources
+        if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+          bhkType = `${property.bedrooms}BHK`;
+        } else if (property.rentDetails?.roomDetails?.availability) {
+          // Try to extract BHK from availability field
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = property.rentDetails.roomDetails.availability.match(bhkRegex);
+          if (match) bhkType = match[0];
+        } else if ((property.rentDetails?.roomDetails as any)?.roomType) {
+          // Try to extract BHK from roomType field
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = (property.rentDetails?.roomDetails as any).roomType.match(bhkRegex);
+          if (match) bhkType = match[0];
+        } else if ((property.rentDetails?.roomDetails as any)?.flatType) {
+          // Try to extract BHK from flatType field (if it exists)
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = (property.rentDetails?.roomDetails as any).flatType?.match(bhkRegex);
+          if (match) bhkType = match[0];
+        } else {
+          // Try to extract BHK from various fields
+          const bhkRegex = /[1-9]BHK\+?/;
+          const candidates = [
+            property.type,
+            property.title,
+            property.description,
+            (property as any).propertyType,
+            (property as any).homeType,
+            (property as any).roomType,
+            (property as any).flatType,
+          ];
+          for (const val of candidates) {
+            if (typeof val === 'string' && bhkRegex.test(val)) {
+              bhkType = val.match(bhkRegex)![0];
+              break;
+            }
+          }
+        }
+      } else {
+        // For sell listings, try to get BHK from various sources
+        if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+          bhkType = `${property.bedrooms}BHK`;
+        } else if (property.sellDetails?.propertyType) {
+          // Try to extract BHK from propertyType
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = property.sellDetails.propertyType.match(bhkRegex);
+          if (match) {
+            bhkType = match[0];
+          }
+        } else if ((property as any).homeType) {
+          // Try to extract BHK from homeType field
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = (property as any).homeType.match(bhkRegex);
+          if (match) bhkType = match[0];
+        } else if ((property as any).roomType) {
+          // Try to extract BHK from roomType field
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = (property as any).roomType.match(bhkRegex);
+          if (match) bhkType = match[0];
+        } else if ((property as any).flatType) {
+          // Try to extract BHK from flatType field
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = (property as any).flatType.match(bhkRegex);
+          if (match) bhkType = match[0];
+        } else {
+          // Try to extract BHK from various fields
+          const bhkRegex = /[1-9]BHK\+?/;
+          const candidates = [
+            property.type,
+            property.title,
+            property.description,
+            (property as any).propertyType,
+            (property as any).homeType,
+            (property as any).roomType,
+            (property as any).flatType,
+          ];
+          for (const val of candidates) {
+            if (typeof val === 'string' && bhkRegex.test(val)) {
+              bhkType = val.match(bhkRegex)![0];
+              break;
+            }
+          }
+        }
+      }
       
       const shareText = 
 `Hey, check this property on Homemates!
 Name: ${property.address?.buildingName || 'Property'}
-Rent: ₹${formatCurrency(rentAmount)}
-Type: ${property.propertyType || '-'}
+${amountLabel}: ₹${formatCurrency(amount)}
+Type: ${bhkType}
 Location: ${property.address?.locality}, ${property.address?.city}
 Link: ${url}`;
 
@@ -273,12 +361,6 @@ Link: ${url}`;
       </div>
     );
   }
-
-  // Debug: Log the property data to see its structure
-  console.log('PropertyDetailsPage - Property data:', property);
-  console.log('PropertyDetailsPage - Listing type:', listingType);
-  console.log('PropertyDetailsPage - Rent details:', property?.rentDetails);
-  console.log('PropertyDetailsPage - Sell details:', property?.sellDetails);
 
   if (error || !property) {
     return (
@@ -449,8 +531,20 @@ Link: ${url}`;
                         <p className="font-semibold text-sm md:text-base">{property.propertyType || '-'}</p>
                       </div>
                       <div>
-                        <span className="text-gray-600 text-sm">Home Type</span>
-                        <p className="font-semibold text-sm md:text-base">{property.rentDetails?.roomDetails?.flatType || '-'}</p>
+                        <span className="text-gray-600 text-sm">BHK</span>
+                        <p className="font-semibold text-sm md:text-base">
+                          {(() => {
+                            if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+                              return `${property.bedrooms}BHK`;
+                            }
+                            if (property.rentDetails?.roomDetails?.availability) {
+                              const bhkRegex = /[1-9]BHK\+?/;
+                              const match = property.rentDetails.roomDetails.availability.match(bhkRegex);
+                              if (match) return match[0];
+                            }
+                            return property.rentDetails?.roomDetails?.flatType || '-';
+                          })()}
+                        </p>
                       </div>
                       <div>
                         <span className="text-gray-600 text-sm">Available Rooms</span>
@@ -482,24 +576,51 @@ Link: ${url}`;
                   ) : (
                     <>
                       <div>
-                        <span className="text-gray-600 text-sm">Home Type</span>
-                        <p className="font-semibold text-sm md:text-base">{property.homeType || '-'}</p>
+                        <span className="text-gray-600 text-sm">BHK</span>
+                        <p className="font-semibold text-sm md:text-base">
+                          {(() => {
+                            if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+                              return `${property.bedrooms}BHK`;
+                            }
+                            // Look for BHK in roomType first (where it's saved from form)
+                            if ((property as any).roomType) {
+                              const bhkRegex = /[1-9]BHK\+?/;
+                              const match = (property as any).roomType.match(bhkRegex);
+                              if (match) return match[0];
+                            }
+                            // Then look in sellDetails.propertyType
+                            if (property.sellDetails?.propertyType) {
+                              const bhkRegex = /[1-9]BHK\+?/;
+                              const match = property.sellDetails.propertyType.match(bhkRegex);
+                              if (match) return match[0];
+                            }
+                            return (property as any).roomType || property.sellDetails?.propertyType || '-';
+                          })()}
+                        </p>
                       </div>
                       <div>
-                        <span className="text-gray-600 text-sm">Room Type</span>
-                        <p className="font-semibold text-sm md:text-base">{property.roomType || '-'}</p>
+                        <span className="text-gray-600 text-sm">Property Type</span>
+                        <p className="font-semibold text-sm md:text-base">{(property as any).homeType || property.sellDetails?.propertyType || property.propertyType || '-'}</p>
                       </div>
                       <div>
-                        <span className="text-gray-600 text-sm">Furnish Type</span>
-                        <p className="font-semibold text-sm md:text-base">{property.furnishType || '-'}</p>
+                        <span className="text-gray-600 text-sm">Square Feet</span>
+                        <p className="font-semibold text-sm md:text-base">{property.sellDetails?.sqft || property.area || '-'}</p>
                       </div>
                       <div>
-                        <span className="text-gray-600 text-sm">Looking For</span>
-                        <p className="font-semibold text-sm md:text-base">{property.lookingFor || '-'}</p>
+                        <span className="text-gray-600 text-sm">Direction</span>
+                        <p className="font-semibold text-sm md:text-base">{property.sellDetails?.direction || '-'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 text-sm">Furnishing</span>
+                        <p className="font-semibold text-sm md:text-base">{(property as any).furnishType || property.sellDetails?.furnishType || property.furnishingType || '-'}</p>
                       </div>
                       <div>
                         <span className="text-gray-600 text-sm">Parking</span>
                         <p className="font-semibold text-sm md:text-base">{property.parking || '-'}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 text-sm">Looking For</span>
+                        <p className="font-semibold text-sm md:text-base">{(property.sellDetails as any)?.lookingFor || (property as any).lookingFor || '-'}</p>
                       </div>
                       <div>
                         <span className="text-gray-600 text-sm">Available From</span>
@@ -548,19 +669,19 @@ Link: ${url}`;
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <div>
                       <span className="text-gray-600 text-sm">Price</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.price || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.price || property.price || 0)}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Maintenance</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Security Deposit</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.securityDeposit || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.securityDeposit || 0)}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Brokerage</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.brokerage || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.brokerage || 0)}</p>
                     </div>
                   </div>
                 </div>

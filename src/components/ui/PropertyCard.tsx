@@ -60,29 +60,20 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   showManageActions = false, // NEW PROP
   onDelete, // NEW PROP: callback after delete
 }) => {
-  console.log('PropertyCard property:', property);
-  console.log('Rendering PropertyCard for property:', property?.id, property?.address?.buildingName);
   const { favoriteProperties, toggleFavorite, user } = useAppContext();
-  console.log('User:', user);
-  console.log('User preferences:', user?.preferences);
-  console.log('Property preferences:', property.rentDetails?.preferredTenant?.preferences);
   const [isLoaded, setIsLoaded] = useState(false);
   const navigate = useNavigate();
   const swiperRef = useRef<any>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImage, setModalImage] = useState<string | null>(null);
   const [modalImageIndex, setModalImageIndex] = useState<number>(0);
-  const [showSavedAnimation, setShowSavedAnimation] = useState(false);
-
-  const isFavorite = favoriteProperties.includes(property.id);
 
   const handleImageLoad = () => setIsLoaded(true);
 
   const handleCall = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
     if (!user) {
-      alert('Please sign in to continue');
+      alert('Please login to contact property owners');
       return;
     }
 
@@ -99,33 +90,21 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         return;
       }
 
-      const phone = property.contactNumber;
-      if (phone) {
-        window.location.href = `tel:${phone}`;
+      if (property?.contactNumber) {
+        window.location.href = `tel:${property.contactNumber}`;
       } else {
-        alert('Contact number not available for this property');
+        alert('Contact number not available');
       }
     } catch (error) {
       console.error('Error using credits:', error);
-      
-      // Fallback: If credits service is unavailable, still allow calling
-      // but show a warning that credits couldn't be deducted
-      console.log('Credits service unavailable, proceeding with call without credit deduction');
-      
-      const phone = property.contactNumber;
-      if (phone) {
-        window.location.href = `tel:${phone}`;
-      } else {
-        alert('Contact number not available for this property');
-      }
+      alert('Failed to process request. Please try again.');
     }
   };
 
   const handleWhatsApp = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    
     if (!user) {
-      alert('Please sign in to continue');
+      alert('Please login to contact property owners');
       return;
     }
 
@@ -142,99 +121,146 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         return;
       }
 
-      const phone = property.contactNumber;
-      if (phone) {
-        const message = `Hey, I want to know more about your flat listing I found at homematesapp.in/rent/${property.id}`;
-        const url = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-        window.open(url, '_blank');
+      if (property?.contactNumber) {
+        const message = `Hi, I'm interested in your property at ${property.address?.buildingName || 'your location'}. Can you provide more details?`;
+        const whatsappUrl = `https://wa.me/${property.contactNumber.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
       } else {
-        alert('Contact number not available for this property');
+        alert('Contact number not available');
       }
     } catch (error) {
       console.error('Error using credits:', error);
-      
-      // Fallback: If credits service is unavailable, still allow WhatsApp sharing
-      // but show a warning that credits couldn't be deducted
-      console.log('Credits service unavailable, proceeding with WhatsApp share without credit deduction');
-      
-      const phone = property.contactNumber;
-      if (phone) {
-        const message = `Hey, I want to know more about your flat listing I found at homematesapp.in/rent/${property.id}`;
-        const url = `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
-        window.open(url, '_blank');
-      } else {
-        alert('Contact number not available for this property');
-      }
+      alert('Failed to process request. Please try again.');
     }
   };
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const type = listingType === 'buy' ? 'sell' : 'rent';
-    const url = getShareableUrl(property.id, type);
-    
-    // Get the correct price/rent based on listing type
-    let price = 0;
-    if (listingType === 'rent') {
-      price = property.rentDetails?.costs?.rent || 0;
-    } else {
-      // For sell listings (full homes), use sellDetails.rent
-      price = property.sellDetails?.rent || property.price || 0;
-    }
-
-    // Get the correct BHK type based on listing type
-    let bhkType = '-';
-    if (listingType === 'rent') {
-      // For rent listings, try to get BHK from various sources
-      if (property.bedrooms) {
-        bhkType = `${property.bedrooms}BHK`;
-      } else if (property.rentDetails?.roomDetails && (property.rentDetails.roomDetails as any)?.flatType) {
-        // Use the flatType from the form (e.g., "2BHK", "3BHK")
-        bhkType = (property.rentDetails.roomDetails as any).flatType;
-      } else {
-        // Try to extract BHK from various fields
-        const bhkRegex = /[1-9]BHK\+?/;
-        const candidates = [
-          property.type,
-          property.title,
-          property.description,
-          property.rentDetails?.roomDetails?.availability,
-        ];
-        for (const val of candidates) {
-          if (typeof val === 'string' && bhkRegex.test(val)) {
-            bhkType = val.match(bhkRegex)![0];
-            break;
-          }
-        }
-      }
-    } else {
-      // For sell listings, try to get BHK from various sources
-      if (property.bedrooms) {
-        bhkType = `${property.bedrooms}BHK`;
-      } else if ((property as any).roomType) {
-        // Use the roomType from the form (e.g., "2BHK", "3BHK")
-        bhkType = (property as any).roomType;
-      } else {
-        // Try to extract BHK from various fields
-        const bhkRegex = /[1-9]BHK\+?/;
-        const candidates = [
-          property.sellDetails?.propertyType,
-          property.type,
-          property.title,
-          property.description,
-        ];
-        for (const val of candidates) {
-          if (typeof val === 'string' && bhkRegex.test(val)) {
-            bhkType = val.match(bhkRegex)![0];
-            break;
-          }
-        }
-      }
-    }
-
-    const shareText = `Hey, checkout this property on Homemates!\n\nName: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Rent'}: ₹${formatCurrency(price)}\nBHK: ${bhkType}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
-
     try {
+      const { getShareableUrl } = await import('../../utils/share');
+      const type = listingType === 'buy' ? 'sell' : 'rent';
+      const url = getShareableUrl(property.id, type);
+      
+      // Get the correct price/rent based on listing type
+      let amount = 0;
+      let amountLabel = 'Price';
+      if (listingType === 'rent') {
+        amount = property.rentDetails?.costs?.rent || 0;
+        amountLabel = 'Rent';
+      } else {
+        // For sell listings, try to get price from sellDetails first
+        amount = property.sellDetails?.price || property.price || 0;
+        amountLabel = 'Price';
+      }
+
+      // Get the correct BHK type based on listing type
+      let bhkType = '-';
+      
+      if (listingType === 'rent') {
+        // For rent listings, try to get BHK from various sources
+        if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+          bhkType = `${property.bedrooms}BHK`;
+        } else if (property.rentDetails?.roomDetails?.availability) {
+          // Try to extract BHK from availability field
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = property.rentDetails.roomDetails.availability.match(bhkRegex);
+          if (match) {
+            bhkType = match[0];
+          }
+        } else if ((property.rentDetails?.roomDetails as any)?.roomType) {
+          // Try to extract BHK from roomType field
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = (property.rentDetails?.roomDetails as any).roomType.match(bhkRegex);
+          if (match) {
+            bhkType = match[0];
+          }
+        } else if ((property.rentDetails?.roomDetails as any)?.flatType) {
+          // Try to extract BHK from flatType field (if it exists)
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = (property.rentDetails?.roomDetails as any).flatType?.match(bhkRegex);
+          if (match) {
+            bhkType = match[0];
+          }
+        } else {
+          // Try to extract BHK from various fields
+          const bhkRegex = /[1-9]BHK\+?/;
+          const candidates = [
+            property.type,
+            property.title,
+            property.description,
+            (property as any).propertyType,
+            (property as any).homeType,
+            (property as any).roomType,
+            (property as any).flatType,
+          ];
+          for (const val of candidates) {
+            if (typeof val === 'string' && bhkRegex.test(val)) {
+              bhkType = val.match(bhkRegex)![0];
+              break;
+            }
+          }
+        }
+      } else {
+        // For sell listings, try to get BHK from various sources
+        if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+          bhkType = `${property.bedrooms}BHK`;
+        } else if (property.sellDetails?.propertyType) {
+          // Try to extract BHK from propertyType
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = property.sellDetails.propertyType.match(bhkRegex);
+          if (match) {
+            bhkType = match[0];
+          }
+        } else if ((property as any).homeType) {
+          // Try to extract BHK from homeType field
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = (property as any).homeType.match(bhkRegex);
+          if (match) {
+            bhkType = match[0];
+          }
+        } else if ((property as any).roomType) {
+          // Try to extract BHK from roomType field
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = (property as any).roomType.match(bhkRegex);
+          if (match) {
+            bhkType = match[0];
+          }
+        } else if ((property as any).flatType) {
+          // Try to extract BHK from flatType field
+          const bhkRegex = /[1-9]BHK\+?/;
+          const match = (property as any).flatType.match(bhkRegex);
+          if (match) {
+            bhkType = match[0];
+          }
+        } else {
+          // Try to extract BHK from various fields
+          const bhkRegex = /[1-9]BHK\+?/;
+          const candidates = [
+            property.type,
+            property.title,
+            property.description,
+            (property as any).propertyType,
+            (property as any).homeType,
+            (property as any).roomType,
+            (property as any).flatType,
+          ];
+          for (const val of candidates) {
+            if (typeof val === 'string' && bhkRegex.test(val)) {
+              bhkType = val.match(bhkRegex)![0];
+              break;
+            }
+          }
+        }
+      }
+      
+      const shareText = 
+`Hey, check this property on Homemates!
+Name: ${property.address?.buildingName || 'Property'}
+${amountLabel}: ₹${formatCurrency(amount)}
+Type: ${bhkType}
+Location: ${property.address?.locality}, ${property.address?.city}
+Link: ${url}`;
+
       if (navigator.share) {
         await navigator.share({
           title: 'Check out this property on Homemates',
@@ -246,6 +272,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       }
     } catch (err) {
       console.error('Error sharing property:', err);
+      alert('Failed to share property. Please try again.');
     }
   };
 
@@ -255,40 +282,36 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       alert('Please login to save properties');
       return;
     }
-    // If already saved, confirm before un-saving
-    if (isFavorite) {
-      const confirmed = window.confirm('Are you sure you want to remove this property from your saved list?');
-      if (!confirmed) return;
-    }
-    try {
-      await updateUserFavorites(user.id, property.id, !isFavorite);
-      toggleFavorite(property.id);
-      if (!isFavorite) {
-        setShowSavedAnimation(true);
-        setTimeout(() => setShowSavedAnimation(false), 1200);
-      }
-    } catch (error) {
-      console.error('Error updating favorites:', error);
-      alert('Failed to update favorites. Please try again.');
-    }
+    toggleFavorite(property.id);
   };
 
   const handleCardClick = () => {
-    // Force scroll to top immediately
-    window.scrollTo(0, 0);
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
-    
-    // Navigate after ensuring scroll position
-    navigate(`/${listingType}/${property.id}`);
+    if (onClick) {
+      onClick();
+    } else {
+      // Force scroll to top immediately
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+      
+      // Navigate after ensuring scroll position
+      const actualListingType = (property as any).listingType || listingType;
+      const displayType = actualListingType === 'sell' ? 'buy' : 'rent';
+      navigate(displayType === 'rent' ? `/rent/${property.id}` : `/buy/${property.id}`);
+    }
   };
 
   const formatAvailabilityDate = (date: string | undefined) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('en-IN', {
-      month: 'short',
-      year: 'numeric',
-    });
+    if (!date) return 'Immediate';
+    try {
+      return new Date(date).toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return date;
+    }
   };
 
   const matchScore = React.useMemo(() => {
@@ -299,9 +322,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     } else {
       propertyPrefs = property.features || [];
     }
-    // Debug logs
-    console.log('User preferences:', user.preferences);
-    console.log('Property preferences/features:', propertyPrefs);
     return getMatchScore(user.preferences, propertyPrefs);
   }, [user, property, listingType]);
 
@@ -497,7 +517,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             onClick={handleFavoriteClick}
             className="flex-1 flex items-center justify-center py-3 text-gray-600 hover:bg-gray-50 transition min-h-[44px]"
           >
-            <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+            <Heart className={`w-5 h-5 ${favoriteProperties.includes(property.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
           </button>
           <button
             onClick={handleCall}
@@ -582,7 +602,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 sm:p-3 transition-all duration-200 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-lg border border-white border-opacity-30 z-[9999]"
             onClick={e => {
               e.stopPropagation();
-              console.log('PropertyCard Left button clicked!');
               setModalImageIndex(i => {
                 const total = property.images?.length || 1;
                 const next = (i - 1 + total) % total;
@@ -599,7 +618,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 sm:p-3 transition-all duration-200 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-lg border border-white border-opacity-30 z-[9999]"
             onClick={e => {
               e.stopPropagation();
-              console.log('PropertyCard Right button clicked!');
               setModalImageIndex(i => {
                 const total = property.images?.length || 1;
                 const next = (i + 1) % total;
@@ -661,54 +679,33 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
          <div className="absolute top-4 left-4 z-10">
            <span className="bg-primary-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
              {(() => {
-               // For rent listings (shared homes)
-               if (listingType === 'rent') {
-                 // 1. Try bedrooms
-                 if (typeof property.bedrooms === 'number' && property.bedrooms > 0) {
-                   return `${property.bedrooms}BHK`;
-                 }
-                 // 2. Try rentDetails.roomDetails.flatType
-                 if (property.rentDetails?.roomDetails && (property.rentDetails.roomDetails as any).flatType) {
-                   const bhkRegex = /[1-9]BHK\+?/;
-                   const match = (property.rentDetails.roomDetails as any).flatType.match(bhkRegex);
-                   if (match) return match[0];
-                 }
-                 // 3. Try other BHK fields
-                 const bhkRegex = /[1-9]BHK\+?/;
-                 const candidates = [
-                   (property as any).flatType,
-                   property.type,
-                   property.title,
-                   property.description,
-                 ];
-                 for (const val of candidates) {
-                   if (typeof val === 'string' && bhkRegex.test(val)) {
-                     return val.match(bhkRegex)![0];
-                   }
-                 }
-               }
                // For buy listings (full homes)
-               else if (listingType === 'buy') {
-                 // 1. Try bedrooms
+               if (listingType === 'buy') {
+                 // 1. Try bedrooms field
                  if (typeof property.bedrooms === 'number' && property.bedrooms > 0) {
                    return `${property.bedrooms}BHK`;
                  }
-                 // 2. Try homeType from sellDetails
-                 if ((property as any).homeType) {
-                   const bhkRegex = /[1-9]BHK\+?/;
-                   const match = (property as any).homeType.match(bhkRegex);
-                   if (match) return match[0];
-                 }
-                 // 3. Try roomType
+                 // 2. Try roomType (BHK from form) - this is where the BHK data is saved
                  if ((property as any).roomType) {
                    const bhkRegex = /[1-9]BHK\+?/;
                    const match = (property as any).roomType.match(bhkRegex);
                    if (match) return match[0];
                  }
-                 // 4. Try other BHK fields
+                 // 3. Try homeType (Home Type from form)
+                 if ((property as any).homeType) {
+                   const bhkRegex = /[1-9]BHK\+?/;
+                   const match = (property as any).homeType.match(bhkRegex);
+                   if (match) return match[0];
+                 }
+                 // 4. Try sellDetails.propertyType
+                 if (property.sellDetails?.propertyType) {
+                   const bhkRegex = /[1-9]BHK\+?/;
+                   const match = property.sellDetails.propertyType.match(bhkRegex);
+                   if (match) return match[0];
+                 }
+                 // 5. Try other BHK fields
                  const bhkRegex = /[1-9]BHK\+?/;
                  const candidates = [
-                   (property as any).flatType,
                    property.type,
                    property.title,
                    property.description,
@@ -719,7 +716,32 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                    }
                  }
                }
-               // 3. Fallback
+               // For rent listings (shared homes)
+               else if (listingType === 'rent') {
+                 // 1. Try bedrooms field
+                 if (typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+                   return `${property.bedrooms}BHK`;
+                 }
+                 // 2. Try rentDetails.roomDetails.availability
+                 if (property.rentDetails?.roomDetails?.availability) {
+                   const bhkRegex = /[1-9]BHK\+?/;
+                   const match = property.rentDetails.roomDetails.availability.match(bhkRegex);
+                   if (match) return match[0];
+                 }
+                 // 3. Try other BHK fields
+                 const bhkRegex = /[1-9]BHK\+?/;
+                 const candidates = [
+                   property.type,
+                   property.title,
+                   property.description,
+                 ];
+                 for (const val of candidates) {
+                   if (typeof val === 'string' && bhkRegex.test(val)) {
+                     return val.match(bhkRegex)![0];
+                   }
+                 }
+               }
+               // Fallback
                return '-';
              })()}
            </span>
@@ -729,7 +751,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           onClick={handleFavoriteClick}
           className="absolute top-4 right-4 z-10 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-50 transition"
         >
-          <Heart className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+          <Heart className={`w-5 h-5 ${favoriteProperties.includes(property.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
         </button>
       </div>
       {/* Main Info */}
@@ -760,7 +782,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
                 ₹{formatCurrency(
                   listingType === 'rent' 
                     ? (property.rentDetails?.costs?.rent || 0)
-                    : (property.sellDetails?.price || 0)
+                    : (property.sellDetails?.price || property.price || 0)
                 )}
               </div>
               <div className="text-sm text-gray-500">
@@ -779,6 +801,227 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               );
             })}
           </div>
+          
+          {/* Property Details Section */}
+          <div className="mb-4">
+            <h4 className="font-semibold text-gray-900 mb-2">Property Details</h4>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              {/* BHK */}
+              <div>
+                <span className="text-gray-600">BHK:</span>
+                <span className="font-medium ml-1">
+                  {(() => {
+                    // For buy listings (full homes)
+                    if (listingType === 'buy') {
+                      // 1. Try bedrooms field
+                      if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+                        return `${property.bedrooms}BHK`;
+                      }
+                      // 2. Try roomType (BHK from form) - this is where the BHK data is saved
+                      if ((property as any).roomType) {
+                        const bhkRegex = /[1-9]BHK\+?/;
+                        const match = (property as any).roomType.match(bhkRegex);
+                        if (match) return match[0];
+                      }
+                      // 3. Try homeType (Home Type from form)
+                      if ((property as any).homeType) {
+                        const bhkRegex = /[1-9]BHK\+?/;
+                        const match = (property as any).homeType.match(bhkRegex);
+                        if (match) return match[0];
+                      }
+                      // 4. Try sellDetails.propertyType
+                      if (property.sellDetails?.propertyType) {
+                        const bhkRegex = /[1-9]BHK\+?/;
+                        const match = property.sellDetails.propertyType.match(bhkRegex);
+                        if (match) return match[0];
+                      }
+                      // 5. Try other BHK fields
+                      const bhkRegex = /[1-9]BHK\+?/;
+                      const candidates = [
+                        property.type,
+                        property.title,
+                        property.description,
+                      ];
+                      for (const val of candidates) {
+                        if (typeof val === 'string' && bhkRegex.test(val)) {
+                          return val.match(bhkRegex)![0];
+                        }
+                      }
+                    }
+                    // For rent listings (shared homes)
+                    else if (listingType === 'rent') {
+                      // 1. Try bedrooms field
+                      if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+                        return `${property.bedrooms}BHK`;
+                      }
+                      // 2. Try rentDetails.roomDetails.availability
+                      if (property.rentDetails?.roomDetails?.availability) {
+                        const bhkRegex = /[1-9]BHK\+?/;
+                        const match = property.rentDetails.roomDetails.availability.match(bhkRegex);
+                        if (match) return match[0];
+                      }
+                      // 3. Try other BHK fields
+                      const bhkRegex = /[1-9]BHK\+?/;
+                      const candidates = [
+                        property.type,
+                        property.title,
+                        property.description,
+                      ];
+                      for (const val of candidates) {
+                        if (typeof val === 'string' && bhkRegex.test(val)) {
+                          return val.match(bhkRegex)![0];
+                        }
+                      }
+                    }
+                    // Fallback
+                    return '-';
+                  })()}
+                </span>
+              </div>
+              
+              {/* Property Type */}
+              <div>
+                <span className="text-gray-600">Type:</span>
+                <span className="font-medium ml-1">
+                  {listingType === 'rent' 
+                    ? ((property.rentDetails?.roomDetails as any)?.roomType || property.type || '-')
+                    : ((property as any).homeType || property.sellDetails?.propertyType || (property as any).roomType || property.type || '-')
+                  }
+                </span>
+              </div>
+              
+              {/* Bathrooms */}
+              <div>
+                <span className="text-gray-600">Bathrooms:</span>
+                <span className="font-medium ml-1">{property.bathrooms || '-'}</span>
+              </div>
+              
+              {/* Area */}
+              <div>
+                <span className="text-gray-600">Area:</span>
+                <span className="font-medium ml-1">
+                  {listingType === 'buy' 
+                    ? `${property.sellDetails?.sqft || property.area || '-'} sq ft`
+                    : `${property.area || '-'} sq ft`
+                  }
+                </span>
+              </div>
+              
+              {/* Square Feet */}
+              <div>
+                <span className="text-gray-600">Square Feet:</span>
+                <span className="font-medium ml-1">
+                  {listingType === 'buy' 
+                    ? `${property.sellDetails?.sqft || property.area || '-'} sq ft`
+                    : `${property.area || '-'} sq ft`
+                  }
+                </span>
+              </div>
+              
+              {/* Direction */}
+              <div>
+                <span className="text-gray-600">Direction:</span>
+                <span className="font-medium ml-1">
+                  {listingType === 'buy' 
+                    ? (property.sellDetails?.direction || '-')
+                    : '-'
+                  }
+                </span>
+              </div>
+              
+              {/* Furnishing */}
+              <div>
+                <span className="text-gray-600">Furnishing:</span>
+                <span className="font-medium ml-1">
+                  {listingType === 'buy' 
+                    ? ((property as any).furnishType || (property.sellDetails as any)?.furnishType || (property as any).furnishingType || '-')
+                    : ((property as any).furnishingType || '-')
+                  }
+                </span>
+              </div>
+              
+              {/* Parking */}
+              <div>
+                <span className="text-gray-600">Parking:</span>
+                <span className="font-medium ml-1">{(property as any).parking || '-'}</span>
+              </div>
+              
+              {/* Available From */}
+              <div>
+                <span className="text-gray-600">Available:</span>
+                <span className="font-medium ml-1">
+                  {(property as any).isImmediate ? 'Immediate' : formatAvailabilityDate((property as any).handoverDate)}
+                </span>
+              </div>
+              
+              {/* Contact Info */}
+              <div>
+                <span className="text-gray-600">Contact:</span>
+                <span className="font-medium ml-1">{property.contactNumber || '-'}</span>
+              </div>
+              
+              {/* Looking For (Family/Bachelor) */}
+              <div>
+                <span className="text-gray-600">Looking For:</span>
+                <span className="font-medium ml-1">
+                  {listingType === 'buy' 
+                    ? ((property.sellDetails as any)?.lookingFor || (property as any).lookingFor || '-')
+                    : (property.rentDetails?.preferredTenant?.lookingFor || '-')
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Additional Details for Rent Listings */}
+          {listingType === 'rent' && property.rentDetails && (
+            <div className="mb-4">
+              <h4 className="font-semibold text-gray-900 mb-2">Rent Details</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-gray-600">Rent:</span>
+                  <span className="font-medium ml-1">₹{formatCurrency(property.rentDetails.costs?.rent || 0)}/month</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Deposit:</span>
+                  <span className="font-medium ml-1">₹{formatCurrency(property.rentDetails.costs?.securityDeposit || 0)}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Maintenance:</span>
+                  <span className="font-medium ml-1">₹{formatCurrency(property.rentDetails.costs?.maintenance || 0)}/month</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Available Rooms:</span>
+                  <span className="font-medium ml-1">{property.rentDetails.roomDetails?.availableRooms || '-'}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Additional Details for Buy Listings */}
+          {listingType === 'buy' && property.sellDetails && (
+            <div className="mb-4">
+              <h4 className="font-semibold text-gray-900 mb-2">Sale Details</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-gray-600">Price:</span>
+                  <span className="font-medium ml-1">₹{formatCurrency(property.sellDetails.price || 0)}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Direction:</span>
+                  <span className="font-medium ml-1">{property.sellDetails.direction || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Ownership:</span>
+                  <span className="font-medium ml-1">{property.sellDetails.ownership || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Age:</span>
+                  <span className="font-medium ml-1">{property.sellDetails.ageOfProperty || '-'}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         {/* Action Buttons - Icon Only */}
         <div className="flex gap-3 mt-auto">
@@ -865,7 +1108,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 sm:p-3 transition-all duration-200 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-lg border border-white border-opacity-30 z-[9999]"
             onClick={e => {
               e.stopPropagation();
-              console.log('PropertyCard Large Left button clicked!');
               setModalImageIndex(i => {
                 const total = property.images?.length || 1;
                 const next = (i - 1 + total) % total;
@@ -883,7 +1125,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 text-white bg-black bg-opacity-70 hover:bg-opacity-90 rounded-full p-2 sm:p-3 transition-all duration-200 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-lg border border-white border-opacity-30 z-[9999]"
             onClick={e => {
               e.stopPropagation();
-              console.log('PropertyCard Large Right button clicked!');
               setModalImageIndex(i => {
                 const total = property.images?.length || 1;
                 const next = (i + 1) % total;

@@ -398,12 +398,14 @@ const AddListingPage = () => {
             locality: formData.address.locality,
             buildingName: formData.address.buildingName,
           }),
-          // Home Details
-          homeType: formData.homeType,
-          roomType: formData.roomType,
-          furnishType: formData.furnishType,
+          // Property Type
+          propertyType: formData.propertyType,
+          // Home Details - BHK, Flat Type, Furnish Type
+          homeType: formData.homeType, // BHK (1BHK, 2BHK, etc.)
+          roomType: formData.roomType, // Flat Type (1BHK, 2BHK, etc.)
+          furnishType: formData.furnishType, // Furnished status
           // Details
-          lookingFor: formData.sellDetails?.lookingFor || '',
+          lookingFor: formData.sellDetails?.lookingFor || '', // Family/Bachelor preference
           parking: formData.parking,
           // Move In details
           handoverDate: formData.handoverDate,
@@ -420,7 +422,19 @@ const AddListingPage = () => {
           // Sell Details - only the fields that are actually in the form
           sellDetails: cleanFormData({
             // Price Details (moved to sellDetails to match interface)
-            price: formData.price,
+            price: formData.sellDetails?.price || formData.price,
+            // Square Feet
+            sqft: (formData as any).sqft,
+            // Direction
+            direction: (formData as any).direction,
+            // Property Type for BHK display
+            propertyType: formData.roomType || formData.homeType, // Use roomType as propertyType for BHK display
+            // Home Type for BHK display
+            homeType: formData.homeType,
+            // Furnish Type
+            furnishType: formData.furnishType,
+            // Looking For (Family/Bachelor)
+            lookingFor: formData.sellDetails?.lookingFor || '',
             // Amenities
             amenities: formData.sellDetails?.amenities || [],
           }),
@@ -428,6 +442,15 @@ const AddListingPage = () => {
         console.log('Sell listing data before cleaning:', sellListingData);
         const cleanedSellListingData = cleanFormData(sellListingData);
         console.log('Sell listing data after cleaning:', cleanedSellListingData);
+        console.log('Form data debug:', {
+          homeType: formData.homeType,
+          roomType: formData.roomType,
+          furnishType: formData.furnishType,
+          lookingFor: formData.sellDetails?.lookingFor,
+          parking: formData.parking,
+          sqft: (formData as any).sqft,
+          direction: (formData as any).direction,
+        });
         console.log('Calling createListing for sell...');
         const result = await createListing('sell', cleanedSellListingData);
         console.log('Sale listing created successfully:', result);

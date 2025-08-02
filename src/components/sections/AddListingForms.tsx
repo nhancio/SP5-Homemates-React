@@ -559,159 +559,45 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             </div>
           </div>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
-          {/* Row 1 - Home Type (NEW for Shared Listing) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
+            <select
+              className={`input w-full${displayErrors.roomType ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.roomType || ''}
+              onChange={e => setFormData({ ...formData, roomType: e.target.value })}
+              onBlur={() => markTouched('roomType')}
+            >
+              <option value="">Select BHK</option>
+              {roomTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+            {displayErrors.roomType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomType}</p>}
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Home Type</label>
             <select
-              ref={fieldRefs['rentDetails.roomDetails.flatType']}
-              className={`input w-full${displayErrors.flatType ? ' border-pink-500 bg-pink-50' : ''}`}
-              value={formData.rentDetails.roomDetails.flatType || ''}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  roomDetails: {
-                    ...formData.rentDetails.roomDetails,
-                    flatType: e.target.value
-                  }
-                }
-              })}
-              onBlur={() => markTouched('flatType')}
+              className={`input w-full${displayErrors.homeType ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.homeType || ''}
+              onChange={e => setFormData({ ...formData, homeType: e.target.value })}
+              onBlur={() => markTouched('homeType')}
             >
               <option value="">Select Home Type</option>
-              {flatTypes.map(type => <option key={type} value={type}>{type}</option>)}
+              {homeTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
-            {displayErrors.flatType && (
-              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-                {displayErrors.flatType}
-              </p>
-            )}
+            {displayErrors.homeType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.homeType}</p>}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Available Rooms</label>
-            <select
-              ref={fieldRefs['rentDetails.roomDetails.availableRooms']}
-              className={`input w-full${displayErrors.availableRooms ? ' border-pink-500 bg-pink-50' : ''}`}
-              value={formData.rentDetails.roomDetails.availableRooms}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  roomDetails: {
-                    ...formData.rentDetails.roomDetails,
-                    availableRooms: e.target.value
-                  }
-                }
-              })}
-              onBlur={() => markTouched('availableRooms')}
-            >
-              <option value="">Select</option>
-              {[1,2,3,4,5].map(n => <option key={n} value={n}>{n}</option>)}
-            </select>
-            {displayErrors.availableRooms && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.availableRooms}
-            </p>}
-          </div>
-          {/* Row 2 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Room Type</label>
-            <select 
-              ref={fieldRefs['rentDetails.roomDetails.roomType']}
-              className={`input w-full${displayErrors.roomType ? ' border-pink-500 bg-pink-50' : ''}`}
-              value={formData.rentDetails.roomDetails.roomType}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  roomDetails: {
-                    ...formData.rentDetails.roomDetails,
-                    roomType: e.target.value
-                  }
-                }
-              })}
-              onBlur={() => markTouched('roomType')}
-            >
-              <option value="">Select Room Type</option>
-              <option value="private">Private</option>
-              <option value="shared">Shared</option>
-            </select>
-            {displayErrors.roomType && (
-              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-                {displayErrors.roomType}
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Washroom Type</label>
-            <select
-              ref={fieldRefs['rentDetails.roomDetails.bathroomType']}
-              className={`input w-full${displayErrors.bathroomType ? ' border-pink-500 bg-pink-50' : ''}`}
-              value={formData.rentDetails.roomDetails.bathroomType}
-              onChange={e => setFormData({
-                ...formData,
-                rentDetails: {
-                  ...formData.rentDetails,
-                  roomDetails: {
-                    ...formData.rentDetails.roomDetails,
-                    bathroomType: e.target.value
-                  }
-                }
-              })}
-              onBlur={() => markTouched('bathroomType')}
-            >
-              <option value="">Select Bathroom Type</option>
-              <option value="attached">Attached</option>
-              <option value="common">Common</option>
-            </select>
-            {displayErrors.bathroomType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.bathroomType}
-            </p>}
-          </div>
-          {/* Remove Property Type dropdown from here */}
-          {/* <div> ...Property Type... </div> */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
             <select
-              ref={fieldRefs['furnishingType']}
-              className={`input w-full${displayErrors.furnishingType ? ' border-pink-500 bg-pink-50' : ''}`}
-              value={formData.furnishingType}
-              onChange={e => setFormData({
-                ...formData,
-                furnishingType: e.target.value
-              })}
-              onBlur={() => markTouched('furnishingType')}
+              className={`input w-full${displayErrors.furnishType ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.furnishType || ''}
+              onChange={e => setFormData({ ...formData, furnishType: e.target.value })}
+              onBlur={() => markTouched('furnishType')}
             >
               <option value="">Select Furnishing</option>
-              <option value="fully">Fully Furnished</option>
-              <option value="semi">Semi Furnished</option>
-              <option value="unfurnished">Unfurnished</option>
+              {furnishTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
-            {displayErrors.furnishingType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.furnishingType}
-            </p>}
-          </div>
-          {/* Row 4 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Parking</label>
-            <select 
-              ref={fieldRefs['parking']}
-              className={`input w-full${displayErrors.parking ? ' border-pink-500 bg-pink-50' : ''}`}
-              value={formData.parking}
-              onChange={e => setFormData({
-                ...formData,
-                parking: e.target.value
-              })}
-              onBlur={() => markTouched('parking')}
-            >
-              <option value="">Select Parking Type</option>
-              <option value="both">Both</option>
-              <option value="car">Car Parking</option>
-              <option value="bike">Bike Parking</option>
-            </select>
-            {displayErrors.parking && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
-              {displayErrors.parking}
-            </p>}
+            {displayErrors.furnishType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.furnishType}</p>}
           </div>
         </div>
       </section>
@@ -1295,28 +1181,28 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
             <select
-              className={`input w-full${displayErrors.homeType ? ' border-pink-500 bg-pink-50' : ''}`}
-              value={formData.homeType || ''}
-              onChange={e => setFormData({ ...formData, homeType: e.target.value })}
-              onBlur={() => markTouched('homeType')}
-            >
-              <option value="">Select BHK</option>
-              {homeTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
-            </select>
-            {displayErrors.homeType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.homeType}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Flat Type</label>
-            <select
               className={`input w-full${displayErrors.roomType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.roomType || ''}
               onChange={e => setFormData({ ...formData, roomType: e.target.value })}
               onBlur={() => markTouched('roomType')}
             >
-              <option value="">Select Flat Type</option>
+              <option value="">Select BHK</option>
               {roomTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
             {displayErrors.roomType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomType}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Home Type</label>
+            <select
+              className={`input w-full${displayErrors.homeType ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.homeType || ''}
+              onChange={e => setFormData({ ...formData, homeType: e.target.value })}
+              onBlur={() => markTouched('homeType')}
+            >
+              <option value="">Select Home Type</option>
+              {homeTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
+            </select>
+            {displayErrors.homeType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.homeType}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Furnish Type</label>
@@ -1511,6 +1397,43 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             </p>}
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Square Feet</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter square feet"
+              value={formData.sqft || ''}
+              onChange={e => setFormData({ ...formData, sqft: e.target.value })}
+              min={0}
+              onBlur={() => markTouched('sqft')}
+            />
+            {displayErrors.sqft && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
+              {displayErrors.sqft}
+            </p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Direction</label>
+            <select
+              className="input w-full"
+              value={formData.direction || ''}
+              onChange={e => setFormData({ ...formData, direction: e.target.value })}
+              onBlur={() => markTouched('direction')}
+            >
+              <option value="">Select Direction</option>
+              <option value="North">North</option>
+              <option value="South">South</option>
+              <option value="East">East</option>
+              <option value="West">West</option>
+              <option value="North-East">North-East</option>
+              <option value="North-West">North-West</option>
+              <option value="South-East">South-East</option>
+              <option value="South-West">South-West</option>
+            </select>
+            {displayErrors.direction && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
+              {displayErrors.direction}
+            </p>}
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance</label>
             <input
               type="number"
@@ -1523,36 +1446,6 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             />
             {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
               {displayErrors.maintenance}
-            </p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit</label>
-            <input
-              type="number"
-              className="input w-full"
-              placeholder="Enter security deposit"
-              value={formData.securityDeposit || ''}
-              onChange={e => setFormData({ ...formData, securityDeposit: e.target.value })}
-              min={0}
-              onBlur={() => markTouched('securityDeposit')}
-            />
-            {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
-              {displayErrors.securityDeposit}
-            </p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage</label>
-            <input
-              type="number"
-              className="input w-full"
-              placeholder="Enter brokerage"
-              value={formData.brokerage || ''}
-              onChange={e => setFormData({ ...formData, brokerage: e.target.value })}
-              min={0}
-              onBlur={() => markTouched('brokerage')}
-            />
-            {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
-              {displayErrors.brokerage}
             </p>}
           </div>
         </div>
