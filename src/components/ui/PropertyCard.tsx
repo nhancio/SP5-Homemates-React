@@ -176,16 +176,57 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       price = property.sellDetails?.rent || property.price || 0;
     }
 
-    // Get the correct property type based on listing type
-    let propertyType = '-';
+    // Get the correct BHK type based on listing type
+    let bhkType = '-';
     if (listingType === 'rent') {
-      propertyType = property.type || '-';
+      // For rent listings, try to get BHK from various sources
+      if (property.bedrooms) {
+        bhkType = `${property.bedrooms}BHK`;
+      } else if (property.rentDetails?.roomDetails && (property.rentDetails.roomDetails as any)?.flatType) {
+        // Use the flatType from the form (e.g., "2BHK", "3BHK")
+        bhkType = (property.rentDetails.roomDetails as any).flatType;
+      } else {
+        // Try to extract BHK from various fields
+        const bhkRegex = /[1-9]BHK\+?/;
+        const candidates = [
+          property.type,
+          property.title,
+          property.description,
+          property.rentDetails?.roomDetails?.availability,
+        ];
+        for (const val of candidates) {
+          if (typeof val === 'string' && bhkRegex.test(val)) {
+            bhkType = val.match(bhkRegex)![0];
+            break;
+          }
+        }
+      }
     } else {
-      // For sell listings (full homes), use sellDetails.propertyType
-      propertyType = property.sellDetails?.propertyType || property.type || '-';
+      // For sell listings, try to get BHK from various sources
+      if (property.bedrooms) {
+        bhkType = `${property.bedrooms}BHK`;
+      } else if ((property as any).roomType) {
+        // Use the roomType from the form (e.g., "2BHK", "3BHK")
+        bhkType = (property as any).roomType;
+      } else {
+        // Try to extract BHK from various fields
+        const bhkRegex = /[1-9]BHK\+?/;
+        const candidates = [
+          property.sellDetails?.propertyType,
+          property.type,
+          property.title,
+          property.description,
+        ];
+        for (const val of candidates) {
+          if (typeof val === 'string' && bhkRegex.test(val)) {
+            bhkType = val.match(bhkRegex)![0];
+            break;
+          }
+        }
+      }
     }
 
-    const shareText = `Name: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Rent'}: ₹${formatCurrency(price)}\nType: ${propertyType}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
+    const shareText = `Hey, checkout this property on Homemates!\n\nName: ${property.address?.buildingName || 'Property'}\n${listingType === 'rent' ? 'Rent' : 'Rent'}: ₹${formatCurrency(price)}\nBHK: ${bhkType}\nLocation: ${property.address?.locality}, ${property.address?.city}\nLink: ${url}`;
 
     try {
       if (navigator.share) {
