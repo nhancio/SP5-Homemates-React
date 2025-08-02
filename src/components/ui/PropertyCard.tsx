@@ -24,18 +24,29 @@ interface PropertyCardProps {
 
 // Key amenities to show as icons
 const AMENITY_ICONS: Record<string, React.ReactNode> = {
-  // Rent form amenities
+  // Rent form amenities (proper case keys)
+  'AC': <Snowflake className="w-4 h-4" />,
+  'Bed': <BedDouble className="w-4 h-4" />,
+  'Power Backup': <Plug className="w-4 h-4" />,
+  'Gym': <Dumbbell className="w-4 h-4" />,
+  'Fridge': <Refrigerator className="w-4 h-4" />,
+  'Washing Machine': <WashingMachine className="w-4 h-4" />,
+  // Sell form amenities (proper case keys)
+  'Security': <Shield className="w-4 h-4" />,
+  'Lift': <Home className="w-4 h-4" />,
+  'Balcony': <Sun className="w-4 h-4" />,
+  // Additional amenities
+  'Parking': <Car className="w-4 h-4" />,
+  // Legacy support for lowercase keys (if any exist)
   ac: <Snowflake className="w-4 h-4" />,
   bed: <BedDouble className="w-4 h-4" />,
   power: <Plug className="w-4 h-4" />,
   gym: <Dumbbell className="w-4 h-4" />,
   fridge: <Refrigerator className="w-4 h-4" />,
   washing: <WashingMachine className="w-4 h-4" />,
-  // Sell form amenities
   security: <Shield className="w-4 h-4" />,
   lift: <Home className="w-4 h-4" />,
   balcony: <Sun className="w-4 h-4" />,
-  // Additional amenities
   parking: <Car className="w-4 h-4" />,
 };
 
@@ -499,9 +510,13 @@ Link: ${url}`;
               const hasAmenity = listingType === 'rent' 
                 ? (property.rentDetails as any)?.amenities?.includes(key)
                 : property.sellDetails?.amenities?.includes(key);
-              return (
-                <span key={key} className={`rounded-full p-1 bg-gray-100 ${hasAmenity ? 'text-primary-600' : 'text-gray-400'}`}>{icon}</span>
-              );
+              // Only show icons for amenities that are actually selected
+              if (hasAmenity) {
+                return (
+                  <span key={key} className="rounded-full p-1 bg-gray-100 text-primary-600">{icon}</span>
+                );
+              }
+              return null;
             })}
           </div>
         </div>
