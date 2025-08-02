@@ -657,12 +657,73 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </SwiperSlide>
           ))}
         </Swiper>
-        {/* Property Type Badge */}
-        <div className="absolute top-4 left-4 z-10">
-          <span className="bg-primary-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
-            {property.type}
-          </span>
-        </div>
+                 {/* BHK Badge */}
+         <div className="absolute top-4 left-4 z-10">
+           <span className="bg-primary-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
+             {(() => {
+               // For rent listings (shared homes)
+               if (listingType === 'rent') {
+                 // 1. Try bedrooms
+                 if (typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+                   return `${property.bedrooms}BHK`;
+                 }
+                 // 2. Try rentDetails.roomDetails.flatType
+                 if (property.rentDetails?.roomDetails && (property.rentDetails.roomDetails as any).flatType) {
+                   const bhkRegex = /[1-9]BHK\+?/;
+                   const match = (property.rentDetails.roomDetails as any).flatType.match(bhkRegex);
+                   if (match) return match[0];
+                 }
+                 // 3. Try other BHK fields
+                 const bhkRegex = /[1-9]BHK\+?/;
+                 const candidates = [
+                   (property as any).flatType,
+                   property.type,
+                   property.title,
+                   property.description,
+                 ];
+                 for (const val of candidates) {
+                   if (typeof val === 'string' && bhkRegex.test(val)) {
+                     return val.match(bhkRegex)![0];
+                   }
+                 }
+               }
+               // For buy listings (full homes)
+               else if (listingType === 'buy') {
+                 // 1. Try bedrooms
+                 if (typeof property.bedrooms === 'number' && property.bedrooms > 0) {
+                   return `${property.bedrooms}BHK`;
+                 }
+                 // 2. Try homeType from sellDetails
+                 if ((property as any).homeType) {
+                   const bhkRegex = /[1-9]BHK\+?/;
+                   const match = (property as any).homeType.match(bhkRegex);
+                   if (match) return match[0];
+                 }
+                 // 3. Try roomType
+                 if ((property as any).roomType) {
+                   const bhkRegex = /[1-9]BHK\+?/;
+                   const match = (property as any).roomType.match(bhkRegex);
+                   if (match) return match[0];
+                 }
+                 // 4. Try other BHK fields
+                 const bhkRegex = /[1-9]BHK\+?/;
+                 const candidates = [
+                   (property as any).flatType,
+                   property.type,
+                   property.title,
+                   property.description,
+                 ];
+                 for (const val of candidates) {
+                   if (typeof val === 'string' && bhkRegex.test(val)) {
+                     return val.match(bhkRegex)![0];
+                   }
+                 }
+               }
+               // 3. Fallback
+               return '-';
+             })()}
+           </span>
+         </div>
         {/* Favorite Button */}
         <button
           onClick={handleFavoriteClick}

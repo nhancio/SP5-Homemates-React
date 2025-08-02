@@ -1293,14 +1293,14 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         )}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Home Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">BHK</label>
             <select
               className={`input w-full${displayErrors.homeType ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.homeType || ''}
               onChange={e => setFormData({ ...formData, homeType: e.target.value })}
               onBlur={() => markTouched('homeType')}
             >
-              <option value="">Select Home Type</option>
+              <option value="">Select BHK</option>
               {homeTypeOptions.map(type => <option key={type} value={type}>{type}</option>)}
             </select>
             {displayErrors.homeType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.homeType}</p>}
