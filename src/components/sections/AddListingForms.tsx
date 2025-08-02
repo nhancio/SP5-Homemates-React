@@ -52,6 +52,7 @@ interface AddListingFormsProps {
   setErrors?: (errors: any) => void; // Optional setErrors for edit page
   submitted?: boolean; // Optional submitted prop for error display
   isSubmitting?: boolean; // Optional isSubmitting prop for submit button state
+  hideSubmitButton?: boolean; // Optional prop to hide submit button (for edit pages)
 }
 
 export const AddressFields = ({ formData, setFormData, errors = {}, listingType, images, setImages, handleImageUpload, removeImage, submitted = false }: AddListingFormsProps & { errors?: any, submitted?: boolean }) => {
@@ -1046,26 +1047,28 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         </div>
 
       {/* Submit Button */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <button
-          type="submit"
-          className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={isSubmitting}
-          onClick={(e) => {
-            e.preventDefault();
-            
-            // Call parent onSubmit - validation will be handled by parent
-            if (onSubmit) {
-              onSubmit();
-            }
-          }}
-        >
-          {isSubmitting ? 'Creating Listing...' : 'Submit Listing'}
-        </button>
-        <p className="text-xs text-gray-500 mt-2 text-center">
-          By submitting, you agree to our terms and conditions
-        </p>
-      </div>
+      {!props.hideSubmitButton && (
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <button
+            type="submit"
+            className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
+            onClick={(e) => {
+              e.preventDefault();
+              
+              // Call parent onSubmit - validation will be handled by parent
+              if (props.onSubmit) {
+                props.onSubmit();
+              }
+            }}
+          >
+            {isSubmitting ? 'Creating Listing...' : 'Submit Listing'}
+          </button>
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            By submitting, you agree to our terms and conditions
+          </p>
+        </div>
+      )}
     </>
   );
 };
@@ -1237,8 +1240,8 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
               value={formData.sellDetails?.lookingFor || ''}
               onChange={e => setFormData({ 
                 ...formData, 
-                sellDetails: {
-                  ...formData.sellDetails,
+                sellDetails: { 
+                  ...formData.sellDetails, 
                   lookingFor: e.target.value
                 }
               })}
@@ -1397,55 +1400,66 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             </p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Square Feet</label>
-            <input
-              type="number"
-              className="input w-full"
-              placeholder="Enter square feet"
-              value={formData.sqft || ''}
-              onChange={e => setFormData({ ...formData, sqft: e.target.value })}
-              min={0}
-              onBlur={() => markTouched('sqft')}
-            />
-            {displayErrors.sqft && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
-              {displayErrors.sqft}
-            </p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Direction</label>
-            <select
-              className="input w-full"
-              value={formData.direction || ''}
-              onChange={e => setFormData({ ...formData, direction: e.target.value })}
-              onBlur={() => markTouched('direction')}
-            >
-              <option value="">Select Direction</option>
-              <option value="North">North</option>
-              <option value="South">South</option>
-              <option value="East">East</option>
-              <option value="West">West</option>
-              <option value="North-East">North-East</option>
-              <option value="North-West">North-West</option>
-              <option value="South-East">South-East</option>
-              <option value="South-West">South-West</option>
-            </select>
-            {displayErrors.direction && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
-              {displayErrors.direction}
-            </p>}
-          </div>
-          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance</label>
             <input
               type="number"
               className="input w-full"
               placeholder="Enter maintenance"
-              value={formData.maintenance || ''}
-              onChange={e => setFormData({ ...formData, maintenance: e.target.value })}
+              value={formData.sellDetails?.maintenance || ''}
+              onChange={e => setFormData({ 
+                ...formData, 
+                sellDetails: { 
+                  ...formData.sellDetails, 
+                  maintenance: e.target.value 
+                } 
+              })}
               min={0}
               onBlur={() => markTouched('maintenance')}
             />
             {displayErrors.maintenance && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
               {displayErrors.maintenance}
+            </p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter security deposit"
+              value={formData.sellDetails?.securityDeposit || ''}
+              onChange={e => setFormData({ 
+                ...formData, 
+                sellDetails: { 
+                  ...formData.sellDetails, 
+                  securityDeposit: e.target.value 
+                } 
+              })}
+              min={0}
+              onBlur={() => markTouched('securityDeposit')}
+            />
+            {displayErrors.securityDeposit && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
+              {displayErrors.securityDeposit}
+            </p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Brokerage</label>
+            <input
+              type="number"
+              className="input w-full"
+              placeholder="Enter brokerage"
+              value={formData.sellDetails?.brokerage || ''}
+              onChange={e => setFormData({ 
+                ...formData, 
+                sellDetails: { 
+                  ...formData.sellDetails, 
+                  brokerage: e.target.value 
+                } 
+              })}
+              min={0}
+              onBlur={() => markTouched('brokerage')}
+            />
+            {displayErrors.brokerage && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
+              {displayErrors.brokerage}
             </p>}
           </div>
         </div>
@@ -1532,26 +1546,28 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
       </div>
 
       {/* Submit Button */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <button
-          type="submit"
-          className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={isSubmitting}
-          onClick={(e) => {
-            e.preventDefault();
-            
-            // Call parent onSubmit - validation will be handled by parent
-            if (onSubmit) {
-              onSubmit();
-            }
-          }}
-        >
-          {isSubmitting ? 'Creating Listing...' : 'Submit Listing'}
-        </button>
-        <p className="text-xs text-gray-500 mt-2 text-center">
-          By submitting, you agree to our terms and conditions
-        </p>
-      </div>
+      {!props.hideSubmitButton && (
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <button
+            type="submit"
+            className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
+            onClick={(e) => {
+              e.preventDefault();
+              
+              // Call parent onSubmit - validation will be handled by parent
+              if (props.onSubmit) {
+                props.onSubmit();
+              }
+            }}
+          >
+            {isSubmitting ? 'Creating Listing...' : 'Submit Listing'}
+          </button>
+          <p className="text-xs text-gray-500 mt-2 text-center">
+            By submitting, you agree to our terms and conditions
+          </p>
+        </div>
+      )}
     </>
   );
 };

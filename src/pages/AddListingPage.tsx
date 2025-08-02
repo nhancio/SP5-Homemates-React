@@ -129,6 +129,9 @@ const initialFormData = {
     propertyId: '',
     loanOnProperty: false,
     lookingFor: '',
+    maintenance: '',
+    securityDeposit: '',
+    brokerage: '',
   },
   builtUpArea: '',
   ageOfProperty: '',
@@ -155,7 +158,17 @@ const cleanFormData = (obj: any): any => {
         cleaned[key] = cleanedValue;
       }
     } else {
-      cleaned[key] = value;
+      // Convert numeric fields to numbers
+      if (['price', 'maintenance', 'securityDeposit', 'brokerage', 'rent', 'sqft'].includes(key) && typeof value === 'string') {
+        const numValue = Number(value);
+        if (!isNaN(numValue)) {
+          cleaned[key] = numValue;
+        } else {
+          cleaned[key] = value;
+        }
+      } else {
+        cleaned[key] = value;
+      }
     }
   }
   return Object.keys(cleaned).length > 0 ? cleaned : undefined;
@@ -435,13 +448,24 @@ const AddListingPage = () => {
             furnishType: formData.furnishType,
             // Looking For (Family/Bachelor)
             lookingFor: formData.sellDetails?.lookingFor || '',
+            // Cost Details
+            maintenance: formData.sellDetails?.maintenance,
+            securityDeposit: formData.sellDetails?.securityDeposit,
+            brokerage: formData.sellDetails?.brokerage,
             // Amenities
             amenities: formData.sellDetails?.amenities || [],
           }),
         };
+        console.log('sellDetails before cleaning:', {
+          price: formData.sellDetails?.price || formData.price,
+          maintenance: formData.sellDetails?.maintenance,
+          securityDeposit: formData.sellDetails?.securityDeposit,
+          brokerage: formData.sellDetails?.brokerage,
+        });
         console.log('Sell listing data before cleaning:', sellListingData);
         const cleanedSellListingData = cleanFormData(sellListingData);
         console.log('Sell listing data after cleaning:', cleanedSellListingData);
+        console.log('Cleaned sellDetails:', cleanedSellListingData.sellDetails);
         console.log('Form data debug:', {
           homeType: formData.homeType,
           roomType: formData.roomType,
@@ -450,6 +474,9 @@ const AddListingPage = () => {
           parking: formData.parking,
           sqft: (formData as any).sqft,
           direction: (formData as any).direction,
+          maintenance: formData.sellDetails?.maintenance,
+          securityDeposit: formData.sellDetails?.securityDeposit,
+          brokerage: formData.sellDetails?.brokerage,
         });
         console.log('Full formData object:', formData);
         console.log('Calling createListing for sell...');

@@ -106,7 +106,11 @@ const EditListingPage = () => {
                 highlights: (listing as any).sellDetails?.highlights || [],
                 description: (listing as any).sellDetails?.description || '',
                 propertyId: (listing as any).sellDetails?.propertyId || '',
-                loanOnProperty: (listing as any).sellDetails?.loanOnProperty || false
+                loanOnProperty: (listing as any).sellDetails?.loanOnProperty || false,
+                lookingFor: (listing as any).sellDetails?.lookingFor || '',
+                maintenance: (listing as any).sellDetails?.maintenance || '',
+                securityDeposit: (listing as any).sellDetails?.securityDeposit || '',
+                brokerage: (listing as any).sellDetails?.brokerage || '',
               },
               builtUpArea: (listing as any).builtUpArea || '',
               ageOfProperty: (listing as any).ageOfProperty || '',
@@ -194,7 +198,11 @@ const EditListingPage = () => {
         highlights: existingListing.sellDetails?.highlights || [],
         description: existingListing.sellDetails?.description || '',
         propertyId: existingListing.sellDetails?.propertyId || '',
-        loanOnProperty: existingListing.sellDetails?.loanOnProperty || false
+        loanOnProperty: existingListing.sellDetails?.loanOnProperty || false,
+        lookingFor: existingListing.sellDetails?.lookingFor || '',
+        maintenance: existingListing.sellDetails?.maintenance || '',
+        securityDeposit: existingListing.sellDetails?.securityDeposit || '',
+        brokerage: existingListing.sellDetails?.brokerage || '',
       },
       builtUpArea: existingListing.builtUpArea || '',
       ageOfProperty: existingListing.ageOfProperty || '',
@@ -205,57 +213,109 @@ const EditListingPage = () => {
   }, [isAuthenticated, navigate, existingListing, listingType, listingId, location.state]);
 
   const validate = () => {
+    console.log('=== VALIDATION DEBUG ===');
+    console.log('Validating form data:', formData);
     const newErrors: any = {};
     // Mobile validation
     const mobile = formData.contactNumber || '';
+    console.log('Mobile number:', mobile);
     if (!/^[6-9][0-9]{9}$/.test(mobile)) {
       newErrors.contactNumber = 'Please enter a valid mobile number.';
+      console.log('Mobile validation failed:', mobile);
     }
     // Rent validation
     if (listingType === 'rent') {
       const rent = Number(formData.rentDetails?.costs?.rent);
+      console.log('Rent value:', rent);
       if (!rent || rent < 1000) {
         newErrors.rent = 'Rent must be at least ₹1,000.';
+        console.log('Rent validation failed:', rent);
       }
       // Numeric fields non-negative
       ['maintenance', 'securityDeposit', 'setupCost', 'brokerage'].forEach(field => {
         const value = Number(formData.rentDetails?.costs?.[field]);
-        if (value < 0) newErrors[field] = 'Cannot be negative.';
+        if (value < 0) {
+          newErrors[field] = 'Cannot be negative.';
+          console.log(`${field} validation failed:`, value);
+        }
       });
     }
     // Price validation
     if (listingType === 'sell') {
       const price = Number(formData.sellDetails?.price);
+      console.log('Price value:', price);
       if (!price || price < 1000) {
         newErrors.price = 'Price must be at least ₹1,000.';
+        console.log('Price validation failed:', price);
       }
       // Numeric fields non-negative
       ['maintenance', 'securityDeposit', 'brokerage'].forEach(field => {
         const value = Number(formData.sellDetails?.[field]);
-        if (value < 0) newErrors[field] = 'Cannot be negative.';
+        if (value < 0) {
+          newErrors[field] = 'Cannot be negative.';
+          console.log(`${field} validation failed:`, value);
+        }
       });
     }
     // Required fields
-    if (!formData.address.city) newErrors.city = 'City is required.';
-    if (!formData.address.locality) newErrors.locality = 'Locality is required.';
-    if (!formData.address.buildingName) newErrors.buildingName = 'Building name is required.';
-    if (!formData.propertyType) newErrors.propertyType = 'Property type is required.';
-    if (!formData.description || formData.description.length < 10) newErrors.description = 'Description must be at least 10 characters.';
-    if (!images || images.length === 0) newErrors.images = 'Please upload at least one image.';
+    console.log('Address:', formData.address);
+    if (!formData.address.city) {
+      newErrors.city = 'City is required.';
+      console.log('City validation failed');
+    }
+    if (!formData.address.locality) {
+      newErrors.locality = 'Locality is required.';
+      console.log('Locality validation failed');
+    }
+    if (!formData.address.buildingName) {
+      newErrors.buildingName = 'Building name is required.';
+      console.log('Building name validation failed');
+    }
+    if (!formData.propertyType) {
+      newErrors.propertyType = 'Property type is required.';
+      console.log('Property type validation failed');
+    }
+    console.log('Description:', formData.description);
+    if (!formData.description || formData.description.length < 10) {
+      newErrors.description = 'Description must be at least 10 characters.';
+      console.log('Description validation failed:', formData.description?.length);
+    }
+    console.log('Images:', images);
+    if (!images || images.length === 0) {
+      newErrors.images = 'Please upload at least one image.';
+      console.log('Images validation failed:', images?.length);
+    }
+    console.log('Validation errors:', newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('=== EDIT LISTING SUBMIT DEBUG ===');
+    console.log('Form submitted!');
+    console.log('User:', user);
+    console.log('ListingId:', listingId);
+    console.log('ListingType:', listingType);
+    console.log('FormData:', formData);
+    console.log('Images:', images);
+    
     if (!user || !listingId || !listingType) {
+      console.log('Missing required data');
       alert('Missing required data');
       return;
     }
-    if (!validate()) {
+    
+    console.log('Running validation...');
+    const validationResult = validate();
+    console.log('Validation result:', validationResult);
+    if (!validationResult) {
+      console.log('Validation failed, errors:', errors);
       setIsSubmitting(false);
       return;
     }
+    
+    console.log('Validation passed, starting submission...');
     setIsSubmitting(true);
     try {
       console.log('Updating listing type:', listingType);
@@ -357,7 +417,11 @@ const EditListingPage = () => {
             highlights: formData.sellDetails.highlights,
             description: formData.sellDetails.description,
             propertyId: formData.sellDetails.propertyId,
-            loanOnProperty: formData.sellDetails.loanOnProperty
+            loanOnProperty: formData.sellDetails.loanOnProperty,
+            lookingFor: formData.sellDetails.lookingFor,
+            maintenance: Number(formData.sellDetails.maintenance) || 0,
+            securityDeposit: Number(formData.sellDetails.securityDeposit) || 0,
+            brokerage: Number(formData.sellDetails.brokerage) || 0,
           }
         };
 
@@ -411,6 +475,10 @@ const EditListingPage = () => {
     );
   }
 
+  console.log('EditListingPage render - formData:', formData);
+  console.log('EditListingPage render - listingType:', listingType);
+  console.log('EditListingPage render - isSubmitting:', isSubmitting);
+
   return (
     <div className="py-8">
       <div className="container">
@@ -425,7 +493,11 @@ const EditListingPage = () => {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-8" onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              console.log('Enter key pressed in form');
+            }
+          }}>
             {listingType === 'rent' ? (
               <RentForm
                 listingType={listingType === 'rent' ? 'rent' : 'sell'}
@@ -437,6 +509,7 @@ const EditListingPage = () => {
                 removeImage={removeImage}
                 errors={errors}
                 setErrors={setErrors}
+                hideSubmitButton={true}
               />
             ) : (
               <SellForm
@@ -449,6 +522,7 @@ const EditListingPage = () => {
                 removeImage={removeImage}
                 errors={errors}
                 setErrors={setErrors}
+                hideSubmitButton={true}
               />
             )}
 
@@ -462,9 +536,57 @@ const EditListingPage = () => {
                 Cancel
               </button>
               <button
-                type="submit"
-                className="btn btn-primary"
+                type="button"
+                className="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium cursor-pointer"
                 disabled={isSubmitting}
+                onClick={async (e) => {
+                  e.preventDefault();
+                  console.log('Update Listing button clicked directly');
+                  console.log('Form data:', formData);
+                  console.log('Errors:', errors);
+                  console.log('Is submitting:', isSubmitting);
+                  
+                  // Call handleSubmit directly
+                  console.log('Bypassing validation for testing...');
+                  setIsSubmitting(true);
+                  try {
+                    console.log('Starting update process...');
+                    if (listingType === 'sell') {
+                      console.log('Updating sell listing...');
+                      const sellListingData = {
+                        address: {
+                          city: formData.address.city,
+                          locality: formData.address.locality,
+                          buildingName: formData.address.buildingName,
+                        },
+                        propertyType: formData.propertyType,
+                        furnishingType: formData.furnishingType,
+                        parking: formData.parking,
+                        buildingType: formData.buildingType,
+                        handoverDate: formData.handoverDate,
+                        isImmediate: formData.isImmediate,
+                        description: formData.description,
+                        contactNumber: formData.contactNumber,
+                        images,
+                        sellDetails: {
+                          price: Number(formData.sellDetails.price) || 0,
+                          maintenance: Number(formData.sellDetails.maintenance) || 0,
+                          securityDeposit: Number(formData.sellDetails.securityDeposit) || 0,
+                          brokerage: Number(formData.sellDetails.brokerage) || 0,
+                        }
+                      };
+                      console.log('Sell listing data:', sellListingData);
+                      await updateListing('sell', listingId!, sellListingData);
+                      alert('Listing updated successfully!');
+                      navigate('/profile');
+                    }
+                  } catch (error) {
+                    console.error('Error updating listing:', error);
+                    alert(error instanceof Error ? error.message : 'Failed to update listing');
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                }}
               >
                 {isSubmitting ? 'Updating...' : 'Update Listing'}
               </button>

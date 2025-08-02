@@ -121,6 +121,11 @@ const PropertyDetailsPage = () => {
           fullProperty: fetchedProperty,
           listingType: listingType,
         });
+        console.log('Property fetched successfully:', fetchedProperty);
+        console.log('Property sellDetails:', (fetchedProperty as any).sellDetails);
+        console.log('Property sellDetails maintenance:', (fetchedProperty as any).sellDetails?.maintenance);
+        console.log('Property sellDetails securityDeposit:', (fetchedProperty as any).sellDetails?.securityDeposit);
+        console.log('Property sellDetails brokerage:', (fetchedProperty as any).sellDetails?.brokerage);
         setProperty(fetchedProperty);
       } catch (error) {
         console.error('Error fetching property:', error);
@@ -131,6 +136,21 @@ const PropertyDetailsPage = () => {
     };
     fetchProperty();
   }, [propertyId]);
+
+  // Debug cost details
+  useEffect(() => {
+    if (property && listingType === 'sell') {
+      console.log('Cost Details Debug:');
+      console.log('Property object:', property);
+      console.log('sellDetails:', property.sellDetails);
+      console.log('Maintenance from sellDetails:', property.sellDetails?.maintenance);
+      console.log('Security Deposit from sellDetails:', property.sellDetails?.securityDeposit);
+      console.log('Brokerage from sellDetails:', property.sellDetails?.brokerage);
+      console.log('Maintenance from root:', (property as any).maintenance);
+      console.log('Security Deposit from root:', (property as any).securityDeposit);
+      console.log('Brokerage from root:', (property as any).brokerage);
+    }
+  }, [property, listingType]);
 
   const handleLoginPrompt = () => {
     if (window.confirm('Please login to use this feature. Would you like to login now?')) {
@@ -675,15 +695,15 @@ Link: ${url}`;
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Maintenance</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.maintenance || (property as any).maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Security Deposit</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.securityDeposit || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.securityDeposit || (property as any).securityDeposit || 0)}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Brokerage</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.brokerage || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.brokerage || (property as any).brokerage || 0)}</p>
                     </div>
                   </div>
                 </div>
