@@ -268,11 +268,11 @@ const AddListingPage = () => {
       if (!formData.furnishType) newErrors.furnishType = 'Please select a furnish type.';
       
       // Details
-      if (!formData.rentDetails?.preferredTenant?.lookingFor) newErrors.lookingFor = 'Please select a gender.';
+      if (!formData.sellDetails?.lookingFor) newErrors.lookingFor = 'Please select a gender.';
       if (!formData.parking) newErrors.parking = 'Please select a parking type.';
       
       // Amenities
-      if (!formData.rentDetails?.amenities || formData.rentDetails.amenities.length === 0) {
+      if (!formData.sellDetails?.amenities || formData.sellDetails.amenities.length === 0) {
         newErrors.amenities = 'Please select at least one amenity.';
       }
       
@@ -281,17 +281,17 @@ const AddListingPage = () => {
         newErrors.handoverDate = 'Please select a move-in option.';
       }
       
-             // Price Details - Only Price is required
-       const price = Number(formData.price);
-       if (!price || price < 1000) {
-         newErrors.price = 'Price must be at least ₹1,000.';
-       }
-       
-       // Numeric fields non-negative
-       ['maintenance', 'securityDeposit', 'brokerage'].forEach(field => {
-         const value = Number((formData as any)?.[field]);
-         if (value < 0) newErrors[field] = 'Cannot be negative.';
-       });
+      // Price Details - Only Price is required
+      const price = Number(formData.price);
+      if (!price || price < 1000) {
+        newErrors.price = 'Price must be at least ₹1,000.';
+      }
+      
+      // Numeric fields non-negative
+      ['maintenance', 'securityDeposit', 'brokerage'].forEach(field => {
+        const value = Number((formData as any)?.[field]);
+        if (value < 0) newErrors[field] = 'Cannot be negative.';
+      });
     }
     
     // Common validation
