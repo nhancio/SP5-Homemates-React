@@ -1348,8 +1348,14 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Looking for</label>
             <select
               className={`input w-full${displayErrors.lookingFor ? ' border-pink-500 bg-pink-50' : ''}`}
-              value={formData.lookingFor || ''}
-              onChange={e => setFormData({ ...formData, lookingFor: e.target.value })}
+              value={formData.sellDetails?.lookingFor || ''}
+              onChange={e => setFormData({ 
+                ...formData, 
+                sellDetails: {
+                  ...formData.sellDetails,
+                  lookingFor: e.target.value
+                }
+              })}
               onBlur={() => markTouched('lookingFor')}
             >
               <option value="">Select</option>
