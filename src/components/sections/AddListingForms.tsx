@@ -488,6 +488,11 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             );
           })}
         </div>
+        {displayErrors.amenities && (
+          <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-2 w-full">
+            {displayErrors.amenities}
+          </p>
+        )}
       </div>
 
       {/* Preferred Tenant */}
@@ -548,6 +553,11 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             Specific Date
           </label>
         </div>
+        {displayErrors.handoverDate && (
+          <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-2 w-full">
+            {displayErrors.handoverDate}
+          </p>
+        )}
         {formData.isImmediate === false && (
           <div className="mb-2">
             <input
@@ -993,6 +1003,11 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             );
           })}
         </div>
+        {displayErrors.amenities && (
+          <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-2 w-full">
+            {displayErrors.amenities}
+          </p>
+        )}
       </div>
 
       {/* Details */}
@@ -1040,6 +1055,55 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
             </p>}
           </div>
         </div>
+      </section>
+
+      {/* Move In Section */}
+      <section className="bg-white p-6 rounded-lg shadow-sm mb-4">
+        <h2 className="text-lg font-semibold mb-4">Move In</h2>
+        <div className="flex items-center gap-8 mb-2">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="moveInOption"
+              checked={formData.isImmediate === true}
+              onChange={() => handleMoveInOption(true)}
+            />
+            Immediate
+          </label>
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="moveInOption"
+              checked={formData.isImmediate === false}
+              onChange={() => handleMoveInOption(false)}
+            />
+            Specific Date
+          </label>
+        </div>
+        {displayErrors.handoverDate && (
+          <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-2 w-full">
+            {displayErrors.handoverDate}
+          </p>
+        )}
+        {formData.isImmediate === false && (
+          <div className="mb-2">
+            <input
+              type="date"
+              className={`input max-w-xs${displayErrors.handoverDate ? ' border-pink-500 bg-pink-50' : ''}`}
+              value={formData.handoverDate || ''}
+              min={minDate}
+              max={maxDate}
+              onChange={e => handleMoveInDateChange(e.target.value ? new Date(e.target.value) : null)}
+              onBlur={() => markTouched('handoverDate')}
+            />
+            <span className="block text-xs text-gray-500 mt-1">Select your move-in date.</span>
+            {displayErrors.handoverDate && (
+              <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">
+                {displayErrors.handoverDate}
+              </p>
+            )}
+          </div>
+        )}
       </section>
 
       {/* Price Details */}

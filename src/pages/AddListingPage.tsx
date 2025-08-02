@@ -246,7 +246,9 @@ const AddListingPage = () => {
       
       // Rental Details - All fields required
       const rent = Number(formData.rentDetails?.costs?.rent);
-      if (!rent || rent < 1000) {
+      if (!formData.rentDetails?.costs?.rent || formData.rentDetails.costs.rent === '') {
+        newErrors.rent = 'Please enter rent amount.';
+      } else if (!rent || rent < 1000) {
         newErrors.rent = 'Rent must be at least ₹1,000.';
       }
       
@@ -333,7 +335,10 @@ const AddListingPage = () => {
       
       // Price Details - Only Price is required
       const price = Number(formData.sellDetails?.price);
-      if (!price || price < 1000) {
+      if (!formData.sellDetails?.price || formData.sellDetails.price === '') {
+        newErrors.price = 'Please enter price amount.';
+        console.log('❌ Price validation failed - empty field');
+      } else if (!price || price < 1000) {
         newErrors.price = 'Price must be at least ₹1,000.';
         console.log('❌ Price validation failed:', price);
       }
