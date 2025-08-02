@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug, X, Check, ChevronLeft, ChevronRight, Pencil, Trash, Eye } from 'lucide-react';
+import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug, X, Check, ChevronLeft, ChevronRight, Pencil, Trash, Eye, Dumbbell, Sun } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
@@ -24,13 +24,19 @@ interface PropertyCardProps {
 
 // Key amenities to show as icons
 const AMENITY_ICONS: Record<string, React.ReactNode> = {
-  parking: <Car className="w-4 h-4" />,
+  // Rent form amenities
   ac: <Snowflake className="w-4 h-4" />,
-  security: <Shield className="w-4 h-4" />,
-  fridge: <Refrigerator className="w-4 h-4" />,
-  washing: <WashingMachine className="w-4 h-4" />,
   bed: <BedDouble className="w-4 h-4" />,
   power: <Plug className="w-4 h-4" />,
+  gym: <Dumbbell className="w-4 h-4" />,
+  fridge: <Refrigerator className="w-4 h-4" />,
+  washing: <WashingMachine className="w-4 h-4" />,
+  // Sell form amenities
+  security: <Shield className="w-4 h-4" />,
+  lift: <Home className="w-4 h-4" />,
+  balcony: <Sun className="w-4 h-4" />,
+  // Additional amenities
+  parking: <Car className="w-4 h-4" />,
 };
 
 // Matching score calculation helper
