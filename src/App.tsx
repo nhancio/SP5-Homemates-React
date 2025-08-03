@@ -56,18 +56,42 @@ const router = createBrowserRouter([
 
 function App() {
   useEffect(() => {
-    fetch('/version.json')
-      .then(res => res.json())
-      .then(data => {
+    // Enhanced cache-busting mechanism
+    const checkForUpdates = async () => {
+      try {
+        const response = await fetch('/version.json?t=' + Date.now());
+        const data = await response.json();
+        
         const currentVersion = localStorage.getItem('appVersion');
-        if (currentVersion && currentVersion !== data.version) {
+        const currentBuildId = localStorage.getItem('appBuildId');
+        
+        // Check if version or build ID has changed
+        if (currentVersion && (currentVersion !== data.version || currentBuildId !== data.buildId)) {
+          console.log('New version detected, reloading...');
           localStorage.setItem('appVersion', data.version);
+          localStorage.setItem('appBuildId', data.buildId);
+          localStorage.setItem('lastUpdateCheck', Date.now().toString());
           window.location.reload();
         } else {
           localStorage.setItem('appVersion', data.version);
+          localStorage.setItem('appBuildId', data.buildId);
+          localStorage.setItem('lastUpdateCheck', Date.now().toString());
         }
-      });
+      } catch (error) {
+        console.error('Failed to check for updates:', error);
+      }
+    };
+
+    // Check for updates on app start
+    checkForUpdates();
+
+    // Set up periodic update checks (every 5 minutes)
+    const updateInterval = setInterval(checkForUpdates, 5 * 60 * 1000);
+
+    // Cleanup interval on unmount
+    return () => clearInterval(updateInterval);
   }, []);
+
   return (
     <AppContextProvider>
       <ErrorBoundary>

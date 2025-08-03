@@ -44,6 +44,10 @@ export default defineConfig({
       }
     }
   },
+  // Add cache busting
+  define: {
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   server: {
     port: 3000,
     // Handle client-side routing in development
