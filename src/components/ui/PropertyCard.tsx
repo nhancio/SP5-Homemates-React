@@ -494,7 +494,7 @@ Link: ${url}`;
             <MapPin className="w-3 h-3 md:w-4 md:h-4 mr-1 text-primary-600" />
             <span className="line-clamp-1 text-xs">
               {listingType === 'rent'
-                ? `${property.rentDetails?.roomDetails?.availableRooms ?? '-'} room(s) available in ${property.address?.locality}, ${property.address?.city}`
+                ? `${property.rentDetails?.roomDetails?.availableRooms ?? property.roomAvailable ?? '-'} room(s) available in ${property.address?.locality}, ${property.address?.city}`
                 : `${property.address?.locality}, ${property.address?.city}`}
             </span>
           </div>

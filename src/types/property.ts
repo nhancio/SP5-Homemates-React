@@ -86,6 +86,7 @@ export interface Property {
   address?: PropertyAddress;
   rentDetails?: RentDetailsFull;
   sellDetails?: SellDetails;
+  roomAvailable?: string; // Room availability information
 }
 
 export interface PropertyAmenities {
