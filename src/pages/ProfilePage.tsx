@@ -672,33 +672,47 @@ const ProfilePage = () => {
                     </p>
                   )}
                 </div>
-                {/* Premium and Credits side by side */}
-                <div className="flex flex-col md:flex-row gap-6 mt-6">
-                  {/* Upgrade to Premium */}
-                  <div className="flex-1 bg-primary-50 border border-primary-200 rounded-lg p-4 md:p-6">
+                {/* Upgrade to Premium - Full Width */}
+                <div className="mt-6">
+                  <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 md:p-6">
                     <div className="text-center mb-4">
                       <p className="text-base md:text-lg mb-2">Plan: <span className="bg-gray-200 text-primary-700 px-3 py-1 rounded-full text-sm font-medium">Free</span></p>
                     </div>
                     <div className="text-center">
                       <h3 className="text-lg md:text-xl font-bold mb-4">Upgrade to Premium</h3>
-                      <ul className="text-left mb-6 space-y-2">
-                        <li className="flex items-start gap-3">
-                          <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
-                          <span className="text-sm md:text-base"><span className="font-semibold">20 Calls</span> to property owners</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
-                          <span className="text-sm md:text-base"><span className="font-semibold">20 WhatsApp</span> connections</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
-                          <span className="text-sm md:text-base"><span className="font-semibold">Priority Support</span> for faster assistance</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                          <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
-                          <span className="text-sm md:text-base"><span className="font-semibold">Exclusive AI Features</span> for better matching</span>
-                        </li>
-                      </ul>
+                      
+                      {/* Credits and Conditions Side by Side */}
+                      <div className="flex flex-col md:flex-row gap-6 mb-6">
+                        {/* Your Credits - Left Side */}
+                        <div className="flex-1 bg-white rounded-lg p-4 border border-gray-200">
+                          <h4 className="text-base md:text-lg font-semibold mb-3 flex items-center justify-center">
+                            <CreditCard className="w-4 h-4 md:w-5 md:h-5 mr-2 text-primary-600" />
+                            Your Credits
+                          </h4>
+                          <div className="text-center mb-3">
+                            <div className="flex items-center justify-center gap-2">
+                              <CreditCard className="w-4 h-4 text-green-600" />
+                              <span className="text-sm md:text-base font-medium">{userCredits}/5 credits available</span>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-500 text-center">Use credits to contact property owners via call or WhatsApp.</div>
+                        </div>
+                        
+                        {/* Premium Features - Right Side */}
+                        <div className="flex-1">
+                          <h4 className="text-base md:text-lg font-semibold mb-3 text-center">Premium Benefits</h4>
+                          <ul className="text-left space-y-2">
+                            <li className="flex items-start gap-3">
+                              <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
+                              <span className="text-sm md:text-base"><span className="font-semibold">Priority Support</span> for faster assistance</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                              <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
+                              <span className="text-sm md:text-base"><span className="font-semibold">Exclusive AI Features</span> for better matching</span>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
                       <div className="flex flex-col items-center gap-2 mb-6">
                         <div className="flex items-center gap-3">
                           <span className="line-through text-gray-400 text-base md:text-lg">₹499</span>
@@ -722,34 +736,6 @@ const ProfilePage = () => {
                       <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-gray-500">
                         <span role="img" aria-label="secure">🔒</span>
                         <span>Secure Payment</span>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Your Credits */}
-                  <div className="flex-1 bg-primary-50 border border-primary-200 rounded-lg p-4 md:p-6">
-                    <div className="text-center">
-                      <h3 className="text-base md:text-lg font-semibold mb-4 flex items-center justify-center">
-                        <CreditCard className="w-4 h-4 md:w-5 md:h-5 mr-2 text-primary-600" />
-                        Your Credits
-                      </h3>
-                      <div className="text-center">
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <Phone className="w-4 h-4 text-green-600" />
-                            <span className="text-sm md:text-base font-medium">{userCredits}/5 Call credits available</span>
-                          </div>
-                          <div className="flex items-center justify-center gap-2">
-                            <MessageCircle className="w-4 h-4 text-green-600" />
-                            <span className="text-sm md:text-base font-medium">{userCredits}/5 WhatsApp credits available</span>
-                          </div>
-                        </div>
-                        <div className="text-xs text-gray-500 mb-6">Use credits to contact property owners via call or WhatsApp.</div>
-                        <button
-                          onClick={() => window.location.href = '/payment'}
-                          className="w-full bg-primary-600 hover:bg-primary-700 text-white px-4 md:px-6 py-3 text-base md:text-lg font-semibold rounded-lg transition-colors"
-                        >
-                          Buy Contact Credits
-                        </button>
                       </div>
                     </div>
                   </div>
