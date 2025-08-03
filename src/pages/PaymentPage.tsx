@@ -1,39 +1,47 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import { CreditCard, ArrowLeft, Check, Shield, Zap, Star, Crown, Phone } from 'lucide-react';
+import { CreditCard, ArrowLeft, Check, Shield, Zap, Star, Crown, Phone, Flame } from 'lucide-react';
 import { getUserCredits, addCredits } from '../services/credits';
 import { initiatePhonePePayment } from '../services/listings';
 
 interface CreditPackage {
   id: string;
+  name: string;
   credits: number;
   price: number;
   popular?: boolean;
   bestValue?: boolean;
   icon: React.ReactNode;
+  paymentLink: string;
 }
 
 const creditPackages: CreditPackage[] = [
   {
     id: 'basic',
+    name: 'Basic',
     credits: 10,
-    price: 49,
-    icon: <Zap className="w-6 h-6" />
+    price: 59,
+    icon: <Zap className="w-6 h-6" />,
+    paymentLink: 'https://rzp.io/rzp/qjQGr6X'
   },
   {
     id: 'popular',
+    name: 'Most Popular',
     credits: 25,
     price: 99,
     popular: true,
-    icon: <Star className="w-6 h-6" />
+    icon: <Star className="w-6 h-6" />,
+    paymentLink: 'https://rzp.io/rzp/97VBldBi'
   },
   {
     id: 'premium',
+    name: 'Best Value',
     credits: 50,
-    price: 179,
+    price: 149,
     bestValue: true,
-    icon: <Crown className="w-6 h-6" />
+    icon: <Crown className="w-6 h-6" />,
+    paymentLink: 'https://rzp.io/rzp/asLk4LN'
   }
 ];
 
@@ -75,31 +83,17 @@ const PaymentPage = () => {
 
     setProcessing(true);
     try {
-      // Get user's phone number from profile - we'll need to fetch it from Firestore
-      const { getDoc, doc } = await import('firebase/firestore');
-      const { db } = await import('../config/firebase');
+      // Redirect to the payment link
+      window.open(selectedPackage.paymentLink, '_blank');
       
-      const userDoc = await getDoc(doc(db, 'u', user.id));
-      const userPhone = userDoc.exists() ? userDoc.data().userPhoneNumber || '' : '';
-      
-      if (!userPhone) {
-        alert('Please add your phone number to your profile to proceed with payment.');
-        return;
-      }
-
-      // Initiate PhonePe payment
-      await initiatePhonePePayment(selectedPackage.price, userPhone);
-      
-      // Note: The payment will redirect to PhonePe, so we won't reach this code
-      // Credits will be added after successful payment callback
-      // For now, we'll add credits immediately (in production, this should be done via webhook)
+      // Add credits immediately (in production, this should be done via webhook)
       await addCredits(user.id, selectedPackage.credits);
       
       // Update local state
       setUserCredits(prev => prev + selectedPackage.credits);
       
       // Show success message
-      alert(`Payment initiated! ${selectedPackage.credits} credits will be added to your account after successful payment.`);
+      alert(`Payment initiated! ${selectedPackage.credits} credits have been added to your account.`);
       
       // Navigate back
       navigate(-1);
@@ -185,7 +179,9 @@ const PaymentPage = () => {
                 selectedPackage?.id === pkg.id
                   ? 'border-primary-600 bg-primary-50'
                   : 'border-gray-200 hover:border-primary-300'
-              } ${pkg.popular ? 'ring-2 ring-primary-200' : ''}`}
+              } ${pkg.popular ? 'ring-2 ring-primary-200' : ''} ${
+                pkg.bestValue ? 'ring-2 ring-green-200 border-green-300 bg-green-50 scale-105' : ''
+              }`}
               onClick={() => handlePackageSelect(pkg)}
             >
               {pkg.popular && (
@@ -198,29 +194,40 @@ const PaymentPage = () => {
               
               {pkg.bestValue && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                    BEST VALUE
+                  <span className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center">
+                    <Flame className="w-3 h-3 mr-1" />
+                    BEST DEAL – Save 50% per credit
                   </span>
                 </div>
               )}
 
               <div className="text-center">
                 <div className="flex justify-center mb-4">
-                  <div className="p-3 bg-primary-100 rounded-full text-primary-600">
+                  <div className={`p-3 rounded-full ${
+                    pkg.bestValue ? 'bg-green-100 text-green-600' : 'bg-primary-100 text-primary-600'
+                  }`}>
                     {pkg.icon}
                   </div>
                 </div>
                 
-                <h3 className="text-xl font-bold mb-2">{pkg.credits} Credits</h3>
+                <h3 className="text-xl font-bold mb-2">{pkg.name}</h3>
                 <p className="text-gray-600 mb-4">Contact {pkg.credits} property owners</p>
                 
-                <div className="text-3xl font-bold text-primary-600 mb-2">
+                <div className={`text-3xl font-bold mb-2 ${
+                  pkg.bestValue ? 'text-green-600' : 'text-primary-600'
+                }`}>
                   ₹{pkg.price}
                 </div>
                 
                 <div className="text-sm text-gray-500">
-                  ₹{(pkg.price / pkg.credits).toFixed(1)} per credit
+                  ₹{(pkg.price / pkg.credits).toFixed(2)} per credit
                 </div>
+
+                {pkg.bestValue && (
+                  <div className="mt-3 text-sm text-green-600 font-medium">
+                    Most users buy this pack!
+                  </div>
+                )}
               </div>
 
               {selectedPackage?.id === pkg.id && (
@@ -255,7 +262,7 @@ const PaymentPage = () => {
             
             <div className="flex items-center justify-center mt-4 text-sm text-gray-500">
               <Shield className="w-4 h-4 mr-1" />
-              Secure payment powered by PhonePe
+              Secure payment powered by Razorpay
             </div>
           </div>
         )}
