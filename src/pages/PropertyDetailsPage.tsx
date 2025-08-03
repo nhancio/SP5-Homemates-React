@@ -303,7 +303,7 @@ const PropertyDetailsPage = () => {
  Name: ${property.address?.buildingName || 'Property'}
  ${amountLabel}: ₹${formatCurrency(amount)}
  Type: ${bhkType}
- ${listingType === 'rent' ? `Room Available: ${(property as any).roomAvailable || '-'}` : ''}
+ ${listingType === 'rent' ? `Rooms Available: ${(property as any).roomAvailable || '-'}` : ''}
  Location: ${property.address?.locality}, ${property.address?.city}
  Link: ${url}`;
 
@@ -562,38 +562,6 @@ const PropertyDetailsPage = () => {
                         <p className="font-semibold text-sm md:text-base">{property.propertyType || '-'}</p>
                       </div>
                       <div>
-                        <span className="text-gray-600 text-sm">BHK</span>
-                        <p className="font-semibold text-sm md:text-base">
-                          {(() => {
-                            console.log('=== PROPERTY DETAILS DEBUG ===');
-                            console.log('Property object:', property);
-                            console.log('roomType:', (property as any).roomType);
-                            console.log('homeType:', (property as any).homeType);
-                            console.log('furnishType:', (property as any).furnishType);
-                            console.log('propertyType:', property.propertyType);
-                            console.log('rentDetails:', property.rentDetails);
-                            console.log('rentDetails.roomDetails:', property.rentDetails?.roomDetails);
-                            
-                            // Look for BHK in roomType first (where it's saved from RentForm)
-                            if ((property as any).roomType) {
-                              const bhkRegex = /[1-9]BHK\+?/;
-                              const match = (property as any).roomType.match(bhkRegex);
-                              if (match) return match[0];
-                            }
-                            // Fallback to old structure
-                            if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
-                              return `${property.bedrooms}BHK`;
-                            }
-                            if (property.rentDetails?.roomDetails?.availability) {
-                              const bhkRegex = /[1-9]BHK\+?/;
-                              const match = property.rentDetails.roomDetails.availability.match(bhkRegex);
-                              if (match) return match[0];
-                            }
-                            return property.rentDetails?.roomDetails?.flatType || '-';
-                          })()}
-                        </p>
-                      </div>
-                      <div>
                         <span className="text-gray-600 text-sm">Room Type</span>
                         <p className="font-semibold text-sm md:text-base">
                           {(property as any).roomType || 
@@ -626,7 +594,7 @@ const PropertyDetailsPage = () => {
                         </p>
                       </div>
                       <div>
-                        <span className="text-gray-600 text-sm">Room Available</span>
+                        <span className="text-gray-600 text-sm">Rooms Available</span>
                         <p className="font-semibold text-sm md:text-base">
                           {(property as any).roomAvailable || '-'}
                         </p>
@@ -634,34 +602,7 @@ const PropertyDetailsPage = () => {
                     </>
                   ) : (
                     <>
-                      <div>
-                        <span className="text-gray-600 text-sm">BHK</span>
-                        <p className="font-semibold text-sm md:text-base">
-                          {(() => {
-                            console.log('PropertyDetailsPage Debug - BHK display data:', {
-                              bedrooms: property.bedrooms,
-                              roomType: (property as any).roomType,
-                              sellDetailsPropertyType: property.sellDetails?.propertyType,
-                            });
-                            if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
-                              return `${property.bedrooms}BHK`;
-                            }
-                            // Look for BHK in roomType first (where it's saved from form)
-                            if ((property as any).roomType) {
-                              const bhkRegex = /[1-9]BHK\+?/;
-                              const match = (property as any).roomType.match(bhkRegex);
-                              if (match) return match[0];
-                            }
-                            // Then look in sellDetails.propertyType
-                            if (property.sellDetails?.propertyType) {
-                              const bhkRegex = /[1-9]BHK\+?/;
-                              const match = property.sellDetails.propertyType.match(bhkRegex);
-                              if (match) return match[0];
-                            }
-                            return (property as any).roomType || property.sellDetails?.propertyType || '-';
-                          })()}
-                        </p>
-                      </div>
+                      
                       <div>
                         <span className="text-gray-600 text-sm">Property Type</span>
                         <p className="font-semibold text-sm md:text-base">{(property as any).homeType || property.sellDetails?.propertyType || property.propertyType || '-'}</p>

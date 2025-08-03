@@ -223,7 +223,7 @@ const AddListingPage = () => {
       
       // Home Details - Check the actual field names from RentForm
       if (!formData.roomType) newErrors.roomType = 'Please select a BHK.';
-      if (!formData.roomAvailable) newErrors.roomAvailable = 'Please select room available.';
+      if (!formData.roomAvailable) newErrors.roomAvailable = 'Please select Rooms Available.';
       if (!formData.furnishType) newErrors.furnishType = 'Please select a furnish type.';
       if (!formData.parking) newErrors.parking = 'Please select a parking type.';
       
@@ -411,7 +411,7 @@ const AddListingPage = () => {
           roomType: formData.roomType, // BHK (1BHK, 2BHK, etc.)
           furnishType: formData.furnishType, // Furnished status
           parking: formData.parking,
-          roomAvailable: formData.roomAvailable, // Room Available (1 Room, 2 Rooms, etc.)
+          roomAvailable: formData.roomAvailable, // Rooms Available (1 Room, 2 Rooms, etc.)
           // Move In details
           handoverDate: formData.handoverDate,
           isImmediate: formData.isImmediate,

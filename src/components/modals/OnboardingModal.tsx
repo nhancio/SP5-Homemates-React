@@ -25,6 +25,8 @@ const LOOKING_FOR = [
 
 const GENDERS = ['Male', 'Female', 'Other'];
 
+const PROFESSIONS = ['IT', 'Content Creation', 'Doctor', 'Student'];
+
 const onboardingSchema = Yup.object().shape({
   mobile: Yup.string()
     .matches(/^[6-9][0-9]{9}$/, 'Enter a valid 10-digit mobile number')
@@ -226,17 +228,18 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
         </div>
         <div className="mb-2 sm:mb-3">
           <label className="block text-sm font-medium mb-1" htmlFor="onboard-profession">Profession</label>
-          <input
+          <select
             id="onboard-profession"
-            type="text"
             value={profession}
             onChange={e => { setProfession(e.target.value); if (professionError) setProfessionError(''); }}
             className={`input w-full py-2 px-3 text-sm${professionError ? ' border-red-500 bg-red-50' : ''}`}
-            placeholder="Enter your profession"
             title="Profession"
             spellCheck={true}
             autoCorrect="on"
-          />
+          >
+            <option value="">Select Profession</option>
+            {PROFESSIONS.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
           {submitted && professionError && (
             <p className="text-red-600 text-xs sm:text-sm font-bold bg-red-100 border border-red-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">
               {professionError}

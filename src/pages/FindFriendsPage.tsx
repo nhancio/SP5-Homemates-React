@@ -342,111 +342,107 @@ const FindFriendsPage = () => {
             return (
               <div
                 key={user.id}
-                className="bg-gradient-to-br from-white via-white to-gray-50/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-gray-100/80 p-6 flex flex-col items-center transition-all duration-500 hover:scale-105 hover:shadow-3xl group relative animate-fade-in hover:border-pink-200 hover:bg-gradient-to-br hover:from-white hover:via-pink-50/50 hover:to-white transform hover:-translate-y-2"
+                className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col items-center transition-all duration-300 hover:shadow-xl hover:scale-105 group relative"
               >
                 {/* Avatar */}
                 {avatarUrl && avatarUrl !== '/images/default-avatar.png' ? (
                   <img
                     src={avatarUrl}
                     alt={name}
-                    className="w-20 h-20 rounded-full object-cover border-3 border-pink-200 mb-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-gray-200 mb-4 shadow-md"
                     onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/default-avatar.png'; }}
                   />
                 ) : (
-                  <div className={`w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold mb-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 ${color} border-3 border-white`}>
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center text-lg font-bold mb-4 shadow-md ${color} border-2 border-gray-200`}>
                     {getInitials(name)}
                   </div>
                 )}
                 
                 {/* Name */}
-                <div className="text-xl font-bold mb-4 text-center text-gray-900 group-hover:text-primary-700 transition-colors">
+                <div className="text-lg font-semibold mb-3 text-center text-gray-900">
                   {name}
                 </div>
                 
-                {/* Age */}
-                <div className="mb-3 flex items-center gap-2 text-gray-700 w-full">
-                  <div className="w-6 h-6 bg-gradient-to-r from-pink-400 to-red-400 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                    <User className="w-3.5 h-3.5 text-white" />
+                {/* Location - Combined Locality, City */}
+                <div className="mb-3 flex items-center gap-2 text-gray-600 w-full">
+                  <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <MapPin className="w-3 h-3 text-blue-600" />
                   </div>
-                  <span className="text-xs font-semibold truncate">{age ? `${age} years` : 'Age not set'}</span>
+                  <span className="text-sm font-medium truncate">
+                    {locality && city && city !== 'No City' 
+                      ? `${locality}, ${city}`
+                      : locality 
+                        ? locality 
+                        : city && city !== 'No City' 
+                          ? city 
+                          : 'Location not set'
+                    }
+                  </span>
                 </div>
                 
                 {/* Profession */}
-                <div className="mb-3 flex items-center gap-2 text-gray-700 w-full">
-                  <div className="w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                    <Briefcase className="w-3.5 h-3.5 text-white" />
+                {profession && (
+                  <div className="mb-3 flex items-center gap-2 text-gray-600 w-full">
+                    <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Briefcase className="w-3 h-3 text-purple-600" />
+                    </div>
+                    <span className="text-sm font-medium truncate">{profession}</span>
                   </div>
-                  <span className="text-xs font-semibold truncate">{profession || 'Profession not set'}</span>
-                </div>
-                
-                {/* City */}
-                <div className="mb-3 flex items-center gap-2 text-gray-700 w-full">
-                  <div className="w-6 h-6 bg-gradient-to-r from-green-400 to-teal-400 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                    <MapPin className="w-3.5 h-3.5 text-white" />
-                  </div>
-                  <span className="text-xs font-semibold truncate">{city !== 'No City' ? city : 'City not set'}</span>
-                </div>
-                
-                {/* Locality */}
-                <div className="mb-3 flex items-center gap-2 text-gray-700 w-full">
-                  <div className="w-6 h-6 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                    <MapPin className="w-3.5 h-3.5 text-white" />
-                  </div>
-                  <span className="text-xs font-semibold truncate">{locality || 'Locality not set'}</span>
-                </div>
+                )}
                  
                  {/* Housing Type */}
                  {user.housingType && (
-                   <div className="mb-3 flex items-center gap-2 text-gray-700 w-full">
-                     <div className="w-6 h-6 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                       <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                   <div className="mb-4 flex items-center gap-2 text-gray-600 w-full">
+                     <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                       <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 24 24">
                          <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6z"/>
                        </svg>
                      </div>
-                     <span className="text-xs font-semibold truncate capitalize">
+                     <span className="text-sm font-medium truncate capitalize">
                        {user.housingType === 'shared' ? 'Shared Home' : user.housingType === 'full' ? 'Full Home' : user.housingType}
                      </span>
                    </div>
                  )}
                 
-                {/* Preferences */}
+                {/* Interests/Preferences */}
                 {preferences && Array.isArray(preferences) && preferences.length > 0 && (
                   <div className="mb-4 w-full">
-                    <div className="flex items-center gap-2 mb-2 text-gray-700">
-                      <div className="w-6 h-6 bg-gradient-to-r from-red-400 to-pink-400 rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-                        <Heart className="w-3.5 h-3.5 text-white" />
-                      </div>
-                      <span className="text-xs font-semibold">Preferences</span>
-                    </div>
                     <div className="flex flex-wrap gap-1 justify-start">
-                      {preferences.map((pref, index) => (
-                        <span key={index} className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-700 border border-pink-200 shadow-sm hover:shadow-md transition-all duration-200">
+                      {preferences.slice(0, 3).map((pref, index) => (
+                        <span key={index} className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-pink-50 text-pink-600 border border-pink-200">
                           {pref}
                         </span>
                       ))}
+                      {preferences.length > 3 && (
+                        <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
+                          +{preferences.length - 3} more
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}
                 
                 {/* Communication Buttons */}
-                <div className="flex gap-3 mt-5 w-full justify-center flex-wrap">
+                <div className="flex gap-2 mt-auto w-full justify-center">
                   {phoneNumber && (
                     <>
                     <button
                       onClick={() => handleCall(phoneNumber)}
-                        className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 hover:from-green-500 hover:to-green-600 text-white rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl border-2 border-green-200"
+                        className="flex-1 max-w-[120px] h-10 bg-green-500 hover:bg-green-600 text-white rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
                       title="Call"
                     >
-                        <Phone className="w-5 h-5" />
+                        <Phone className="w-4 h-4 mr-1" />
+                        Call
                     </button>
                     <button
                       onClick={() => handleWhatsApp(phoneNumber, name)}
-                        className="w-12 h-12 bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#128C7E] hover:to-[#075E54] text-white rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg hover:shadow-xl border-2 border-[#25D366]"
+                        className="flex-1 max-w-[120px] h-10 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
                       title="WhatsApp"
                     >
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
                         </svg>
+                        Chat
                     </button>
                     </>
                   )}

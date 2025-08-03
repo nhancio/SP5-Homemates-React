@@ -61,33 +61,33 @@ const SavedPage = () => {
         <div className="flex space-x-2 mb-6">
           <button
             onClick={() => setActiveFilter('all')}
-            className={`px-4 py-2 rounded-full text-sm font-medium ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               activeFilter === 'all'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-primary-600 text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             All
           </button>
           <button
-            onClick={() => setActiveFilter('buy')}
-            className={`px-4 py-2 rounded-full text-sm font-medium ${
-              activeFilter === 'buy'
-                ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            Full Homes
-          </button>
-          <button
             onClick={() => setActiveFilter('rent')}
-            className={`px-4 py-2 rounded-full text-sm font-medium ${
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               activeFilter === 'rent'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-primary-600 text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
             Shared Homes
+          </button>
+          <button
+            onClick={() => setActiveFilter('buy')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              activeFilter === 'buy'
+                ? 'bg-primary-600 text-white shadow-md'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Full Homes
           </button>
         </div>
 
@@ -114,11 +114,17 @@ const SavedPage = () => {
               Start exploring and save properties that catch your interest.
             </p>
             <div className="flex justify-center gap-4">
-              <Link to="/buy" className="btn btn-primary">
-                Full Homes
-              </Link>
-              <Link to="/rent" className="btn btn-secondary">
+              <Link 
+                to="/rent" 
+                className="px-6 py-3 bg-primary-600 text-white rounded-full text-sm font-medium hover:bg-primary-700 transition-colors shadow-md"
+              >
                 Shared Homes
+              </Link>
+              <Link 
+                to="/buy" 
+                className="px-6 py-3 bg-primary-600 text-white rounded-full text-sm font-medium hover:bg-primary-700 transition-colors shadow-md"
+              >
+                Full Homes
               </Link>
             </div>
           </div>

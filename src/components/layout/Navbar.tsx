@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { PlusSquare, Heart, User, Home, Building } from 'lucide-react';
+import { Sparkles, Heart, User, Home, Building2, Plus } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
 const Navbar = () => {
@@ -39,9 +39,9 @@ const Navbar = () => {
               <div className="md:hidden relative">
                 <button 
                   onClick={handleLogin}
-                  className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors min-h-[44px]"
+                  className="flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 min-h-[44px] shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
-                  <User className="w-4 h-4" />
+                  <Sparkles className="w-4 h-4" />
                   <span>Login</span>
                 </button>
                 {loginError && (
@@ -55,68 +55,68 @@ const Navbar = () => {
             )}
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
+            <div className="hidden md:flex items-center space-x-3 lg:space-x-4">
               <Link 
                 to="/" 
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium ${
                   isActive('/') 
-                    ? 'bg-blue-100 text-blue-700 shadow-md' 
-                    : 'bg-gray-50 text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                    ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg transform scale-105' 
+                    : 'bg-white text-gray-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 hover:text-primary-700 border border-gray-200 hover:border-primary-300 shadow-sm hover:shadow-md'
                 }`}
               >
                 <Home className="w-5 h-5" />
-                <span className="font-medium">Home</span>
+                <span>Home</span>
               </Link>
               
               <div className="relative">
                 <Link 
                   to="/add-listing" 
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium ${
                     isActive('/add-listing') 
-                      ? 'bg-pink-100 text-pink-700 shadow-md' 
-                      : 'bg-gray-50 text-gray-700 hover:bg-pink-50 hover:text-pink-600'
+                      ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg transform scale-105' 
+                      : 'bg-white text-gray-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 hover:text-primary-700 border border-gray-200 hover:border-primary-300 shadow-sm hover:shadow-md'
                   }`}
                 >
-                  <PlusSquare className="w-5 h-5" />
-                  <span className="font-medium">Post</span>
+                  <Plus className="w-5 h-5" />
+                  <span>Post</span>
                 </Link>
                 {/* FREE Tag */}
-                <div className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-sm z-10">
+                <div className="absolute -top-2 -right-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg z-10 animate-pulse">
                   FREE
                 </div>
               </div>
               
               <Link 
                 to="/saved" 
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium ${
                   isActive('/saved') 
-                    ? 'bg-red-100 text-red-700 shadow-md' 
-                    : 'bg-gray-50 text-gray-700 hover:bg-red-50 hover:text-red-600'
+                    ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg transform scale-105' 
+                    : 'bg-white text-gray-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 hover:text-primary-700 border border-gray-200 hover:border-primary-300 shadow-sm hover:shadow-md'
                 }`}
               >
                 <Heart className="w-5 h-5" />
-                <span className="font-medium">Saved</span>
+                <span>Saved</span>
               </Link>
               
               {isAuthenticated ? (
                 <Link 
                   to="/profile" 
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium ${
                     isActive('/profile') 
-                      ? 'bg-purple-100 text-purple-700 shadow-md' 
-                      : 'bg-gray-50 text-gray-700 hover:bg-purple-50 hover:text-purple-600'
+                      ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg transform scale-105' 
+                      : 'bg-white text-gray-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 hover:text-primary-700 border border-gray-200 hover:border-primary-300 shadow-sm hover:shadow-md'
                   }`}
                 >
                   <User className="w-5 h-5" />
-                  <span className="font-medium">Profile</span>
+                  <span>Profile</span>
                 </Link>
               ) : (
                 <div className="relative">
                   <button 
                     onClick={handleLogin}
-                    className="flex items-center space-x-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition-colors font-medium min-h-[44px]"
+                    className="flex items-center space-x-2 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white px-4 py-2.5 rounded-xl transition-all duration-300 font-semibold min-h-[44px] shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
-                    <User className="w-5 h-5" />
+                    <Sparkles className="w-5 h-5" />
                     <span>Login</span>
                   </button>
                   {loginError && (

@@ -403,14 +403,14 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             {displayErrors.roomType && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomType}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Room Available</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Rooms Available</label>
             <select
               className={`input w-full${displayErrors.roomAvailable ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.roomAvailable || ''}
               onChange={e => setFormData({ ...formData, roomAvailable: e.target.value })}
               onBlur={() => markTouched('roomAvailable')}
             >
-              <option value="">Select Room Available</option>
+              <option value="">Select Rooms Available</option>
               <option value="1 Room">1 Room</option>
               <option value="2 Rooms">2 Rooms</option>
               <option value="3 Rooms">3 Rooms</option>
