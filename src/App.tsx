@@ -48,9 +48,9 @@ const router = createBrowserRouter([
       { path: 'users', element: <FindFriendsPage /> },
       { path: 'payment', element: <PaymentPage /> },
       { path: 'card-demo', element: <CardDemoPage /> },
-      { path: 'privacy_policy', element: <PrivacyPolicyPage /> },
-      { path: 'refund_policy', element: <RefundPolicyPage /> },
-      { path: 'TandC', element: <TermsAndConditionsPage /> },
+      { path: 'privacy-policy', element: <PrivacyPolicyPage /> },
+      { path: 'refund-policy', element: <RefundPolicyPage /> },
+      { path: 'terms-and-conditions', element: <TermsAndConditionsPage /> },
     ]
   }
 ]);

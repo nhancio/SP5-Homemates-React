@@ -49,7 +49,7 @@ const Layout = () => {
       <main className="flex-grow pt-16 pb-24 md:pb-0"> {/* Add bottom padding for mobile nav */}
         <Outlet />
       </main>
-      {location.pathname !== '/' && <Footer />}
+      <Footer />
       <MobileNav />
       <PWAInstallPrompt />
       {showPreferences && <PreferencesModal onClose={handleClosePreferences} />}

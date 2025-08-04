@@ -5,6 +5,7 @@ import HomeCategories from '../components/sections/HomeCategories';
 import HomeServices from '../components/sections/HomeServices';
 import Testimonials from '../components/sections/Testimonials';
 import MatchingDashboard from '../components/MatchingDashboard';
+
 import { useAppContext } from '../context/AppContext';
 import { ChevronDown, User as UserIcon, Briefcase, Loader, Phone, Star, MapPin, Heart } from 'lucide-react';
 import { findUserMatches, getCompatibilityInsights, UserProfile, mockUsers } from '../services/matching';
