@@ -10,6 +10,8 @@ import * as Yup from 'yup';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import InputMask from 'react-input-mask';
+import { useAppContext } from '../../context/AppContext';
+import { getUserCredits, useCredits, addCredits } from '../../services/credits';
 
 // Amenities options for shared home (rent) with icons
 const rentAmenitiesOptions = [
@@ -287,7 +289,49 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
   const [localErrors, setLocalErrors] = useState<any>({});
   // Only show errors after form submission
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const { user } = useAppContext();
+  const [credits, setCredits] = useState<number | null>(null);
+  const [loadingCredits, setLoadingCredits] = useState(true);
+  const [renewing, setRenewing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    async function fetchCredits() {
+      if (user) {
+        setLoadingCredits(true);
+        const res = await getUserCredits(user.id);
+        setCredits(res.credits);
+        setLoadingCredits(false);
+      }
+    }
+    fetchCredits();
+  }, [user]);
+
+  const handleRenewPremium = async () => {
+    if (!user) return;
+    setRenewing(true);
+    setError(null);
+    const success = await addCredits(user.id, 5);
+    if (success) {
+      setCredits(5);
+    } else {
+      setError('Failed to renew premium. Please try again.');
+    }
+    setRenewing(false);
+  };
+
+  // Wrap the onSubmit to decrement credits
+  const handleSubmit = async () => {
+    if (!user || !credits || credits <= 0) return;
+    const used = await useCredits(user.id, 'listing');
+    if (used) {
+      setCredits((c) => (c ? c - 1 : 0));
+      if (props.onSubmit) props.onSubmit();
+    } else {
+      setError('You have no credits left. Please renew premium.');
+    }
+  };
+  
   // Add missing variable definitions
   const roomTypeOptions = ['1BHK', '2BHK', '3BHK', '4BHK', '4+BHK'];
   const homeTypeOptions = ['Flat', 'Independent House', 'Villa', 'Gated Community'];
@@ -813,31 +857,38 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
       </div>
 
+      {/* Credits Display */}
+      <div className="mb-4 flex items-center gap-4">
+        <span className="font-semibold text-primary-700">Credits: {loadingCredits ? '...' : credits !== null ? `${credits}/5` : 'N/A'}</span>
+        {credits === 0 && (
+          <button
+            className="ml-4 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50"
+            onClick={handleRenewPremium}
+            disabled={renewing}
+          >
+            {renewing ? 'Renewing...' : 'Renew Premium'}
+          </button>
+        )}
+        {error && <span className="text-red-600 ml-4">{error}</span>}
+      </div>
+
       {/* Submit Button */}
       {!hideSubmitButton && (
         <div className="mt-8 pt-6 border-t border-gray-200">
           <button
             type="button"
             className="w-full bg-primary-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isSubmitting}
-            onClick={(e) => {
-              e.preventDefault();
-              console.log('Submit button clicked in RentForm');
-              console.log('onSubmit function:', onSubmit);
-              console.log('formData:', formData);
-              if (onSubmit) {
-                console.log('Calling onSubmit...');
-                onSubmit();
-              } else {
-                console.log('No onSubmit function provided');
-              }
-            }}
+            disabled={isSubmitting || credits === 0}
+            onClick={handleSubmit}
           >
             {isSubmitting ? 'Creating Listing...' : 'Submit Listing'}
           </button>
           <p className="text-xs text-gray-500 mt-2 text-center">
             By submitting, you agree to our terms and conditions
           </p>
+          {credits === 0 && (
+            <p className="text-red-600 text-center mt-2 font-bold">You have no credits left. Please renew premium to continue.</p>
+          )}
         </div>
       )}
     </>
@@ -846,6 +897,48 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
 
 export const SellForm: React.FC<AddListingFormsProps> = (props) => {
   const { formData, setFormData, images, setImages, handleImageUpload, removeImage, errors: propErrors, setErrors: propSetErrors, onSubmit, submitted = false, isSubmitting = false, hideSubmitButton = false } = props;
+  const { user } = useAppContext();
+  const [credits, setCredits] = useState<number | null>(null);
+  const [loadingCredits, setLoadingCredits] = useState(true);
+  const [renewing, setRenewing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchCredits() {
+      if (user) {
+        setLoadingCredits(true);
+        const res = await getUserCredits(user.id);
+        setCredits(res.credits);
+        setLoadingCredits(false);
+      }
+    }
+    fetchCredits();
+  }, [user]);
+
+  const handleRenewPremium = async () => {
+    if (!user) return;
+    setRenewing(true);
+    setError(null);
+    const success = await addCredits(user.id, 5);
+    if (success) {
+      setCredits(5);
+    } else {
+      setError('Failed to renew premium. Please try again.');
+    }
+    setRenewing(false);
+  };
+
+  // Wrap the onSubmit to decrement credits
+  const handleSubmit = async () => {
+    if (!user || !credits || credits <= 0) return;
+    const used = await useCredits(user.id, 'listing');
+    if (used) {
+      setCredits((c) => (c ? c - 1 : 0));
+      if (props.onSubmit) props.onSubmit();
+    } else {
+      setError('You have no credits left. Please renew premium.');
+    }
+  };
   
   // Add missing variable definitions
   const roomTypeOptions = ['1BHK', '2BHK', '3BHK', '4BHK', '4+BHK'];
@@ -1285,25 +1378,30 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
         <p className="text-xs text-gray-500 mt-1">This number will be displayed to interested users</p>
       </div>
 
+      {/* Credits Display */}
+      <div className="mb-4 flex items-center gap-4">
+        <span className="font-semibold text-primary-700">Credits: {loadingCredits ? '...' : credits !== null ? `${credits}/5` : 'N/A'}</span>
+        {credits === 0 && (
+          <button
+            className="ml-4 px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50"
+            onClick={handleRenewPremium}
+            disabled={renewing}
+          >
+            {renewing ? 'Renewing...' : 'Renew Premium'}
+          </button>
+        )}
+        {error && <span className="text-red-600 ml-4">{error}</span>}
+      </div>
+
       {/* Submit Button */}
       {!hideSubmitButton && (
         <div className="mt-8 pt-6 border-t border-gray-200">
           <button
             type="button"
-            onClick={() => {
-              console.log('=== SELLFORM SUBMIT BUTTON CLICKED ===');
-              console.log('onSubmit function:', onSubmit);
-              console.log('formData:', formData);
-              console.log('Calling onSubmit...');
-              if (onSubmit) {
-                onSubmit();
-              } else {
-                console.log('❌ onSubmit function is undefined!');
-              }
-            }}
-            disabled={isSubmitting}
+            onClick={handleSubmit}
+            disabled={isSubmitting || credits === 0}
             className={`w-full py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
-              isSubmitting
+              isSubmitting || credits === 0
                 ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-primary-600 hover:bg-primary-700'
             }`}
@@ -1313,6 +1411,9 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
           <p className="text-xs text-gray-500 mt-2 text-center">
             By submitting, you agree to our terms and conditions
           </p>
+          {credits === 0 && (
+            <p className="text-red-600 text-center mt-2 font-bold">You have no credits left. Please renew premium to continue.</p>
+          )}
         </div>
       )}
     </>

@@ -692,7 +692,7 @@ const ProfilePage = () => {
                           <div className="text-center mb-3">
                             <div className="flex items-center justify-center gap-2">
                               <CreditCard className="w-4 h-4 text-green-600" />
-                              <span className="text-sm md:text-base font-medium">{userCredits}/5 credits available</span>
+                              <span className="text-sm md:text-base font-medium">{userCredits} credits available</span>
                             </div>
                           </div>
                           <div className="text-xs text-gray-500 text-center">Use credits to contact property owners via call or WhatsApp.</div>
