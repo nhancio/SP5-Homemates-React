@@ -19,6 +19,20 @@ import {
 const HomePage: React.FC = () => {
   const { user } = useAppContext();
   const [showContent, setShowContent] = useState(false);
+
+  // Lock scroll until 'What's inside?' is clicked
+  useEffect(() => {
+    if (!showContent) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    // Clean up on unmount
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showContent]);
+
   // Revert animation state
 
   // Always scroll to the Smart Matching Algorithm section

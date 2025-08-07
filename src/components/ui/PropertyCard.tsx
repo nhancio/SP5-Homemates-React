@@ -166,39 +166,39 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 
       // Get the correct BHK type based on listing type
       let bhkType = '-';
-      
+      let availableRooms = undefined;
+      let flatType = undefined;
       if (listingType === 'rent') {
-        // For rent listings, try to get BHK from various sources
+        // For rent listings, try to get BHK and available rooms
+        availableRooms = property.rentDetails?.roomDetails?.availableRooms;
+        flatType = property.rentDetails?.roomDetails?.flatType;
         if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
           bhkType = `${property.bedrooms}BHK`;
+        } else if (flatType) {
+          bhkType = flatType;
         } else if (property.rentDetails?.roomDetails?.availability) {
-          // Try to extract BHK from availability field
           const bhkRegex = /[1-9]BHK\+?/;
           const match = property.rentDetails.roomDetails.availability.match(bhkRegex);
           if (match) {
             bhkType = match[0];
           }
         } else if ((property.rentDetails?.roomDetails as any)?.roomType) {
-          // Try to extract BHK from roomType field first (where BHK data is saved)
           const bhkRegex = /[1-9]BHK\+?/;
           const match = (property.rentDetails?.roomDetails as any).roomType.match(bhkRegex);
           if (match) {
             bhkType = match[0];
           }
         } else if (property.sellDetails?.propertyType) {
-          // Try to extract BHK from propertyType
           const bhkRegex = /[1-9]BHK\+?/;
           const match = property.sellDetails.propertyType.match(bhkRegex);
           if (match) {
             bhkType = match[0];
           }
         } else if ((property as any).flatType) {
-          // Try to extract BHK from flatType field
           const bhkRegex = /[1-9]BHK\+?/;
           const match = (property as any).flatType.match(bhkRegex);
           if (match) bhkType = match[0];
         } else {
-          // Try to extract BHK from various fields
           const bhkRegex = /[1-9]BHK\+?/;
           const candidates = [
             property.type,
@@ -220,26 +220,22 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
           bhkType = `${property.bedrooms}BHK`;
         } else if ((property as any).roomType) {
-          // Try to extract BHK from roomType field first (where BHK data is saved)
           const bhkRegex = /[1-9]BHK\+?/;
           const match = (property as any).roomType.match(bhkRegex);
           if (match) {
             bhkType = match[0];
           }
         } else if (property.sellDetails?.propertyType) {
-          // Try to extract BHK from propertyType
           const bhkRegex = /[1-9]BHK\+?/;
           const match = property.sellDetails.propertyType.match(bhkRegex);
           if (match) {
             bhkType = match[0];
           }
         } else if ((property as any).flatType) {
-          // Try to extract BHK from flatType field
           const bhkRegex = /[1-9]BHK\+?/;
           const match = (property as any).flatType.match(bhkRegex);
           if (match) bhkType = match[0];
         } else {
-          // Try to extract BHK from various fields
           const bhkRegex = /[1-9]BHK\+?/;
           const candidates = [
             property.type,
@@ -258,13 +254,27 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         }
       }
       
-      const shareText = 
+      // Compose shareText
+      let shareText = '';
+      if (listingType === 'rent') {
+        // Shared home: show Type: {x} Room(s) available in {BHK}
+        shareText = 
+`Hey, check this property on Homemates!
+Name: ${property.address?.buildingName || 'Property'}
+${amountLabel}: ₹${formatCurrency(amount)}
+Type: ${availableRooms ? `${availableRooms} Room(s) available in ${bhkType}` : bhkType}
+Location: ${property.address?.locality}, ${property.address?.city}
+Link: ${url}`;
+      } else {
+        // Full home: keep current logic
+        shareText = 
 `Hey, check this property on Homemates!
 Name: ${property.address?.buildingName || 'Property'}
 ${amountLabel}: ₹${formatCurrency(amount)}
 Type: ${bhkType}
 Location: ${property.address?.locality}, ${property.address?.city}
 Link: ${url}`;
+      }
 
       if (navigator.share) {
         await navigator.share({

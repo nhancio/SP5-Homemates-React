@@ -84,6 +84,13 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
     }
   }, [city, markets]);
 
+  // Add a helper to extract city from a string like 'Madhapur, Hyderabad'
+  function extractCityFromLocation(input: string): string {
+    if (!input) return '';
+    const parts = input.split(',');
+    return parts[parts.length - 1].trim();
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
@@ -272,7 +279,14 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
           <select
             id="onboard-city"
             value={city}
-            onChange={e => { setCity(e.target.value); setLocality(''); if (cityError) setCityError(''); }}
+            onChange={e => {
+              // If the value contains a comma, extract the city
+              const val = e.target.value;
+              const extractedCity = extractCityFromLocation(val);
+              setCity(extractedCity);
+              setLocality('');
+              if (cityError) setCityError('');
+            }}
             className={`input w-full py-2 px-3 text-sm${cityError ? ' border-red-500 bg-red-50' : ''}`}
             disabled={marketsLoading}
             title="City"
@@ -294,7 +308,18 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
           <select
             id="onboard-locality"
             value={locality}
-            onChange={e => { setLocality(e.target.value); if (localityError) setLocalityError(''); }}
+            onChange={e => {
+              const val = e.target.value;
+              // If the value contains a comma, extract city and set it
+              if (val.includes(',')) {
+                const extractedCity = extractCityFromLocation(val);
+                setCity(extractedCity);
+                setLocality(val.split(',')[0].trim());
+              } else {
+                setLocality(val);
+              }
+              if (localityError) setLocalityError('');
+            }}
             className={`input w-full py-2 px-3 text-sm${localityError ? ' border-red-500 bg-red-50' : ''}`}
             disabled={!city || marketsLoading}
             title="Locality"
