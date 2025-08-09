@@ -4,6 +4,21 @@ import { collection, addDoc, getDocs, query, where, doc, getDoc, updateDoc, dele
 import { db } from '../config/firebase';
 import { getAuth } from 'firebase/auth';
 
+// Helper to safely parse numeric amounts from numbers or strings
+function parseAmount(value: any): number | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value > 0 ? value : null;
+  }
+  if (typeof value === 'string') {
+    const cleaned = value.replace(/[^0-9]/g, '');
+    if (!cleaned) return null;
+    const num = Number(cleaned);
+    return Number.isFinite(num) && num > 0 ? num : null;
+  }
+  return null;
+}
+
 // Collection references
 const rentCollection = collection(db, 'r');
 const sellCollection = collection(db, 's');
@@ -109,6 +124,19 @@ export async function createListing(type: 'rent' | 'sell', data: RentListing | S
     console.log('Data keys:', Object.keys(data));
     console.log('Has rentDetails:', 'rentDetails' in data);
     console.log('Has sellDetails:', 'sellDetails' in data);
+
+    // Additional validation: enforce minimum amount 1000
+    if (type === 'rent') {
+      const rent = parseAmount((data as any)?.rentDetails?.costs?.rent);
+      if (rent === null || rent < 1000) {
+        throw new Error('Minimum monthly rent must be ₹1000 or above');
+      }
+    } else {
+      const price = parseAmount((data as any)?.sellDetails?.price ?? (data as any)?.price);
+      if (price === null || price < 1000) {
+        throw new Error('Minimum price must be ₹1000 or above');
+      }
+    }
 
     // Clean data before saving
     const cleanData = {
@@ -228,8 +256,16 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
 
     console.log('Transformed listings before client-side filtering:', listings);
 
-    // Apply all client-side filters
-    let filteredListings = listings;
+    // Apply base validation filter: drop listings with invalid or too-low amounts
+    let filteredListings = listings.filter(listing => {
+      if (type === 'rent') {
+        const rent = parseAmount(listing?.rentDetails?.costs?.rent);
+        return rent !== null && rent >= 1000;
+      } else {
+        const price = parseAmount(listing?.sellDetails?.price ?? listing?.price);
+        return price !== null && price >= 1000;
+      }
+    });
 
     if (filters) {
       console.log('Applying client-side filters:', filters);

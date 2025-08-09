@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Phone, Share2, Heart, Building, MapPin, Calendar, Car, Home, KeyRound, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug, X, Check, ChevronLeft, ChevronRight, Pencil, Trash, Eye, Dumbbell, Sun } from 'lucide-react';
+import { Phone, Share2, Heart, Building, MapPin, Car, Home, BedDouble, Snowflake, Shield, Refrigerator, WashingMachine, Plug, X, ChevronLeft, ChevronRight, Pencil, Trash, Eye, Dumbbell, Sun } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import 'swiper/css';
@@ -9,15 +9,14 @@ import { useAppContext } from '../../context/AppContext';
 import { Property } from '../../types/property';
 import { formatCurrency } from '../../utils/format';
 import { useNavigate } from 'react-router-dom';
-import { getShareableUrl } from '../../utils/share';
-import { updateUserFavorites } from '../../utils/userFavorites';
+// getShareableUrl is dynamically imported when needed
 
 interface PropertyCardProps {
   property: Property;
   listingType?: 'rent' | 'buy';
   variant?: 'small' | 'large';
   onClick?: () => void;
-  showBadge?: boolean;
+  showBadge?: boolean; // kept for backward compat; not used
   showManageActions?: boolean; // NEW PROP
   onDelete?: (id: string) => void; // NEW PROP: callback after delete
 }
@@ -62,12 +61,82 @@ function getMatchScore(userPrefs: string[] = [], propertyPrefs: string[] = []) {
   return { matches, total: userPrefs.length, percent };
 }
 
+// Helper: robust BHK extraction across various fields and formats
+function extractBhkLabel(property: any, listingType: 'rent' | 'buy'): string {
+  // Prefer explicit bedrooms number
+  if (typeof property?.bedrooms === 'number' && property.bedrooms > 0) {
+    return `${property.bedrooms}BHK`;
+  }
+
+  // Regex: match e.g. "1 BHK", "2bhk", "3BHK+", case-insensitive, allow spaces
+  const bhkRegex = /\b(\d+)\s*BHK\+?\b/i;
+
+  const pickFromString = (val?: string) => {
+    if (typeof val !== 'string') return undefined;
+    const match = val.match(bhkRegex);
+    return match ? match[0].toUpperCase().replace(/\s+/g, '') : undefined;
+  };
+
+  if (listingType === 'rent') {
+    // rentDetails.roomDetails.availability or flatType/roomType may carry BHK
+    const availability = property?.rentDetails?.roomDetails?.availability as string | undefined;
+    const flatType = (property?.rentDetails?.roomDetails as any)?.flatType as string | undefined;
+    const roomType = (property?.rentDetails?.roomDetails as any)?.roomType as string | undefined;
+    const fromAvailability = pickFromString(availability);
+    if (fromAvailability) return fromAvailability;
+    const fromFlatType = pickFromString(flatType);
+    if (fromFlatType) return fromFlatType;
+    const fromRoomType = pickFromString(roomType);
+    if (fromRoomType) return fromRoomType;
+  } else {
+    // buy listings often store in roomType/homeType/sellDetails.propertyType
+    const fromRoomType = pickFromString((property as any)?.roomType);
+    if (fromRoomType) return fromRoomType;
+    const fromHomeType = pickFromString((property as any)?.homeType);
+    if (fromHomeType) return fromHomeType;
+    const fromSellPropertyType = pickFromString(property?.sellDetails?.propertyType);
+    if (fromSellPropertyType) return fromSellPropertyType;
+  }
+
+  // Generic fallbacks: search common text fields
+  const candidates: Array<string | undefined> = [
+    property?.type,
+    property?.title,
+    property?.description,
+    (property as any)?.propertyType,
+    (property as any)?.flatType,
+    (property as any)?.roomType,
+  ];
+  for (const val of candidates) {
+    const picked = pickFromString(val);
+    if (picked) return picked;
+  }
+
+  return 'BHK';
+}
+
+// Helper: safe numeric parsing for rent/price (avoid NaN and 0 leaks)
+function parseAmount(value: any): number | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value > 0 ? value : null;
+  }
+  if (typeof value === 'string') {
+    // Remove currency symbols, commas, spaces, and trailing '/-'
+    const cleaned = value.replace(/[^0-9]/g, '');
+    if (!cleaned) return null;
+    const num = Number(cleaned);
+    return Number.isFinite(num) && num > 0 ? num : null;
+  }
+  return null;
+}
+
 const PropertyCard: React.FC<PropertyCardProps> = ({ 
   property, 
   listingType = 'rent',
   variant = 'small',
   onClick,
-  showBadge = true,
+  showBadge: _showBadge = true,
   showManageActions = false, // NEW PROP
   onDelete, // NEW PROP: callback after delete
 }) => {
@@ -77,7 +146,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const swiperRef = useRef<any>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImage, setModalImage] = useState<string | null>(null);
-  const [modalImageIndex, setModalImageIndex] = useState<number>(0);
+  const [_, setModalImageIndex] = useState<number>(0);
 
   const handleImageLoad = () => setIsLoaded(true);
 
@@ -153,105 +222,25 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       const url = getShareableUrl(property.id, type);
       
       // Get the correct price/rent based on listing type
-      let amount = 0;
+      let amount: number | null = null;
       let amountLabel = 'Price';
       if (listingType === 'rent') {
-        amount = property.rentDetails?.costs?.rent || 0;
+        amount = parseAmount(property.rentDetails?.costs?.rent);
         amountLabel = 'Rent';
       } else {
         // For sell listings, try to get price from sellDetails first
-        amount = property.sellDetails?.price || property.price || 0;
+        amount = parseAmount(property.sellDetails?.price ?? (property as any)?.price);
         amountLabel = 'Price';
       }
 
       // Get the correct BHK type based on listing type
-      let bhkType = '-';
+      let bhkType = extractBhkLabel(property, listingType);
       let availableRooms = undefined;
-      let flatType = undefined;
       if (listingType === 'rent') {
         // For rent listings, try to get BHK and available rooms
         availableRooms = property.rentDetails?.roomDetails?.availableRooms;
-        flatType = property.rentDetails?.roomDetails?.flatType;
-        if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
-          bhkType = `${property.bedrooms}BHK`;
-        } else if (flatType) {
-          bhkType = flatType;
-        } else if (property.rentDetails?.roomDetails?.availability) {
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = property.rentDetails.roomDetails.availability.match(bhkRegex);
-          if (match) {
-            bhkType = match[0];
-          }
-        } else if ((property.rentDetails?.roomDetails as any)?.roomType) {
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property.rentDetails?.roomDetails as any).roomType.match(bhkRegex);
-          if (match) {
-            bhkType = match[0];
-          }
-        } else if (property.sellDetails?.propertyType) {
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = property.sellDetails.propertyType.match(bhkRegex);
-          if (match) {
-            bhkType = match[0];
-          }
-        } else if ((property as any).flatType) {
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property as any).flatType.match(bhkRegex);
-          if (match) bhkType = match[0];
-        } else {
-          const bhkRegex = /[1-9]BHK\+?/;
-          const candidates = [
-            property.type,
-            property.title,
-            property.description,
-            (property as any).propertyType,
-            (property as any).roomType,
-            (property as any).flatType,
-          ];
-          for (const val of candidates) {
-            if (typeof val === 'string' && bhkRegex.test(val)) {
-              bhkType = val.match(bhkRegex)![0];
-              break;
-            }
-          }
-        }
       } else {
-        // For sell listings, try to get BHK from various sources
-        if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
-          bhkType = `${property.bedrooms}BHK`;
-        } else if ((property as any).roomType) {
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property as any).roomType.match(bhkRegex);
-          if (match) {
-            bhkType = match[0];
-          }
-        } else if (property.sellDetails?.propertyType) {
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = property.sellDetails.propertyType.match(bhkRegex);
-          if (match) {
-            bhkType = match[0];
-          }
-        } else if ((property as any).flatType) {
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property as any).flatType.match(bhkRegex);
-          if (match) bhkType = match[0];
-        } else {
-          const bhkRegex = /[1-9]BHK\+?/;
-          const candidates = [
-            property.type,
-            property.title,
-            property.description,
-            (property as any).propertyType,
-            (property as any).roomType,
-            (property as any).flatType,
-          ];
-          for (const val of candidates) {
-            if (typeof val === 'string' && bhkRegex.test(val)) {
-              bhkType = val.match(bhkRegex)![0];
-              break;
-            }
-          }
-        }
+        // bhkLabel already handles buy case
       }
       
       // Compose shareText
@@ -261,7 +250,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         shareText = 
 `Hey, check this property on Homemates!
 Name: ${property.address?.buildingName || 'Property'}
-${amountLabel}: ₹${formatCurrency(amount)}
+${amountLabel}: ${amount ? `₹${formatCurrency(amount)}` : 'On request'}
 Type: ${availableRooms ? `${availableRooms} Room(s) available in ${bhkType}` : bhkType}
 Location: ${property.address?.locality}, ${property.address?.city}
 Link: ${url}`;
@@ -270,7 +259,7 @@ Link: ${url}`;
         shareText = 
 `Hey, check this property on Homemates!
 Name: ${property.address?.buildingName || 'Property'}
-${amountLabel}: ₹${formatCurrency(amount)}
+${amountLabel}: ${amount ? `₹${formatCurrency(amount)}` : 'On request'}
 Type: ${bhkType}
 Location: ${property.address?.locality}, ${property.address?.city}
 Link: ${url}`;
@@ -339,6 +328,11 @@ Link: ${url}`;
     }
     return getMatchScore(user.preferences, propertyPrefs);
   }, [user, property, listingType]);
+
+  // Derived displays
+  const bhkLabel = React.useMemo(() => extractBhkLabel(property, listingType), [property, listingType]);
+  const rentAmount = React.useMemo(() => parseAmount(property?.rentDetails?.costs?.rent), [property]);
+  const priceAmount = React.useMemo(() => parseAmount(property?.sellDetails?.price ?? (property as any)?.price), [property]);
 
   // --- Management Actions ---
   const handleEdit = (e: React.MouseEvent) => {
@@ -417,32 +411,10 @@ Link: ${url}`;
             </SwiperSlide>
           ))}
         </Swiper>
-        {/* Property Type Badge */}
+        {/* BHK Badge */}
         <div className="absolute top-3 left-3 z-10">
           <span className="bg-primary-600 text-white text-xs font-semibold px-2 py-1 rounded">
-            {(() => {
-              // 1. Try bedrooms
-              if (typeof property.bedrooms === 'number' && property.bedrooms > 0) {
-                return `${property.bedrooms}BHK`;
-              }
-              // 2. Try common BHK string fields
-              const bhkRegex = /[1-9]BHK\+?/;
-              const candidates = [
-                property.rentDetails && property.rentDetails.roomDetails && (property.rentDetails.roomDetails as any).flatType,
-                (property as any).flatType,
-                property.type,
-                property.type,
-                property.title,
-                property.description,
-              ];
-              for (const val of candidates) {
-                if (typeof val === 'string' && bhkRegex.test(val)) {
-                  return val.match(bhkRegex)![0];
-                }
-              }
-              // 3. Fallback
-              return '-';
-            })()}
+            {bhkLabel}
           </span>
         </div>
         {/* Management Actions (Edit/Delete/View) */}
@@ -493,11 +465,9 @@ Link: ${url}`;
                 : (property.address?.buildingName || 'Property')}
             </h3>
             <span className="text-base md:text-lg font-extrabold text-primary-600">
-              ₹{formatCurrency(
-                listingType === 'rent' 
-                  ? (property.rentDetails?.costs?.rent || 0)
-                  : (property.sellDetails?.price || 0)
-              )}
+              {listingType === 'rent'
+                ? (rentAmount ? `₹${formatCurrency(rentAmount)}` : 'Rent on request')
+                : (priceAmount ? `₹${formatCurrency(priceAmount)}` : 'Price on request')}
             </span>
           </div>
           <div className="text-xs text-primary-600 font-semibold mb-1 flex items-center">
@@ -694,75 +664,10 @@ Link: ${url}`;
             </SwiperSlide>
           ))}
         </Swiper>
-                 {/* BHK Badge */}
+         {/* BHK Badge */}
          <div className="absolute top-4 left-4 z-10">
            <span className="bg-primary-600 text-white text-sm font-semibold px-3 py-1.5 rounded-full">
-             {(() => {
-               // For buy listings (full homes)
-               if (listingType === 'buy') {
-                 // 1. Try bedrooms field
-                 if (typeof property.bedrooms === 'number' && property.bedrooms > 0) {
-                   return `${property.bedrooms}BHK`;
-                 }
-                 // 2. Try roomType (BHK from form) - this is where the BHK data is saved
-                 if ((property as any).roomType) {
-                   const bhkRegex = /[1-9]BHK\+?/;
-                   const match = (property as any).roomType.match(bhkRegex);
-                   if (match) return match[0];
-                 }
-                 // 3. Try homeType (Home Type from form)
-                 if ((property as any).homeType) {
-                   const bhkRegex = /[1-9]BHK\+?/;
-                   const match = (property as any).homeType.match(bhkRegex);
-                   if (match) return match[0];
-                 }
-                 // 4. Try sellDetails.propertyType
-                 if (property.sellDetails?.propertyType) {
-                   const bhkRegex = /[1-9]BHK\+?/;
-                   const match = property.sellDetails.propertyType.match(bhkRegex);
-                   if (match) return match[0];
-                 }
-                 // 5. Try other BHK fields
-                 const bhkRegex = /[1-9]BHK\+?/;
-                 const candidates = [
-                   property.type,
-                   property.title,
-                   property.description,
-                 ];
-                 for (const val of candidates) {
-                   if (typeof val === 'string' && bhkRegex.test(val)) {
-                     return val.match(bhkRegex)![0];
-                   }
-                 }
-               }
-               // For rent listings (shared homes)
-               else if (listingType === 'rent') {
-                 // 1. Try bedrooms field
-                 if (typeof property.bedrooms === 'number' && property.bedrooms > 0) {
-                   return `${property.bedrooms}BHK`;
-                 }
-                 // 2. Try rentDetails.roomDetails.availability
-                 if (property.rentDetails?.roomDetails?.availability) {
-                   const bhkRegex = /[1-9]BHK\+?/;
-                   const match = property.rentDetails.roomDetails.availability.match(bhkRegex);
-                   if (match) return match[0];
-                 }
-                 // 3. Try other BHK fields
-                 const bhkRegex = /[1-9]BHK\+?/;
-                 const candidates = [
-                   property.type,
-                   property.title,
-                   property.description,
-                 ];
-                 for (const val of candidates) {
-                   if (typeof val === 'string' && bhkRegex.test(val)) {
-                     return val.match(bhkRegex)![0];
-                   }
-                 }
-               }
-               // Fallback
-               return '-';
-             })()}
+             {bhkLabel}
            </span>
          </div>
         {/* Favorite Button */}
@@ -798,11 +703,9 @@ Link: ${url}`;
             </div>
             <div className="text-right">
               <div className="text-xl md:text-2xl font-extrabold text-primary-600">
-                ₹{formatCurrency(
-                  listingType === 'rent' 
-                    ? (property.rentDetails?.costs?.rent || 0)
-                    : (property.sellDetails?.price || property.price || 0)
-                )}
+                {listingType === 'rent'
+                  ? (rentAmount ? `₹${formatCurrency(rentAmount)}` : 'Rent on request')
+                  : (priceAmount ? `₹${formatCurrency(priceAmount)}` : 'Price on request')}
               </div>
               <div className="text-sm text-gray-500">
                 {listingType === 'rent' ? 'per month' : 'total price'}

@@ -435,7 +435,7 @@ const AddListingPage = () => {
             },
             // Rental Costs
             costs: {
-              rent: formData.rentDetails?.costs?.rent || 0,
+              rent: Math.max(0, Number(formData.rentDetails?.costs?.rent || 0)),
               maintenance: formData.rentDetails?.costs?.maintenance || 0,
               securityDeposit: formData.rentDetails?.costs?.securityDeposit || 0,
               setupCost: formData.rentDetails?.costs?.setupCost || 0,

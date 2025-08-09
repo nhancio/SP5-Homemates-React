@@ -359,7 +359,7 @@ const EditListingPage = () => {
             },
             amenities: formData.rentDetails.amenities,
             costs: {
-              rent: Number(formData.rentDetails.costs.rent) || 0,
+              rent: Math.max(0, Number(formData.rentDetails.costs.rent) || 0),
               maintenance: Number(formData.rentDetails.costs.maintenance) || 0,
               securityDeposit: Number(formData.rentDetails.costs.securityDeposit) || 0,
               setupCost: Number(formData.rentDetails.costs.setupCost) || 0,

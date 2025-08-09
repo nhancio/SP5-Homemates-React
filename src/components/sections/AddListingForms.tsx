@@ -634,7 +634,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               type="number"
               className={`input w-full${displayErrors.rent ? ' border-pink-500 bg-pink-50' : ''}`}
               placeholder="Enter rent amount"
-              min={0}
+              min={1000}
               value={formData.rentDetails?.costs?.rent || ''}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 const rent = Number(e.target.value);
@@ -1218,7 +1218,7 @@ export const SellForm: React.FC<AddListingFormsProps> = (props) => {
                   price: e.target.value 
                 } 
               })}
-              min={0}
+              min={1000}
               onBlur={() => markTouched('price')}
             />
             {displayErrors.price && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full">

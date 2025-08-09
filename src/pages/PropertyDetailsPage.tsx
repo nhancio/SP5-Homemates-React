@@ -1,20 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getPropertyById } from '../services/listings';
-import { Phone, Share2, Heart, Building, Loader, ArrowLeft, Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Phone, Share2, Heart, Building, Loader, ArrowLeft, Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { formatCurrency } from '../utils/format';
 import { getShareableUrl } from '../utils/share';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 
-const SERVICES = [
-  { key: 'maid', label: 'Maid' },
-  { key: 'cook', label: 'Cook' },
-  { key: 'laundry', label: 'Laundry' },
-  { key: 'wifi', label: 'WiFi' },
-  { key: 'security', label: 'Security' },
-];
+// Helper: safe amount parsing similar to PropertyCard
+function parseAmount(value: any): number | null {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) && value > 0 ? value : null;
+  }
+  if (typeof value === 'string') {
+    const cleaned = value.replace(/[^0-9]/g, '');
+    if (!cleaned) return null;
+    const num = Number(cleaned);
+    return Number.isFinite(num) && num > 0 ? num : null;
+  }
+  return null;
+}
+
+// const SERVICES = [...]; // not used currently
 
 const PropertyDetailsPage = () => {
   const { propertyId } = useParams();
@@ -23,7 +32,7 @@ const PropertyDetailsPage = () => {
   const [property, setProperty] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { favoriteProperties, toggleFavorite, isAuthenticated, login, loginError, clearLoginError, user, filters } = useAppContext();
+  const { favoriteProperties, toggleFavorite, isAuthenticated, login, loginError, clearLoginError, user } = useAppContext();
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImage, setModalImage] = useState<string | null>(null);
   const [modalImageIndex, setModalImageIndex] = useState<number>(0);
@@ -31,74 +40,7 @@ const PropertyDetailsPage = () => {
   // Determine listing type from URL
   const listingType = location.pathname.startsWith('/rent') ? 'rent' : 'sell';
 
-  // Helper to get applied filters as chips
-  const getAppliedFilters = () => {
-    const activeType = filters.activeType || listingType;
-    const f = filters[activeType] || {};
-    const chips: { label: string, value: string }[] = [];
-    // Define possible fields for each filter type
-    const fieldMap: Record<string, Array<{ key: string, label: string, isCurrency?: boolean }>> = {
-      fullHome: [
-        { key: 'city', label: 'City' },
-        { key: 'locality', label: 'Locality' },
-        { key: 'propertyType', label: 'Type' },
-        { key: 'furnishingType', label: 'Furnishing' },
-        { key: 'bhk', label: 'BHK' },
-        { key: 'bathrooms', label: 'Bathrooms' },
-        { key: 'minPrice', label: 'Min Price', isCurrency: true },
-        { key: 'maxPrice', label: 'Max Price', isCurrency: true },
-        { key: 'minSqft', label: 'Min Sqft' },
-        { key: 'maxSqft', label: 'Max Sqft' },
-        { key: 'amenities', label: 'Amenities' },
-        { key: 'availability', label: 'Availability' },
-        { key: 'availableFrom', label: 'Available From' },
-        { key: 'ageOfProperty', label: 'Age' },
-        { key: 'possessionStatus', label: 'Possession' },
-      ],
-      rent: [
-        { key: 'city', label: 'City' },
-        { key: 'locality', label: 'Locality' },
-        { key: 'propertyType', label: 'Type' },
-        { key: 'furnishingType', label: 'Furnishing' },
-        { key: 'bhk', label: 'BHK' },
-        { key: 'bathrooms', label: 'Bathrooms' },
-        { key: 'minRent', label: 'Min Rent', isCurrency: true },
-        { key: 'maxRent', label: 'Max Rent', isCurrency: true },
-        { key: 'minSqft', label: 'Min Sqft' },
-        { key: 'maxSqft', label: 'Max Sqft' },
-        { key: 'amenities', label: 'Amenities' },
-        { key: 'availability', label: 'Availability' },
-        { key: 'availableFrom', label: 'Available From' },
-        { key: 'ageOfProperty', label: 'Age' },
-        { key: 'possessionStatus', label: 'Possession' },
-      ],
-      buy: [
-        { key: 'city', label: 'City' },
-        { key: 'locality', label: 'Locality' },
-        { key: 'propertyType', label: 'Type' },
-        { key: 'bhk', label: 'BHK' },
-        { key: 'bathrooms', label: 'Bathrooms' },
-        { key: 'minPrice', label: 'Min Price', isCurrency: true },
-        { key: 'maxPrice', label: 'Max Price', isCurrency: true },
-        { key: 'minSqft', label: 'Min Sqft' },
-        { key: 'maxSqft', label: 'Max Sqft' },
-        { key: 'ageOfProperty', label: 'Age' },
-        { key: 'possessionStatus', label: 'Possession' },
-      ],
-    };
-    const fields = fieldMap[activeType] || [];
-    fields.forEach(({ key, label, isCurrency }) => {
-      const value = (f as any)[key];
-      if (value !== undefined && value !== '' && value !== null) {
-        if (isCurrency) {
-          chips.push({ label, value: `₹${value}` });
-        } else {
-          chips.push({ label, value });
-        }
-      }
-    });
-    return chips;
-  };
+  // getAppliedFilters not used on details page
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -198,13 +140,13 @@ const PropertyDetailsPage = () => {
       console.log('Generated URL:', url);
       
       // Get the correct price/rent based on listing type
-      let amount = 0;
+      let amount: number | null = null;
       let amountLabel = 'Price';
       if (listingType === 'rent') {
-        amount = property.rentDetails?.costs?.rent || 0;
+        amount = parseAmount(property.rentDetails?.costs?.rent);
         amountLabel = 'Rent';
       } else {
-        amount = property.sellDetails?.price || property.price || 0;
+        amount = parseAmount(property.sellDetails?.price || property.price);
         amountLabel = 'Price';
       }
       console.log('Amount:', amount);
@@ -301,7 +243,7 @@ const PropertyDetailsPage = () => {
       const shareText = 
  `Hey, check this property on Homemates!
  Name: ${property.address?.buildingName || 'Property'}
- ${amountLabel}: ₹${formatCurrency(amount)}
+ ${amountLabel}: ${amount ? `₹${formatCurrency(amount)}` : 'On request'}
  Type: ${bhkType}
  ${listingType === 'rent' ? `Rooms Available: ${(property as any).roomAvailable || '-'}` : ''}
  Location: ${property.address?.locality}, ${property.address?.city}
@@ -507,12 +449,24 @@ const PropertyDetailsPage = () => {
               {/* Basic Info */}
               <div className="p-4 md:p-6 border-b">
                 <div className="flex items-center text-xl md:text-2xl font-bold text-primary-600 mb-2">
-                  ₹{formatCurrency(
-                    listingType === 'rent' 
-                      ? (property.rentDetails?.costs?.rent || 0) 
-                      : (property.sellDetails?.price || property.price || 0)
-                  )}
-                  {listingType === 'rent' && <span className="text-sm text-gray-500 ml-1">/month</span>}
+                  {(() => {
+                    const rentAmt = parseAmount(property.rentDetails?.costs?.rent);
+                    const priceAmt = parseAmount(property.sellDetails?.price || property.price);
+                    if (listingType === 'rent') {
+                      return rentAmt ? (
+                        <>
+                          ₹{formatCurrency(rentAmt)}<span className="text-sm text-gray-500 ml-1">/month</span>
+                        </>
+                      ) : (
+                        <span>Rent on request</span>
+                      );
+                    }
+                    return priceAmt ? (
+                      <>₹{formatCurrency(priceAmt)}</>
+                    ) : (
+                      <span>Price on request</span>
+                    );
+                  })()}
                 </div>
                 <h1 className="text-xl md:text-2xl font-bold mb-2">
                   {property.address?.buildingName}
@@ -637,23 +591,38 @@ const PropertyDetailsPage = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <div>
                       <span className="text-gray-600 text-sm">Monthly Rent</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.rentDetails?.costs?.rent || 0)} <span className="text-xs text-gray-500">/month</span></p>
+                      <p className="font-semibold text-sm md:text-base">{(() => {
+                        const v = parseAmount(property.rentDetails?.costs?.rent);
+                        return v ? `₹${formatCurrency(v)} /month` : '-';
+                      })()}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Maintenance</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.rentDetails?.costs?.maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
+                      <p className="font-semibold text-sm md:text-base">{(() => {
+                        const v = parseAmount(property.rentDetails?.costs?.maintenance);
+                        return v ? `₹${formatCurrency(v)} /month` : '-';
+                      })()}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Security Deposit</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.rentDetails?.costs?.securityDeposit || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">{(() => {
+                        const v = parseAmount(property.rentDetails?.costs?.securityDeposit);
+                        return v ? `₹${formatCurrency(v)}` : '-';
+                      })()}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Setup Cost</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.rentDetails?.costs?.setupCost || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">{(() => {
+                        const v = parseAmount(property.rentDetails?.costs?.setupCost);
+                        return v ? `₹${formatCurrency(v)}` : '-';
+                      })()}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Brokerage</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.rentDetails?.costs?.brokerage || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">{(() => {
+                        const v = parseAmount(property.rentDetails?.costs?.brokerage);
+                        return v ? `₹${formatCurrency(v)}` : '-';
+                      })()}</p>
                     </div>
                   </div>
                 </div>
@@ -666,19 +635,31 @@ const PropertyDetailsPage = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                     <div>
                       <span className="text-gray-600 text-sm">Price</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.price || property.price || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">{(() => {
+                        const v = parseAmount(property.sellDetails?.price || property.price);
+                        return v ? `₹${formatCurrency(v)}` : '-';
+                      })()}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Maintenance</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.maintenance || (property as any).maintenance || 0)} <span className="text-xs text-gray-500">/month</span></p>
+                      <p className="font-semibold text-sm md:text-base">{(() => {
+                        const v = parseAmount(property.sellDetails?.maintenance || (property as any).maintenance);
+                        return v ? `₹${formatCurrency(v)} /month` : '-';
+                      })()}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Security Deposit</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.securityDeposit || (property as any).securityDeposit || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">{(() => {
+                        const v = parseAmount(property.sellDetails?.securityDeposit || (property as any).securityDeposit);
+                        return v ? `₹${formatCurrency(v)}` : '-';
+                      })()}</p>
                     </div>
                     <div>
                       <span className="text-gray-600 text-sm">Brokerage</span>
-                      <p className="font-semibold text-sm md:text-base">₹{formatCurrency(property.sellDetails?.brokerage || (property as any).brokerage || 0)}</p>
+                      <p className="font-semibold text-sm md:text-base">{(() => {
+                        const v = parseAmount(property.sellDetails?.brokerage || (property as any).brokerage);
+                        return v ? `₹${formatCurrency(v)}` : '-';
+                      })()}</p>
                     </div>
                   </div>
                 </div>
