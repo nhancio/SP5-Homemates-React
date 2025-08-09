@@ -82,7 +82,12 @@ const BUY_SLIDER_MARKS = {
 };
 
 const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTypes, listingType, variant = 'compact', children }) => {
-  const { filters, setFilters } = useAppContext();
+  const { filters, setFilters, user } = useAppContext();
+  const [cityLocked, setCityLocked] = useState<boolean>(!!user?.city);
+
+  useEffect(() => {
+    setCityLocked(!!user?.city);
+  }, [user?.city]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
@@ -406,10 +411,19 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">City</label>
-          <select className="input w-full bg-gray-50 border-gray-200 focus:border-primary-500 focus:ring-primary-100" value={currentFilters.city || ''} onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); console.log('[PropertyFilters] setFilters called (city):', { ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); }} disabled={marketsLoading}>
-            <option value="">Select City</option>
-            {cities.map(city => <option key={city} value={city}>{city}</option>)}
-          </select>
+          <div className="flex gap-2 items-center">
+            <select className="input w-full bg-gray-50 border-gray-200 focus:border-primary-500 focus:ring-primary-100" value={currentFilters.city || ''} onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); console.log('[PropertyFilters] setFilters called (city):', { ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); }} disabled={marketsLoading || (cityLocked && !!user?.city)}>
+              <option value="">Select City</option>
+              {cities.map(city => <option key={city} value={city}>{city}</option>)}
+            </select>
+            {!!user?.city && (
+              cityLocked ? (
+                <button type="button" className="text-xs px-2 py-1 rounded border text-primary-600 border-primary-200 hover:bg-primary-50" onClick={() => setCityLocked(false)}>Change city</button>
+              ) : (
+                <button type="button" className="text-xs px-2 py-1 rounded border text-primary-600 border-primary-200 hover:bg-primary-50" onClick={() => { setFilters({ ...filters, [listingType]: { ...filters[listingType], city: user.city || '', locality: '' } }); setCityLocked(true); }}>Use my city</button>
+              )
+            )}
+          </div>
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">Locality</label>
@@ -728,15 +742,24 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({ propertyTypes, bhkTyp
                   <div className="space-y-3">
                     <div>
                       <span className="text-xs text-gray-500 font-medium mb-2 block">City</span>
-                      <select 
+                       <div className="flex gap-2 items-center">
+                       <select 
                         className="w-full px-3 py-2 lg:py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100 focus:bg-white transition-all" 
                         value={currentFilters.city || ''} 
-                        onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); console.log('[PropertyFilters] setFilters called (city):', { ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); }} 
-                        disabled={marketsLoading}
+                         onChange={e => { setFilters({ ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); console.log('[PropertyFilters] setFilters called (city):', { ...filters, [listingType]: { ...filters[listingType], city: e.target.value, locality: '' } }); }} 
+                         disabled={marketsLoading || (cityLocked && !!user?.city)}
                       >
                         <option value="">Select City</option>
                         {cities.map(city => <option key={city} value={city}>{city}</option>)}
                       </select>
+                        {!!user?.city && (
+                          cityLocked ? (
+                            <button type="button" className="text-xs px-2 py-1 rounded border text-primary-600 border-primary-200 hover:bg-primary-50" onClick={() => setCityLocked(false)}>Change city</button>
+                          ) : (
+                            <button type="button" className="text-xs px-2 py-1 rounded border text-primary-600 border-primary-200 hover:bg-primary-50" onClick={() => { setFilters({ ...filters, [listingType]: { ...filters[listingType], city: user.city || '', locality: '' } }); setCityLocked(true); }}>Use my city</button>
+                          )
+                        )}
+                       </div>
                     </div>
                     <div>
                       <span className="text-xs text-gray-500 font-medium mb-2 block">Locality</span>

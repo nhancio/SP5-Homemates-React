@@ -10,6 +10,7 @@ import { useAppContext } from '../context/AppContext';
 const BuyPropertiesPage = () => {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { filters, isAuthenticated, login, loginError, clearLoginError } = useAppContext();
@@ -37,6 +38,13 @@ const BuyPropertiesPage = () => {
         listingType: (l as any).listingType
       })));
       setProperties(listings);
+      // Fallback: if no results for user's city, suggest other cities
+      if ((filters.buy.city || '').trim() && listings.length === 0) {
+        const broader = await getListings('sell', { ...filters.buy, city: '' });
+        setSuggestions(broader);
+      } else {
+        setSuggestions([]);
+      }
       console.log('=== BUY PROPERTIES DEBUG END ===');
     } catch (err) {
       console.error('=== BUY PROPERTIES ERROR ===');
@@ -79,6 +87,17 @@ const BuyPropertiesPage = () => {
 
   // Filter properties by search query
   const filteredProperties = properties.filter((property) => {
+    if (!debouncedQuery) return true;
+    const q = debouncedQuery.toLowerCase();
+    return (
+      (property.address?.buildingName?.toLowerCase().includes(q)) ||
+      (property.address?.locality?.toLowerCase().includes(q)) ||
+      (property.address?.city?.toLowerCase().includes(q)) ||
+      (property.description?.toLowerCase().includes(q))
+    );
+  });
+
+  const filteredSuggestions = suggestions.filter((property) => {
     if (!debouncedQuery) return true;
     const q = debouncedQuery.toLowerCase();
     return (
@@ -173,13 +192,32 @@ const BuyPropertiesPage = () => {
           ) : (
             <>
               {filteredProperties.length === 0 ? (
-                <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
-                  <Building className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">No properties found</h3>
-                  <p className="text-gray-600">
-                    Try adjusting your search or check back later for new listings
-                  </p>
-                </div>
+                suggestions.length === 0 ? (
+                  <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
+                    <Building className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">No properties found</h3>
+                    <p className="text-gray-600">Try adjusting your search or check back later for new listings</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-center py-10 mb-6 bg-primary-50 border border-primary-100 rounded-xl">
+                      <h3 className="text-lg font-semibold text-primary-700">No properties in {filters.buy.city}. Showing other cities instead.</h3>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
+                      {filteredSuggestions.map(property => (
+                        <div key={property.id} className="min-w-[300px]">
+                          <PropertyCard
+                            property={property}
+                            listingType={property.rentDetails ? 'rent' : 'buy'}
+                            variant="small"
+                            onClick={() => handlePropertyClick(property)}
+                            showBadge={false}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
                   {filteredProperties.map(property => (

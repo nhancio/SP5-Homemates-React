@@ -15,6 +15,7 @@ const RentPropertiesPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { filters, setFilters, isAuthenticated, login, loginError, clearLoginError, user } = useAppContext();
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const [userGender, setUserGender] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,6 +75,13 @@ const RentPropertiesPage = () => {
       })));
       setProperties(listings);
       setCurrentPage(1); // Reset to first page on new fetch
+      // Fallback: if city set and no results, fetch broader suggestions
+      if ((filters.rent.city || '').trim() && listings.length === 0) {
+        const broader = await getListings('rent', { ...filters.rent, city: '' });
+        setSuggestions(broader);
+      } else {
+        setSuggestions([]);
+      }
       console.log('=== RENT PROPERTIES DEBUG END ===');
     } catch (err) {
       console.error('=== RENT PROPERTIES ERROR ===');
@@ -190,13 +198,31 @@ const RentPropertiesPage = () => {
           ) : (
             <>
               {filteredProperties.length === 0 ? (
-                <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
-                  <Building className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-xl font-semibold mb-2">No properties found</h3>
-                  <p className="text-gray-600">
-                    Try adjusting your search or check back later for new listings.
-                  </p>
-                </div>
+                suggestions.length === 0 ? (
+                  <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
+                    <Building className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">No properties found</h3>
+                    <p className="text-gray-600">Try adjusting your search or check back later for new listings.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-center py-10 mb-6 bg-primary-50 border border-primary-100 rounded-xl">
+                      <h3 className="text-lg font-semibold text-primary-700">No properties in {filters.rent.city}. Showing other cities instead.</h3>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">
+                      {suggestions.map(property => (
+                        <div key={property.id} className="min-w-[300px]">
+                          <PropertyCard
+                            property={property}
+                            listingType="rent"
+                            variant="small"
+                            onClick={() => handlePropertyClick(property.id)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )
               ) : (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-center">

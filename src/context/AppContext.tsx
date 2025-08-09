@@ -125,8 +125,8 @@ const defaultFilters: Filters = {
     propertyType: '',
     bhk: '',
     bathrooms: '',
-    priceMin: 1000,
-    priceMax: 100000,
+    priceMin: 0,
+    priceMax: 0,
     minSqft: 0,
     maxSqft: 10000,
     ageOfProperty: '',
@@ -390,6 +390,26 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
 
     loadFavorites();
   }, [user]);
+
+  // Auto-apply user's city to filters so they only see properties from their city by default
+  useEffect(() => {
+    const userCity = user?.city?.trim();
+    if (!userCity) return;
+    setFilters((prev) => {
+      // If already matching, avoid re-render
+      const alreadyApplied =
+        prev.rent.city === userCity &&
+        prev.buy.city === userCity &&
+        prev.fullHome.city === userCity;
+      if (alreadyApplied) return prev;
+      return {
+        ...prev,
+        rent: { ...prev.rent, city: userCity, locality: '' },
+        buy: { ...prev.buy, city: userCity, locality: '' },
+        fullHome: { ...prev.fullHome, city: userCity, locality: '' },
+      };
+    });
+  }, [user?.city]);
 
   const value: AppContextType = {
     user,

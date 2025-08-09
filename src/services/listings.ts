@@ -174,6 +174,9 @@ export async function getListings(type: 'rent' | 'sell', filters?: any) {
       // Add status filter
       baseQuery = query(baseQuery, where('status', '==', 'active'));
 
+      // Avoid applying city/locality at query level to prevent exact-match issues across inconsistent data casing
+      // We will filter by city/locality in a case-insensitive way after fetching (see below)
+
       // Add other filters if they exist
       if (filters) {
         if (filters.propertyType) {
