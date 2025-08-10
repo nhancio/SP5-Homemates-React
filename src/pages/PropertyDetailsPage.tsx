@@ -7,6 +7,7 @@ import { formatCurrency } from '../utils/format';
 import { getShareableUrl } from '../utils/share';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
+import { getBhkLabel } from '../utils/property';
 
 // Helper: safe amount parsing similar to PropertyCard
 function parseAmount(value: any): number | null {
@@ -152,115 +153,22 @@ const PropertyDetailsPage = () => {
       console.log('Amount:', amount);
       
       // Get the correct BHK type based on listing type
-      let bhkType = '-';
-      if (listingType === 'rent') {
-        // For rent listings, try to get BHK from various sources
-        if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
-          bhkType = `${property.bedrooms}BHK`;
-        } else if (property.rentDetails?.roomDetails?.availability) {
-          // Try to extract BHK from availability field
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = property.rentDetails.roomDetails.availability.match(bhkRegex);
-          if (match) bhkType = match[0];
-        } else if ((property.rentDetails?.roomDetails as any)?.roomType) {
-          // Try to extract BHK from roomType field
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property.rentDetails?.roomDetails as any).roomType.match(bhkRegex);
-          if (match) bhkType = match[0];
-        } else if ((property.rentDetails?.roomDetails as any)?.flatType) {
-          // Try to extract BHK from flatType field (if it exists)
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property.rentDetails?.roomDetails as any).flatType?.match(bhkRegex);
-          if (match) bhkType = match[0];
-        } else {
-          // Try to extract BHK from various fields
-          const bhkRegex = /[1-9]BHK\+?/;
-          const candidates = [
-            property.type,
-            property.title,
-            property.description,
-            (property as any).propertyType,
-            (property as any).homeType,
-            (property as any).roomType,
-            (property as any).flatType,
-          ];
-          for (const val of candidates) {
-            if (typeof val === 'string' && bhkRegex.test(val)) {
-              bhkType = val.match(bhkRegex)![0];
-              break;
-            }
-          }
-        }
-      } else {
-        // For sell listings, try to get BHK from various sources
-        if (property.bedrooms && typeof property.bedrooms === 'number' && property.bedrooms > 0) {
-          bhkType = `${property.bedrooms}BHK`;
-        } else if ((property as any).roomType) {
-          // Try to extract BHK from roomType field first (where BHK data is saved)
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property as any).roomType.match(bhkRegex);
-          if (match) {
-            bhkType = match[0];
-          }
-        } else if ((property as any).homeType) {
-          // Try to extract BHK from homeType field
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property as any).homeType.match(bhkRegex);
-          if (match) bhkType = match[0];
-        } else if (property.sellDetails?.propertyType) {
-          // Try to extract BHK from propertyType
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = property.sellDetails.propertyType.match(bhkRegex);
-          if (match) {
-            bhkType = match[0];
-          }
-        } else if ((property as any).flatType) {
-          // Try to extract BHK from flatType field
-          const bhkRegex = /[1-9]BHK\+?/;
-          const match = (property as any).flatType.match(bhkRegex);
-          if (match) bhkType = match[0];
-        } else {
-          // Try to extract BHK from various fields
-          const bhkRegex = /[1-9]BHK\+?/;
-          const candidates = [
-            property.type,
-            property.title,
-            property.description,
-            (property as any).propertyType,
-            (property as any).homeType,
-            (property as any).roomType,
-            (property as any).flatType,
-          ];
-          for (const val of candidates) {
-            if (typeof val === 'string' && bhkRegex.test(val)) {
-              bhkType = val.match(bhkRegex)![0];
-              break;
-            }
-          }
-        }
-      }
+      const bhkType = getBhkLabel(property, listingType === 'sell' ? 'buy' : (listingType as 'rent' | 'buy')) || '-';
       
-      const shareText = 
- `Hey, check this property on Homemates!
- Name: ${property.address?.buildingName || 'Property'}
- ${amountLabel}: ${amount ? `₹${formatCurrency(amount)}` : 'On request'}
- Type: ${bhkType}
- ${listingType === 'rent' ? `Rooms Available: ${(property as any).roomAvailable || '-'}` : ''}
- Location: ${property.address?.locality}, ${property.address?.city}
- Link: ${url}`;
+      const shareTitle = 'Check out this property on Homemates';
+      const shareBody = `Name: ${property.address?.buildingName || 'Property'}
+${amountLabel}: ${amount ? `₹${formatCurrency(amount)}` : 'On request'}
+Type: ${bhkType}
+${listingType === 'rent' ? `Rooms Available: ${(property as any).roomAvailable || '-'}` : ''}
+Location: ${property.address?.locality}, ${property.address?.city}
+Link: ${url}`;
 
-      console.log('Share text:', shareText);
+      console.log('Share text:', `${shareTitle} -> ${shareBody}`);
 
       if (navigator.share) {
-        console.log('Using navigator.share');
-        await navigator.share({
-          title: 'Check out this property on Homemates',
-          text: shareText,
-        });
-        console.log('Share successful');
+        await navigator.share({ title: shareTitle, text: shareBody });
       } else {
-        console.log('Using clipboard fallback');
-        await navigator.clipboard.writeText(shareText);
+        await navigator.clipboard.writeText(`${shareTitle}\n\n${shareBody}`);
         alert('Property details copied to clipboard!');
       }
     } catch (err) {

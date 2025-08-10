@@ -9,6 +9,7 @@ import { useAppContext } from '../../context/AppContext';
 import { Property } from '../../types/property';
 import { formatCurrency } from '../../utils/format';
 import { useNavigate } from 'react-router-dom';
+import { getBhkLabel } from '../../utils/property';
 // getShareableUrl is dynamically imported when needed
 
 interface PropertyCardProps {
@@ -243,22 +244,21 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         // bhkLabel already handles buy case
       }
       
-      // Compose shareText
-      let shareText = '';
+      // Compose share content
+      const shareTitle = 'Check out this property on Homemates';
+      let shareBody = '';
       if (listingType === 'rent') {
         // Shared home: show Type: {x} Room(s) available in {BHK}
-        shareText = 
-`Hey, check this property on Homemates!
-Name: ${property.address?.buildingName || 'Property'}
+        shareBody = 
+`Name: ${property.address?.buildingName || 'Property'}
 ${amountLabel}: ${amount ? `₹${formatCurrency(amount)}` : 'On request'}
 Type: ${availableRooms ? `${availableRooms} Room(s) available in ${bhkType}` : bhkType}
 Location: ${property.address?.locality}, ${property.address?.city}
 Link: ${url}`;
       } else {
         // Full home: keep current logic
-        shareText = 
-`Hey, check this property on Homemates!
-Name: ${property.address?.buildingName || 'Property'}
+        shareBody = 
+`Name: ${property.address?.buildingName || 'Property'}
 ${amountLabel}: ${amount ? `₹${formatCurrency(amount)}` : 'On request'}
 Type: ${bhkType}
 Location: ${property.address?.locality}, ${property.address?.city}
@@ -266,12 +266,10 @@ Link: ${url}`;
       }
 
       if (navigator.share) {
-        await navigator.share({
-          title: 'Check out this property on Homemates',
-          text: shareText,
-        });
+        await navigator.share({ title: shareTitle, text: shareBody });
       } else {
-        await navigator.clipboard.writeText(shareText);
+        const clipboardText = `${shareTitle}\n\n${shareBody}`;
+        await navigator.clipboard.writeText(clipboardText);
         alert('Property details copied to clipboard!');
       }
     } catch (err) {
@@ -330,7 +328,7 @@ Link: ${url}`;
   }, [user, property, listingType]);
 
   // Derived displays
-  const bhkLabel = React.useMemo(() => extractBhkLabel(property, listingType), [property, listingType]);
+  const bhkLabel = React.useMemo(() => getBhkLabel(property as any, listingType) || extractBhkLabel(property, listingType), [property, listingType]);
   const rentAmount = React.useMemo(() => parseAmount(property?.rentDetails?.costs?.rent), [property]);
   const priceAmount = React.useMemo(() => parseAmount(property?.sellDetails?.price ?? (property as any)?.price), [property]);
 
