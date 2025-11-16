@@ -1,30 +1,42 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
 interface CategoryCardProps {
   title: string;
-  icon: React.ReactNode;
   description: string;
   link: string;
+  image: string;
 }
 
-const CategoryCard: React.FC<CategoryCardProps> = ({ title, icon, description, link }) => {
+const CategoryCard = ({ title, description, link, image }: CategoryCardProps) => {
   return (
     <Link 
       to={link}
-      className="group bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full"
+      className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col h-full min-h-[440px] md:min-h-[440px]"
     >
-      <div className="p-2 rounded-full bg-primary-50 text-primary-600 w-fit mb-3 group-hover:bg-primary-100 transition-colors duration-300">
-        {icon}
-      </div>
-      <h3 className="text-base font-semibold mb-1 group-hover:text-primary-600 transition-colors duration-300">
-        {title}
-      </h3>
-      <p className="text-gray-600 text-xs mb-3 flex-grow">{description}</p>
-      <div className="flex items-center text-primary-600 text-sm font-medium">
-        <span className="mr-1">Explore</span>
-        <ArrowRight className="w-3 h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-500 group-hover:scale-110"
+        style={{
+          backgroundImage: `url('${image}')`
+        }}
+      />
+      
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 group-hover:from-black/90 group-hover:via-black/60 transition-all duration-300" />
+      
+      {/* Content */}
+      <div className="relative z-10 flex flex-col justify-end h-full p-6 text-white">
+        <h3 className="text-xl md:text-2xl font-bold mb-2 group-hover:text-primary-300 transition-colors duration-300">
+          {title}
+        </h3>
+        <p className="text-sm md:text-base text-gray-200 mb-4 line-clamp-2">
+          {description}
+        </p>
+        <div className="flex items-center text-white text-sm md:text-base font-semibold group-hover:text-primary-300 transition-colors duration-300">
+          <span className="mr-2">Explore</span>
+          <ArrowRight className="w-4 h-4 transform group-hover:translate-x-2 transition-transform duration-300" />
+        </div>
       </div>
     </Link>
   );

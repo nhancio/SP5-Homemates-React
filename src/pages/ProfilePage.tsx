@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil, Trash, MoreVertical, Eye, Edit, Star, Info, UserCheck, Users, MessageCircle, Briefcase, Share2 } from 'lucide-react';
+import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil, Trash, MoreVertical, Eye, Edit, Star, Info, UserCheck, Users, MessageCircle, Briefcase, Headphones, Shield } from 'lucide-react';
 import { Dialog } from '@headlessui/react';
 import { useAppContext } from '../context/AppContext';
 import { getDoc, doc, updateDoc } from 'firebase/firestore';
@@ -579,46 +579,8 @@ const ProfilePage = () => {
                       {displayName}
                     </h1>
                   </div>
-                  {/* Share and Logout Buttons - Top Right */}
+                  {/* Logout Button - Top Right */}
                   <div className="flex items-center gap-2 flex-shrink-0 md:mt-4">
-                    <button
-                      onClick={() => {
-                        const shareData = {
-                          title: 'My Homemates Profile',
-                          text: 'Check out my Homemates profile!',
-                          url: window.location.origin + '/profile'
-                        };
-                        
-                        if (navigator.share) {
-                          navigator.share(shareData)
-                            .catch((error) => {
-                              console.log('Error sharing:', error);
-                              // Fallback to copying to clipboard
-                              navigator.clipboard.writeText(window.location.origin + '/profile')
-                                .then(() => {
-                                  alert('Profile link copied to clipboard!');
-                                })
-                                .catch(() => {
-                                  alert('Profile link: ' + window.location.origin + '/profile');
-                                });
-                            });
-                        } else {
-                          // Fallback for browsers that don't support Web Share API
-                          navigator.clipboard.writeText(window.location.origin + '/profile')
-                            .then(() => {
-                              alert('Profile link copied to clipboard!');
-                            })
-                            .catch(() => {
-                              alert('Profile link: ' + window.location.origin + '/profile');
-                            });
-                        }
-                      }}
-                      className="btn flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 bg-primary-600 hover:bg-primary-700 text-white"
-                    >
-                      <Share2 className="w-4 h-4" /> 
-                      <span className="hidden sm:inline">Share Profile</span>
-                      <span className="sm:hidden">Share</span>
-                    </button>
                     <button
                       onClick={logout}
                       className="btn flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-200 bg-red-600 hover:bg-red-700 text-white"
@@ -629,167 +591,150 @@ const ProfilePage = () => {
                     </button>
                   </div>
                 </div>
-                <div className="mt-4 space-y-2">
-                  <p className="flex items-center justify-center md:justify-start text-gray-600">
-                    <Mail className="w-4 h-4 mr-2 flex-shrink-0" />
-                    <span className="text-center md:text-left">{displayEmail}</span>
-                  </p>
-                  {displayPhone && (
-                    <p className="flex items-center justify-center md:justify-start text-gray-600">
-                      <Phone className="w-4 h-4 mr-2 flex-shrink-0" />
-                      <span className="text-center md:text-left">{displayPhone}</span>
-                    </p>
-                  )}
-                  {displayCity && (
-                    <p className="flex items-center justify-center md:justify-start text-gray-600">
-                      <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
-                      <span className="text-center md:text-left">{displayCity}</span>
-                    </p>
-                  )}
-                  {displayAge && (
-                    <p className="flex items-center justify-center md:justify-start text-gray-600">
-                      <User className="w-4 h-4 mr-2 flex-shrink-0" />
-                      <span className="text-center md:text-left">Age: {displayAge}</span>
-                    </p>
-                  )}
-                  {displayGender && (
-                    <p className="flex items-center justify-center md:justify-start text-gray-600">
-                      <UserCheck className="w-4 h-4 mr-2 flex-shrink-0" />
-                      <span className="text-center md:text-left">Gender: {displayGender}</span>
-                    </p>
-                  )}
-                  {displayProfession && (
-                    <p className="flex items-center justify-center md:justify-start text-gray-600">
-                      <Briefcase className="w-4 h-4 mr-2 flex-shrink-0" />
-                      <span className="text-center md:text-left">Profession: {displayProfession}</span>
-                    </p>
-                  )}
-                  {/* Premium/Verified badge */}
-                  {isPremium && (
-                    <p className="flex items-center justify-center md:justify-start text-primary-600 font-semibold">
-                      <Star className="w-4 h-4 mr-2 flex-shrink-0" />
-                      <span className="text-center md:text-left">Premium Member</span>
-                    </p>
-                  )}
+                {/* Compact Info Grid */}
+                <div className="mt-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {displayEmail && (
+                      <div className="flex items-center text-gray-600 text-sm">
+                        <Mail className="w-4 h-4 mr-2 flex-shrink-0 text-primary-600" />
+                        <span className="truncate">{displayEmail}</span>
+                      </div>
+                    )}
+                    {displayPhone && (
+                      <div className="flex items-center text-gray-600 text-sm">
+                        <Phone className="w-4 h-4 mr-2 flex-shrink-0 text-primary-600" />
+                        <span>{displayPhone}</span>
+                      </div>
+                    )}
+                    {displayCity && (
+                      <div className="flex items-center text-gray-600 text-sm">
+                        <MapPin className="w-4 h-4 mr-2 flex-shrink-0 text-primary-600" />
+                        <span>{displayCity}</span>
+                      </div>
+                    )}
+                    {displayProfession && (
+                      <div className="flex items-center text-gray-600 text-sm">
+                        <Briefcase className="w-4 h-4 mr-2 flex-shrink-0 text-primary-600" />
+                        <span>{displayProfession}</span>
+                      </div>
+                    )}
+                    {displayAge && displayGender && (
+                      <div className="flex items-center text-gray-600 text-sm">
+                        <User className="w-4 h-4 mr-2 flex-shrink-0 text-primary-600" />
+                        <span>{displayAge} • {displayGender}</span>
+                      </div>
+                    )}
+                    {isPremium && (
+                      <div className="flex items-center text-primary-600 font-semibold text-sm">
+                        <Star className="w-4 h-4 mr-2 flex-shrink-0" />
+                        <span>VIP Tenant</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                {/* Upgrade to Premium - Full Width */}
-                <div className="mt-6">
-                  <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 md:p-6">
-                    <div className="text-center mb-4">
-                      <p className="text-base md:text-lg mb-2">Plan: <span className="bg-gray-200 text-primary-700 px-3 py-1 rounded-full text-sm font-medium">Free</span></p>
-                    </div>
-                    <div className="text-center">
-                      <h3 className="text-lg md:text-xl font-bold mb-4">Upgrade to Premium</h3>
-                      
-                      {/* Credits and Conditions Side by Side */}
-                      <div className="flex flex-col md:flex-row gap-6 mb-6">
-                        {/* Your Credits - Left Side */}
-                        <div className="flex-1 bg-white rounded-lg p-4 border border-gray-200">
-                          <h4 className="text-base md:text-lg font-semibold mb-3 flex items-center justify-center">
-                            <CreditCard className="w-4 h-4 md:w-5 md:h-5 mr-2 text-primary-600" />
-                            Your Credits
-                          </h4>
-                          <div className="text-center mb-3">
-                            <div className="flex items-center justify-center gap-2">
-                              <CreditCard className="w-4 h-4 text-green-600" />
-                              <span className="text-sm md:text-base font-medium">{userCredits} credits available</span>
+                {/* Upgrade to VIP Tenant - Full Width */}
+                {!isPremium && (
+                  <div className="mt-6">
+                    <div className="bg-gradient-to-br from-primary-50 to-white border-2 border-primary-200 rounded-lg p-4 md:p-6 shadow-lg">
+                      <div className="text-center mb-4">
+                        <p className="text-base md:text-lg mb-2">Current Plan: <span className="bg-gray-200 text-primary-700 px-3 py-1 rounded-full text-sm font-medium">Free</span></p>
+                      </div>
+                      <div className="text-center">
+                        <h3 className="text-lg md:text-xl font-bold mb-4 flex items-center justify-center gap-2">
+                          <Award className="w-5 h-5 md:w-6 md:h-6 text-primary-600" />
+                          Upgrade to VIP Tenant
+                        </h3>
+                        
+                        {/* VIP Features */}
+                        <div className="mb-6 space-y-3">
+                          <div className="flex items-start gap-3 p-3 bg-white rounded-lg">
+                            <Users className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                            <div className="text-left">
+                              <span className="font-semibold text-sm md:text-base">25 Contacts</span>
+                              <p className="text-xs text-gray-600">Contact up to 25 property owners</p>
                             </div>
                           </div>
-                          <div className="text-xs text-gray-500 text-center">Use credits to contact property owners via call or WhatsApp.</div>
+                          <div className="flex items-start gap-3 p-3 bg-white rounded-lg">
+                            <Headphones className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                            <div className="text-left">
+                              <span className="font-semibold text-sm md:text-base">Priority Support</span>
+                              <p className="text-xs text-gray-600">Faster response times</p>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-3 p-3 bg-white rounded-lg">
+                            <UserCheck className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                            <div className="text-left">
+                              <span className="font-semibold text-sm md:text-base">Dedicated Relationship Manager</span>
+                              <p className="text-xs text-gray-600">Personal assistance assigned</p>
+                            </div>
+                          </div>
                         </div>
                         
-                        {/* Premium Features - Right Side */}
-                        <div className="flex-1">
-                          <h4 className="text-base md:text-lg font-semibold mb-3 text-center">Premium Benefits</h4>
-                          <ul className="text-left space-y-2">
-                            <li className="flex items-start gap-3">
-                              <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
-                              <span className="text-sm md:text-base"><span className="font-semibold">Priority Support</span> for faster assistance</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                              <span className="text-green-600 text-lg mt-0.5 flex-shrink-0">✔</span>
-                              <span className="text-sm md:text-base"><span className="font-semibold">Exclusive AI Features</span> for better matching</span>
-                            </li>
-                          </ul>
+                        <div className="flex flex-col items-center gap-2 mb-6">
+                          <div className="flex items-center gap-3">
+                            <span className="line-through text-gray-400 text-lg md:text-xl">₹9,999</span>
+                            <span className="text-3xl md:text-4xl font-bold text-primary-700">₹499</span>
+                          </div>
+                          <p className="text-xs text-gray-500">Limited time offer</p>
                         </div>
-                      </div>
-                      <div className="flex flex-col items-center gap-2 mb-6">
-                        <div className="flex items-center gap-3">
-                          <span className="line-through text-gray-400 text-base md:text-lg">₹499</span>
-                          <span className="text-2xl md:text-3xl font-bold text-primary-700">₹99 only</span>
+                        
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            navigate('/payment');
+                          }}
+                          className="w-full bg-primary-600 hover:bg-primary-700 text-white px-4 md:px-6 py-3 text-base md:text-lg font-semibold rounded-lg transition-colors mb-4 shadow-md hover:shadow-lg" 
+                        >
+                          Upgrade to VIP Tenant
+                        </button>
+                        <div className="text-xs md:text-sm text-gray-600 mb-3">
+                          Get exclusive benefits and premium features with VIP Tenant membership.
                         </div>
-                      </div>
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          console.log('Upgrade button clicked - navigating to payment');
-                          window.location.href = '/payment';
-                        }}
-                        className="w-full bg-primary-600 hover:bg-primary-700 text-white px-4 md:px-6 py-3 text-base md:text-lg font-semibold rounded-lg transition-colors mb-4" 
-                      >
-                        Upgrade to Premium
-                      </button>
-                      <div className="text-xs md:text-sm text-gray-600 mb-3">
-                        Get exclusive benefits and features with a Premium membership.
-                      </div>
-                      <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-gray-500">
-                        <span role="img" aria-label="secure">🔒</span>
-                        <span>Secure Payment</span>
+                        <div className="flex items-center justify-center gap-2 text-xs md:text-sm text-gray-500">
+                          <Shield className="w-4 h-4" />
+                          <span>Secure Payment via Razorpay</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                {/* About Me and Looking For sections */}
-                <div className="mt-6 flex flex-col md:flex-row gap-6">
-                  {/* About Me */}
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-bold mb-2 flex items-center gap-2"><Info className="w-4 h-4 md:w-5 md:h-5" /> About Me</h3>
-                    {editingBio ? (
-                      <div>
-                        <textarea
-                          value={bioInput}
-                          onChange={e => setBioInput(e.target.value)}
-                          className="input w-full mb-2"
-                          rows={3}
-                          autoFocus
-                        />
-                        <button className="btn btn-primary btn-sm mr-2" onClick={saveBio} disabled={savingField==='bio'}>Save</button>
-                        <button className="btn btn-outline btn-sm" onClick={() => { setEditingBio(false); setBioInput(displayBio); }}>Cancel</button>
+                )}
+                
+                {/* VIP Status Display */}
+                {isPremium && (
+                  <div className="mt-6">
+                    <div className="bg-gradient-to-br from-primary-100 to-primary-50 border-2 border-primary-300 rounded-lg p-4 md:p-6">
+                      <div className="flex items-center justify-center gap-2 mb-2">
+                        <Award className="w-5 h-5 md:w-6 md:h-6 text-primary-600" />
+                        <h3 className="text-lg md:text-xl font-bold text-primary-700">VIP Tenant Active</h3>
                       </div>
-                    ) : (
-                      <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingBio(true)}>
-                        <span className="text-sm md:text-base">{displayBio || <span className="italic text-gray-400">Add a short bio to let others know more about you!</span>}</span>
-                        <Edit className="w-4 h-4 text-primary-600 ml-2 flex-shrink-0" />
+                      <div className="text-center text-sm md:text-base text-gray-700">
+                        You're enjoying all VIP Tenant benefits!
                       </div>
-                    )}
+                    </div>
                   </div>
-                  {/* Looking For */}
-                  <div className="flex-1">
-                    <h3 className="text-base md:text-lg font-bold mb-2 flex items-center gap-2"><Users className="w-4 h-4 md:w-5 md:h-5" /> Looking For</h3>
-                    {editingLookingFor ? (
-                      <div>
-                        <select
-                          className="input w-full mb-2"
-                          value={lookingForInput}
-                          onChange={e => setLookingForInput(e.target.value)}
-                          autoFocus
-                        >
-                          <option value="">Select</option>
-                          <option value="Room">Room</option>
-                          <option value="Flat">Flat</option>
-                          <option value="Homemate">Homemate</option>
-                        </select>
-                        <button className="btn btn-primary btn-sm mr-2" onClick={saveLookingFor} disabled={savingField==='lookingFor'}>Save</button>
-                        <button className="btn btn-outline btn-sm" onClick={() => { setEditingLookingFor(false); setLookingForInput(displayLookingFor); }}>Cancel</button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingLookingFor(true)}>
-                        <span>{displayLookingFor || <span className="italic text-gray-400">Let others know what you’re looking for (e.g., Room, Flat, Homemate).</span>}</span>
-                        <Edit className="w-4 h-4 text-primary-600 ml-2 flex-shrink-0" />
-                      </div>
-                    )}
-                  </div>
+                )}
+                {/* About Me section */}
+                <div className="mt-6">
+                  <h3 className="text-base md:text-lg font-bold mb-2 flex items-center gap-2"><Info className="w-4 h-4 md:w-5 md:h-5" /> About Me</h3>
+                  {editingBio ? (
+                    <div>
+                      <textarea
+                        value={bioInput}
+                        onChange={e => setBioInput(e.target.value)}
+                        className="input w-full mb-2"
+                        rows={3}
+                        autoFocus
+                      />
+                      <button className="btn btn-primary btn-sm mr-2" onClick={saveBio} disabled={savingField==='bio'}>Save</button>
+                      <button className="btn btn-outline btn-sm" onClick={() => { setEditingBio(false); setBioInput(displayBio); }}>Cancel</button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between bg-primary-50 rounded p-3 cursor-pointer" onClick={() => setEditingBio(true)}>
+                      <span className="text-sm md:text-base">{displayBio || <span className="italic text-gray-400">Add a short bio to let others know more about you!</span>}</span>
+                      <Edit className="w-4 h-4 text-primary-600 ml-2 flex-shrink-0" />
+                    </div>
+                  )}
                 </div>
                 {/* Your Choices (Preferences) section */}
                 <div className="mt-6">
@@ -902,12 +847,6 @@ const ProfilePage = () => {
           )}
         </div>
 
-        {/* Policy Links */}
-        <div className="mt-8 flex flex-wrap gap-4 justify-center md:justify-start">
-          <a href="/privacy_policy" className="btn btn-secondary text-sm px-4 py-2">Privacy Policy</a>
-          <a href="/refund_policy" className="btn btn-secondary text-sm px-4 py-2">Refund Policy</a>
-          <a href="/TandC" className="btn btn-secondary text-sm px-4 py-2">T&amp;C</a>
-        </div>
         {/* Edit Profile Modal */}
         <Dialog open={editProfileModalOpen} onClose={() => setEditProfileModalOpen(false)} className="fixed z-50 inset-0 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">

@@ -3,6 +3,7 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db, auth } from '../../config/firebase';
 import { getMarkets } from '../../services/markets';
 import * as Yup from 'yup';
+import { LiquidButton } from '../ui/liquid-glass-button';
 
 interface OnboardingModalProps {
   userId: string;
@@ -170,9 +171,9 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg p-4 sm:p-6 max-w-sm sm:max-w-md w-full mx-auto max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Complete Your Profile</h2>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-md rounded-lg p-4 sm:p-6 max-w-sm sm:max-w-md w-full mx-auto max-h-[90vh] overflow-y-auto shadow-2xl border border-white/20">
+        <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-center">Complete Your Profile</h2>
         <div className="mb-2 sm:mb-3">
           <label className="block text-sm font-medium mb-1" htmlFor="onboard-mobile">Mobile Number</label>
           <input
@@ -365,11 +366,14 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({ userId, email, name, 
             </p>
           )}
         </div>
-        <div className="flex justify-end space-x-4 mt-4">
-          {/* Remove Skip button, only show Submit */}
-          <button type="submit" disabled={loading} className="px-3 py-2 sm:px-4 sm:py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 text-sm sm:text-base">
+        <div className="flex justify-center mt-6">
+          <LiquidButton 
+            type="submit" 
+            disabled={loading}
+            className="w-full max-w-xs"
+          >
             {loading ? 'Saving...' : 'Submit'}
-          </button>
+          </LiquidButton>
         </div>
       </form>
     </div>

@@ -1,53 +1,42 @@
-import React from 'react';
 import CategoryCard from '../ui/CategoryCard';
-import { Home, Building, Key, Castle, Landmark, Hotel, Bed, Sofa } from 'lucide-react';
 
 const HomeCategories = () => {
   return (
-    <section className="py-12 bg-gray-50">
-      <div className="container">
-        {/* Rental Options Section - Temporarily Disabled */}
-        {/* <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-2">Rental Options</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Find your ideal rental property
+    <section className="relative w-full">
+      <div className="container relative z-10 pt-6 pb-16 sm:pb-12 md:pb-10 lg:pb-0">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Explore Our Services</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto mt-2">
+            Find your perfect living space or connect with like-minded people
           </p>
         </div>
         
-        <div className="grid grid-cols-2 gap-4 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <CategoryCard 
-            title="Single Room"
-            icon={<Bed className="w-6 h-6" />}
-            description="Affordable single rooms perfect for students and singles"
-            link="/rent?type=single_room"
+            title="Room in a Flat"
+            description="Find affordable rooms in shared flats perfect for students and professionals"
+            link="/rent"
+            image="/cards/room.jpg"
           />
           <CategoryCard 
-            title="2BHK"
-            icon={<Sofa className="w-6 h-6" />}
-            description="Comfortable 2 bedroom apartments ideal for small families"
-            link="/rent?type=2bhk"
+            title="Full Flat"
+            description="Browse complete apartments and flats for rent or purchase"
+            link="/buy"
+            image="/cards/fullflat.webp"
           />
           <CategoryCard 
-            title="3BHK"
-            icon={<Hotel className="w-6 h-6" />}
-            description="Spacious 3 bedroom apartments for families and professionals"
-            link="/rent?type=3bhk"
+            title="Find Homemate"
+            description="Connect with compatible flatmates using our smart matching system"
+            link="/users"
+            image="/cards/homemate.jpg"
           />
           <CategoryCard 
-            title="4BHK"
-            icon={<Key className="w-6 h-6" />}
-            description="Luxury 4 bedroom homes with abundant space and amenities"
-            link="/rent?type=4bhk"
+            title="Home Services"
+            description="Discover professional home services for all your needs"
+            link="/services"
+            image="/cards/services.avif"
           />
-        </div> */}
-
-        {/* Properties by Category Section - Temporarily Disabled */}
-        {/* <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-2">Find Properties by Category</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Browse properties based on your preferences
-          </p>
-        </div> */}
+        </div>
       </div>
     </section>
   );

@@ -1,30 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAppContext } from '../context/AppContext';
-import { Phone, MapPin, User, Briefcase, Heart } from 'lucide-react';
-
-// Helper to get initials from name
-function getInitials(name?: string) {
-  if (!name || typeof name !== 'string' || !name.trim()) return '?';
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .map(word => word[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) || '?';
-}
-
-const COLORS = [
-  'bg-pink-100 text-pink-700',
-  'bg-blue-100 text-blue-700',
-  'bg-green-100 text-green-700',
-  'bg-yellow-100 text-yellow-700',
-  'bg-purple-100 text-purple-700',
-  'bg-orange-100 text-orange-700',
-  'bg-teal-100 text-teal-700',
-];
+import { User as UserIcon, ChevronDown } from 'lucide-react';
+import MatchingDashboard from '../components/MatchingDashboard';
+import { ProfileCard } from '../components/ui/profile-card';
 
 interface User {
   id: string;
@@ -47,20 +27,10 @@ interface User {
   };
 }
 
-interface Filters {
-  city?: string;
-  locality?: string;
-  profession?: string;
-  age?: string;
-  preferences?: string;
-  housingType?: string; // 'shared' or 'full'
-}
-
 const FindFriendsPage = () => {
   const { user, isAuthenticated, login, loginError, clearLoginError } = useAppContext();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [activeFilters, setActiveFilters] = useState<Filters>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -200,63 +170,6 @@ const FindFriendsPage = () => {
     fetchUsers();
   }, [user]);
 
-  // Filtering logic based on AI filters
-  const handleAIFilters = (filters: Filters) => {
-    setActiveFilters(filters);
-    filterUsers(filters);
-  };
-
-  const filterUsers = (filters: Filters) => {
-    let filtered = users;
-    
-    if (filters.city) {
-      filtered = filtered.filter(u => (u.city || u.address?.city || '').toLowerCase().includes(filters.city!.toLowerCase()));
-    }
-    if (filters.locality) {
-      filtered = filtered.filter(u => (u.locality || u.address?.locality || '').toLowerCase().includes(filters.locality!.toLowerCase()));
-    }
-    if (filters.profession) {
-      filtered = filtered.filter(u => (u.profession || '').toLowerCase().includes(filters.profession!.toLowerCase()));
-    }
-    if (filters.age) {
-      const age = Number(filters.age);
-      if (!isNaN(age)) {
-        filtered = filtered.filter(u => {
-          const userAge = Number(u.age);
-          return !isNaN(userAge) && userAge === age;
-        });
-      }
-    }
-    if (filters.preferences) {
-      filtered = filtered.filter(u => {
-        const userPrefs = u.preferences || [];
-        return userPrefs.some((pref: string) => 
-          pref.toLowerCase().includes(filters.preferences!.toLowerCase())
-        );
-      });
-    }
-    if (filters.housingType) {
-      filtered = filtered.filter(u => {
-        const userHousingType = u.housingType || '';
-        return userHousingType.toLowerCase() === filters.housingType!.toLowerCase();
-      });
-    }
-    
-    setFilteredUsers(filtered);
-  };
-
-  const handleRemoveFilter = (key: string) => {
-    const newFilters = { ...activeFilters };
-    delete newFilters[key as keyof Filters];
-    setActiveFilters(newFilters);
-    filterUsers(newFilters);
-  };
-
-  const handleClearAllFilters = () => {
-    setActiveFilters({});
-    setFilteredUsers(users);
-  };
-
   const handleCall = (phoneNumber: string) => {
     if (phoneNumber) {
       window.open(`tel:${phoneNumber}`, '_blank');
@@ -284,13 +197,74 @@ const FindFriendsPage = () => {
     }
   };
 
-  // Filter chips are hidden for now
-  const renderFilterChips = () => {
-    return null; // Don't render filter chips
+  const [showContent, setShowContent] = useState(false);
+
+  // Lock scroll until 'What's inside?' is clicked
+  useEffect(() => {
+    if (!showContent) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showContent]);
+
+  const handleScrollToContent = () => {
+    setShowContent(true);
+    setTimeout(() => {
+      const contentSection = document.getElementById('find-friends-content');
+      if (contentSection) {
+        contentSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   return (
-      <div className="min-h-[80vh] bg-gradient-to-br from-blue-50 via-white to-purple-50 py-10">
+    <>
+      {/* Full-screen Hero Section with "What's inside?" button */}
+      <div className="h-screen flex flex-col relative -mt-16 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="flex flex-col items-center justify-center h-full">
+          <h1 className="text-5xl md:text-6xl font-extrabold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600 text-center px-4">Find Friends</h1>
+          <p className="text-lg md:text-xl text-gray-600 mb-8 text-center px-4">
+            Connect with other Homemates users and grow your network!
+          </p>
+          
+          {/* "What's inside?" button */}
+          <div className="mt-8">
+            <button
+              onClick={handleScrollToContent}
+              className="group px-6 md:px-8 py-3 md:py-4 rounded-full bg-gradient-to-r from-purple-400 via-pink-300 to-blue-400 flex items-center gap-2 md:gap-3 font-semibold text-gray-900 text-sm md:text-base transition-all duration-300 focus:outline-none border-none shadow-lg hover:shadow-xl min-h-[44px]"
+            >
+              <span className="flex items-center gap-1 md:gap-2">
+                <span className="text-sm md:text-base font-semibold tracking-wide">What's inside?</span>
+                <span className="relative">
+                  <ChevronDown className="w-5 h-5 md:w-7 md:h-7 text-white transition-all duration-300 group-hover:scale-110 group-hover:text-pink-100 group-hover:filter group-hover:brightness-110" />
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {showContent && (
+        <div id="find-friends-content" className="min-h-[80vh] bg-gradient-to-br from-blue-50 via-white to-purple-50 py-10">
+          {/* Smart Matching Algorithm section */}
+          <div className="container mx-auto px-4 mb-8">
+            <div className="text-center py-8 md:py-16">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 md:mb-1 text-primary-700 text-center px-4">Smart Matching Algorithm 🎯</h1>
+              <p className="text-base md:text-lg text-gray-600 text-center px-4">Find your perfect flatmate using our advanced preference matching system.</p>
+            </div>
+            
+            {/* Show matching dashboard for logged-in users */}
+            {user && (
+              <div className="py-4 md:py-8">
+                <MatchingDashboard onViewMatches={() => {}} />
+              </div>
+            )}
+          </div>
+
       <div className="container mx-auto px-4">
         <h1 className="text-5xl font-extrabold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600 text-center">Find Friends</h1>
         <p className="text-lg text-gray-600 mb-4 text-center">
@@ -301,7 +275,7 @@ const FindFriendsPage = () => {
         {!isAuthenticated ? (
           <div className="text-center py-12 bg-white rounded-lg shadow-lg border border-gray-200">
             <div className="mb-6">
-              <User className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+              <UserIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
               <h3 className="text-xl font-semibold mb-2">Login Required</h3>
               <p className="text-gray-600 mb-6">
                 Please login to access Find Friends and connect with other Homemates users.
@@ -327,127 +301,29 @@ const FindFriendsPage = () => {
             {loading && <div className="text-center text-lg text-primary-600">Loading...</div>}
             {error && <div className="text-red-500 text-center mb-4">{error}</div>}
         
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredUsers.map((user, idx) => {
-            const color = COLORS[idx % COLORS.length];
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {filteredUsers.map((user) => {
             const name = user.name || user.userName || 'No Name';
-            const city = user.city || user.address?.city || 'No City';
-            const locality = user.locality || user.address?.locality || '';
-            const profession = user.profession || '';
+            const city = user.city || user.address?.city;
+            const locality = user.locality || user.address?.locality;
+            const profession = user.profession;
             const avatarUrl = user.photoURL || user.avatarUrl;
-            const age = user.age || '';
             const preferences = user.preferences || [];
-            const phoneNumber = user.userPhoneNumber || user.phone || '';
+            const phoneNumber = user.userPhoneNumber || user.phone;
             
             return (
-              <div
+              <ProfileCard
                 key={user.id}
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 flex flex-col items-center transition-all duration-300 hover:shadow-xl hover:scale-105 group relative"
-              >
-                {/* Avatar */}
-                {avatarUrl && avatarUrl !== '/images/default-avatar.png' ? (
-                  <img
-                    src={avatarUrl}
-                    alt={name}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-gray-200 mb-4 shadow-md"
-                    onError={e => { (e.currentTarget as HTMLImageElement).src = '/images/default-avatar.png'; }}
-                  />
-                ) : (
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center text-lg font-bold mb-4 shadow-md ${color} border-2 border-gray-200`}>
-                    {getInitials(name)}
-                  </div>
-                )}
-                
-                {/* Name */}
-                <div className="text-lg font-semibold mb-3 text-center text-gray-900">
-                  {name}
-                </div>
-                
-                {/* Location - Combined Locality, City */}
-                <div className="mb-3 flex items-center gap-2 text-gray-600 w-full">
-                  <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <MapPin className="w-3 h-3 text-blue-600" />
-                  </div>
-                  <span className="text-sm font-medium truncate">
-                    {locality && city && city !== 'No City' 
-                      ? `${locality}, ${city}`
-                      : locality 
-                        ? locality 
-                        : city && city !== 'No City' 
-                          ? city 
-                          : 'Location not set'
-                    }
-                  </span>
-                </div>
-                
-                {/* Profession */}
-                {profession && (
-                  <div className="mb-3 flex items-center gap-2 text-gray-600 w-full">
-                    <div className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Briefcase className="w-3 h-3 text-purple-600" />
-                    </div>
-                    <span className="text-sm font-medium truncate">{profession}</span>
-                  </div>
-                )}
-                 
-                 {/* Housing Type */}
-                 {user.housingType && (
-                   <div className="mb-4 flex items-center gap-2 text-gray-600 w-full">
-                     <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                       <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                         <path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM10 6a2 2 0 0 1 4 0v1h-4V6z"/>
-                       </svg>
-                     </div>
-                     <span className="text-sm font-medium truncate capitalize">
-                       {user.housingType === 'shared' ? 'Shared Home' : user.housingType === 'full' ? 'Full Home' : user.housingType}
-                     </span>
-                   </div>
-                 )}
-                
-                {/* Interests/Preferences */}
-                {preferences && Array.isArray(preferences) && preferences.length > 0 && (
-                  <div className="mb-4 w-full">
-                    <div className="flex flex-wrap gap-1 justify-start">
-                      {preferences.slice(0, 3).map((pref, index) => (
-                        <span key={index} className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-pink-50 text-pink-600 border border-pink-200">
-                          {pref}
-                        </span>
-                      ))}
-                      {preferences.length > 3 && (
-                        <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200">
-                          +{preferences.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Communication Buttons */}
-                <div className="flex gap-2 mt-auto w-full justify-center">
-                  {phoneNumber && (
-                    <>
-                    <button
-                      onClick={() => handleCall(phoneNumber)}
-                        className="flex-1 max-w-[120px] h-10 bg-green-500 hover:bg-green-600 text-white rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
-                      title="Call"
-                    >
-                        <Phone className="w-4 h-4 mr-1" />
-                        Call
-                    </button>
-                    <button
-                      onClick={() => handleWhatsApp(phoneNumber, name)}
-                        className="flex-1 max-w-[120px] h-10 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-lg flex items-center justify-center transition-colors text-sm font-medium"
-                      title="WhatsApp"
-                    >
-                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
-                        </svg>
-                        Chat
-                    </button>
-                    </>
-                  )}
-                </div>
-              </div>
+                name={name}
+                avatar={avatarUrl}
+                city={city}
+                locality={locality}
+                profession={profession}
+                preferences={preferences}
+                phoneNumber={phoneNumber}
+                onCall={phoneNumber ? () => handleCall(phoneNumber) : undefined}
+                onWhatsApp={phoneNumber ? () => handleWhatsApp(phoneNumber, name) : undefined}
+              />
             );
           })}
         </div>
@@ -461,6 +337,8 @@ const FindFriendsPage = () => {
         )}
       </div>
     </div>
+      )}
+    </>
   );
 };
 

@@ -46,7 +46,7 @@ const Layout = () => {
       <ScrollToTop />
       <PageViewTracker />
       <Navbar />
-      <main className="flex-grow pt-16 pb-24 md:pb-0"> {/* Add bottom padding for mobile nav */}
+      <main className="flex-grow pt-16 pb-24 lg:pb-0"> {/* Bottom padding only on small screens */}
         <Outlet />
       </main>
       <Footer />

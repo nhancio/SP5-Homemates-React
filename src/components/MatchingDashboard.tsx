@@ -192,31 +192,6 @@ const MatchingDashboard: React.FC<MatchingDashboardProps> = ({ onViewMatches }) 
         </div>
       )}
 
-      {/* Algorithm Stats */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold text-primary-600">{recommendations.topUserMatches.length}</div>
-            <div className="text-sm text-gray-600">User Matches</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-green-600">{recommendations.topPropertyMatches.length}</div>
-            <div className="text-sm text-gray-600">Property Matches</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-purple-600">
-              {Math.round(recommendations.topUserMatches.reduce((acc, match) => acc + match.score, 0) / recommendations.topUserMatches.length)}
-            </div>
-            <div className="text-sm text-gray-600">Avg Match Score</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-orange-600">
-              {recommendations.topUserMatches.filter(match => match.score > 80).length}
-            </div>
-            <div className="text-sm text-gray-600">High Matches</div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

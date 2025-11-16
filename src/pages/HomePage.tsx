@@ -1,110 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
-import HeroBanner from '../components/sections/HeroBanner';
-import FeaturedProperties from '../components/sections/FeaturedProperties';
 import HomeCategories from '../components/sections/HomeCategories';
-import HomeServices from '../components/sections/HomeServices';
-import Testimonials from '../components/sections/Testimonials';
-import MatchingDashboard from '../components/MatchingDashboard';
 
-import { useAppContext } from '../context/AppContext';
-import { ChevronDown, User as UserIcon, Briefcase, Loader, Phone, Star, MapPin, Heart } from 'lucide-react';
-import { findUserMatches, getCompatibilityInsights, UserProfile, mockUsers } from '../services/matching';
-import { 
-  calculatePreferenceMatch, 
-  calculateLocationMatch, 
-  calculateBudgetMatch, 
-  calculateLifestyleMatch 
-} from '../services/matching';
-
-const HomePage: React.FC = () => {
-  const { user } = useAppContext();
-  const [showContent, setShowContent] = useState(false);
-
-  // Lock scroll until 'What's inside?' is clicked
-  useEffect(() => {
-    if (!showContent) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    // Clean up on unmount
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [showContent]);
-
-  // Revert animation state
-
-  // Always scroll to the Smart Matching Algorithm section
-  const handleScrollToContent = () => {
-    setShowContent(true);
-    setTimeout(() => {
-      const contentSection = document.getElementById('home-content');
-      if (contentSection) {
-        contentSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
-  };
-
+const HomePage = () => {
   return (
-    <>
-      {/* Full-screen HeroBanner */}
-      <div className="h-screen flex flex-col relative -mt-16"> {/* Remove top margin to account for fixed navbar */}
-        <HeroBanner />
-        
-        {/* Visually Interesting Scroll button - Mobile Optimized */}
-        <div className="absolute bottom-8 md:bottom-12 left-1/2 transform -translate-x-1/2 z-20">
-          <button
-            onClick={handleScrollToContent}
-            className="group px-6 md:px-8 py-3 md:py-4 rounded-full bg-gradient-to-r from-purple-400 via-pink-300 to-blue-400 flex items-center gap-2 md:gap-3 font-semibold text-gray-900 text-sm md:text-base transition-all duration-300 focus:outline-none border-none shadow-lg hover:shadow-xl min-h-[44px]"
-          >
-            <span className="flex items-center gap-1 md:gap-2">
-              <span className="text-sm md:text-base font-semibold tracking-wide">What's inside?</span>
-              <span className="relative">
-                <ChevronDown className="w-5 h-5 md:w-7 md:h-7 text-white transition-all duration-300 group-hover:scale-110 group-hover:text-pink-100 group-hover:filter group-hover:brightness-110" />
-              </span>
-            </span>
-          </button>
-        </div>
+    <div 
+      className="relative w-full min-h-full"
+      style={{
+        background: "radial-gradient(125% 125% at 50% 10%, #ffffff 20%, #fce7f3 40%, #f3e8ff 60%, #e5e7eb 80%, #d1d5db 100%)",
+      }}
+    >
+      {/* Additional gradient layer */}
+      <div 
+        className="absolute inset-0 opacity-60 pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse at top, #fce7f3 0%, transparent 50%), radial-gradient(ellipse at bottom, #e5e7eb 0%, transparent 50%)",
+        }}
+      />
+      
+      <div className="relative z-10">
+        <HomeCategories />
       </div>
-      {showContent && (
-        <div id="home-content" className="bg-gray-50 mt-24 md:mt-48">
-          {/* --- Smart Matching Algorithm heading and description --- */}
-          <div className="container py-8 md:py-16 flex flex-col items-center justify-center">
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 md:mb-1 text-primary-700 text-center px-4">Smart Matching Algorithm 🎯</h1>
-            <p className="text-base md:text-lg text-gray-600 text-center px-4">Find your perfect flatmate using our advanced preference matching system.</p>
-          </div>
-          {/* --- Other homepage sections --- */}
-          {/* Show matching dashboard for logged-in users */}
-          {user && (
-            <div className="container py-4 md:py-8">
-              <MatchingDashboard onViewMatches={() => window.location.href = '/find-friends'} />
-            </div>
-          )}
-          {/*
-          <FeaturedProperties
-            title="Featured Shared Homes"
-            subtitle="Top shared home listings for you"
-            viewAllLink="/rent"
-            type="rent"
-            limit={4}
-            minRent={1000}
-            maxRent={30000}
-          />
-          <FeaturedProperties
-            title="Featured Full Home"
-            subtitle="Best full home listings for families and professionals"
-            viewAllLink="/buy"
-            type="buy"
-            limit={4}
-          />
-          <HomeServices />
-          <Testimonials />
-          */}
-          <HomeCategories />
-        </div>
-      )}
-    </>
+    </div>
   );
 };
 
