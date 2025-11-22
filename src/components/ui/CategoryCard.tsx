@@ -22,18 +22,18 @@ const CategoryCard = ({ title, description, link, image }: CategoryCardProps) =>
         }}
       />
       
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 group-hover:from-black/90 group-hover:via-black/60 transition-all duration-300" />
+      {/* Gradient Overlay - Pink Theme */}
+      <div className="absolute inset-0 bg-gradient-to-t from-pink-900/90 via-pink-800/60 to-pink-700/30 group-hover:from-pink-950/95 group-hover:via-pink-900/70 transition-all duration-300" />
       
       {/* Content */}
       <div className="relative z-10 flex flex-col justify-end h-full p-6 text-white">
-        <h3 className="text-xl md:text-2xl font-bold mb-2 group-hover:text-primary-300 transition-colors duration-300">
+        <h3 className="text-xl md:text-2xl font-bold mb-2 group-hover:text-pink-200 transition-colors duration-300 drop-shadow-lg">
           {title}
         </h3>
-        <p className="text-sm md:text-base text-gray-200 mb-4 line-clamp-2">
+        <p className="text-sm md:text-base text-pink-50 mb-4 line-clamp-2 drop-shadow-md">
           {description}
         </p>
-        <div className="flex items-center text-white text-sm md:text-base font-semibold group-hover:text-primary-300 transition-colors duration-300">
+        <div className="flex items-center text-white text-sm md:text-base font-semibold group-hover:text-pink-200 transition-colors duration-300 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full w-fit">
           <span className="mr-2">Explore</span>
           <ArrowRight className="w-4 h-4 transform group-hover:translate-x-2 transition-transform duration-300" />
         </div>

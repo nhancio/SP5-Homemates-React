@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { useAppContext } from '../context/AppContext';
-import { User as UserIcon, ChevronDown } from 'lucide-react';
+import { User as UserIcon } from 'lucide-react';
 import MatchingDashboard from '../components/MatchingDashboard';
 import { ProfileCard } from '../components/ui/profile-card';
 
@@ -197,86 +197,42 @@ const FindFriendsPage = () => {
     }
   };
 
-  const [showContent, setShowContent] = useState(false);
-
-  // Lock scroll until 'What's inside?' is clicked
-  useEffect(() => {
-    if (!showContent) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [showContent]);
-
-  const handleScrollToContent = () => {
-    setShowContent(true);
-    setTimeout(() => {
-      const contentSection = document.getElementById('find-friends-content');
-      if (contentSection) {
-        contentSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
-  };
-
   return (
-    <>
-      {/* Full-screen Hero Section with "What's inside?" button */}
-      <div className="h-screen flex flex-col relative -mt-16 bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <div className="flex flex-col items-center justify-center h-full">
-          <h1 className="text-5xl md:text-6xl font-extrabold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600 text-center px-4">Find Friends</h1>
-          <p className="text-lg md:text-xl text-gray-600 mb-8 text-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50 py-10">
+      <div className="container mx-auto px-4">
+        {/* Page Header */}
+        <div className="text-center mb-8 md:mb-12">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-3 bg-gradient-to-r from-pink-600 via-rose-500 to-pink-700 bg-clip-text text-transparent">
+            Find Friends
+          </h1>
+          <p className="text-lg md:text-xl text-gray-700 mb-8">
             Connect with other Homemates users and grow your network!
           </p>
-          
-          {/* "What's inside?" button */}
-          <div className="mt-8">
-            <button
-              onClick={handleScrollToContent}
-              className="group px-6 md:px-8 py-3 md:py-4 rounded-full bg-gradient-to-r from-purple-400 via-pink-300 to-blue-400 flex items-center gap-2 md:gap-3 font-semibold text-gray-900 text-sm md:text-base transition-all duration-300 focus:outline-none border-none shadow-lg hover:shadow-xl min-h-[44px]"
-            >
-              <span className="flex items-center gap-1 md:gap-2">
-                <span className="text-sm md:text-base font-semibold tracking-wide">What's inside?</span>
-                <span className="relative">
-                  <ChevronDown className="w-5 h-5 md:w-7 md:h-7 text-white transition-all duration-300 group-hover:scale-110 group-hover:text-pink-100 group-hover:filter group-hover:brightness-110" />
-                </span>
-              </span>
-            </button>
-          </div>
         </div>
-      </div>
 
-      {showContent && (
-        <div id="find-friends-content" className="min-h-[80vh] bg-gradient-to-br from-blue-50 via-white to-purple-50 py-10">
-          {/* Smart Matching Algorithm section */}
-          <div className="container mx-auto px-4 mb-8">
-            <div className="text-center py-8 md:py-16">
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 md:mb-1 text-primary-700 text-center px-4">Smart Matching Algorithm 🎯</h1>
-              <p className="text-base md:text-lg text-gray-600 text-center px-4">Find your perfect flatmate using our advanced preference matching system.</p>
+        {/* Smart Matching Algorithm section */}
+        {user && (
+          <div className="mb-12">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-2 text-pink-700">
+                Smart Matching Algorithm 🎯
+              </h2>
+              <p className="text-base md:text-lg text-gray-600">
+                Find your perfect flatmate using our advanced preference matching system.
+              </p>
             </div>
-            
-            {/* Show matching dashboard for logged-in users */}
-            {user && (
-              <div className="py-4 md:py-8">
-                <MatchingDashboard onViewMatches={() => {}} />
-              </div>
-            )}
+            <div className="py-4 md:py-8">
+              <MatchingDashboard onViewMatches={() => {}} />
+            </div>
           </div>
-
-      <div className="container mx-auto px-4">
-        <h1 className="text-5xl font-extrabold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-purple-600 text-center">Find Friends</h1>
-        <p className="text-lg text-gray-600 mb-4 text-center">
-          Connect with other Homemates users and grow your network!
-        </p>
+        )}
         
         {/* Authentication Check */}
         {!isAuthenticated ? (
-          <div className="text-center py-12 bg-white rounded-lg shadow-lg border border-gray-200">
+          <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-pink-200">
             <div className="mb-6">
-              <UserIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Login Required</h3>
+              <UserIcon className="w-16 h-16 mx-auto text-pink-400 mb-4" />
+              <h3 className="text-2xl font-bold mb-2 text-gray-900">Login Required</h3>
               <p className="text-gray-600 mb-6">
                 Please login to access Find Friends and connect with other Homemates users.
               </p>
@@ -286,59 +242,69 @@ const FindFriendsPage = () => {
                 clearLoginError();
                 await login();
               }}
-              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+              className="bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-700 hover:to-rose-600 text-white px-8 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
             >
               Login to Continue
             </button>
             {loginError && (
-              <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded text-red-700">
+              <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700">
                 {loginError}
               </div>
             )}
           </div>
         ) : (
           <>
-            {loading && <div className="text-center text-lg text-primary-600">Loading...</div>}
-            {error && <div className="text-red-500 text-center mb-4">{error}</div>}
+            {loading && (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-600"></div>
+                <p className="text-lg text-pink-600 mt-4">Loading...</p>
+              </div>
+            )}
+            {error && (
+              <div className="text-red-500 text-center mb-4 p-4 bg-red-50 rounded-lg border border-red-200">
+                {error}
+              </div>
+            )}
         
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredUsers.map((user) => {
-            const name = user.name || user.userName || 'No Name';
-            const city = user.city || user.address?.city;
-            const locality = user.locality || user.address?.locality;
-            const profession = user.profession;
-            const avatarUrl = user.photoURL || user.avatarUrl;
-            const preferences = user.preferences || [];
-            const phoneNumber = user.userPhoneNumber || user.phone;
-            
-            return (
-              <ProfileCard
-                key={user.id}
-                name={name}
-                avatar={avatarUrl}
-                city={city}
-                locality={locality}
-                profession={profession}
-                preferences={preferences}
-                phoneNumber={phoneNumber}
-                onCall={phoneNumber ? () => handleCall(phoneNumber) : undefined}
-                onWhatsApp={phoneNumber ? () => handleWhatsApp(phoneNumber, name) : undefined}
-              />
-            );
-          })}
-        </div>
+              {filteredUsers.map((user) => {
+                const name = user.name || user.userName || 'No Name';
+                const city = user.city || user.address?.city;
+                const locality = user.locality || user.address?.locality;
+                const profession = user.profession;
+                const avatarUrl = user.photoURL || user.avatarUrl;
+                const preferences = user.preferences || [];
+                const phoneNumber = user.userPhoneNumber || user.phone;
+                
+                return (
+                  <ProfileCard
+                    key={user.id}
+                    name={name}
+                    avatar={avatarUrl}
+                    city={city}
+                    locality={locality}
+                    profession={profession}
+                    preferences={preferences}
+                    phoneNumber={phoneNumber}
+                    onCall={phoneNumber ? () => handleCall(phoneNumber) : undefined}
+                    onWhatsApp={phoneNumber ? () => handleWhatsApp(phoneNumber, name) : undefined}
+                  />
+                );
+              })}
+            </div>
         
             {(!loading && filteredUsers.length === 0) && (
-              <div className="text-center text-gray-500 mt-8">
-                {user?.gender ? `No ${user.gender} users found matching your criteria.` : 'No users found matching your criteria.'}
+              <div className="text-center py-12">
+                <UserIcon className="w-16 h-16 mx-auto text-pink-300 mb-4" />
+                <p className="text-lg text-gray-600">
+                  {user?.gender ? `No ${user.gender} users found matching your criteria.` : 'No users found matching your criteria.'}
+                </p>
               </div>
             )}
           </>
         )}
       </div>
     </div>
-      )}
-    </>
   );
 };
 

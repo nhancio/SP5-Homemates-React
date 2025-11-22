@@ -272,7 +272,7 @@ const PaymentPage = () => {
               <h4 className="text-lg font-semibold mb-4 text-center">What's Included:</h4>
               {vipPlan.features.map((feature, index) => (
                 <div key={index} className="flex items-start gap-3 p-3 bg-white rounded-lg">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-pink-600 flex-shrink-0 mt-0.5" />
                   <span className="text-gray-700">{feature}</span>
                 </div>
               ))}

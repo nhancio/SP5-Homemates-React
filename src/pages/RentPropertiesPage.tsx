@@ -150,11 +150,13 @@ const RentPropertiesPage = () => {
         )}
 
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-3 text-gray-900">Shared Homes</h1>
-          <p className="text-lg text-gray-600 mb-4">
-            Plug and play homes which are in your comfort zone.
+          <h1 className="text-4xl md:text-5xl font-extrabold mb-3 bg-gradient-to-r from-pink-600 via-rose-500 to-pink-700 bg-clip-text text-transparent">
+            Plug & Play Shared Flats
+          </h1>
+          <p className="text-lg md:text-xl text-gray-700 mb-4 font-medium">
+            Walk in with a suitcase, not a U-Haul. Pre-furnished, pre-serviced, and pre-approved by people like you.
           </p>
-          <h2 className="text-xl font-bold text-primary-700">Showing {filteredProperties.length} rooms</h2>
+          <h2 className="text-xl font-bold text-pink-600">Showing {filteredProperties.length} rooms</h2>
         </div>
         
         {/* Search Bar */}
