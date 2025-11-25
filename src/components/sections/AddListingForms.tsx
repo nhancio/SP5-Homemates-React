@@ -451,7 +451,15 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
             <select
               className={`input w-full${displayErrors.roomAvailable ? ' border-pink-500 bg-pink-50' : ''}`}
               value={formData.roomAvailable || ''}
-              onChange={e => setFormData({ ...formData, roomAvailable: e.target.value })}
+              onChange={e => {
+                const value = e.target.value;
+                setFormData({ 
+                  ...formData, 
+                  roomAvailable: value,
+                  // Clear rooms when changing from Full Flat
+                  rooms: value === 'Full Flat' ? formData.rooms : undefined
+                });
+              }}
               onBlur={() => markTouched('roomAvailable')}
             >
               <option value="">Select Rooms Available</option>
@@ -459,6 +467,7 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
               <option value="2 Rooms">2 Rooms</option>
               <option value="3 Rooms">3 Rooms</option>
               <option value="4+ Rooms">4+ Rooms</option>
+              <option value="Full Flat">Full Flat</option>
             </select>
             {displayErrors.roomAvailable && <p className="text-red-600 text-sm font-bold bg-pink-100 border border-pink-200 rounded px-2 py-1 mt-1 w-full" aria-live="polite">{displayErrors.roomAvailable}</p>}
           </div>
@@ -495,6 +504,209 @@ export const RentForm: React.FC<AddListingFormsProps> = (props) => {
           </div>
         </div>
       </section>
+
+      {/* Individual Room Details - Only for Full Flat */}
+      {formData.roomAvailable === 'Full Flat' && (
+        <section className="bg-white p-6 rounded-lg shadow-sm mb-8">
+          <h2 className="text-lg font-bold mb-6 bg-gray-50 p-2 rounded">Individual Room Details</h2>
+          
+          {/* Room Count Selection */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Number of Rooms</label>
+            <div className="flex gap-3">
+              {[1, 2, 3, 4].map((num) => {
+                const roomCount = formData.rooms?.length || 0;
+                const isSelected = roomCount === num;
+                return (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => {
+                      // Initialize rooms array with default values
+                      const newRooms = Array.from({ length: num }, (_, i) => ({
+                        roomNumber: i + 1,
+                        hasWashroom: formData.rooms?.[i]?.hasWashroom ?? false,
+                        hasBalcony: formData.rooms?.[i]?.hasBalcony ?? false,
+                        available: formData.rooms?.[i]?.available ?? true,
+                      }));
+                      setFormData({ ...formData, rooms: newRooms });
+                    }}
+                    className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                      isSelected
+                        ? 'text-white bg-gradient-to-br from-primary-600 to-primary-700 shadow-[6px_6px_12px_rgba(194,24,91,0.3),-6px_-6px_12px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[8px_8px_16px_rgba(194,24,91,0.4),-8px_-8px_16px_rgba(255,255,255,0.1)] active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.3),inset_-4px_-4px_8px_rgba(255,255,255,0.1)]'
+                        : 'text-gray-700 bg-[#F5F5F5] shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.8)] hover:bg-[#EEEEEE] hover:shadow-[8px_8px_16px_rgba(0,0,0,0.12),-8px_-8px_16px_rgba(255,255,255,0.9)] hover:-translate-y-0.5 active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)] active:translate-y-0.5'
+                    }`}
+                  >
+                    {num}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Room Details Forms */}
+          {formData.rooms && formData.rooms.length > 0 && (
+            <div className="space-y-4">
+              {formData.rooms.map((room: any, index: number) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                  <h3 className="text-md font-semibold mb-4">Room {room.roomNumber}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Washroom */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Washroom</label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={`room-${index}-washroom`}
+                            checked={room.hasWashroom === true}
+                            onChange={() => {
+                              const updatedRooms = [...formData.rooms];
+                              updatedRooms[index] = { ...room, hasWashroom: true };
+                              setFormData({ ...formData, rooms: updatedRooms });
+                            }}
+                          />
+                          <span>Yes</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={`room-${index}-washroom`}
+                            checked={room.hasWashroom === false}
+                            onChange={() => {
+                              const updatedRooms = [...formData.rooms];
+                              updatedRooms[index] = { ...room, hasWashroom: false };
+                              setFormData({ ...formData, rooms: updatedRooms });
+                            }}
+                          />
+                          <span>No</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Balcony */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Balcony</label>
+                      <div className="flex gap-4">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={`room-${index}-balcony`}
+                            checked={room.hasBalcony === true}
+                            onChange={() => {
+                              const updatedRooms = [...formData.rooms];
+                              updatedRooms[index] = { ...room, hasBalcony: true };
+                              setFormData({ ...formData, rooms: updatedRooms });
+                            }}
+                          />
+                          <span>Yes</span>
+                        </label>
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name={`room-${index}-balcony`}
+                            checked={room.hasBalcony === false}
+                            onChange={() => {
+                              const updatedRooms = [...formData.rooms];
+                              updatedRooms[index] = { ...room, hasBalcony: false };
+                              setFormData({ ...formData, rooms: updatedRooms });
+                            }}
+                          />
+                          <span>No</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Room Images */}
+                  <div className="mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Room Images (Optional)</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-2 border-2 border-dashed rounded-lg p-2">
+                      {(room.images || []).map((image: string, imgIndex: number) => (
+                        <div key={imgIndex} className="relative rounded-lg shadow hover:shadow-lg transition overflow-hidden group bg-gray-50">
+                          <img src={image} alt={`Room ${room.roomNumber} Image ${imgIndex + 1}`} className="w-full h-20 object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updatedRooms = [...formData.rooms];
+                              const roomImages = updatedRooms[index].images || [];
+                              roomImages.splice(imgIndex, 1);
+                              updatedRooms[index] = { ...room, images: roomImages };
+                              setFormData({ ...formData, rooms: updatedRooms });
+                            }}
+                            className="absolute top-1 left-1 bg-white bg-opacity-80 text-red-600 rounded-full p-1 hover:bg-red-500 hover:text-white transition z-10"
+                            title="Remove Image"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                      {(!room.images || room.images.length < 3) && (
+                        <label 
+                          htmlFor={`room-${index}-image-upload`} 
+                          className="flex flex-col items-center justify-center h-20 rounded-lg border-2 border-dashed border-primary-300 cursor-pointer hover:border-primary-500 bg-primary-50 text-primary-600 font-medium shadow group transition"
+                        >
+                          <Camera className="h-5 w-5 mb-1 group-hover:text-primary-700" />
+                          <span className="text-xs">Add Photo</span>
+                          <input 
+                            id={`room-${index}-image-upload`} 
+                            type="file" 
+                            accept="image/*" 
+                            multiple 
+                            className="hidden" 
+                            onChange={(e) => {
+                              const files = e.target.files;
+                              if (files && files.length > 0) {
+                                const roomImages = room.images || [];
+                                if (roomImages.length + files.length > 3) {
+                                  alert('Maximum 3 images per room');
+                                  return;
+                                }
+                                
+                                Array.from(files).forEach(file => {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    const img = new Image();
+                                    img.src = reader.result as string;
+                                    img.onload = () => {
+                                      const canvas = document.createElement('canvas');
+                                      const ctx = canvas.getContext('2d');
+                                      
+                                      const maxWidth = 800;
+                                      const scaleFactor = maxWidth / img.width;
+                                      canvas.width = maxWidth;
+                                      canvas.height = img.height * scaleFactor;
+                                      
+                                      ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                      const compressedImage = canvas.toDataURL('image/jpeg', 0.8);
+                                      
+                                      const updatedRooms = [...formData.rooms];
+                                      const currentRoomImages = updatedRooms[index].images || [];
+                                      updatedRooms[index] = { 
+                                        ...room, 
+                                        images: [...currentRoomImages, compressedImage] 
+                                      };
+                                      setFormData({ ...formData, rooms: updatedRooms });
+                                    };
+                                  };
+                                  reader.readAsDataURL(file);
+                                });
+                              }
+                            }} 
+                          />
+                        </label>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {(room.images || []).length}/3 images uploaded for this room
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Amenities Section */}
       <div className="mb-6">

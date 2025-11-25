@@ -16,14 +16,39 @@ const FeaturedProperties = () => {
     const fetchFeatured = async () => {
       try {
         setLoading(true);
-        const [rentListings, buyListings] = await Promise.all([
-          getListings('rent', { ...filters.rent, limit: 6 }),
-          getListings('sell', { ...filters.buy, limit: 6 })
+        console.log('[FeaturedProperties] Fetching featured properties...');
+        const startTime = Date.now();
+        
+        // Add timeout to prevent infinite loading
+        const fetchPromise = Promise.all([
+          getListings('rent', { ...filters.rent, limit: 6 }).catch(err => {
+            console.error('[FeaturedProperties] Error fetching rent:', err);
+            return [];
+          }),
+          getListings('sell', { ...filters.buy, limit: 6 }).catch(err => {
+            console.error('[FeaturedProperties] Error fetching sell:', err);
+            return [];
+          })
         ]);
-        setFeaturedRent(rentListings.slice(0, 3));
-        setFeaturedBuy(buyListings.slice(0, 3));
+        
+        const timeoutPromise = new Promise((resolve) => {
+          setTimeout(() => {
+            console.warn('[FeaturedProperties] Fetch timeout - using empty arrays');
+            resolve([[], []]);
+          }, 10000); // 10 second timeout
+        });
+        
+        const [rentListings, buyListings] = await Promise.race([fetchPromise, timeoutPromise]) as any[];
+        const duration = Date.now() - startTime;
+        console.log(`[FeaturedProperties] Fetched in ${duration}ms - Rent: ${rentListings?.length || 0}, Buy: ${buyListings?.length || 0}`);
+        
+        setFeaturedRent((rentListings || []).slice(0, 3));
+        setFeaturedBuy((buyListings || []).slice(0, 3));
       } catch (error) {
-        console.error('Error fetching featured properties:', error);
+        console.error('[FeaturedProperties] Error:', error);
+        // Set empty arrays on error to show homepage
+        setFeaturedRent([]);
+        setFeaturedBuy([]);
       } finally {
         setLoading(false);
       }

@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 import { useAppContext } from '../context/AppContext';
 import { User as UserIcon } from 'lucide-react';
 import MatchingDashboard from '../components/MatchingDashboard';
 import { ProfileCard } from '../components/ui/profile-card';
+import { openWhatsAppFromUser } from '../services/chat';
 
 interface User {
   id: string;
@@ -74,72 +74,92 @@ const FindFriendsPage = () => {
           console.log('Attempting to fetch users with gender:', normalizedGender);
           
           try {
-            // First, let's try the exact match query
-            const usersQuery = query(
-              collection(db, 'u'),
-              where('gender', '==', normalizedGender)
-            );
+            // Fetch users from Supabase
+            const { data, error } = await supabase
+              .from('users')
+              .select('*')
+              .ilike('gender', normalizedGender);
             
-            const snapshot = await getDocs(usersQuery);
-            usersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as User[];
-            
-            console.log(`Query-based filtering: Found ${usersData.length} users with gender '${normalizedGender}'`);
-            
-            // If no users found, let's try fetching all users and filtering client-side to debug
-            if (usersData.length === 0) {
-              console.log('No users found with exact gender match, fetching all users to debug...');
-              const allUsersSnapshot = await getDocs(collection(db, 'u'));
-              const allUsers = allUsersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as User[];
+            if (error) {
+              console.error('Error fetching users:', error);
+            } else {
+              usersData = (data || []).map(row => ({
+                id: row.id,
+                user_id: row.user_id,
+                name: row.name,
+                userName: row.user_name || row.name,
+                age: row.age,
+                profession: row.profession,
+                city: row.city,
+                locality: row.locality,
+                preferences: row.preferences || [],
+                userPhoneNumber: row.user_phone_number,
+                phone: row.user_phone_number,
+                photoURL: row.photo_url,
+                avatarUrl: row.photo_url,
+                gender: row.gender,
+                address: {
+                  city: row.city,
+                  locality: row.locality,
+                },
+              })) as User[];
               
-              console.log('All users in database:', allUsers.map(u => ({ 
-                id: u.id, 
-                name: u.name, 
-                gender: u.gender,
-                genderType: typeof u.gender 
-              })));
+              console.log(`Query-based filtering: Found ${usersData.length} users with gender '${normalizedGender}'`);
               
-              // Try different gender formats
-              const possibleGenders = [
-                normalizedGender,
-                currentUserGender, // Original case
-                currentUserGender.toLowerCase(),
-                currentUserGender.toUpperCase(),
-                currentUserGender.charAt(0).toUpperCase() + currentUserGender.slice(1).toLowerCase(), // Title case
-              ];
-              
-              console.log('Trying different gender formats:', possibleGenders);
-              
-              for (const genderFormat of possibleGenders) {
-                const matchingUsers = allUsers.filter(u => {
-                  const userGender = u.gender || '';
-                  return userGender.toLowerCase().trim() === genderFormat.toLowerCase().trim();
-                });
-                
-                if (matchingUsers.length > 0) {
-                  console.log(`Found ${matchingUsers.length} users with gender format: "${genderFormat}"`);
-                  usersData = matchingUsers;
-                  break;
-                }
-              }
-              
+              // If no users found, try case-insensitive search
               if (usersData.length === 0) {
-                console.log('No users found with any gender format. Available genders in database:');
-                const uniqueGenders = [...new Set(allUsers.map(u => u.gender).filter(Boolean))];
-                console.log(uniqueGenders);
+                const { data: allUsersData } = await supabase
+                  .from('users')
+                  .select('*');
+                
+                if (allUsersData) {
+                  const allUsers = allUsersData.map(row => ({
+                    id: row.id,
+                    user_id: row.user_id,
+                    name: row.name,
+                    userName: row.user_name || row.name,
+                    age: row.age,
+                    profession: row.profession,
+                    city: row.city,
+                    locality: row.locality,
+                    preferences: row.preferences || [],
+                    userPhoneNumber: row.user_phone_number,
+                    phone: row.user_phone_number,
+                    photoURL: row.photo_url,
+                    avatarUrl: row.photo_url,
+                    gender: row.gender,
+                    address: {
+                      city: row.city,
+                      locality: row.locality,
+                    },
+                  })) as User[];
+                  
+                  // Try different gender formats
+                  const possibleGenders = [
+                    normalizedGender,
+                    currentUserGender,
+                    currentUserGender.toLowerCase(),
+                    currentUserGender.toUpperCase(),
+                    currentUserGender.charAt(0).toUpperCase() + currentUserGender.slice(1).toLowerCase(),
+                  ];
+                  
+                  for (const genderFormat of possibleGenders) {
+                    const matchingUsers = allUsers.filter(u => {
+                      const userGender = u.gender || '';
+                      return userGender.toLowerCase().trim() === genderFormat.toLowerCase().trim();
+                    });
+                    
+                    if (matchingUsers.length > 0) {
+                      usersData = matchingUsers;
+                      break;
+                    }
+                  }
+                }
               }
             }
           } catch (queryError) {
-            console.error('Error with gender query, falling back to fetch all:', queryError);
-            // Fallback: fetch all users and filter client-side
-            const allUsersSnapshot = await getDocs(collection(db, 'u'));
-            const allUsers = allUsersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as User[];
-            
-            usersData = allUsers.filter(u => {
-              const userGender = u.gender || '';
-              return userGender.toLowerCase().trim() === normalizedGender;
-            });
-            
-            console.log(`Fallback filtering: Found ${usersData.length} users with gender '${normalizedGender}'`);
+            console.error('Error with gender query:', queryError);
+            usersData = [];
           }
         } else {
           console.log('No gender filtering applied - current user has no gender set');
@@ -180,19 +200,8 @@ const FindFriendsPage = () => {
 
   const handleWhatsApp = (phoneNumber: string, userName: string) => {
     if (phoneNumber) {
-      const currentUserName = user?.name || 'a Homemates user';
-      const message = `Hi ${userName}! I'm ${currentUserName} from the Homemates app. I found your profile and would love to connect with you!`;
-      
-      // Clean phone number and ensure it has country code
-      let cleanPhone = phoneNumber.replace(/\D/g, '');
-      if (!cleanPhone.startsWith('91') && cleanPhone.length === 10) {
-        cleanPhone = '91' + cleanPhone; // Add India country code if missing
-      }
-      
-      // Use the api.whatsapp.com format for better compatibility
-      const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`;
-      window.open(url, '_blank');
-        } else {
+      openWhatsAppFromUser(phoneNumber, userName);
+    } else {
       alert('Phone number not available');
     }
   };

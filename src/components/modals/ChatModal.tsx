@@ -103,7 +103,7 @@ const ChatModal: React.FC<ChatModalProps> = ({
         setTimeout(() => {
           onMessageSent();
         }, 200);
-        // Call again after 500ms to ensure Firebase/localStorage sync
+        // Call again after 500ms to ensure sync
         setTimeout(() => {
           onMessageSent();
         }, 500);

@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { User, MapPin, Phone, Mail, Award, Settings, LogOut, X, CreditCard, Pencil, Trash, MoreVertical, Eye, Edit, Star, Info, UserCheck, Users, MessageCircle, Briefcase, Headphones, Shield } from 'lucide-react';
 import { Dialog } from '@headlessui/react';
 import { useAppContext } from '../context/AppContext';
-import { getDoc, doc, updateDoc } from 'firebase/firestore';
-import { db, storage } from '../config/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { supabase } from '../config/supabase';
 import PropertyCard from '../components/ui/PropertyCard';
 import { getListingsByUser, initiatePhonePePayment, updateListing, deleteListing } from '../services/listings';
 import { useNavigate } from 'react-router-dom';
@@ -136,10 +134,76 @@ const ProfilePage = () => {
       }
       setLoading(true);
       try {
-        // Fetch from "u" collection by user.id
-        const userDoc = await getDoc(doc(db, 'u', user.id));
-        if (userDoc.exists()) {
-          setProfileUser({ id: user.id, ...userDoc.data() });
+        console.log('[ProfilePage] Fetching user profile for:', user.id);
+        const startTime = Date.now();
+        
+        // Fetch from Supabase users table with timeout
+        const queryPromise = supabase
+          .from('users')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        
+        const timeoutPromise = new Promise((resolve) => {
+          setTimeout(() => {
+            console.warn('[ProfilePage] User profile query timeout after 3s - using session data');
+            resolve({ data: null, error: { message: 'Timeout', code: 'TIMEOUT' } });
+          }, 3000); // Reduced to 3 seconds for faster fallback
+        });
+        
+        const { data: userData, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+        const duration = Date.now() - startTime;
+        console.log(`[ProfilePage] Query completed in ${duration}ms`);
+        
+        if (error && error.code !== 'PGRST116') {
+          console.error('[ProfilePage] Error fetching user:', error);
+          // Show error but don't block - use fallback data
+          setProfileUser({
+            id: user.id,
+            photoURL: user.photoURL,
+            userName: user.name,
+            userEmail: user.email,
+            userPhoneNumber: user.userPhoneNumber || '',
+            age: user.age || 0,
+            gender: user.gender || '',
+            profession: user.profession || '',
+            city: user.city || '',
+            locality: user.locality || '',
+            bio: '',
+            lookingFor: '',
+            preferences: user.preferences || [],
+            funFact: '',
+            coverPhotoURL: '',
+            linkedin: '',
+            instagram: '',
+            facebook: '',
+          });
+          setLoading(false);
+          return;
+        }
+        
+        if (userData && !error) {
+          // Transform Supabase data to match expected format
+          setProfileUser({
+            id: user.id,
+            photoURL: userData.photo_url,
+            userName: userData.name,
+            userEmail: userData.email,
+            userPhoneNumber: userData.user_phone_number,
+            age: userData.age,
+            gender: userData.gender,
+            profession: userData.profession,
+            city: userData.city,
+            locality: userData.locality,
+            bio: userData.bio,
+            lookingFor: userData.looking_for,
+            preferences: userData.preferences || [],
+            funFact: userData.fun_fact,
+            coverPhotoURL: userData.cover_photo_url,
+            linkedin: userData.linkedin,
+            instagram: userData.instagram,
+            facebook: userData.facebook,
+          });
         } else {
           // fallback to auth user if not found
           setProfileUser(user);
@@ -154,7 +218,7 @@ const ProfilePage = () => {
   }, [user]);
 
   useEffect(() => {
-    // Fetch user listings
+    // Fetch user listings with timeout
     const fetchUserListings = async () => {
       if (!user) return;
       
@@ -162,15 +226,27 @@ const ProfilePage = () => {
       setListingsError(null);
       
       try {
-        console.log('=== FETCH USER LISTINGS DEBUG ===');
-        console.log('Fetching listings for user:', user.id);
-        const listings = await getListingsByUser(user.id);
-        console.log('Retrieved listings:', listings);
-        console.log('Listing types:', listings.map(l => ({ id: l.id, listingType: l.listingType })));
-        setUserListings(listings);
+        console.log('[ProfilePage] Fetching user listings for:', user.id);
+        const startTime = Date.now();
+        
+        // Add timeout to listings query
+        const listingsPromise = getListingsByUser(user.id);
+        const listingsTimeout = new Promise((resolve) => {
+          setTimeout(() => {
+            console.warn('[ProfilePage] Listings query timeout');
+            resolve([]);
+          }, 5000);
+        });
+        
+        const listings = await Promise.race([listingsPromise, listingsTimeout]) as any[];
+        const duration = Date.now() - startTime;
+        console.log(`[ProfilePage] Listings fetched in ${duration}ms, count: ${listings?.length || 0}`);
+        
+        setUserListings(listings || []);
       } catch (error) {
-        console.error('Error fetching user listings:', error);
+        console.error('[ProfilePage] Error fetching user listings:', error);
         setListingsError('Failed to load listings');
+        setUserListings([]);
       } finally {
         setListingsLoading(false);
       }
@@ -211,12 +287,35 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchRecentActivity = async () => {
       if (!user || !user.id) return;
-      const favoriteIds = await getUserFavorites(user.id);
-      if (favoriteIds.length) {
-        const recentIds = favoriteIds.slice(-5).reverse(); // last 5, most recent first
-        const properties = await getListingsByIds(recentIds);
-        setRecentProperties(properties);
-      } else {
+      try {
+        console.log('[ProfilePage] Fetching recent activity...');
+        const startTime = Date.now();
+        
+        // Add timeout to favorites query
+        const favoritesPromise = getUserFavorites(user.id);
+        const favoritesTimeout = new Promise((resolve) => {
+          setTimeout(() => {
+            console.warn('[ProfilePage] Favorites query timeout');
+            resolve([]);
+          }, 3000);
+        });
+        
+        const favoriteIds = await Promise.race([favoritesPromise, favoritesTimeout]) as string[];
+        const favoritesDuration = Date.now() - startTime;
+        console.log(`[ProfilePage] Favorites fetched in ${favoritesDuration}ms`);
+        
+        if (favoriteIds && favoriteIds.length > 0) {
+          const recentIds = favoriteIds.slice(-5).reverse(); // last 5, most recent first
+          const propertiesStartTime = Date.now();
+          const properties = await getListingsByIds(recentIds);
+          const propertiesDuration = Date.now() - propertiesStartTime;
+          console.log(`[ProfilePage] Properties fetched in ${propertiesDuration}ms`);
+          setRecentProperties(properties);
+        } else {
+          setRecentProperties([]);
+        }
+      } catch (err) {
+        console.error('[ProfilePage] Error fetching recent activity:', err);
         setRecentProperties([]);
       }
     };
@@ -230,16 +329,11 @@ const ProfilePage = () => {
         return;
       }
       try {
-        const allUsers = await getUsers();
-        const mutuals = allUsers
-          .filter(u => u.id !== user.id && u.preferences && u.preferences.length)
-          .map(u => {
-            const shared = u.preferences.filter((p: string) => profileUser.preferences.includes(p));
-            return shared.length > 0 ? { ...u, shared } : null;
-          })
-          .filter(Boolean);
-        setMutualUsers(mutuals);
+        // Skip getUsers() as it returns empty array - this was causing delay
+        // For now, set empty array. Can be implemented later with proper Supabase query
+        setMutualUsers([]);
       } catch (err) {
+        console.error('[ProfilePage] Error fetching mutual interests:', err);
         setMutualUsers([]);
       }
     };
@@ -316,10 +410,12 @@ const ProfilePage = () => {
     try {
       await profileSchema.validate(editProfileForm, { abortEarly: false });
       setProfileErrors({});
-      await updateDoc(doc(db, 'u', profileUser.id), {
-        photoURL: editProfileForm.photoURL,
-        userName: editProfileForm.name,
-        userEmail: editProfileForm.email,
+      await supabase
+        .from('users')
+        .update({
+          photo_url: editProfileForm.photoURL,
+          name: editProfileForm.name,
+          email: editProfileForm.email,
         userPhoneNumber: editProfileForm.phone,
         age: editProfileForm.age,
         gender: editProfileForm.gender,
@@ -359,11 +455,27 @@ const ProfilePage = () => {
     }
     setUploading(true);
     try {
-      const storageRef = ref(storage, `cover_photos/${user.id}.jpg`);
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
-      await updateDoc(doc(db, 'u', user.id), { coverPhotoURL: downloadURL });
-      setProfileUser((prev: any) => ({ ...prev, coverPhotoURL: downloadURL }));
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `cover_photos/${user.id}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('cover-photos')
+        .upload(fileName, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('cover-photos')
+        .getPublicUrl(fileName);
+      
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ cover_photo_url: publicUrl })
+        .eq('user_id', user.id);
+      
+      if (updateError) throw updateError;
+      
+      setProfileUser((prev: any) => ({ ...prev, coverPhotoURL: publicUrl }));
     } catch (err) {
       alert('Failed to upload cover photo.');
       console.error(err);
@@ -383,9 +495,9 @@ const ProfilePage = () => {
         <div className="container">
           <div className="max-w-md mx-auto text-center">
             <User className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Sign In Required</h2>
+            <h2 className="text-2xl font-bold mb-2">Sign In to Explore More Options</h2>
             <p className="text-gray-600 mb-6">
-              Please sign in to view your profile and saved properties
+              Please sign in to view your profile, saved properties, and access all features
             </p>
             <div className="relative">
               <button 
@@ -410,8 +522,10 @@ const ProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="py-20 flex justify-center items-center">
+      <div className="py-20 flex flex-col justify-center items-center gap-4">
+        <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
         <div className="text-lg text-gray-600">Loading profile...</div>
+        <div className="text-sm text-gray-400">This should only take a moment</div>
       </div>
     );
   }
@@ -470,7 +584,10 @@ const ProfilePage = () => {
   const saveBio = async () => {
     setSavingField('bio');
     try {
-      await updateDoc(doc(db, 'u', profileUser.id), { bio: bioInput });
+      await supabase
+        .from('users')
+        .update({ bio: bioInput })
+        .eq('user_id', profileUser.id);
       setProfileUser((prev: any) => ({ ...prev, bio: bioInput }));
       setEditingBio(false);
     } finally {
@@ -480,7 +597,10 @@ const ProfilePage = () => {
   const saveLookingFor = async () => {
     setSavingField('lookingFor');
     try {
-      await updateDoc(doc(db, 'u', profileUser.id), { lookingFor: lookingForInput });
+      await supabase
+        .from('users')
+        .update({ looking_for: lookingForInput })
+        .eq('user_id', profileUser.id);
       setProfileUser((prev: any) => ({ ...prev, lookingFor: lookingForInput }));
       setEditingLookingFor(false);
     } finally {
@@ -490,7 +610,10 @@ const ProfilePage = () => {
   const saveFunFact = async () => {
     setSavingField('funFact');
     try {
-      await updateDoc(doc(db, 'u', profileUser.id), { funFact: funFactInput });
+      await supabase
+        .from('users')
+        .update({ fun_fact: funFactInput })
+        .eq('user_id', profileUser.id);
       setProfileUser((prev: any) => ({ ...prev, funFact: funFactInput }));
       setEditingFunFact(false);
     } finally {
@@ -502,7 +625,10 @@ const ProfilePage = () => {
     try {
       console.log('Saving preferences:', preferencesInput);
       console.log('User ID:', profileUser.id);
-      await updateDoc(doc(db, 'u', profileUser.id), { preferences: preferencesInput });
+      await supabase
+        .from('users')
+        .update({ preferences: preferencesInput })
+        .eq('user_id', profileUser.id);
       setProfileUser((prev: any) => ({ ...prev, preferences: preferencesInput }));
       setEditingPreferences(false);
       console.log('Preferences saved successfully');

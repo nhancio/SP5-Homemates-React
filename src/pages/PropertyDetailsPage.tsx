@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { getPropertyById } from '../services/listings';
-import { Phone, Share2, Heart, Building, Loader, ArrowLeft, Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Phone, Share2, Heart, Building, Loader, ArrowLeft, Wifi, Car, Droplet, Utensils, Dumbbell, Snowflake, Shield, Tv, Flame, Fan, Lightbulb, Lock, Refrigerator, WashingMachine, BedDouble, ShowerHead, PawPrint, Users, KeyRound, Plug, Speaker, ParkingCircle, Bike, Leaf, Sun, Thermometer, AirVent, Home, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { formatCurrency } from '../utils/format';
 import { getShareableUrl } from '../utils/share';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { getBhkLabel } from '../utils/property';
+import { openWhatsAppFromProperty } from '../services/chat';
 
 // Helper: safe amount parsing similar to PropertyCard
 function parseAmount(value: any): number | null {
@@ -37,6 +38,7 @@ const PropertyDetailsPage = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImage, setModalImage] = useState<string | null>(null);
   const [modalImageIndex, setModalImageIndex] = useState<number>(0);
+  const [selectedRoomIndex, setSelectedRoomIndex] = useState<number>(0); // Track selected room tab
 
   // Determine listing type from URL
   const listingType = location.pathname.startsWith('/rent') ? 'rent' : 'sell';
@@ -60,6 +62,7 @@ const PropertyDetailsPage = () => {
           parking: (fetchedProperty as any).parking,
           handoverDate: (fetchedProperty as any).handoverDate,
           isImmediate: (fetchedProperty as any).isImmediate,
+          rooms: (fetchedProperty as any).rooms,
           // Add more detailed debugging
           fullProperty: fetchedProperty,
           listingType: listingType,
@@ -70,6 +73,10 @@ const PropertyDetailsPage = () => {
         console.log('Property sellDetails securityDeposit:', (fetchedProperty as any).sellDetails?.securityDeposit);
         console.log('Property sellDetails brokerage:', (fetchedProperty as any).sellDetails?.brokerage);
         setProperty(fetchedProperty);
+        // Initialize selected room to first room if rooms exist
+        if (fetchedProperty.rooms && fetchedProperty.rooms.length > 0) {
+          setSelectedRoomIndex(0);
+        }
       } catch (error) {
         console.error('Error fetching property:', error);
         setError('Failed to load property details');
@@ -653,29 +660,167 @@ Link: ${url}`;
 
           {/* Sidebar - Mobile Optimized */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 sticky top-4">
-              <div className="flex flex-col gap-3 md:gap-4">
-                <button
-                  onClick={handleCall}
-                  className="btn btn-primary flex items-center justify-center gap-2 py-3 md:py-2 text-sm md:text-base"
-                >
-                  <Phone className="w-5 h-5" />
-                  Contact Owner
-                </button>
-                <button
-                  onClick={handleFavoriteClick}
-                  className="btn btn-secondary flex items-center justify-center gap-2 py-3 md:py-2 text-sm md:text-base"
-                >
-                  <Heart className={isAuthenticated && favoriteProperties.includes(property.id) ? 'fill-red-500' : ''} />
-                  {isAuthenticated && favoriteProperties.includes(property.id) ? 'Saved' : 'Save'}
-                </button>
-                <button
-                  onClick={handleShare}
-                  className="btn btn-outline flex items-center justify-center gap-2 py-3 md:py-2 text-sm md:text-base"
-                >
-                  <Share2 className="w-5 h-5" />
-                  Share
-                </button>
+            <div className="space-y-4">
+              {/* Property Rooms Section - Only for Full Flat with rooms */}
+              {listingType === 'rent' && property.rooms && property.rooms.length > 0 && (
+                <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 sticky top-4">
+                  <h2 className="text-lg font-semibold mb-4">Property Rooms</h2>
+                  
+                  {/* Room Tabs */}
+                  <div className="flex gap-2 mb-4 overflow-x-auto">
+                    {property.rooms.map((room: any, index: number) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedRoomIndex(index)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+                          selectedRoomIndex === index
+                            ? 'text-white bg-gradient-to-br from-primary-600 to-primary-700 shadow-[6px_6px_12px_rgba(194,24,91,0.3),-6px_-6px_12px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[8px_8px_16px_rgba(194,24,91,0.4),-8px_-8px_16px_rgba(255,255,255,0.1)] active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.3),inset_-4px_-4px_8px_rgba(255,255,255,0.1)]'
+                            : 'text-gray-700 bg-[#F5F5F5] shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.8)] hover:bg-[#EEEEEE] hover:shadow-[8px_8px_16px_rgba(0,0,0,0.12),-8px_-8px_16px_rgba(255,255,255,0.9)] hover:-translate-y-0.5 active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)] active:translate-y-0.5'
+                        }`}
+                      >
+                        Room {room.roomNumber}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setSelectedRoomIndex(-1)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+                        selectedRoomIndex === -1
+                          ? 'text-white bg-gradient-to-br from-primary-600 to-primary-700 shadow-[6px_6px_12px_rgba(194,24,91,0.3),-6px_-6px_12px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[8px_8px_16px_rgba(194,24,91,0.4),-8px_-8px_16px_rgba(255,255,255,0.1)] active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.3),inset_-4px_-4px_8px_rgba(255,255,255,0.1)]'
+                          : 'text-gray-700 bg-[#F5F5F5] shadow-[6px_6px_12px_rgba(0,0,0,0.1),-6px_-6px_12px_rgba(255,255,255,0.8)] hover:bg-[#EEEEEE] hover:shadow-[8px_8px_16px_rgba(0,0,0,0.12),-8px_-8px_16px_rgba(255,255,255,0.9)] hover:-translate-y-0.5 active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.1),inset_-4px_-4px_8px_rgba(255,255,255,0.8)] active:translate-y-0.5'
+                      }`}
+                    >
+                      Full House
+                    </button>
+                  </div>
+
+                  {/* Room Details */}
+                  {selectedRoomIndex >= 0 && selectedRoomIndex < property.rooms.length && (
+                    <div className="space-y-4">
+                      {(() => {
+                        const room = property.rooms[selectedRoomIndex];
+                        return (
+                          <>
+                            <div>
+                              <h3 className="text-lg font-semibold">Room {room.roomNumber}</h3>
+                              {room.available !== false && (
+                                <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                  Available
+                                </span>
+                              )}
+                            </div>
+                            
+                            <div className="space-y-2">
+                              {room.hasBalcony && (
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                  <Sun className="w-4 h-4 text-primary-600" />
+                                  <span>Balcony</span>
+                                </div>
+                              )}
+                              {room.hasWashroom && (
+                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                  <ShowerHead className="w-4 h-4 text-primary-600" />
+                                  <span>Attached</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {room.lockInPeriod && (
+                              <div className="text-sm text-gray-600">
+                                <span>{room.lockInPeriod} lock-in</span>
+                              </div>
+                            )}
+
+                            {room.rent && (
+                              <div className="text-lg font-semibold text-primary-600">
+                                ₹{formatCurrency(room.rent)} /mo
+                              </div>
+                            )}
+
+                            {/* Room Images */}
+                            {room.images && room.images.length > 0 && (
+                              <div className="mt-4">
+                                <div className="grid grid-cols-2 gap-2">
+                                  {room.images.map((img: string, imgIndex: number) => (
+                                    <img
+                                      key={imgIndex}
+                                      src={img}
+                                      alt={`Room ${room.roomNumber} ${imgIndex + 1}`}
+                                      className="w-full h-24 object-cover rounded-lg cursor-pointer hover:opacity-80"
+                                      onClick={() => {
+                                        setModalImage(img);
+                                        setModalImageIndex(imgIndex);
+                                        setShowImageModal(true);
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+                  )}
+
+                  {/* Full House View */}
+                  {selectedRoomIndex === -1 && (
+                    <div className="space-y-4">
+                      <div>
+                        <h3 className="text-lg font-semibold">Full House</h3>
+                        <p className="text-sm text-gray-600 mt-2">
+                          All {property.rooms.length} rooms available
+                        </p>
+                      </div>
+                      {(() => {
+                        const totalRent = property.rooms.reduce((sum: number, room: any) => sum + (room.rent || 0), 0);
+                        const rentAmount = parseAmount(property.rentDetails?.costs?.rent);
+                        return (
+                          <div className="text-lg font-semibold text-primary-600">
+                            ₹{formatCurrency(rentAmount || totalRent)} /mo
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  )}
+
+                  {/* Chat Button - WhatsApp */}
+                  {property.contactNumber && (
+                    <button
+                      onClick={() => openWhatsAppFromProperty(property.contactNumber, property.address?.buildingName)}
+                      className="w-full mt-4 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2 bg-gradient-to-br from-[#25D366] to-[#128C7E] shadow-[6px_6px_12px_rgba(37,211,102,0.3),-6px_-6px_12px_rgba(255,255,255,0.1),inset_0_1px_0_rgba(255,255,255,0.1)] hover:shadow-[8px_8px_16px_rgba(37,211,102,0.4),-8px_-8px_16px_rgba(255,255,255,0.1)] hover:-translate-y-0.5 active:shadow-[inset_4px_4px_8px_rgba(18,140,126,0.4),inset_-4px_-4px_8px_rgba(255,255,255,0.1)] active:translate-y-0.5"
+                    >
+                      <MessageCircle className="w-5 h-5" />
+                      Chat on WhatsApp
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* Contact Buttons */}
+              <div className="bg-white rounded-lg shadow-sm p-4 md:p-6 sticky top-4">
+                <div className="flex flex-col gap-3 md:gap-4">
+                  <button
+                    onClick={handleCall}
+                    className="btn btn-primary flex items-center justify-center gap-2 py-3 md:py-2 text-sm md:text-base"
+                  >
+                    <Phone className="w-5 h-5" />
+                    Contact Owner
+                  </button>
+                  <button
+                    onClick={handleFavoriteClick}
+                    className="btn btn-secondary flex items-center justify-center gap-2 py-3 md:py-2 text-sm md:text-base"
+                  >
+                    <Heart className={isAuthenticated && favoriteProperties.includes(property.id) ? 'fill-red-500' : ''} />
+                    {isAuthenticated && favoriteProperties.includes(property.id) ? 'Saved' : 'Save'}
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="btn btn-outline flex items-center justify-center gap-2 py-3 md:py-2 text-sm md:text-base"
+                  >
+                    <Share2 className="w-5 h-5" />
+                    Share
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -684,7 +829,13 @@ Link: ${url}`;
       {showImageModal && modalImage && (
         // Defensive: fallback to [] if property.images is undefined
         (() => { 
-          const images = property.images?.length ? property.images : []; 
+          // Determine which images to use: room images if viewing a room, otherwise property images
+          let images: string[] = [];
+          if (selectedRoomIndex >= 0 && selectedRoomIndex < (property.rooms?.length || 0)) {
+            images = property.rooms[selectedRoomIndex]?.images || [];
+          } else {
+            images = property.images?.length ? property.images : [];
+          }
           return (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"

@@ -1,8 +1,5 @@
 // Coming soon
 
-// import { collection, getDocs, query, where, setDoc, doc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore';
-// import { auth, db } from '../config/firebase';
-
 export interface UserProfile {
   id: string;
   userEmail: string;

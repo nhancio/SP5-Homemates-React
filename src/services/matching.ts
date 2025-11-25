@@ -1,7 +1,6 @@
 // Coming soon
 
-import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 
 export interface UserProfile {
   id: string;
@@ -238,37 +237,42 @@ function calculateCompatibilityScore(user1: UserProfile, user2: UserProfile): { 
  */
 export async function findUserMatches(currentUser: UserProfile, limit: number = 20): Promise<MatchScore[]> {
   try {
-    // Get all users except current user
-    const usersRef = collection(db, 'u');
-    const usersSnapshot = await getDocs(usersRef);
+    // Get all users except current user from Supabase
+    const { data: usersData, error } = await supabase
+      .from('users')
+      .select('*')
+      .neq('user_id', currentUser.id);
     
-    const allUsers: UserProfile[] = [];
-    usersSnapshot.forEach(doc => {
-      const data = doc.data();
-      if (doc.id !== currentUser.id) {
-        allUsers.push({
-          id: doc.id,
-          userEmail: data.userEmail || '',
-          userName: data.userName || '',
-          userPhoneNumber: data.userPhoneNumber || '',
-          age: data.age || 0,
-          gender: data.gender || '',
-          profession: data.profession || '',
-          preferences: data.preferences || [],
-          photoURL: data.photoURL,
-          online: data.online || false,
-          lastActive: data.lastActive || 0,
-          city: data.city,
-          locality: data.locality,
-          lookingFor: data.lookingFor,
-          budget: data.budget,
-          moveInDate: data.moveInDate,
-          flatType: data.flatType,
-          roomType: data.roomType,
-          bathroomType: data.bathroomType
-        });
-      }
-    });
+    if (error) {
+      console.error('Error fetching users for matching:', error);
+      return [];
+    }
+    
+    const allUsers: UserProfile[] = (usersData || []).map(row => ({
+      id: row.id,
+      user_id: row.user_id,
+      userEmail: row.email || row.user_email || '',
+      userName: row.name || row.user_name || '',
+      userPhoneNumber: row.user_phone_number || '',
+      age: row.age || 0,
+      gender: row.gender || '',
+      profession: row.profession || '',
+      preferences: row.preferences || [],
+      photoURL: row.photo_url,
+      online: row.online || false,
+      lastActive: row.last_active || 0,
+      city: row.city,
+      locality: row.locality,
+      lookingFor: row.looking_for,
+      budget: row.budget_min && row.budget_max ? {
+        min: row.budget_min,
+        max: row.budget_max,
+      } : undefined,
+      moveInDate: row.move_in_date,
+      flatType: row.flat_type,
+      roomType: row.room_type,
+      bathroomType: row.bathroom_type
+    }));
     
     // Calculate match scores for each user
     const matchScores: MatchScore[] = allUsers.map(user => {
@@ -320,26 +324,32 @@ export async function findUserMatches(currentUser: UserProfile, limit: number = 
  */
 export async function findPropertyMatches(user: UserProfile, listingType: 'rent' | 'sell', limit: number = 20): Promise<PropertyMatchScore[]> {
   try {
-    // Get all properties
-    const listingsRef = collection(db, 'listings');
-    const listingsSnapshot = await getDocs(listingsRef);
+    // Get all properties from Supabase
+    const tableName = listingType === 'rent' ? 'rent_listings' : 'sell_listings';
+    const { data: listingsData, error } = await supabase
+      .from(tableName)
+      .select('*')
+      .eq('status', 'active');
     
-    const allProperties: PropertyListing[] = [];
-    listingsSnapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.listingType === listingType) {
-        allProperties.push({
-          id: doc.id,
-          address: data.address || {},
-          rentDetails: data.rentDetails,
-          sellDetails: data.sellDetails,
-          flatType: data.flatType,
-          listingType: data.listingType,
-          userId: data.userId,
-          createdAt: data.createdAt
-        });
-      }
-    });
+    if (error) {
+      console.error('Error fetching properties for matching:', error);
+      return [];
+    }
+    
+    const allProperties: PropertyListing[] = (listingsData || []).map(row => ({
+      id: row.id,
+      address: {
+        city: row.address_city,
+        locality: row.address_locality,
+        buildingName: row.address_building_name,
+      },
+      rentDetails: row.rent_details,
+      sellDetails: row.sell_details,
+      flatType: row.flat_type,
+      listingType: listingType,
+      userId: row.user_id,
+      createdAt: row.created_at
+    }));
     
     // Calculate property match scores
     const propertyMatches: PropertyMatchScore[] = allProperties.map(property => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sparkles, Heart, User, Home, Building2, Plus } from 'lucide-react';
+import { Sparkles, Heart, User, Home, Building2, Plus, Key, Info } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
 const Navbar = () => {
@@ -66,6 +66,30 @@ const Navbar = () => {
               >
                 <Home className="w-5 h-5" />
                 <span>Home</span>
+              </Link>
+              
+              <Link 
+                to="/for-landlords" 
+                className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium ${
+                  isActive('/for-landlords') 
+                    ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg transform scale-105' 
+                    : 'bg-white text-gray-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 hover:text-primary-700 border border-gray-200 hover:border-primary-300 shadow-sm hover:shadow-md'
+                }`}
+              >
+                <Key className="w-5 h-5" />
+                <span>For Landlords</span>
+              </Link>
+              
+              <Link 
+                to="/about-us" 
+                className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl transition-all duration-300 font-medium ${
+                  isActive('/about-us') 
+                    ? 'bg-gradient-to-r from-primary-600 to-primary-700 text-white shadow-lg transform scale-105' 
+                    : 'bg-white text-gray-700 hover:bg-gradient-to-r hover:from-primary-50 hover:to-primary-100 hover:text-primary-700 border border-gray-200 hover:border-primary-300 shadow-sm hover:shadow-md'
+                }`}
+              >
+                <Info className="w-5 h-5" />
+                <span>About Us</span>
               </Link>
               
               <div className="relative">

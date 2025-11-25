@@ -16,6 +16,8 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
 import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
 import CardDemoPage from './pages/CardDemoPage';
+import ForLandlordsPage from './pages/ForLandlordsPage';
+import AboutUsPage from './pages/AboutUsPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AppContextProvider } from './context/AppContext';
 import { checkForUpdates } from './utils/cacheUtils';
@@ -41,6 +43,8 @@ const router = createBrowserRouter([
         ]
       },
       { path: 'services', element: <HomeServicesPage /> },
+      { path: 'for-landlords', element: <ForLandlordsPage /> },
+      { path: 'about-us', element: <AboutUsPage /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'add-listing', element: <AddListingPage /> },
       { path: 'edit-listing/:listingType/:listingId', element: <EditListingPage /> },

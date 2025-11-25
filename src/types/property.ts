@@ -10,6 +10,16 @@ export interface RoomDetails {
   bathroomType: string;
 }
 
+export interface IndividualRoom {
+  roomNumber: number;
+  hasWashroom: boolean;
+  hasBalcony: boolean;
+  rent?: number; // Optional rent for individual room
+  lockInPeriod?: string; // Optional lock-in period
+  available?: boolean; // Optional availability status
+  images?: string[]; // Images specific to this room
+}
+
 export interface RentCosts {
   rent: number;
   maintenance: number;
@@ -87,6 +97,7 @@ export interface Property {
   rentDetails?: RentDetailsFull;
   sellDetails?: SellDetails;
   roomAvailable?: string; // Room availability information
+  rooms?: IndividualRoom[]; // Individual room details for full flat listings
 }
 
 export interface PropertyAmenities {

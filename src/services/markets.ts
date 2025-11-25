@@ -1,36 +1,80 @@
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 
 export const getMarkets = async () => {
-  const snapshot = await getDocs(collection(db, 'markets'));
-  return snapshot.docs.map(doc => ({
-    id: doc.id,
-    city: doc.data().city,
-    market: doc.data().market,
-  }));
+  try {
+    console.log('[getMarkets] Fetching markets...');
+    const startTime = Date.now();
+    
+    const queryPromise = supabase
+      .from('markets')
+      .select('id, city, market');
+    
+    const timeoutPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        console.warn('[getMarkets] Timeout after 5s');
+        resolve({ data: null, error: { code: 'TIMEOUT' } });
+      }, 5000);
+    });
+    
+    const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+    const duration = Date.now() - startTime;
+    console.log(`[getMarkets] Completed in ${duration}ms`);
+
+    if (error) {
+      console.error('[getMarkets] Error:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('[getMarkets] Exception:', error);
+    return [];
+  }
 };
 
 // Fetch localities for a given city from the markets collection
 export async function getLocalitiesByCity(city: string): Promise<string[]> {
   try {
     const normalizedCity = city.trim().toLowerCase();
-    const allMarketsSnapshot = await getDocs(collection(db, 'markets'));
-    const allMarkets = allMarketsSnapshot.docs
-      .map(doc => doc.data())
-      .filter((m: any) => typeof m.city === 'string' && m.city.trim().toLowerCase() === normalizedCity)
-      .map((m: any) => m.market)
+    console.log('[getLocalitiesByCity] Fetching for city:', normalizedCity);
+    const startTime = Date.now();
+    
+    const queryPromise = supabase
+      .from('markets')
+      .select('market')
+      .ilike('city', normalizedCity);
+    
+    const timeoutPromise = new Promise((resolve) => {
+      setTimeout(() => {
+        console.warn('[getLocalitiesByCity] Timeout after 5s');
+        resolve({ data: null, error: { code: 'TIMEOUT' } });
+      }, 5000);
+    });
+    
+    const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+    const duration = Date.now() - startTime;
+    console.log(`[getLocalitiesByCity] Completed in ${duration}ms`);
+
+    if (error) {
+      console.error('Error fetching localities:', error);
+      return [];
+    }
+
+    const markets = (data || [])
+      .map(m => m.market)
       .filter((m: any) => typeof m === 'string' && m.trim() !== '');
+
     // Remove duplicates (case-insensitive, trimmed)
-    const uniqueMarkets = Array.from(new Set(allMarkets.map((m: string) => m.trim().toLowerCase())))
-      .map(key => allMarkets.find((m: string) => m.trim().toLowerCase() === key) || key);
-    // Debug logs
+    const uniqueMarkets = Array.from(new Set(markets.map((m: string) => m.trim().toLowerCase())))
+      .map(key => markets.find((m: string) => m.trim().toLowerCase() === key) || key);
+
     console.log('Looking for city:', normalizedCity);
-    console.log('All markets:', allMarketsSnapshot.docs.map(doc => doc.data()));
-    console.log('Filtered markets:', allMarkets);
+    console.log('Filtered markets:', markets);
     console.log('Unique markets:', uniqueMarkets);
+    
     return uniqueMarkets;
   } catch (error) {
     console.error('Error fetching localities for city:', city, error);
     return [];
   }
-} 
+}

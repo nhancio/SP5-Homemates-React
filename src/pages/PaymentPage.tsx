@@ -178,15 +178,17 @@ const PaymentPage = () => {
 
   const updateUserVIPStatus = async (userId: string) => {
     try {
-      const { doc, updateDoc } = await import('firebase/firestore');
-      const { db } = await import('../config/firebase');
-      await updateDoc(doc(db, 'u', userId), {
-        isPremium: true,
-        isVIP: true,
-        vipPlan: 'vip-tenant',
-        vipActivatedAt: new Date().toISOString(),
-        contactsRemaining: 25,
-      });
+      const { supabase } = await import('../config/supabase');
+      await supabase
+        .from('users')
+        .update({
+          is_premium: true,
+          is_vip: true,
+          vip_plan: 'vip-tenant',
+          vip_activated_at: new Date().toISOString(),
+          contacts_remaining: 25,
+        })
+        .eq('user_id', userId);
     } catch (error) {
       console.error('Error updating VIP status:', error);
     }

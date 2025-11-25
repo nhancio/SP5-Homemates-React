@@ -30,22 +30,20 @@ const Layout = () => {
     setShowPreferences(false);
   };
   
-  // Show loading spinner while context is initializing
-  if (isLoading) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <div className="flex items-center justify-center flex-grow">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-        </div>
-      </div>
-    );
-  }
+  // Show homepage with subtle loading indicator instead of blocking
+  // This ensures users can always see content even if auth is slow
   
   return (
     <div className="flex flex-col min-h-screen">
       <ScrollToTop />
       <PageViewTracker />
       <Navbar />
+      {/* Subtle loading indicator at top if still loading */}
+      {isLoading && (
+        <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-gray-200">
+          <div className="h-full bg-gradient-to-r from-primary-600 to-pink-600 animate-pulse" style={{ width: '30%' }}></div>
+        </div>
+      )}
       <main className="flex-grow pt-16 pb-24 lg:pb-0"> {/* Bottom padding only on small screens */}
         <Outlet />
       </main>

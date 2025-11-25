@@ -191,7 +191,7 @@ export function getServiceById(id: string): Service | undefined {
   return mockServices.find(service => service.id === id);
 }
 
-// Filters for services based on Firebase DB fields
+// Filters for services based on database fields
 export type ServiceFilters = {
   type?: string; // e.g., 'Cleaning', 'Cooking', 'Repair', 'Painting'
   minPrice?: number;

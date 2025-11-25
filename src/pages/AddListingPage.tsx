@@ -78,6 +78,7 @@ const initialFormData = {
   brokerage: '', // Add brokerage field for sell listings
   securityDeposit: '', // Add security deposit field for sell listings
   roomAvailable: '', // Add roomAvailable for RentForm
+  rooms: undefined, // Individual room details for Full Flat
 
   // Rent specific fields
   rentDetails: {
@@ -412,6 +413,8 @@ const AddListingPage = () => {
           furnishType: formData.furnishType, // Furnished status
           parking: formData.parking,
           roomAvailable: formData.roomAvailable, // Rooms Available (1 Room, 2 Rooms, etc.)
+          // Individual room details for Full Flat
+          rooms: formData.rooms || undefined,
           // Move In details
           handoverDate: formData.handoverDate,
           isImmediate: formData.isImmediate,

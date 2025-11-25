@@ -4,8 +4,7 @@ import PropertyCard from '../components/ui/PropertyCard';
 import { Building, Loader, User, Search, X } from 'lucide-react';
 import { getListings } from '../services/listings';
 import { useAppContext } from '../context/AppContext';
-import { getDoc, doc } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { supabase } from '../config/supabase';
 
 const PROPERTIES_PER_PAGE = 9;
 
@@ -45,9 +44,29 @@ const RentPropertiesPage = () => {
 
   useEffect(() => {
     if (user && user.id) {
-      // Fetch logged-in user's gender
-      getDoc(doc(db, 'u', user.id)).then(userDoc => {
-        setUserGender(userDoc.exists() ? (userDoc.data().gender || '').toLowerCase() : null);
+      // Fetch logged-in user's gender from Supabase with timeout
+      const queryPromise = supabase
+        .from('users')
+        .select('gender')
+        .eq('user_id', user.id)
+        .single();
+      
+      const timeoutPromise = new Promise((resolve) => {
+        setTimeout(() => {
+          console.warn('[RentPropertiesPage] Gender query timeout');
+          resolve({ data: null, error: { code: 'TIMEOUT' } });
+        }, 3000);
+      });
+      
+      Promise.race([queryPromise, timeoutPromise]).then((result: any) => {
+        if (result.data && !result.error) {
+          setUserGender((result.data.gender || '').toLowerCase());
+        } else {
+          setUserGender(null);
+        }
+      }).catch(err => {
+        console.error('[RentPropertiesPage] Error fetching gender:', err);
+        setUserGender(null);
       });
     } else {
       setUserGender(null);
